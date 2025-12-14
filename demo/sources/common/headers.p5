@@ -1,0 +1,152 @@
+//=========Header Struct Instantiation============
+
+
+enum PHO_OFFSETS_E 
+{
+  PHO_OUTER_L2_START                    = 0,
+  PHO_OUTER_VLANS_START                 = 1,
+  PHO_OUTER_L3_START                    = 2,
+  PHO_OUTER_L4_START                    = 3
+
+};
+
+enum L4_PROTOCOL_E
+{
+  L4_PROTOCOL_NONE             = 0,
+
+  L4_PROTOCOL_TCP              = 10,
+  
+  L4_PROTOCOL_UDP	             = 32
+};
+
+struct PHI_S
+{
+  uint<4> PortType;
+  uint<2> L2Type;
+  uint<2> TagType;
+  uint<2> L3Type;
+  uint<8> L4Type;
+};
+
+struct ETHER_S
+{
+  uint<48> Dmac;
+  uint<48> Smac;
+};
+
+struct VlanInfo_S {
+    union {
+        uint<4> PriCfi;
+        struct {
+            uint<3> Pri;
+            uint<1> Dei;
+        };
+    };
+    uint<12> VlanID;
+};
+
+struct VLAN_TAG_S
+{
+  uint<16>     Tpid;
+  VlanInfo_S   VlanInfo;
+};
+struct ETHER_TYPE_S
+{
+  uint<16>    Type;
+};
+
+struct IPv4_S
+{
+  uint<4>    Version;
+  uint<4>    Ihl;
+  union
+  {
+    uint<8>    TOS;
+    uint<6>    DSCP;
+    uint<3>    Precedence;
+  } u_0;
+  uint<16>    TotalLen;
+  uint<16>    Iden;
+  uint<1>     R;
+  uint<1>     DF;
+  uint<1>     MF;
+  uint<13>    FragOffset;
+  uint<8>       TTL;
+  uint<8>       Protocol;
+  uint<16>      Checksum;
+  uint<32>      SIP;
+  uint<32>      DIP;
+};
+struct IPv6_S
+{
+  uint<4>   Version;
+  union
+  {
+    uint<8>   TC;              /*Traffic Class*/
+    uint<6>   DSCP;            /*Differentiated services code point*/
+    uint<3>   Precedence;      /*IP Precedence*/
+  };
+  uint<20>  FlowLabel;            /*Flow Label*/
+  uint<16>  PayloadLen;           /*Length of packet after IPv6 header*/
+  uint<8>   NextProtocol;         /*Type of next header after this one*/
+  uint<8>   HopLmt;               /*Hop limit*/
+  uint<128>  SIP;                 /*Source address */
+  uint<128>  DIP;                 /*Destination address  */
+};
+
+struct UDP_S
+{
+  uint<16>    SrcPort;
+  uint<16>    DstPort;
+  uint<16>    Length;
+  uint<16>    Checksum;
+};
+
+struct FlagCtrl_S
+{
+  uint<1>    Urg;
+  uint<1>    Ack;
+  uint<1>    Psh;
+  uint<1>    Rst;
+  uint<1>    Syn;
+  uint<1>    Fin;
+};
+
+struct DataCtrl_S
+{
+  uint<4>    DataOffset;
+  union {
+    struct {
+      uint<3>    Res;
+      uint<3>    Ecn;
+    };
+    struct {
+      uint<4>    Hr2n;  // Private usage
+      uint<2>    Ecn1;
+    };
+  };
+  FlagCtrl_S Ctrl;
+};
+
+struct TCP_S
+{
+  uint<16>    SrcPort;
+  uint<16>    DstPort;
+  uint<32>    SeqNo;
+  uint<32>    AckNo;
+  DataCtrl_S  DataCtrl;
+  uint<16>    Window;
+  uint<16>    Checksum;
+  uint<16>    UrgentPtr;
+};
+
+/****************************        Outer Headers           *********************************/
+header ETHER_S ETHER;
+header VLAN_TAG_S VLAN_TAG0;
+header ETHER_TYPE_S ETHER_TYPE;
+
+header IPv4_S IPv4;
+header IPv6_S IPv6;
+
+header UDP_S UDP;
+header TCP_S TCP;

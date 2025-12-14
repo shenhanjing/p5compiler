@@ -1,0 +1,44 @@
+table IPAT_TBL()
+{
+    key =
+    {
+        switch (PHI.PortType)
+        {
+             case PORT_TYPE_ETH:
+             {
+                 GLSP;
+                 control_parameters =
+                 {
+		             control_info = (IpatCtrlInfo_S){1};
+                 }
+             }
+
+             default:
+             {
+             }
+        }
+    }
+
+    // IPATFull_S rsIpat = _lookup();
+    uint<2> IpatStatus = _status();
+    IPATFull_S rsIpat = IpatLookup(IpatStatus);
+    IpatCtrlInfo_S   IpatCtrlInfo= _control_info();
+}
+
+table IMA0_MATCH_TBL()
+{
+    IPAT_TBL tbIPAT = IPAT_TBL();
+
+    _apply(tbIPAT);
+
+    ma_id = 0;
+}
+
+table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
+{
+    iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus, tbIMA0Match.tbIPAT.IpatCtrlInfo);
+    
+    ma_id = 0;
+}
+
+

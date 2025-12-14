@@ -1,0 +1,9 @@
+
+void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    if (IsUc) {
+        EncapProfile = 1;
+    } else {
+        EncapProfile = 0;
+    }
+}

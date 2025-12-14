@@ -1,0 +1,47 @@
+table FIB_TBL()
+{
+    key = {
+      switch (PHI.L3Type) {
+          case L3_TYPE_IPv4: { // ICIB:Heartbeat
+              Vrf;
+              IPv4.DIP;
+              (uint<32>) 0;
+              (uint<32>) 0;
+              (uint<32>) 0;
+              control_parameters = {
+                  table_id = 0;
+              }
+          }
+          case L3_TYPE_IPv6: { // ICIB:Heartbeat
+              Vrf;
+              IPv6.DIP;
+              control_parameters = {
+                  table_id = 1;
+              }
+          }
+          default: { 
+            //Skip
+          }
+      }
+    }
+
+    uint<2> StatusFib = _status();
+    uint<4> tid = _table_id();
+    FIBFull_S rsFib = FibLookup(StatusFib, tid);
+};
+
+table IMA1_MATCH_TBL()
+{
+    FIB_TBL               tbFib           = FIB_TBL();
+    _apply(tbFib);
+
+    ma_id = 1;
+
+};
+
+table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
+{  
+    iMA1Action(tbIMA1Match.tbFib.rsFib);
+
+    ma_id = 1;
+};

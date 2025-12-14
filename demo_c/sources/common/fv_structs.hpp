@@ -1,0 +1,36 @@
+#ifndef FV_STRUCTS_HPP
+#define FV_STRUCTS_HPP
+
+enum RSP_STATUS_E
+{
+  RSP_STATUS_MATCH          = 0,
+  RSP_STATUS_NO_MATCH       = 1,
+  RSP_STATUS_LOOKUP_SKIPPED = 2,
+  RSP_STATUS_ERROR          = 3
+};
+
+enum TLB_LKUP_TYPE_E
+{
+  TBL_LKUP_TYPE_INDEX                    = 0,
+  TBL_LKUP_TYPE_EM                       = 1,
+  TBL_LKUP_TYPE_LPM                      = 3,
+  TBL_LKUP_TYPE_TCAM                     = 4
+};
+
+enum SE_TID_E
+{
+    SE_TID_IPAT                    =    0,
+    SE_TID_FIB                     =    1,
+    SE_TID_EPAT                    =    2,
+    SE_TID_ENCAP                   =    3
+};
+
+enum PORT_TYPE_E
+{
+    PORT_TYPE_ETH          = 0,
+    PORT_TYPE_CPU          = 1,
+    PORT_TYPE_STACK        = 2
+};
+
+#endif // FV_STRUCTS_HPP
+

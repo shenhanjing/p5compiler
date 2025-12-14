@@ -1,0 +1,114 @@
+/*****************************************************************************************************************
+ *                               Parser Functions                                *
+ ******************************************************************************************************************/
+#define PG_OUTER_L2  0
+#define PG_OUTER_L3  1
+#define PG_OUTER_L4  2
+
+#define IP_PROTOCOL_TCP      0x06
+#define IP_PROTOCOL_UDP      0x11
+
+enum L2_TYPE_E
+{
+  L2_TYPE_INVALID  = 0,
+  L2_TYPE_ETHERNET = 1,
+  L2_TYPE_OTHER    = 2,
+  L2_TYPE_RES      = 3
+};
+
+enum VLAN_TYPE_E
+{
+  VLAN_UNTAGGED = 0,
+  VLAN_SINGLE_TAGGED = 1,
+  VLAN_DOUBLE_TAGGED = 2,
+  VLAN_TRIPLE_TAGGED = 3
+};
+enum L3_TYPE_E
+{
+  L3_TYPE_INVALID = 0,
+  L3_TYPE_NON_IP = 1,
+  L3_TYPE_IPv4 = 2,
+  L3_TYPE_IPv6 = 3
+};
+
+@parser void iprs( )
+{
+    return parse_ETHER();
+};
+
+@parser void eprs( )
+{
+    return parse_ETHER();
+};
+
+@parser(PG_OUTER_L2) 
+void  parse_ETHER()
+{
+  PHI.L2Type = L2_TYPE_ETHERNET;
+  PHO[PHO_OUTER_L2_START] = _extract(ETHER);
+
+  _lookahead(ETHER_TYPE);
+  return switch(ETHER_TYPE.Type)
+  {
+     case 0x8100: parse_VlanTag();
+     default: _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L2)
+void parse_VlanTag()
+{
+  PHI.TagType = VLAN_SINGLE_TAGGED;
+  PHO[PHO_OUTER_VLANS_START] = _extract(VLAN_TAG0);
+
+  _lookahead(ETHER_TYPE);
+  return switch (ETHER_TYPE.Type)
+  {
+     case 0x0800: parse_IPv4();
+     case 0x86dd: parse_IPv6();
+     default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv4()
+{
+  PHI.L3Type = L3_TYPE_IPv4;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv4);
+
+  return switch(IPv4.Protocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv6()
+{
+  PHI.L3Type = L3_TYPE_IPv6;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv6);
+
+  return switch(IPv6.NextProtocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L4)
+void  parse_TCP()
+{  
+  PHI.L4Type = L4_PROTOCOL_TCP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(TCP);
+
+  return _parser_next(0, 0);
+}
+@parser(PG_OUTER_L4)
+void  parse_UDP()
+{  
+  PHI.L4Type = L4_PROTOCOL_UDP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(UDP);
+
+  return _parser_next(0, 0);
+}

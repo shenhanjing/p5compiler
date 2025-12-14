@@ -1,0 +1,56 @@
+
+struct ENCAP_LOCAL_ADDR_S {
+    uint<48> SMAC;
+};
+struct EPATRSP_S {
+    @global_valid uint<1> Valid;
+    uint<31> Rsvd;
+    @dma union {
+        ENCAP_LOCAL_ADDR_S Addr;
+    }Dma;
+};
+typedef _inflate<EPATRSP_S> EPATFull_S;
+
+struct ENCAP_ARP_S {
+    uint<48> DMAC;
+};
+
+struct ENCAPRSP_S {
+    @global_valid uint<1> Valid;
+    uint<31> Rsvd;
+
+    @dma union {
+        ENCAP_ARP_S Arp;
+    }Dma;
+};
+typedef _inflate<ENCAPRSP_S> ENCAPFull_S;
+
+@lookup EPATFull_S EpatLookup(uint<2> &Status)
+{
+    uint<10> Gltp;
+    _compressed_EPATRSP_S CompressedEpatRsp = {0};
+    _compressed_EPATRSP_S Mem = {0};
+
+    Gltp = _key();
+
+    Mem = _lookup(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
+    Status = _status(SE_TID_EPAT);
+    _memcpy(CompressedEpatRsp, {Mem});
+    
+    return CompressedEpatRsp;
+}
+
+@lookup ENCAPFull_S EncapLookup(uint<2> &Status)
+{
+    uint<8> index;
+    _compressed_ENCAPRSP_S CompressedEncapRsp = {0};
+    _compressed_ENCAPRSP_S Mem = {0};
+
+    index = _key();
+
+    Mem = _lookup(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
+    Status = _status(SE_TID_ENCAP);
+    _memcpy(CompressedEncapRsp, {Mem});
+    
+    return CompressedEncapRsp;
+}
