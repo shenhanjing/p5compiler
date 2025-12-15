@@ -73,7 +73,7 @@ inline size_t extract(ParserState& state, IPv4_S& header) {
     }
     header.Version = p5::uint<4>((state.pkt_data_ptr[state.current_offset_bytes] >> 4) & 0x0F);
     header.Ihl = p5::uint<4>(state.pkt_data_ptr[state.current_offset_bytes] & 0x0F);
-    header.u_0.TOS_raw = state.pkt_data_ptr[state.current_offset_bytes + 1];
+    header.u_0.TOS_raw = static_cast<uint8_t>(state.pkt_data_ptr[state.current_offset_bytes + 1]);
     uint16_t total_len = (static_cast<uint16_t>(state.pkt_data_ptr[state.current_offset_bytes + 2]) << 8) |
                         state.pkt_data_ptr[state.current_offset_bytes + 3];
     header.TotalLen = p5::uint<16>(total_len);
@@ -90,8 +90,8 @@ inline size_t extract(ParserState& state, IPv6_S& header) {
         throw std::runtime_error("PacketTooShort: cannot extract IPv6");
     }
     header.Version = p5::uint<4>((state.pkt_data_ptr[state.current_offset_bytes] >> 4) & 0x0F);
-    header.tc_union.TC_raw = ((state.pkt_data_ptr[state.current_offset_bytes] & 0x0F) << 4) | 
-                             ((state.pkt_data_ptr[state.current_offset_bytes + 1] >> 4) & 0x0F);
+    header.tc_union.TC_raw = static_cast<uint8_t>(((state.pkt_data_ptr[state.current_offset_bytes] & 0x0F) << 4) | 
+                             ((state.pkt_data_ptr[state.current_offset_bytes + 1] >> 4) & 0x0F));
     header.NextProtocol = p5::uint<8>(state.pkt_data_ptr[state.current_offset_bytes + 6]);
     size_t old_offset = state.current_offset_bytes;
     state.current_offset_bytes += header_size_bytes;
