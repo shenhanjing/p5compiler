@@ -1,6 +1,10 @@
 #ifndef _MODEL_INTF_H_
 #define _MODEL_INTF_H_
 
+#include <cstdint>
+#include <cstddef>
+#include <string>
+
 #define PKT_HEADER_BYTE_LEN     192
 
 // FV数据宽度取决于微码代码版本，可能会有变化

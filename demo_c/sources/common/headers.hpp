@@ -245,16 +245,18 @@ struct TCP_S
 };
 
 /****************************        Outer Headers           *********************************/
-// P5: header Type Name;  -> C++: Type Name; (全局变量)
-ETHER_S ETHER;
-VLAN_TAG_S VLAN_TAG0;
-ETHER_TYPE_S ETHER_TYPE;
-
-IPv4_S IPv4;
-IPv6_S IPv6;
-
-UDP_S UDP;
-TCP_S TCP;
+// 注意：Header 变量现在作为 ParserImpl 类的成员变量
+// 不再作为全局变量定义
+// 如果需要访问 header，请通过 ParserImpl 实例的访问器方法
+// 
+// 原来的全局变量已迁移到 ParserImpl 类中：
+//   ETHER_S ether;
+//   VLAN_TAG_S vlan_tag0;
+//   ETHER_TYPE_S ether_type;
+//   IPv4_S ipv4;
+//   IPv6_S ipv6;
+//   UDP_S udp;
+//   TCP_S tcp;
 
 #endif // HEADERS_HPP
 

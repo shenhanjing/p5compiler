@@ -2,7 +2,8 @@
 #include <iomanip>
 #include <cstring>
 #include "model_intf_1027.h"
-#include "sources/common/parser.cpp"
+// 注意：不要包含 .cpp 文件，应该链接编译好的目标文件
+// PrsProcPkt 函数在 parser_interface.cpp 中定义
 
 // 辅助函数：打印十六进制数据
 void print_hex(const char* label, const uint8_t* data, size_t len) {
