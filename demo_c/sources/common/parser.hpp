@@ -8,19 +8,10 @@
 /**
  * @brief Parser 实现类
  * 
- * 包含所有 header 成员变量和解析状态，实现具体的解析逻辑
+ * 实现具体的解析逻辑，使用全局 header 变量（定义在 headers.hpp 中）
  */
 class ParserImpl : public ParserBase {
 private:
-    // ========== Header 成员变量（替代全局变量）==========
-    // ETHER_S ether;
-    // VLAN_TAG_S vlan_tag0;
-    // ETHER_TYPE_S ether_type;
-    // IPv4_S ipv4;
-    // IPv6_S ipv6;
-    // UDP_S udp;
-    // TCP_S tcp;
-    
     // ========== 解析函数（私有成员函数）==========
     void iprs();
     void eprs();
@@ -45,28 +36,6 @@ public:
         const PktHeader &pkt_hdr,
         Prs2Ma0FvInfoDef &fv_info
     ) override;
-    
-    // ========== Header 访问器方法（访问全局变量）==========
-    ETHER_S& get_ether() { return ether; }
-    const ETHER_S& get_ether() const { return ether; }
-    
-    VLAN_TAG_S& get_vlan_tag0() { return vlan_tag0; }
-    const VLAN_TAG_S& get_vlan_tag0() const { return vlan_tag0; }
-    
-    ETHER_TYPE_S& get_ether_type() { return ether_type; }
-    const ETHER_TYPE_S& get_ether_type() const { return ether_type; }
-    
-    IPv4_S& get_ipv4() { return ipv4; }
-    const IPv4_S& get_ipv4() const { return ipv4; }
-    
-    IPv6_S& get_ipv6() { return ipv6; }
-    const IPv6_S& get_ipv6() const { return ipv6; }
-    
-    UDP_S& get_udp() { return udp; }
-    const UDP_S& get_udp() const { return udp; }
-    
-    TCP_S& get_tcp() { return tcp; }
-    const TCP_S& get_tcp() const { return tcp; }
     
     // ========== State 访问器方法 ==========
     const PHI_S& get_phi() const { return state.phi_temp; }

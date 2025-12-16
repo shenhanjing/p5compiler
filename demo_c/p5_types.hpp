@@ -57,8 +57,12 @@ public:
     }
     
     // 类型转换
-    // P5 中只有 uint<N> 类型，不提供隐式转换到标准整数类型
-    // 如果需要转换为标准类型，使用显式的 to_ullong() 方法
+    // 提供隐式转换运算符，支持转换为常用的无符号整数类型
+    // 注意：size_t 在64位系统上通常是 uint64_t 的别名，因此不单独提供转换运算符
+    operator uint8_t() const { return static_cast<uint8_t>(value.to_ullong()); }
+    operator uint16_t() const { return static_cast<uint16_t>(value.to_ullong()); }
+    operator uint32_t() const { return static_cast<uint32_t>(value.to_ullong()); }
+    operator uint64_t() const { return value.to_ullong(); }
     
     // 算术运算符
     uint operator+(const uint& other) const {
