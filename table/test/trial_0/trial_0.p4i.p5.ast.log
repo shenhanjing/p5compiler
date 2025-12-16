@@ -1,0 +1,345 @@
+[463] P4Program
+  objects: [12] Type_SerEnum name=SE_TID_E declid=0
+    type: [3] Type_Bits size=32 isSigned=0
+    members: [10] SerEnumMember name=SE_TID_LU declid=0
+      value: [8] Constant value=0 base=10
+        type: [7] Type_InfInt declid=1
+  objects: [30] Type_SerEnum name=TLB_LKUP_TYPE_E declid=1
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [19] SerEnumMember name=TBL_LKUP_TYPE_INDEX declid=1
+      value: [17] Constant value=0 base=10
+        type: [16] Type_InfInt declid=2
+    members: [22] SerEnumMember name=TBL_LKUP_TYPE_EM declid=2
+      value: [21] Constant value=1 base=10
+        type: [20] Type_InfInt declid=3
+    members: [25] SerEnumMember name=TBL_LKUP_TYPE_LPM declid=3
+      value: [24] Constant value=3 base=10
+        type: [23] Type_InfInt declid=4
+    members: [28] SerEnumMember name=TBL_LKUP_TYPE_TCAM declid=4
+      value: [27] Constant value=4 base=10
+        type: [26] Type_InfInt declid=5
+  objects: [48] Type_SerEnum name=RSP_STATUS_E declid=2
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [37] SerEnumMember name=RSP_STATUS_MATCH declid=5
+      value: [35] Constant value=0 base=10
+        type: [34] Type_InfInt declid=6
+    members: [40] SerEnumMember name=RSP_STATUS_NO_MATCH declid=6
+      value: [39] Constant value=1 base=10
+        type: [38] Type_InfInt declid=7
+    members: [43] SerEnumMember name=RSP_STATUS_LOOKUP_SKIPPED declid=7
+      value: [42] Constant value=2 base=10
+        type: [41] Type_InfInt declid=8
+    members: [46] SerEnumMember name=RSP_STATUS_ERROR declid=8
+      value: [45] Constant value=3 base=10
+        type: [44] Type_InfInt declid=9
+  objects: [55] Declaration_Variable name=SEL declid=9
+    type: [54] Type_Bits size=1 isSigned=0
+  objects: [61] Declaration_Variable name=KE0 declid=10
+    type: [60] Type_Bits size=10 isSigned=0
+  objects: [66] Declaration_Variable name=DropFlag declid=11
+    type: [54] Type_Bits size=1 isSigned=0...
+  objects: [72] Declaration_Variable name=RSP declid=12
+    type: [71] Type_Bits size=2 isSigned=0
+  objects: [83] Type_Struct name=LuCtrlInfo_S declid=3
+    typeParameters: [85] TypeParameters
+    fields: [78] StructField name=ForwardEn declid=13
+      type: [54] Type_Bits size=1 isSigned=0...
+  objects: [102] Type_Struct name=LURSP_S declid=4
+    typeParameters: [104] TypeParameters
+    fields: [92] StructField name=Rsp_0 declid=14
+      type: [54] Type_Bits size=1 isSigned=0...
+    fields: [98] StructField name=Rsp_1 declid=15
+      type: [71] Type_Bits size=2 isSigned=0...
+  objects: [110] Type_Typedef name=LUFull_S declid=5
+    type: [109] Type_Name
+      path: [108] Path name=_inflate<LURSP_S> absolute=0
+  objects: [237] Function name=LuLookup declid=20
+    annotations: [114] Annotation name=lookup structured=1
+    type: [234] Type_Method name=LuLookup
+      typeParameters: [235] TypeParameters
+      returnType: [117] Type_Name
+        path: [116] Path name=LUFull_S absolute=0
+      parameters: [123] ParameterList
+        parameters: [121] Parameter name=Status declid=16 direction=inout
+          type: [71] Type_Bits size=2 isSigned=0...
+    body: [125] BlockStatement
+      components: [131] Declaration_Variable name=Ke0 declid=17
+        type: [60] Type_Bits size=10 isSigned=0...
+      components: [149] Declaration_Variable name=CompressedLuRsp declid=18
+        type: [135] Type_Name
+          path: [134] Path name=_compressed_LURSP_S absolute=0
+        initializer: [141] ListExpression
+          type: [147] Type_List
+            components: [136] Type_InfInt declid=19
+          components: [137] Constant value=0 base=10
+            type: [136] Type_InfInt declid=19
+      components: [166] Declaration_Variable name=Mem declid=19
+        type: [153] Type_Name
+          path: [152] Path name=_compressed_LURSP_S absolute=0
+        initializer: [159] ListExpression
+          type: [164] Type_List
+            components: [154] Type_InfInt declid=20
+          components: [155] Constant value=0 base=10
+            type: [154] Type_InfInt declid=20
+      components: [176] AssignmentStatement
+        left: [170] PathExpression
+          type: [142] Type_Unknown
+          path: [169] Path name=Ke0 absolute=0
+        right: [174] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [172] PathExpression
+            type: [142] Type_Unknown
+            path: [171] Path name=_key absolute=0
+          typeArguments: [175] Vector<Type>
+          arguments: [173] Vector<Argument>
+      components: [194] AssignmentStatement
+        left: [179] PathExpression
+          type: [142] Type_Unknown
+          path: [178] Path name=Mem absolute=0
+        right: [192] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [181] PathExpression
+            type: [142] Type_Unknown
+            path: [180] Path name=_lookup absolute=0
+          typeArguments: [193] Vector<Type>
+          arguments: [185] Vector<Argument>
+            arguments: [184] Argument name=<null>
+              expression: [183] PathExpression
+                type: [142] Type_Unknown
+                path: [182] Path name=SE_TID_LU absolute=0
+            arguments: [188] Argument name=<null>
+              expression: [187] PathExpression
+                type: [142] Type_Unknown
+                path: [186] Path name=TBL_LKUP_TYPE_INDEX absolute=0
+            arguments: [191] Argument name=<null>
+              expression: [190] PathExpression
+                type: [142] Type_Unknown
+                path: [189] Path name=Ke0 absolute=0
+      components: [206] AssignmentStatement
+        left: [197] PathExpression
+          type: [142] Type_Unknown
+          path: [196] Path name=Status absolute=0
+        right: [204] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [199] PathExpression
+            type: [142] Type_Unknown
+            path: [198] Path name=_status absolute=0
+          typeArguments: [205] Vector<Type>
+          arguments: [203] Vector<Argument>
+            arguments: [202] Argument name=<null>
+              expression: [201] PathExpression
+                type: [142] Type_Unknown
+                path: [200] Path name=SE_TID_LU absolute=0
+      components: [229] MethodCallStatement
+        methodCall: [227] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [226] PathExpression
+            type: [142] Type_Unknown
+            path: [225] Path name=_memcpy absolute=0
+          typeArguments: [228] Vector<Type>
+          arguments: [211] Vector<Argument>
+            arguments: [210] Argument name=<null>
+              expression: [209] PathExpression
+                type: [142] Type_Unknown
+                path: [208] Path name=CompressedLuRsp absolute=0
+            arguments: [224] Argument name=<null>
+              expression: [217] ListExpression
+                type: [222] Type_List
+                  components: [142] Type_Unknown
+                components: [213] PathExpression
+                  type: [142] Type_Unknown
+                  path: [212] Path name=Mem absolute=0
+      components: [233] ReturnStatement
+        expression: [231] PathExpression
+          type: [142] Type_Unknown
+          path: [232] Path name=CompressedLuRsp absolute=0
+  objects: [278] P5Table name=LU_TBL declid=23
+    parameters: [240] ParameterList
+    body: [254] BlockStatement
+      components: [251] P5Key
+        elements: [246] P5KeyElement matchType=<null>
+          expr: [245] PathExpression
+            type: [142] Type_Unknown
+            path: [244] Path name=KE0 absolute=0
+      components: [264] Declaration_Variable name=LuStatus declid=21
+        type: [71] Type_Bits size=2 isSigned=0...
+        initializer: [262] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [260] PathExpression
+            type: [142] Type_Unknown
+            path: [259] Path name=_status absolute=0
+          typeArguments: [263] Vector<Type>
+          arguments: [261] Vector<Argument>
+      components: [276] Declaration_Variable name=rsLu declid=22
+        type: [267] Type_Name
+          path: [266] Path name=LUFull_S absolute=0
+        initializer: [274] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [269] PathExpression
+            type: [142] Type_Unknown
+            path: [268] Path name=LuLookup absolute=0
+          typeArguments: [275] Vector<Type>
+          arguments: [273] Vector<Argument>
+            arguments: [272] Argument name=<null>
+              expression: [271] PathExpression
+                type: [142] Type_Unknown
+                path: [270] Path name=LuStatus absolute=0
+  objects: [304] P5Table name=MATCH_TBL declid=25
+    parameters: [281] ParameterList
+    body: [292] BlockStatement
+      components: [290] Declaration_Variable name=tbLU declid=24
+        type: [284] Type_Name
+          path: [283] Path name=LU_TBL absolute=0
+        initializer: [288] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [286] PathExpression
+            type: [142] Type_Unknown
+            path: [285] Path name=LU_TBL absolute=0
+          typeArguments: [289] Vector<Type>
+          arguments: [287] Vector<Argument>
+      components: [303] MethodCallStatement
+        methodCall: [301] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [300] PathExpression
+            type: [142] Type_Unknown
+            path: [299] Path name=_apply absolute=0
+          typeArguments: [302] Vector<Type>
+          arguments: [298] Vector<Argument>
+            arguments: [297] Argument name=<null>
+              expression: [296] PathExpression
+                type: [142] Type_Unknown
+                path: [295] Path name=tbLU absolute=0
+  objects: [366] Function name=Action declid=28
+    type: [363] Type_Method name=Action
+      typeParameters: [364] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [312] ParameterList
+        parameters: [310] Parameter name=rsLu declid=26 direction=in
+          type: [309] Type_Name
+            path: [308] Path name=LUFull_S absolute=0
+        parameters: [317] Parameter name=LuStatus declid=27 direction=in
+          type: [71] Type_Bits size=2 isSigned=0...
+    body: [319] BlockStatement
+      components: [362] IfStatement
+        condition: [329] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [324] PathExpression
+            type: [142] Type_Unknown
+            path: [323] Path name=_valid absolute=0
+          typeArguments: [330] Vector<Type>
+          arguments: [328] Vector<Argument>
+            arguments: [327] Argument name=<null>
+              expression: [326] PathExpression
+                type: [142] Type_Unknown
+                path: [325] Path name=rsLu absolute=0
+        [354] BlockStatement
+          components: [332] BlockStatement
+            components: [341] AssignmentStatement
+              left: [337] PathExpression
+                type: [142] Type_Unknown
+                path: [336] Path name=RSP absolute=0
+              right: [340] Member member=Rsp_1
+                type: [142] Type_Unknown
+                expr: [339] PathExpression
+                  type: [142] Type_Unknown
+                  path: [338] Path name=rsLu absolute=0
+        [359] BlockStatement
+          components: [343] BlockStatement
+            components: [351] AssignmentStatement
+              left: [348] PathExpression
+                type: [142] Type_Unknown
+                path: [347] Path name=DropFlag absolute=0
+              right: [350] Constant value=1 base=10
+                type: [349] Type_InfInt declid=23
+  objects: [395] P5Table name=ACTION_TBL declid=30
+    parameters: [374] ParameterList
+      parameters: [372] Parameter name=tbMatch declid=29 direction=in
+        type: [371] Type_Name
+          path: [370] Path name=MATCH_TBL absolute=0
+    body: [392] BlockStatement
+      components: [391] MethodCallStatement
+        methodCall: [389] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [388] PathExpression
+            type: [142] Type_Unknown
+            path: [387] Path name=Action absolute=0
+          typeArguments: [390] Vector<Type>
+          arguments: [381] Vector<Argument>
+            arguments: [380] Argument name=<null>
+              expression: [379] Member member=rsLu
+                type: [142] Type_Unknown
+                expr: [378] Member member=tbLU
+                  type: [142] Type_Unknown
+                  expr: [377] PathExpression
+                    type: [142] Type_Unknown
+                    path: [376] Path name=tbMatch absolute=0
+            arguments: [386] Argument name=<null>
+              expression: [385] Member member=LuStatus
+                type: [142] Type_Unknown
+                expr: [384] Member member=tbLU
+                  type: [142] Type_Unknown
+                  expr: [383] PathExpression
+                    type: [142] Type_Unknown
+                    path: [382] Path name=tbMatch absolute=0
+  objects: [460] Function name=Control declid=33
+    annotations: [399] Annotation name=control structured=1
+    type: [457] Type_Method name=Control
+      typeParameters: [458] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [401] ParameterList
+    body: [403] BlockStatement
+      components: [418] Declaration_Variable name=tbMatch declid=31
+        annotations: [409] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [407] StringLiteral value=
+            type: [142] Type_Unknown
+        type: [412] Type_Name
+          path: [411] Path name=MATCH_TBL absolute=0
+        initializer: [416] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [414] PathExpression
+            type: [142] Type_Unknown
+            path: [413] Path name=MATCH_TBL absolute=0
+          typeArguments: [417] Vector<Type>
+          arguments: [415] Vector<Argument>
+      components: [435] Declaration_Variable name=tbAction declid=32
+        annotations: [423] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [421] StringLiteral value=
+            type: [142] Type_Unknown
+        type: [426] Type_Name
+          path: [425] Path name=ACTION_TBL absolute=0
+        initializer: [433] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [428] PathExpression
+            type: [142] Type_Unknown
+            path: [427] Path name=ACTION_TBL absolute=0
+          typeArguments: [434] Vector<Type>
+          arguments: [432] Vector<Argument>
+            arguments: [431] Argument name=<null>
+              expression: [430] PathExpression
+                type: [142] Type_Unknown
+                path: [429] Path name=tbMatch absolute=0
+      components: [446] MethodCallStatement
+        methodCall: [444] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [443] PathExpression
+            type: [142] Type_Unknown
+            path: [442] Path name=_apply absolute=0
+          typeArguments: [445] Vector<Type>
+          arguments: [441] Vector<Argument>
+            arguments: [440] Argument name=<null>
+              expression: [439] PathExpression
+                type: [142] Type_Unknown
+                path: [438] Path name=tbMatch absolute=0
+      components: [456] MethodCallStatement
+        methodCall: [454] MethodCallExpression
+          type: [142] Type_Unknown
+          method: [453] PathExpression
+            type: [142] Type_Unknown
+            path: [452] Path name=_apply absolute=0
+          typeArguments: [455] Vector<Type>
+          arguments: [451] Vector<Argument>
+            arguments: [450] Argument name=<null>
+              expression: [449] PathExpression
+                type: [142] Type_Unknown
+                path: [448] Path name=tbAction absolute=0
+

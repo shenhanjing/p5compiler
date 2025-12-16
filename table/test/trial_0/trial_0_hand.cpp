@@ -2,11 +2,11 @@
 #include <optional>
 #include <limits>
 #include <iostream>
-#include "table.h"
-#include "SE.h"
-#include "key.h"
+#include "table.hpp"
+#include "SE.hpp"
+#include "key.hpp"
 // Built-in helpers (inflate, key/status, lookup, memcpy, bit width)
-#include "BuiltIn.h"
+#include "BuiltIn.hpp"
 
 // --- Types translated from trial_0.p5 ---
 enum SE_TID_E {
@@ -28,25 +28,25 @@ enum RSP_STATUS_E {
 };
 
 // Global variables declared in the P5 snippet.
-uint8_t SEL = 0;
-uint16_t KE0 = 0;
-uint8_t DropFlag = 0;
-uint8_t RSP = 0;
+p5::uint<1> SEL;
+p5::uint<10> KE0;
+p5::uint<1> DropFlag;
+p5::uint<2> RSP;
 
 struct LuCtrlInfo_S {
-    uint8_t ForwardEn;
+    p5::uint<1> ForwardEn;
 };
 
 struct LURSP_S {
-    uint8_t Rsp_0;
-    uint8_t Rsp_1;
+    p5::uint<1> Rsp_0;
+    p5::uint<2> Rsp_1;
 };
 
 using LUFull_S = _inflate<LURSP_S>;
 
 // @lookup function
-LUFull_S LuLookup(uint8_t &Status) {
-    uint16_t Ke0 = 0;
+LUFull_S LuLookup(p5::uint<2> &Status) {
+    p5::uint<10> Ke0;
     _inflate<LURSP_S> CompressedLuRsp = {0};
     _inflate<LURSP_S> Mem = {0};
 
@@ -54,7 +54,7 @@ LUFull_S LuLookup(uint8_t &Status) {
 
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(
         SE_TID_LU, TBL_LKUP_TYPE_INDEX, Ke0);
-    _memcpy(CompressedLuRsp, Mem);
+    _memcpy(CompressedLuRsp, {Mem});
     Status = _status(SE_TID_LU);
 
     return CompressedLuRsp;
@@ -63,11 +63,11 @@ LUFull_S LuLookup(uint8_t &Status) {
 // --- Table subclasses ---
 class LU_TBL : public Table {
 public:
-    uint8_t LuStatus;
+    p5::uint<2> LuStatus;
     LUFull_S rsLu{};
 
     void apply() override {
-        g_key.buildKey({KeyPart{KE0, bit_width_of_type<decltype(KE0)>()}});
+        g_key.buildKey(KE0);
         rsLu = LuLookup(LuStatus);
     }
 };
@@ -82,7 +82,7 @@ public:
 };
 
 // Mirrors Action(rsLu, LuStatus) in trial_0.p5
-void Action(LUFull_S rsLu, uint8_t LuStatus) {
+void Action(LUFull_S rsLu, p5::uint<2> LuStatus) {
 
     if (_valid(rsLu)) {
         RSP = rsLu.Rsp_1;
@@ -125,14 +125,14 @@ int main() {
     std::cout << "[trial_0_hand test] start\n";
 
     // Initialize and configure search engine and key manager.
-    g_se.initTable<uint16_t, LURSP_S>(SE_TID_LU, MatchType::INDEX);
-    g_key.initKey({16});
+    g_se.initTable<p5::uint<10>, LURSP_S>(SE_TID_LU, MatchType::INDEX);
+    g_key.initKey({10});
 
     // Configure table entries
     // key=0 => {Rsp_0=1, Rsp_1=2}
-    g_se.config<uint16_t, LURSP_S>(SE_TID_LU, 0, LURSP_S{1, 2});
-    // key=2 => {Rsp_0=1, Rsp_1=5}
-    g_se.config<uint16_t, LURSP_S>(SE_TID_LU, 2, LURSP_S{1, 5});
+    g_se.config<p5::uint<10>, LURSP_S>(SE_TID_LU, 0, LURSP_S{1, 2});
+    // key=2 => {Rsp_0=1, Rsp_1=3} (fits in uint<2>)
+    g_se.config<p5::uint<10>, LURSP_S>(SE_TID_LU, 2, LURSP_S{1, 3});
 
     // Test case 1: hit
     KE0 = 0;
@@ -142,8 +142,8 @@ int main() {
     auto st1 = g_se.status(SE_TID_LU);
     bool pass1 = (st1 == SearchEngine::Status::MATCH) && (DropFlag == 0) && (RSP == 2);
     std::cout << "Case1 (hit): status=" << statusToStr(st1)
-              << " RSP=" << static_cast<int>(RSP)
-              << " DropFlag=" << static_cast<int>(DropFlag)
+              << " RSP=" << static_cast<int>(RSP.to_ullong())
+              << " DropFlag=" << static_cast<int>(DropFlag.to_ullong())
               << " => " << (pass1 ? "PASS" : "FAIL") << "\n";
 
     // Test case 2: another hit
@@ -152,10 +152,10 @@ int main() {
     DropFlag = 0;
     Control();
     auto st2 = g_se.status(SE_TID_LU);
-    bool pass2 = (st2 == SearchEngine::Status::MATCH) && (DropFlag == 0) && (RSP == 5);
+    bool pass2 = (st2 == SearchEngine::Status::MATCH) && (DropFlag == 0) && (RSP == 3);
     std::cout << "Case2 (hit): status=" << statusToStr(st2)
-              << " RSP=" << static_cast<int>(RSP)
-              << " DropFlag=" << static_cast<int>(DropFlag)
+              << " RSP=" << static_cast<int>(RSP.to_ullong())
+              << " DropFlag=" << static_cast<int>(DropFlag.to_ullong())
               << " => " << (pass2 ? "PASS" : "FAIL") << "\n";
 
     // Test case 3: miss
@@ -166,8 +166,8 @@ int main() {
     auto st3 = g_se.status(SE_TID_LU);
     bool pass3 = (st3 == SearchEngine::Status::NO_MATCH) && (DropFlag == 1);
     std::cout << "Case3 (miss): status=" << statusToStr(st3)
-              << " RSP=" << static_cast<int>(RSP)
-              << " DropFlag=" << static_cast<int>(DropFlag)
+              << " RSP=" << static_cast<int>(RSP.to_ullong())
+              << " DropFlag=" << static_cast<int>(DropFlag.to_ullong())
               << " => " << (pass3 ? "PASS" : "FAIL") << "\n";
 
     bool allPass = pass1 && pass2 && pass3;

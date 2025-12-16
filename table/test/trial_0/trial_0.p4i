@@ -1,0 +1,96 @@
+# 0 "trial_0.p5"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "trial_0.p5"
+enum SE_TID_E
+{
+    SE_TID_LU = 0
+};
+enum TLB_LKUP_TYPE_E
+{
+  TBL_LKUP_TYPE_INDEX = 0,
+  TBL_LKUP_TYPE_EM = 1,
+  TBL_LKUP_TYPE_LPM = 3,
+  TBL_LKUP_TYPE_TCAM = 4
+};
+enum RSP_STATUS_E
+{
+  RSP_STATUS_MATCH = 0,
+  RSP_STATUS_NO_MATCH = 1,
+  RSP_STATUS_LOOKUP_SKIPPED = 2,
+  RSP_STATUS_ERROR = 3
+};
+
+uint<1> SEL;
+uint<10> KE0;
+uint<1> DropFlag;
+uint<2> RSP;
+
+struct LuCtrlInfo_S
+{
+    uint<1> ForwardEn;
+};
+
+struct LURSP_S {
+    uint<1> Rsp_0;
+    uint<2> Rsp_1;
+};
+typedef _inflate<LURSP_S> LUFull_S;
+
+@lookup LUFull_S LuLookup(uint<2> &Status)
+{
+    uint<10> Ke0;
+    _compressed_LURSP_S CompressedLuRsp = {0};
+    _compressed_LURSP_S Mem = {0};
+
+    Ke0 = _key();
+
+    Mem = _lookup(SE_TID_LU, TBL_LKUP_TYPE_INDEX, Ke0);
+    Status = _status(SE_TID_LU);
+    _memcpy(CompressedLuRsp, {Mem});
+
+    return CompressedLuRsp;
+}
+
+table LU_TBL()
+{
+    key =
+    {
+        KE0;
+    }
+
+    uint<2> LuStatus = _status();
+    LUFull_S rsLu = LuLookup(LuStatus);
+}
+
+table MATCH_TBL()
+{
+    LU_TBL tbLU = LU_TBL();
+
+    _apply(tbLU);
+
+}
+
+void Action(LUFull_S rsLu, uint<2> LuStatus)
+{
+    if (_valid(rsLu)) {
+        RSP = rsLu.Rsp_1;
+    } else {
+        DropFlag = 1;
+    }
+}
+
+table ACTION_TBL(MATCH_TBL tbMatch)
+{
+    Action(tbMatch.tbLU.rsLu, tbMatch.tbLU.LuStatus);
+
+}
+
+@control void Control()
+{
+  @hw_map("MATCH") MATCH_TBL tbMatch = MATCH_TBL();
+  @hw_map("ACTION") ACTION_TBL tbAction = ACTION_TBL(tbMatch);
+
+  _apply(tbMatch);
+  _apply(tbAction);
+}

@@ -8,13 +8,33 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "key.h"
-#include "SE.h"
+#include "key.hpp"
+#include "SE.hpp"
+#include "p5_types.hpp"
 
-// Helper: bit width of an integral type.
+template <typename T>
+constexpr std::size_t bit_width_of_type();
+
+namespace detail_builtin {
+template <typename T>
+struct is_p5_uint : std::false_type {};
+template <std::size_t N>
+struct is_p5_uint<p5::uint<N>> : std::true_type {};
+
+template <typename...>
+struct always_false : std::false_type {};
+}  // namespace detail_builtin
+
+// Helper: bit width of a type (only p5::uint<N> is supported).
 template <typename T>
 constexpr std::size_t bit_width_of_type() {
-    return sizeof(T) * 8;
+    using Decayed = std::decay_t<T>;
+    if constexpr (detail_builtin::is_p5_uint<Decayed>::value) {
+        return Decayed::width();
+    } else {
+        static_assert(detail_builtin::always_false<T>::value, "bit_width_of_type only supports p5::uint<N>");
+        return 0;
+    }
 }
 
 // Wrap original struct with a validity flag; defaults to zeroed payload + valid=false.
@@ -28,13 +48,8 @@ struct _inflate : public T {
     _inflate(std::nullopt_t) : T{}, valid(false) {}
     _inflate(std::initializer_list<int> ilist) : T{}, valid(false) {
         if (ilist.size() == 1 && *ilist.begin() == 0) {
-            valid = false;  // explicit {0} => zeroed payload, valid=false
-        } else if (ilist.size() > 0) {
-            // Fill fields with the first element best-effort; mark as valid.
-            const int v = *ilist.begin();
-            std::memset(static_cast<T *>(this), 0, sizeof(T));
-            std::memcpy(static_cast<T *>(this), &v, std::min(sizeof(T), sizeof(v)));
-            valid = true;
+            // Explicit {0}: keep zeroed payload, valid=false.
+            return;
         }
     }
 
