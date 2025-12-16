@@ -73,28 +73,13 @@ struct ETHER_S
 
 struct VlanInfo_S {
     union {
-        uint8_t PriCfi_raw;  // 4 bits, stored as uint8_t
+        p5::uint<4> PriCfi;  // 4 bits,
         struct {
-            uint8_t Pri_raw;  // 3 bits, stored as uint8_t
-            uint8_t Dei_raw;  // 1 bit, stored as uint8_t
+            p5::uint<3> Pri;  // 3 bits,
+            p5::uint<1> Dei;  // 1 bit,
         } pri_dei;
     };
     p5::uint<12> VlanID;
-    
-    // 访问器方法
-    p5::uint<4> PriCfi() const { return p5::uint<4>(PriCfi_raw & 0x0F); }
-    void PriCfi(p5::uint<4> val) { PriCfi_raw = static_cast<uint8_t>(val.to_ullong() & 0x0F); }
-    
-    p5::uint<3> Pri() const { return p5::uint<3>(pri_dei.Pri_raw & 0x07); }
-    void Pri(p5::uint<3> val) { pri_dei.Pri_raw = static_cast<uint8_t>(val.to_ullong() & 0x07); }
-    
-    p5::uint<1> Dei() const { return p5::uint<1>(pri_dei.Dei_raw & 0x01); }
-    void Dei(p5::uint<1> val) { pri_dei.Dei_raw = static_cast<uint8_t>(val.to_ullong() & 0x01); }
-    
-    // 默认构造函数
-    VlanInfo_S() : VlanID(0) {
-        PriCfi_raw = 0;
-    }
 };
 
 struct VLAN_TAG_S
@@ -114,9 +99,9 @@ struct IPv4_S
   p5::uint<4>    Ihl;
   union
   {
-    uint8_t    TOS_raw;      // 8 bits, stored as uint8_t
-    uint8_t    DSCP_raw;      // 6 bits, but stored as uint8_t
-    uint8_t    Precedence_raw;  // 3 bits, but stored as uint8_t
+    p5::uint<8>    TOS;      // 8 bits,
+    p5::uint<6>    DSCP;      // 6 bits,
+    p5::uint<3>    Precedence;  // 3 bits,
   } u_0;
   p5::uint<16>    TotalLen;
   p5::uint<16>    Iden;
@@ -129,22 +114,6 @@ struct IPv4_S
   p5::uint<16>      Checksum;
   p5::uint<32>      SIP;
   p5::uint<32>      DIP;
-  
-  // 访问器方法
-  p5::uint<8> TOS() const { return p5::uint<8>(u_0.TOS_raw); }
-  void TOS(p5::uint<8> val) { u_0.TOS_raw = static_cast<uint8_t>(val.to_ullong() & 0xFF); }
-  
-  p5::uint<6> DSCP() const { return p5::uint<6>(u_0.DSCP_raw & 0x3F); }
-  void DSCP(p5::uint<6> val) { u_0.DSCP_raw = static_cast<uint8_t>(val.to_ullong() & 0x3F); }
-  
-  p5::uint<3> Precedence() const { return p5::uint<3>(u_0.Precedence_raw & 0x07); }
-  void Precedence(p5::uint<3> val) { u_0.Precedence_raw = static_cast<uint8_t>(val.to_ullong() & 0x07); }
-  
-  // 默认构造函数
-  IPv4_S() : Version(0), Ihl(0), TotalLen(0), Iden(0), R(0), DF(0), MF(0), 
-             FragOffset(0), TTL(0), Protocol(0), Checksum(0), SIP(0), DIP(0) {
-    u_0.TOS_raw = 0;
-  }
 };
 
 struct IPv6_S
@@ -152,9 +121,9 @@ struct IPv6_S
   p5::uint<4>   Version;
   union
   {
-    uint8_t   TC_raw;              /*Traffic Class, stored as uint8_t*/
-    uint8_t   DSCP_raw;            /*Differentiated services code point, stored as uint8_t*/
-    uint8_t   Precedence_raw;      /*IP Precedence, stored as uint8_t*/
+    p5::uint<8>   TC;              /*Traffic Class,*/
+    p5::uint<6>   DSCP;            /*Differentiated services code point,*/
+    p5::uint<3>   Precedence;      /*IP Precedence,*/
   } tc_union;
   p5::uint<20>  FlowLabel;            /*Flow Label*/
   p5::uint<16>  PayloadLen;           /*Length of packet after IPv6 header*/
@@ -163,21 +132,6 @@ struct IPv6_S
   p5::uint<128>  SIP;                 /*Source address */
   p5::uint<128>  DIP;                 /*Destination address  */
   
-  // 访问器方法
-  p5::uint<8> TC() const { return p5::uint<8>(tc_union.TC_raw); }
-  void TC(p5::uint<8> val) { tc_union.TC_raw = static_cast<uint8_t>(val.to_ullong() & 0xFF); }
-  
-  p5::uint<6> DSCP() const { return p5::uint<6>(tc_union.DSCP_raw & 0x3F); }
-  void DSCP(p5::uint<6> val) { tc_union.DSCP_raw = static_cast<uint8_t>(val.to_ullong() & 0x3F); }
-  
-  p5::uint<3> Precedence() const { return p5::uint<3>(tc_union.Precedence_raw & 0x07); }
-  void Precedence(p5::uint<3> val) { tc_union.Precedence_raw = static_cast<uint8_t>(val.to_ullong() & 0x07); }
-  
-  // 默认构造函数
-  IPv6_S() : Version(0), FlowLabel(0), PayloadLen(0), NextProtocol(0), 
-             HopLmt(0), SIP(0), DIP(0) {
-    tc_union.TC_raw = 0;
-  }
 };
 
 struct UDP_S
@@ -203,34 +157,15 @@ struct DataCtrl_S
   p5::uint<4>    DataOffset;
   union {
     struct {
-      uint8_t    Res_raw;   // 3 bits, stored as uint8_t
-      uint8_t    Ecn_raw;   // 3 bits, stored as uint8_t
+      p5::uint<3>    Res;   // 3 bits,
+      p5::uint<3>    Ecn;   // 3 bits,
     } res_ecn;
     struct {
-      uint8_t    Hr3n_raw;  // Private usage, 8 bits
-      uint8_t    Ecn1_raw;  // 8 bits
+      p5::uint<4>    Hr3n;  // Private usage, 8 bits
+      p5::uint<2>    Ecn1;  // 8 bits
     } hr2n_ecn1;
   } data_union;
   FlagCtrl_S Ctrl;
-  
-  // 访问器方法
-  p5::uint<3> Res() const { return p5::uint<3>(data_union.res_ecn.Res_raw & 0x07); }
-  void Res(p5::uint<3> val) { data_union.res_ecn.Res_raw = static_cast<uint8_t>(val.to_ullong() & 0x07); }
-  
-  p5::uint<3> Ecn() const { return p5::uint<3>(data_union.res_ecn.Ecn_raw & 0x07); }
-  void Ecn(p5::uint<3> val) { data_union.res_ecn.Ecn_raw = static_cast<uint8_t>(val.to_ullong() & 0x07); }
-  
-  p5::uint<4> Hr2n() const { return p5::uint<4>(data_union.hr2n_ecn1.Hr3n_raw & 0x0F); }
-  void Hr2n(p5::uint<4> val) { data_union.hr2n_ecn1.Hr3n_raw = static_cast<uint8_t>(val.to_ullong() & 0x0F); }
-  
-  p5::uint<2> Ecn1() const { return p5::uint<2>(data_union.hr2n_ecn1.Ecn1_raw & 0x03); }
-  void Ecn1(p5::uint<2> val) { data_union.hr2n_ecn1.Ecn1_raw = static_cast<uint8_t>(val.to_ullong() & 0x03); }
-  
-  // 默认构造函数
-  DataCtrl_S() : DataOffset(0), Ctrl() {
-    data_union.res_ecn.Res_raw = 0;
-    data_union.res_ecn.Ecn_raw = 0;
-  }
 };
 
 struct TCP_S

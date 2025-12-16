@@ -257,8 +257,8 @@ int main() {
         
         // 验证结果
         std::cout << "\nVerification:" << std::endl;
-        // 检查 phData 是否与输入一致
-        bool ph_match = (memcmp(fv_info.phData, pkt_hdr.pkt_data, sizeof(fv_info.phData)) == 0);
+        // 检查 phData 是否与输入一致（只比较实际数据包大小，避免越界）
+        bool ph_match = (memcmp(fv_info.phData, pkt_hdr.pkt_data, PKT_HEADER_BYTE_LEN) == 0);
         std::cout << "  phData matches input: " << (ph_match ? "YES" : "NO") << std::endl;
     }
     

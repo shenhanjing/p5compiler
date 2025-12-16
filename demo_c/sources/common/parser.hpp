@@ -21,9 +21,6 @@ private:
     // UDP_S udp;
     // TCP_S tcp;
     
-    // ========== Lookahead 函数 ==========
-    void lookahead_ether_type_at_offset(size_t offset);
-    
     // ========== 解析函数（私有成员函数）==========
     void iprs();
     void eprs();

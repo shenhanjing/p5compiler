@@ -9,28 +9,14 @@
 #include <stdexcept>
 #include <iostream>
 
-// 内置函数：_parser_next (暂时为空实现)
-static void _parser_next(int group, int stage) {
-    // TODO: 后续实现
-    (void)group;
-    (void)stage;
-}
-
 // ========== Extract 函数实现已移至 extract.h ==========
-
-void ParserImpl::lookahead_ether_type_at_offset(size_t offset) {
-    size_t saved_offset = state.current_offset_bytes;
-    state.current_offset_bytes = offset;
-    extract(state, ether_type);
-    state.current_offset_bytes = saved_offset;
-}
 
 // ========== PrsProcPkt 实现 ==========
 void ParserImpl::PrsProcPkt(
     bool direction,
     const ParserHwInfo &parser_hinfo,
-    NhiDef &nhi_info,
-    Cp2NpHeader &cp2np_hdr,
+    [[maybe_unused]] NhiDef &nhi_info,
+    [[maybe_unused]] Cp2NpHeader &cp2np_hdr,
     const PktHeader &pkt_hdr,
     Prs2Ma0FvInfoDef &fv_info
 ) {
@@ -91,7 +77,7 @@ void ParserImpl::parse_ETHER() {
     
     // 先 lookahead ETHER_TYPE（在偏移量 current_offset + 12 的位置）
     // 因为 ETHER_TYPE 是 ETHER 头的一部分（最后2字节）
-    lookahead_ether_type_at_offset(state.current_offset_bytes + 12);
+    lookahead(ether_type, state.current_offset_bytes + 12);
     uint16_t ether_type_val = ether_type.Type.to_ullong();  // 使用成员变量
     std::cerr << "[DEBUG] ETHER_TYPE: 0x" << std::hex << ether_type_val << std::dec << std::endl;
     
@@ -128,7 +114,7 @@ void ParserImpl::parse_VlanTag() {
     // extract_vlan_tag0 提取了 4 字节，当前偏移在 EtherType 之后
     // 需要回退 2 字节来读取 EtherType（VLAN 标签的最后 2 字节）
     size_t vlan_start = state.pho_temp[PHO_OUTER_VLANS_START].to_ullong();
-    lookahead_ether_type_at_offset(vlan_start + 2);  // VLAN 标签的偏移 + 2 字节 = EtherType 位置
+    lookahead(ether_type, vlan_start + 2);  // VLAN 标签的偏移 + 2 字节 = EtherType 位置
     uint16_t ether_type_val = ether_type.Type.to_ullong();  // 使用成员变量
     std::cerr << "[DEBUG] After VLAN, ETHER_TYPE: 0x" << std::hex << ether_type_val << std::dec << std::endl;
     switch(ether_type_val) {

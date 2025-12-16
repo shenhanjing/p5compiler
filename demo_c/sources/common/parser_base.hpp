@@ -28,7 +28,7 @@ struct ParserState {
         current_offset_bytes = start_offset;
         
         // 初始化 phi_temp 和 pho_temp 为 0
-        memset(&phi_temp, 0, sizeof(phi_temp));
+        phi_temp = PHI_S{};  // 使用值初始化替代 memset
         for (int i = 0; i < 5; i++) {
             pho_temp[i] = p5::uint<7>(0);
         }
@@ -57,6 +57,19 @@ protected:
         }
         extract(state, header);
         state.current_offset_bytes = saved_offset;
+    }
+
+    // ========== 内置函数：_parser_next ==========
+    /**
+     * @brief Parser 状态转换函数
+     * 
+     * @param group 解析组 ID
+     * @param stage 解析阶段 ID
+     */
+    void _parser_next(int group, int stage) {
+        // TODO: 后续实现
+        (void)group;
+        (void)stage;
     }
 
 public:
