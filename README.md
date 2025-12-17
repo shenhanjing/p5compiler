@@ -4,11 +4,7 @@ P5到C++转换的运行时支撑库，提供完整的P5程序运行时环境，�
 
 ## 项目概述
 
-本项目合并了以下两个项目的功能：
-- **MA项目**：提供Table（匹配-动作表）的运行时支撑
-- **demo_c项目**：提供Parser（数据包解析器）的功能
-
-合并后的项目提供完整的P5→C++转换运行时支撑，支持：
+项目提供完整的P5→C++转换运行时支撑，支持：
 - P5 Parser的解析功能
 - P5 Table的查表和执行功能
 - 统一的类型系统和接口定义
@@ -18,36 +14,50 @@ P5到C++转换的运行时支撑库，提供完整的P5程序运行时环境，�
 ```
 P5toC/
 ├── include/              # 头文件目录
-│   ├── BuiltIn.hpp      # P5内置函数包装
-│   ├── key.hpp          # 键管理器
-│   ├── SE.hpp           # 查表引擎
-│   ├── table.hpp        # 表基类
-│   ├── parser_base.hpp  # 解析器基类
-│   ├── parser.hpp       # Parser实现
-│   ├── extract.h        # Header提取函数
-│   ├── headers.hpp      # Header定义
-│   ├── fv.hpp           # FV相关
-│   ├── fv_structs.hpp   # FV结构体
-│   ├── serializer.hpp   # 序列化
-│   ├── p5_types.hpp     # P5类型系统
-│   └── model_intf_1027.h # 接口定义
+│   ├── common/          # 公共头文件
+│   │   ├── BuiltIn.hpp      # P5内置函数包装
+│   │   ├── key.hpp          # 键管理器
+│   │   ├── SE.hpp           # 查表引擎
+│   │   ├── table.hpp        # 表基类
+│   │   ├── parser_base.hpp  # 解析器基类
+│   │   ├── extract.h        # Header提取函数
+│   │   ├── headers.hpp      # Header定义
+│   │   ├── fv.hpp           # FV相关
+│   │   ├── fv_structs.hpp   # FV结构体
+│   │   ├── serializer.hpp   # 序列化
+│   │   ├── p5_types.hpp     # P5类型系统
+│   │   └── model_intf_1027.h # 接口定义
+│   └── generated/       # 生成的代码头文件
+│       ├── parser.hpp       # Parser实现头文件
+│       ├── generated_MA.hpp # Table生成代码头文件
+│       ├── generated_enum.hpp
+│       ├── generated_gtv.hpp
+│       └── generated_struct.hpp
 ├── src/                  # 源代码目录
-│   ├── key.cpp          # 键管理器实现
-│   ├── SE.cpp           # 查表引擎实现
-│   ├── table.cpp        # 表基类实现
-│   ├── parser.cpp       # Parser实现
-│   └── parser_interface.cpp # Parser接口实现
+│   ├── common/          # 公共源代码
+│   │   ├── key.cpp          # 键管理器实现
+│   │   ├── SE.cpp           # 查表引擎实现
+│   │   ├── table.cpp        # 表基类实现
+│   │   └── parser_interface.cpp # Parser接口实现
+│   └── generated/       # 生成的代码源文件
+│       ├── parser.cpp       # Parser实现
+│       └── generated_MA.cpp # Table生成代码实现
 ├── docs/                 # 文档目录
 │   ├── builtin.md       # 内置函数说明
 │   ├── conversion_logic.md # 转换逻辑
 │   ├── design_idea.md   # 设计思路
+│   ├── information_extract.md # 信息提取说明
+│   ├── key.md           # 键管理器说明
+│   ├── search_engine.md # 查表引擎说明
 │   └── ...
 ├── test/                 # 测试目录
 │   ├── test_parser.cpp  # Parser测试
-│   └── tb/              # Table测试
-│       ├── main.cpp
-│       └── generated/   # 生成的代码
-├── bin/                  # 构建输出目录（自动创建）
+│   ├── test_ma.cpp      # Table测试（Match-Action）
+│   └── tb.p5            # P5测试源文件
+├── build/                # 构建输出目录（自动创建）
+│   ├── obj/             # 编译中间文件
+│   ├── test_parser      # Parser测试可执行文件
+│   └── test_ma          # Table测试可执行文件
 ├── Makefile             # 构建文件
 └── README.md            # 本文件
 ```
@@ -94,24 +104,23 @@ P5toC/
 
 #### 1. 构建Parser测试
 ```bash
-make parser-test
+make parser
 ```
-构建结果：`bin/test_parser`
+构建结果：`build/test_parser`
 
 #### 2. 构建Table测试
 ```bash
-make table-test TEST=test/tb/main.cpp
+make table
 ```
-构建结果：`bin/main`（根据测试文件名）
+构建结果：`build/test_ma`
 
 #### 3. 构建所有组件
 ```bash
-# 只构建Parser测试
 make all
-
-# 同时构建Parser和Table测试（需要指定TEST变量）
-make all TEST=test/tb/main.cpp
 ```
+同时构建Parser和Table测试，输出文件：
+- `build/test_parser` - Parser测试可执行文件
+- `build/test_ma` - Table测试可执行文件
 
 #### 4. 查看帮助
 ```bash
@@ -122,13 +131,14 @@ make help
 ```bash
 make clean
 ```
+清理 `build/` 目录下的所有构建产物
 
 ## 使用示例
 
 ### Parser使用
 ```cpp
-#include "model_intf_1027.h"
-#include "parser.hpp"
+#include "common/model_intf_1027.h"
+#include "generated/parser.hpp"
 
 // 调用Parser接口
 PrsProcPkt(false, parser_hinfo, nhi_info, cp2np_hdr, pkt_hdr, fv_info);
@@ -136,9 +146,10 @@ PrsProcPkt(false, parser_hinfo, nhi_info, cp2np_hdr, pkt_hdr, fv_info);
 
 ### Table使用
 ```cpp
-#include "BuiltIn.hpp"
-#include "SE.hpp"
-#include "key.hpp"
+#include "common/BuiltIn.hpp"
+#include "common/SE.hpp"
+#include "common/key.hpp"
+#include "generated/generated_MA.hpp"
 
 // 初始化键管理器
 g_key.initKey({10});
@@ -182,6 +193,10 @@ if (_valid(result)) {
 - `conversion_logic.md`：转换逻辑说明
 - `builtin.md`：内置函数说明
 - `search_engine.md`：查表引擎说明
+- `key.md`：键管理器说明
+- `information_extract.md`：信息提取说明
+- `preP5.md`：P5预处理说明
+- `todo.md`：待办事项
 
 ## 许可证
 
