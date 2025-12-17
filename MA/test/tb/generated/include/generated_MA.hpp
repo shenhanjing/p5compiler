@@ -35,7 +35,7 @@ public:
 
 class IMA0_MATCH_TBL : public Table {
 public:
-    IPAT_TBL tbIPAT;
+    IPAT_TBL tbIPAT = IPAT_TBL();
 
     IMA0_MATCH_TBL() {}
 

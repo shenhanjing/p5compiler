@@ -23,8 +23,8 @@ void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
 }
 
 void iMA0Control() {
-    IMA0_MATCH_TBL tbIMA0Match;
-    IMA0_ACTION_TBL tbIMA0Action(tbIMA0Match);
+    IMA0_MATCH_TBL tbIMA0Match = IMA0_MATCH_TBL();
+    IMA0_ACTION_TBL tbIMA0Action = IMA0_ACTION_TBL(tbIMA0Match);
     tbIMA0Match.apply();
     tbIMA0Action.apply();
 }
