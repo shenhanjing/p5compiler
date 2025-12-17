@@ -5,6 +5,9 @@
 #include <vector>
 #include "generated_MA.hpp"
 
+// Unity build: pull in generated implementation so globals are defined once.
+#include "generated/src/generated_MA.cpp"
+
 namespace {
 
 // 预置一些全局字段的基准值，方便复用
