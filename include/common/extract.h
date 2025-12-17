@@ -16,7 +16,7 @@ struct ParserState;
 // ========== Extract 函数实现：通过函数重载支持不同 header 类型 ==========
 
 // ETHER header 提取实现
-inline size_t extract(ParserState& state, ETHER_S& header) {
+inline size_t _extract(ParserState& state, ETHER_S& header) {
     size_t header_size_bytes = 14;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract ETHER");
@@ -34,7 +34,7 @@ inline size_t extract(ParserState& state, ETHER_S& header) {
 }
 
 // ETHER_TYPE header 提取实现
-inline size_t extract(ParserState& state, ETHER_TYPE_S& header) {
+inline size_t _extract(ParserState& state, ETHER_TYPE_S& header) {
     size_t header_size_bytes = 2;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract ETHER_TYPE");
@@ -48,7 +48,7 @@ inline size_t extract(ParserState& state, ETHER_TYPE_S& header) {
 }
 
 // VLAN_TAG header 提取实现
-inline size_t extract(ParserState& state, VLAN_TAG_S& header) {
+inline size_t _extract(ParserState& state, VLAN_TAG_S& header) {
     size_t header_size_bytes = 4;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract VLAN_TAG");
@@ -66,7 +66,7 @@ inline size_t extract(ParserState& state, VLAN_TAG_S& header) {
 }
 
 // IPv4 header 提取实现
-inline size_t extract(ParserState& state, IPv4_S& header) {
+inline size_t _extract(ParserState& state, IPv4_S& header) {
     size_t header_size_bytes = 20;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract IPv4");
@@ -84,7 +84,7 @@ inline size_t extract(ParserState& state, IPv4_S& header) {
 }
 
 // IPv6 header 提取实现
-inline size_t extract(ParserState& state, IPv6_S& header) {
+inline size_t _extract(ParserState& state, IPv6_S& header) {
     size_t header_size_bytes = 40;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract IPv6");
@@ -99,7 +99,7 @@ inline size_t extract(ParserState& state, IPv6_S& header) {
 }
 
 // TCP header 提取实现
-inline size_t extract(ParserState& state, TCP_S& header) {
+inline size_t _extract(ParserState& state, TCP_S& header) {
     size_t header_size_bytes = 20;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract TCP");
@@ -116,7 +116,7 @@ inline size_t extract(ParserState& state, TCP_S& header) {
 }
 
 // UDP header 提取实现
-inline size_t extract(ParserState& state, UDP_S& header) {
+inline size_t _extract(ParserState& state, UDP_S& header) {
     size_t header_size_bytes = 8;
     if (state.current_offset_bytes + header_size_bytes > state.pkt_data_size) {
         throw std::runtime_error("PacketTooShort: cannot extract UDP");

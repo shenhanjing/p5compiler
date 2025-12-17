@@ -50,12 +50,12 @@ protected:
     
     // ========== Lookahead 函数 ==========
     template<typename HeaderType>
-    void lookahead(HeaderType& header, size_t offset = SIZE_MAX) {
+    void _lookahead(HeaderType& header, size_t offset = SIZE_MAX) {
         size_t saved_offset = state.current_offset_bytes;
         if (offset != SIZE_MAX) {
             state.current_offset_bytes = offset;
         }
-        extract(state, header);
+        _extract(state, header);
         state.current_offset_bytes = saved_offset;
     }
 

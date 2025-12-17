@@ -64,10 +64,10 @@ void ParserImpl::parse_ETHER() {
     
     // 先 lookahead ETHER_TYPE（在偏移量 current_offset + 12 的位置）
     // 因为 ETHER_TYPE 是 ETHER 头的一部分（最后2字节）
-    lookahead(ether_type, state.current_offset_bytes + 12);
+    _lookahead(ether_type, state.current_offset_bytes + 12);
     uint16_t ether_type_val = ether_type.Type;  // 使用隐式类型转换
     
-    size_t offset = extract(state, ether);
+    size_t offset = _extract(state, ether);
     state.pho_temp[PHO_OUTER_L2_START] = p5::uint<7>(offset);
 
     switch(ether_type_val) {
@@ -86,14 +86,14 @@ void ParserImpl::parse_ETHER() {
 // ========== parse_VlanTag 实现 ==========
 void ParserImpl::parse_VlanTag() {
     state.phi_temp.TagType = VLAN_SINGLE_TAGGED;
-    state.pho_temp[PHO_OUTER_VLANS_START] = p5::uint<7>(extract(state, vlan_tag0));
+    state.pho_temp[PHO_OUTER_VLANS_START] = p5::uint<7>(_extract(state, vlan_tag0));
 
     // VLAN 标签结构：TPID(2) + VLAN Info(2)
     // VLAN Info 的最后 2 字节就是 EtherType
     // extract 提取了 4 字节，当前偏移在 EtherType 之后
     // 需要回退 2 字节来读取 EtherType（VLAN 标签的最后 2 字节）
     size_t vlan_start = state.pho_temp[PHO_OUTER_VLANS_START];  // 使用隐式类型转换
-    lookahead(ether_type, vlan_start + 2);  // VLAN 标签的偏移 + 2 字节 = EtherType 位置
+    _lookahead(ether_type, vlan_start + 2);  // VLAN 标签的偏移 + 2 字节 = EtherType 位置
     uint16_t ether_type_val = ether_type.Type;  // 使用隐式类型转换
     switch(ether_type_val) {
         case 0x0800: 
@@ -112,7 +112,7 @@ void ParserImpl::parse_VlanTag() {
 void ParserImpl::parse_IPv4() {
     state.phi_temp.L3Type = L3_TYPE_IPv4;
     
-    size_t offset = extract(state, ipv4);
+    size_t offset = _extract(state, ipv4);
     state.pho_temp[PHO_OUTER_L3_START] = p5::uint<7>(offset);
     
     uint8_t protocol = ipv4.Protocol;  // 使用隐式类型转换
@@ -132,7 +132,7 @@ void ParserImpl::parse_IPv4() {
 // ========== parse_IPv6 实现 ==========
 void ParserImpl::parse_IPv6() {
     state.phi_temp.L3Type = L3_TYPE_IPv6;
-    state.pho_temp[PHO_OUTER_L3_START] = p5::uint<7>(extract(state, ipv6));
+    state.pho_temp[PHO_OUTER_L3_START] = p5::uint<7>(_extract(state, ipv6));
 
     uint8_t next_protocol = ipv6.NextProtocol;  // 使用隐式类型转换
     switch(next_protocol) {
@@ -146,7 +146,7 @@ void ParserImpl::parse_IPv6() {
 void ParserImpl::parse_TCP() {
     state.phi_temp.L4Type = L4_PROTOCOL_TCP;
     
-    size_t offset = extract(state, tcp);
+    size_t offset = _extract(state, tcp);
     state.pho_temp[PHO_OUTER_L4_START] = p5::uint<7>(offset);
 
     _parser_next(0, 0);
@@ -155,7 +155,7 @@ void ParserImpl::parse_TCP() {
 // ========== parse_UDP 实现 ==========
 void ParserImpl::parse_UDP() {
     state.phi_temp.L4Type = L4_PROTOCOL_UDP;
-    state.pho_temp[PHO_OUTER_L4_START] = p5::uint<7>(extract(state, udp));
+    state.pho_temp[PHO_OUTER_L4_START] = p5::uint<7>(_extract(state, udp));
 
     _parser_next(0, 0);
 }
