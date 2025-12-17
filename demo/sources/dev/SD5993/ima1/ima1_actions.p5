@@ -1,9 +1,0 @@
-
-void iMA1Action(FIBFull_S rsFib)
-{
-    if (_valid(rsFib)) {
-        GLTP = rsFib.Port;
-        EncapIndex = rsFib.EncapIndex;
-        TTL = TTL - 1;
-    }
-}

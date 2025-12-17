@@ -1,3 +1,26 @@
-request.md
-request.txt
+# Build directories
+build/
+*.o
+*.a
+*.so
+*.dylib
 
+# Executables
+test_ma
+test_parser
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+
+# IDE files
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
