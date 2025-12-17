@@ -4,41 +4,48 @@
 #include <array>
 #include <cstdint>
 #include <vector>
+
+#include "table.hpp"
+#include "SE.hpp"
+#include "key.hpp"
+#include "BuiltIn.hpp"
 #include "p5_types.hpp"
+#include "model_intf_1027.h"
+
 #include "generated_struct.hpp"
 
 /****************************        Outer Headers           *********************************/
-ETHER_S ETHER;
-VLAN_TAG_S VLAN_TAG0;
-ETHER_TYPE_S ETHER_TYPE;
-IPv4_S IPv4;
-IPv6_S IPv6;
-UDP_S UDP;
-TCP_S TCP;
+inline ETHER_S ETHER;
+inline VLAN_TAG_S VLAN_TAG0;
+inline ETHER_TYPE_S ETHER_TYPE;
+inline IPv4_S IPv4;
+inline IPv6_S IPv6;
+inline UDP_S UDP;
+inline TCP_S TCP;
 
 /****************************              fv                *********************************/
-PHI_S PHI;
-p5::uint<7> PHO[5];
-p5::uint<8> NGSFBuffer[64];
-p5::uint<10> GLSP;
-p5::uint<10> GLTP;
-p5::uint<6> LLTP;
-p5::uint<8> Vrf;
-p5::uint<6> FQID;
-p5::uint<14> PktLength;
-p5::uint<1> DropFlag;
-p5::uint<1> IsUc;
-p5::uint<12> Mgid;
-p5::uint<8> SB;
-p5::uint<8> SP;
-p5::uint<8> TB;
-p5::uint<8> TP;
-p5::uint<16> HashValue;
-p5::uint<8> TOS;
-p5::uint<8> TTL;
-p5::uint<8> EncapIndex;
-p5::uint<3> HubSpkGrp;
-p5::uint<2> EncapProfile;
+inline PHI_S PHI;
+inline p5::uint<7> PHO[5];
+inline p5::uint<8> NGSFBuffer[64];
+inline p5::uint<10> GLSP;
+inline p5::uint<10> GLTP;
+inline p5::uint<6> LLTP;
+inline p5::uint<8> Vrf;
+inline p5::uint<6> FQID;
+inline p5::uint<14> PktLength;
+inline p5::uint<1> DropFlag;
+inline p5::uint<1> IsUc;
+inline p5::uint<12> Mgid;
+inline p5::uint<8> SB;
+inline p5::uint<8> SP;
+inline p5::uint<8> TB;
+inline p5::uint<8> TP;
+inline p5::uint<16> HashValue;
+inline p5::uint<8> TOS;
+inline p5::uint<8> TTL;
+inline p5::uint<8> EncapIndex;
+inline p5::uint<3> HubSpkGrp;
+inline p5::uint<2> EncapProfile;
 
 // 将 fv 字段压缩/解压为固定长度的字节数组，便于调试或跨模块传输
 namespace {
@@ -71,7 +78,7 @@ namespace {
 } // namespace
 
 // 将 PHI 字段按声明顺序拼成 10 字节数组
-PhiPackedBuffer pack_phi_to_bytes() {
+inline PhiPackedBuffer pack_phi_to_bytes() {
     std::vector<bool> bits;
     bits.reserve(32);
 
@@ -93,7 +100,7 @@ PhiPackedBuffer pack_phi_to_bytes() {
 }
 
 // 从 10 字节数组按同样顺序解析回 PHI 字段
-void unpack_phi_from_bytes(const PhiPackedBuffer &in) {
+inline void unpack_phi_from_bytes(const PhiPackedBuffer &in) {
     std::size_t cursor = 0;
 
     assign_from_bits(in, cursor, 4, PHI.PortType);
@@ -104,7 +111,7 @@ void unpack_phi_from_bytes(const PhiPackedBuffer &in) {
 }
 
 // 将 PHO[5] (每个 7bit) 按顺序拼成 32 字节数组
-PhoPackedBuffer pack_pho_to_bytes() {
+inline PhoPackedBuffer pack_pho_to_bytes() {
     std::vector<bool> bits;
     bits.reserve(40);
 
@@ -124,7 +131,7 @@ PhoPackedBuffer pack_pho_to_bytes() {
 }
 
 // 从 32 字节数组解析回 PHO[5]
-void unpack_pho_from_bytes(const PhoPackedBuffer &in) {
+inline void unpack_pho_from_bytes(const PhoPackedBuffer &in) {
     std::size_t cursor = 0;
     for (auto &v : PHO) {
         assign_from_bits(in, cursor, 7, v);
@@ -132,7 +139,7 @@ void unpack_pho_from_bytes(const PhoPackedBuffer &in) {
 }
 
 // 按字段声明顺序将位拼接到字节数组（大端 bit 顺序）
-FvPackedBuffer pack_fv_to_bytes() {
+inline FvPackedBuffer pack_fv_to_bytes() {
     std::vector<bool> bits;
     bits.reserve(200); // 当前仅用到 145bit，预留冗余
 
@@ -168,7 +175,7 @@ FvPackedBuffer pack_fv_to_bytes() {
 }
 
 // 从字节数组按同样顺序解析出各个字段
-void unpack_fv_from_bytes(const FvPackedBuffer &in) {
+inline void unpack_fv_from_bytes(const FvPackedBuffer &in) {
     std::size_t cursor = 0;
 
     assign_from_bits(in, cursor, 10, GLSP);

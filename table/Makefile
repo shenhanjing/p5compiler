@@ -19,6 +19,15 @@ TEST_ABS := $(abspath $(TEST))
 TEST_BASENAME := $(notdir $(basename $(TEST_ABS)))
 TARGET := $(BIN_DIR)/$(TEST_BASENAME)
 
+TEST_DIR := $(dir $(TEST_ABS))
+TEST_GEN_DIR := $(TEST_DIR)/generated
+TEST_GEN_INC_DIR := $(TEST_GEN_DIR)/include
+TEST_GEN_SRC_DIR := $(TEST_GEN_DIR)/src
+
+# Test sources and generated sources that belong to the selected test.
+TEST_SRCS := $(wildcard $(TEST_DIR)/*.cpp) $(wildcard $(TEST_GEN_SRC_DIR)/*.cpp)
+ALL_SRCS := $(SRCS) $(TEST_SRCS)
+
 .PHONY: all clean dirs
 
 all: dirs $(TARGET)
@@ -26,8 +35,8 @@ all: dirs $(TARGET)
 dirs:
 	@mkdir -p $(BIN_DIR)
 
-$(TARGET): $(SRCS) $(TEST_ABS) | dirs
-	$(CXX) $(CXXFLAGS) $(SRCS) $(TEST_ABS) -o $@ $(LDFLAGS)
+$(TARGET): $(ALL_SRCS) | dirs
+	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) -I$(TEST_GEN_INC_DIR) $(ALL_SRCS) -o $@ $(LDFLAGS)
 
 clean:
 	rm -rf $(BIN_DIR)

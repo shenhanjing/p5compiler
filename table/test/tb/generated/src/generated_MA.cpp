@@ -1,26 +1,6 @@
 #include <cstring>
-#include <string>
 
-#include "table.hpp"
-#include "SE.hpp"
-#include "key.hpp"
-#include "BuiltIn.hpp"
-#include "p5_types.hpp"
-#include "model_intf_1027.h"
-
-#include "generated_gtv.hpp"
-
-/****************************              iMA0              *********************************/
-
-struct IPATRSP_S {
-    p5::uint<1> Valid;
-    p5::uint<1> RouterIntf;
-    p5::uint<1> QinQ;
-    p5::uint<8> VrfId;
-    VlanInfo_S Pvid;
-};
-
-using IPATFull_S = _inflate<IPATRSP_S>;
+#include "generated_MA.hpp"
 
 IPATFull_S IpatLookup(p5::uint<2> &Status) {
     p5::uint<10> Glsp;
@@ -33,30 +13,6 @@ IPATFull_S IpatLookup(p5::uint<2> &Status) {
     return CompressedIpatRsp;
 }
 
-class IPAT_TBL : public Table {
-public:
-    p5::uint<2> IpatStatus;
-    IPATFull_S rsIpat;
-
-    IPAT_TBL() {}
-
-    void apply() override {
-        g_key.buildKey(GLSP);
-        rsIpat = IpatLookup(IpatStatus);
-    }
-};
-
-class IMA0_MATCH_TBL : public Table {
-public:
-    IPAT_TBL tbIPAT;
-
-    IMA0_MATCH_TBL() {}
-
-    void apply() override {
-        tbIPAT.apply();
-    }
-};
-
 void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
     if (_valid(rsIpat) && (PHI.L3Type == L3_TYPE_IPv4 || PHI.L3Type == L3_TYPE_IPv6)) {
         Vrf = rsIpat.VrfId;
@@ -65,17 +21,6 @@ void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
         DropFlag = 1;
     }
 }
-
-class IMA0_ACTION_TBL : public Table {
-public:
-    IMA0_MATCH_TBL &tbIMA0Match;
-
-    explicit IMA0_ACTION_TBL(IMA0_MATCH_TBL &tbIMA0Match_in) : tbIMA0Match(tbIMA0Match_in) {}
-
-    void apply() override {
-        iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
-    }
-};
 
 void iMA0Control() {
     IMA0_MATCH_TBL tbIMA0Match;

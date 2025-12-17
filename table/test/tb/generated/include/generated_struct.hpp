@@ -1,7 +1,13 @@
 #ifndef GENERATED_STRUCT_HPP
 #define GENERATED_STRUCT_HPP
 
+#include "table.hpp"
+#include "SE.hpp"
+#include "key.hpp"
+#include "BuiltIn.hpp"
 #include "p5_types.hpp"
+#include "model_intf_1027.h"
+
 #include "generated_enum.hpp"
 
 struct PHI_S {
@@ -93,5 +99,15 @@ struct TCP_S {
     p5::uint<16> Checksum;
     p5::uint<16> UrgentPtr;
 };
+
+struct IPATRSP_S {
+    p5::uint<1> Valid;
+    p5::uint<1> RouterIntf;
+    p5::uint<1> QinQ;
+    p5::uint<8> VrfId;
+    VlanInfo_S Pvid;
+};
+
+using IPATFull_S = _inflate<IPATRSP_S>;
 
 #endif // GENERATED_STRUCT_HPP

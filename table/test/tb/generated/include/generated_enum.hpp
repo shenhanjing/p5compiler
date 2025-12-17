@@ -1,6 +1,13 @@
 #ifndef GENERATED_ENUM_HPP
 #define GENERATED_ENUM_HPP
 
+#include "table.hpp"
+#include "SE.hpp"
+#include "key.hpp"
+#include "BuiltIn.hpp"
+#include "p5_types.hpp"
+#include "model_intf_1027.h"
+
 enum RSP_STATUS_E {
     RSP_STATUS_MATCH = 0,
     RSP_STATUS_NO_MATCH = 1,
