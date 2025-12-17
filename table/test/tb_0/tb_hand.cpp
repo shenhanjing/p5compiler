@@ -7,6 +7,7 @@
 #include "key.hpp"
 // Built-in helpers (inflate, key/status, lookup, memcpy, bit width)
 #include "BuiltIn.hpp"
+#include "p5_types.hpp"
 
 // --- Types translated from trial_0.p5 ---
 enum SE_TID_E {
@@ -64,7 +65,9 @@ LUFull_S LuLookup(p5::uint<2> &Status) {
 class LU_TBL : public Table {
 public:
     p5::uint<2> LuStatus;
-    LUFull_S rsLu{};
+    LUFull_S rsLu;
+
+    LU_TBL() {}
 
     void apply() override {
         g_key.buildKey(KE0);
@@ -74,8 +77,10 @@ public:
 
 class MATCH_TBL : public Table {
 public:
-    LU_TBL tbLU{};
+    LU_TBL tbLU;
 
+    MATCH_TBL() {}
+    
     void apply() override {
         tbLU.apply();
     }
@@ -93,12 +98,12 @@ void Action(LUFull_S rsLu, p5::uint<2> LuStatus) {
 
 class ACTION_TBL : public Table {
 public:
-    MATCH_TBL *tbMatch = nullptr;
+    MATCH_TBL &tbMatch;
 
-    explicit ACTION_TBL(MATCH_TBL &match) : tbMatch(&match) {}
+    explicit ACTION_TBL(MATCH_TBL &tbMatch_in) : tbMatch(tbMatch_in) {}
 
     void apply() override {
-        Action(tbMatch->tbLU.rsLu, tbMatch->tbLU.LuStatus);
+        Action(tbMatch.tbLU.rsLu, tbMatch.tbLU.LuStatus);
     }
 };
 

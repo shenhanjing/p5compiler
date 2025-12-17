@@ -1,4 +1,5 @@
-#pragma once
+#ifndef KEY_HPP
+#define KEY_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -162,3 +163,4 @@ T KeyManager::getKey(std::size_t bits) const {
     return T::from_bits(bv);
 }
 
+#endif // KEY_HPP

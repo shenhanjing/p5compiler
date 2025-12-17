@@ -1,0 +1,704 @@
+[1167] P4Program
+  objects: [21] Type_SerEnum name=RSP_STATUS_E declid=0
+    type: [3] Type_Bits size=32 isSigned=0
+    members: [10] SerEnumMember name=RSP_STATUS_MATCH declid=0
+      value: [8] Constant value=0 base=10
+        type: [7] Type_InfInt declid=1
+    members: [13] SerEnumMember name=RSP_STATUS_NO_MATCH declid=1
+      value: [12] Constant value=1 base=10
+        type: [11] Type_InfInt declid=2
+    members: [16] SerEnumMember name=RSP_STATUS_LOOKUP_SKIPPED declid=2
+      value: [15] Constant value=2 base=10
+        type: [14] Type_InfInt declid=3
+    members: [19] SerEnumMember name=RSP_STATUS_ERROR declid=3
+      value: [18] Constant value=3 base=10
+        type: [17] Type_InfInt declid=4
+  objects: [39] Type_SerEnum name=TLB_LKUP_TYPE_E declid=1
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [28] SerEnumMember name=TBL_LKUP_TYPE_INDEX declid=4
+      value: [26] Constant value=0 base=10
+        type: [25] Type_InfInt declid=5
+    members: [31] SerEnumMember name=TBL_LKUP_TYPE_EM declid=5
+      value: [30] Constant value=1 base=10
+        type: [29] Type_InfInt declid=6
+    members: [34] SerEnumMember name=TBL_LKUP_TYPE_LPM declid=6
+      value: [33] Constant value=3 base=10
+        type: [32] Type_InfInt declid=7
+    members: [37] SerEnumMember name=TBL_LKUP_TYPE_TCAM declid=7
+      value: [36] Constant value=4 base=10
+        type: [35] Type_InfInt declid=8
+  objects: [57] Type_SerEnum name=SE_TID_E declid=2
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [46] SerEnumMember name=SE_TID_IPAT declid=8
+      value: [44] Constant value=0 base=10
+        type: [43] Type_InfInt declid=9
+    members: [49] SerEnumMember name=SE_TID_FIB declid=9
+      value: [48] Constant value=1 base=10
+        type: [47] Type_InfInt declid=10
+    members: [52] SerEnumMember name=SE_TID_EPAT declid=10
+      value: [51] Constant value=2 base=10
+        type: [50] Type_InfInt declid=11
+    members: [55] SerEnumMember name=SE_TID_ENCAP declid=11
+      value: [54] Constant value=3 base=10
+        type: [53] Type_InfInt declid=12
+  objects: [72] Type_SerEnum name=PORT_TYPE_E declid=3
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [64] SerEnumMember name=PORT_TYPE_ETH declid=12
+      value: [62] Constant value=0 base=10
+        type: [61] Type_InfInt declid=13
+    members: [67] SerEnumMember name=PORT_TYPE_CPU declid=13
+      value: [66] Constant value=1 base=10
+        type: [65] Type_InfInt declid=14
+    members: [70] SerEnumMember name=PORT_TYPE_STACK declid=14
+      value: [69] Constant value=2 base=10
+        type: [68] Type_InfInt declid=15
+  objects: [90] Type_SerEnum name=PHO_OFFSETS_E declid=4
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [79] SerEnumMember name=PHO_OUTER_L2_START declid=15
+      value: [77] Constant value=0 base=10
+        type: [76] Type_InfInt declid=16
+    members: [82] SerEnumMember name=PHO_OUTER_VLANS_START declid=16
+      value: [81] Constant value=1 base=10
+        type: [80] Type_InfInt declid=17
+    members: [85] SerEnumMember name=PHO_OUTER_L3_START declid=17
+      value: [84] Constant value=2 base=10
+        type: [83] Type_InfInt declid=18
+    members: [88] SerEnumMember name=PHO_OUTER_L4_START declid=18
+      value: [87] Constant value=3 base=10
+        type: [86] Type_InfInt declid=19
+  objects: [105] Type_SerEnum name=L4_PROTOCOL_E declid=5
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [97] SerEnumMember name=L4_PROTOCOL_NONE declid=19
+      value: [95] Constant value=0 base=10
+        type: [94] Type_InfInt declid=20
+    members: [100] SerEnumMember name=L4_PROTOCOL_TCP declid=20
+      value: [99] Constant value=10 base=10
+        type: [98] Type_InfInt declid=21
+    members: [103] SerEnumMember name=L4_PROTOCOL_UDP declid=21
+      value: [102] Constant value=32 base=10
+        type: [101] Type_InfInt declid=22
+  objects: [123] Type_SerEnum name=L2_TYPE_E declid=6
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [112] SerEnumMember name=L2_TYPE_INVALID declid=22
+      value: [110] Constant value=0 base=10
+        type: [109] Type_InfInt declid=23
+    members: [115] SerEnumMember name=L2_TYPE_ETHERNET declid=23
+      value: [114] Constant value=1 base=10
+        type: [113] Type_InfInt declid=24
+    members: [118] SerEnumMember name=L2_TYPE_OTHER declid=24
+      value: [117] Constant value=2 base=10
+        type: [116] Type_InfInt declid=25
+    members: [121] SerEnumMember name=L2_TYPE_RES declid=25
+      value: [120] Constant value=3 base=10
+        type: [119] Type_InfInt declid=26
+  objects: [141] Type_SerEnum name=VLAN_TYPE_E declid=7
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [130] SerEnumMember name=VLAN_UNTAGGED declid=26
+      value: [128] Constant value=0 base=10
+        type: [127] Type_InfInt declid=27
+    members: [133] SerEnumMember name=VLAN_SINGLE_TAGGED declid=27
+      value: [132] Constant value=1 base=10
+        type: [131] Type_InfInt declid=28
+    members: [136] SerEnumMember name=VLAN_DOUBLE_TAGGED declid=28
+      value: [135] Constant value=2 base=10
+        type: [134] Type_InfInt declid=29
+    members: [139] SerEnumMember name=VLAN_TRIPLE_TAGGED declid=29
+      value: [138] Constant value=3 base=10
+        type: [137] Type_InfInt declid=30
+  objects: [159] Type_SerEnum name=L3_TYPE_E declid=8
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [148] SerEnumMember name=L3_TYPE_INVALID declid=30
+      value: [146] Constant value=0 base=10
+        type: [145] Type_InfInt declid=31
+    members: [151] SerEnumMember name=L3_TYPE_NON_IP declid=31
+      value: [150] Constant value=1 base=10
+        type: [149] Type_InfInt declid=32
+    members: [154] SerEnumMember name=L3_TYPE_IPv4 declid=32
+      value: [153] Constant value=2 base=10
+        type: [152] Type_InfInt declid=33
+    members: [157] SerEnumMember name=L3_TYPE_IPv6 declid=33
+      value: [156] Constant value=3 base=10
+        type: [155] Type_InfInt declid=34
+  objects: [194] Type_Struct name=PHI_S declid=9
+    typeParameters: [196] TypeParameters
+    fields: [167] StructField name=PortType declid=34
+      type: [166] Type_Bits size=4 isSigned=0
+    fields: [174] StructField name=L2Type declid=35
+      type: [173] Type_Bits size=2 isSigned=0
+    fields: [179] StructField name=TagType declid=36
+      type: [173] Type_Bits size=2 isSigned=0...
+    fields: [184] StructField name=L3Type declid=37
+      type: [173] Type_Bits size=2 isSigned=0...
+    fields: [190] StructField name=L4Type declid=38
+      type: [189] Type_Bits size=8 isSigned=0
+  objects: [214] Type_Struct name=ETHER_S declid=10
+    typeParameters: [216] TypeParameters
+    fields: [204] StructField name=Dmac declid=39
+      type: [203] Type_Bits size=48 isSigned=0
+    fields: [210] StructField name=Smac declid=40
+      type: [203] Type_Bits size=48 isSigned=0...
+  objects: [241] Type_Struct name=VlanInfo_S declid=11
+    typeParameters: [243] TypeParameters
+    fields: [224] StructField name=Pri declid=41
+      type: [223] Type_Bits size=3 isSigned=0
+    fields: [231] StructField name=Dei declid=42
+      type: [230] Type_Bits size=1 isSigned=0
+    fields: [237] StructField name=VlanID declid=43
+      type: [236] Type_Bits size=12 isSigned=0
+  objects: [261] Type_Struct name=VLAN_TAG_S declid=12
+    typeParameters: [263] TypeParameters
+    fields: [251] StructField name=Tpid declid=44
+      type: [250] Type_Bits size=16 isSigned=0
+    fields: [257] StructField name=VlanInfo declid=45
+      type: [256] Type_Name
+        path: [255] Path name=VlanInfo_S absolute=0
+  objects: [275] Type_Struct name=ETHER_TYPE_S declid=13
+    typeParameters: [277] TypeParameters
+    fields: [270] StructField name=Type declid=46
+      type: [250] Type_Bits size=16 isSigned=0...
+  objects: [355] Type_Struct name=IPv4_S declid=14
+    typeParameters: [357] TypeParameters
+    fields: [284] StructField name=Version declid=47
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [290] StructField name=Ihl declid=48
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [295] StructField name=TOS declid=49
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [300] StructField name=TotalLen declid=50
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [305] StructField name=Iden declid=51
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [310] StructField name=R declid=52
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [315] StructField name=DF declid=53
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [320] StructField name=MF declid=54
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [326] StructField name=FragOffset declid=55
+      type: [325] Type_Bits size=13 isSigned=0
+    fields: [331] StructField name=TTL declid=56
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [336] StructField name=Protocol declid=57
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [341] StructField name=Checksum declid=58
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [346] StructField name=SIP declid=59
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [351] StructField name=DIP declid=60
+      type: [3] Type_Bits size=32 isSigned=0...
+  objects: [406] Type_Struct name=IPv6_S declid=15
+    typeParameters: [408] TypeParameters
+    fields: [364] StructField name=Version declid=61
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [370] StructField name=TC declid=62
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [376] StructField name=FlowLabel declid=63
+      type: [375] Type_Bits size=20 isSigned=0
+    fields: [381] StructField name=PayloadLen declid=64
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [386] StructField name=NextProtocol declid=65
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [391] StructField name=HopLmt declid=66
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [397] StructField name=SIP declid=67
+      type: [396] Type_Bits size=128 isSigned=0
+    fields: [402] StructField name=DIP declid=68
+      type: [396] Type_Bits size=128 isSigned=0...
+  objects: [435] Type_Struct name=UDP_S declid=16
+    typeParameters: [437] TypeParameters
+    fields: [415] StructField name=SrcPort declid=69
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [421] StructField name=DstPort declid=70
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [426] StructField name=Length declid=71
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [431] StructField name=Checksum declid=72
+      type: [250] Type_Bits size=16 isSigned=0...
+  objects: [474] Type_Struct name=FlagCtrl_S declid=17
+    typeParameters: [476] TypeParameters
+    fields: [444] StructField name=Urg declid=73
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [450] StructField name=Ack declid=74
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [455] StructField name=Psh declid=75
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [460] StructField name=Rst declid=76
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [465] StructField name=Syn declid=77
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [470] StructField name=Fin declid=78
+      type: [230] Type_Bits size=1 isSigned=0...
+  objects: [503] Type_Struct name=DataCtrl_S declid=18
+    typeParameters: [505] TypeParameters
+    fields: [483] StructField name=DataOffset declid=79
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [489] StructField name=Res declid=80
+      type: [223] Type_Bits size=3 isSigned=0...
+    fields: [494] StructField name=Ecn declid=81
+      type: [223] Type_Bits size=3 isSigned=0...
+    fields: [499] StructField name=Ctrl declid=82
+      type: [498] Type_Name
+        path: [497] Path name=FlagCtrl_S absolute=0
+  objects: [552] Type_Struct name=TCP_S declid=19
+    typeParameters: [554] TypeParameters
+    fields: [512] StructField name=SrcPort declid=83
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [518] StructField name=DstPort declid=84
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [523] StructField name=SeqNo declid=85
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [528] StructField name=AckNo declid=86
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [533] StructField name=DataCtrl declid=87
+      type: [532] Type_Name
+        path: [531] Path name=DataCtrl_S absolute=0
+    fields: [538] StructField name=Window declid=88
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [543] StructField name=Checksum declid=89
+      type: [250] Type_Bits size=16 isSigned=0...
+    fields: [548] StructField name=UrgentPtr declid=90
+      type: [250] Type_Bits size=16 isSigned=0...
+  objects: [560] Declaration_Variable name=ETHER declid=91
+    type: [559] Type_Name
+      path: [558] Path name=ETHER_S absolute=0
+  objects: [565] Declaration_Variable name=VLAN_TAG0 declid=92
+    type: [564] Type_Name
+      path: [563] Path name=VLAN_TAG_S absolute=0
+  objects: [570] Declaration_Variable name=ETHER_TYPE declid=93
+    type: [569] Type_Name
+      path: [568] Path name=ETHER_TYPE_S absolute=0
+  objects: [575] Declaration_Variable name=IPv4 declid=94
+    type: [574] Type_Name
+      path: [573] Path name=IPv4_S absolute=0
+  objects: [580] Declaration_Variable name=IPv6 declid=95
+    type: [579] Type_Name
+      path: [578] Path name=IPv6_S absolute=0
+  objects: [585] Declaration_Variable name=UDP declid=96
+    type: [584] Type_Name
+      path: [583] Path name=UDP_S absolute=0
+  objects: [590] Declaration_Variable name=TCP declid=97
+    type: [589] Type_Name
+      path: [588] Path name=TCP_S absolute=0
+  objects: [606] Declaration_Variable name=PHI declid=98
+    annotations: [596] Annotation name=segment structured=1
+      body::IR::Vector<IR::Expression>: [593] StringLiteral value=
+        type: [594] Type_Unknown
+    annotations: [602] Annotation name=volatile structured=1
+      body::IR::Vector<IR::Expression>: [598] StringLiteral value=
+        type: [594] Type_Unknown
+      body::IR::Vector<IR::Expression>: [600] StringLiteral value=
+        type: [594] Type_Unknown
+      body::IR::Vector<IR::Expression>: [601] StringLiteral value=
+        type: [594] Type_Unknown
+    type: [605] Type_Name
+      path: [604] Path name=PHI_S absolute=0
+  objects: [625] Declaration_Variable name=PHO declid=99
+    annotations: [611] Annotation name=segment structured=1
+      body::IR::Vector<IR::Expression>: [609] StringLiteral value=
+        type: [594] Type_Unknown
+    annotations: [617] Annotation name=volatile structured=1
+      body::IR::Vector<IR::Expression>: [613] StringLiteral value=
+        type: [594] Type_Unknown
+      body::IR::Vector<IR::Expression>: [615] StringLiteral value=
+        type: [594] Type_Unknown
+      body::IR::Vector<IR::Expression>: [616] StringLiteral value=
+        type: [594] Type_Unknown
+    type: [624] Type_Stack
+      elementType: [621] Type_Bits size=7 isSigned=0
+      size: [623] Constant value=5 base=10
+        type: [622] Type_InfInt declid=90
+  objects: [633] Declaration_Variable name=NGSFBuffer declid=100
+    type: [632] Type_Stack
+      elementType: [189] Type_Bits size=8 isSigned=0...
+      size: [631] Constant value=64 base=10
+        type: [630] Type_InfInt declid=92
+  objects: [639] Declaration_Variable name=GLSP declid=101
+    type: [638] Type_Bits size=10 isSigned=0
+  objects: [644] Declaration_Variable name=GLTP declid=102
+    type: [638] Type_Bits size=10 isSigned=0...
+  objects: [650] Declaration_Variable name=LLTP declid=103
+    type: [649] Type_Bits size=6 isSigned=0
+  objects: [655] Declaration_Variable name=Vrf declid=104
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [660] Declaration_Variable name=FQID declid=105
+    type: [649] Type_Bits size=6 isSigned=0...
+  objects: [666] Declaration_Variable name=PktLength declid=106
+    type: [665] Type_Bits size=14 isSigned=0
+  objects: [671] Declaration_Variable name=DropFlag declid=107
+    type: [230] Type_Bits size=1 isSigned=0...
+  objects: [676] Declaration_Variable name=IsUc declid=108
+    type: [230] Type_Bits size=1 isSigned=0...
+  objects: [681] Declaration_Variable name=Mgid declid=109
+    type: [236] Type_Bits size=12 isSigned=0...
+  objects: [686] Declaration_Variable name=SB declid=110
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [691] Declaration_Variable name=SP declid=111
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [696] Declaration_Variable name=TB declid=112
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [701] Declaration_Variable name=TP declid=113
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [706] Declaration_Variable name=HashValue declid=114
+    type: [250] Type_Bits size=16 isSigned=0...
+  objects: [711] Declaration_Variable name=TOS declid=115
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [716] Declaration_Variable name=TTL declid=116
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [721] Declaration_Variable name=EncapIndex declid=117
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [726] Declaration_Variable name=HubSpkGrp declid=118
+    type: [223] Type_Bits size=3 isSigned=0...
+  objects: [731] Declaration_Variable name=EncapProfile declid=119
+    type: [173] Type_Bits size=2 isSigned=0...
+  objects: [765] Type_Struct name=IPATRSP_S declid=20
+    typeParameters: [767] TypeParameters
+    fields: [740] StructField name=Valid declid=120
+      annotations: [736] Annotation name=global_valid structured=1
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [746] StructField name=RouterIntf declid=121
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [751] StructField name=QinQ declid=122
+      type: [230] Type_Bits size=1 isSigned=0...
+    fields: [756] StructField name=VrfId declid=123
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [761] StructField name=Pvid declid=124
+      type: [760] Type_Name
+        path: [759] Path name=VlanInfo_S absolute=0
+  objects: [773] Type_Typedef name=IPATFull_S declid=21
+    type: [772] Type_Name
+      path: [771] Path name=_inflate<IPATRSP_S> absolute=0
+  objects: [899] Function name=IpatLookup declid=129
+    annotations: [777] Annotation name=lookup structured=1
+    type: [896] Type_Method name=IpatLookup
+      typeParameters: [897] TypeParameters
+      returnType: [780] Type_Name
+        path: [779] Path name=IPATFull_S absolute=0
+      parameters: [786] ParameterList
+        parameters: [784] Parameter name=Status declid=125 direction=inout
+          type: [173] Type_Bits size=2 isSigned=0...
+    body: [788] BlockStatement
+      components: [794] Declaration_Variable name=Glsp declid=126
+        type: [638] Type_Bits size=10 isSigned=0...
+      components: [811] Declaration_Variable name=CompressedIpatRsp declid=127
+        type: [798] Type_Name
+          path: [797] Path name=_compressed_IPATRSP_S absolute=0
+        initializer: [804] ListExpression
+          type: [809] Type_List
+            components: [799] Type_InfInt declid=118
+          components: [800] Constant value=0 base=10
+            type: [799] Type_InfInt declid=118
+      components: [828] Declaration_Variable name=Mem declid=128
+        type: [815] Type_Name
+          path: [814] Path name=_compressed_IPATRSP_S absolute=0
+        initializer: [821] ListExpression
+          type: [826] Type_List
+            components: [816] Type_InfInt declid=119
+          components: [817] Constant value=0 base=10
+            type: [816] Type_InfInt declid=119
+      components: [838] AssignmentStatement
+        left: [832] PathExpression
+          type: [594] Type_Unknown
+          path: [831] Path name=Glsp absolute=0
+        right: [836] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [834] PathExpression
+            type: [594] Type_Unknown
+            path: [833] Path name=_key absolute=0
+          typeArguments: [837] Vector<Type>
+          arguments: [835] Vector<Argument>
+      components: [856] AssignmentStatement
+        left: [841] PathExpression
+          type: [594] Type_Unknown
+          path: [840] Path name=Mem absolute=0
+        right: [854] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [843] PathExpression
+            type: [594] Type_Unknown
+            path: [842] Path name=_lookup absolute=0
+          typeArguments: [855] Vector<Type>
+          arguments: [847] Vector<Argument>
+            arguments: [846] Argument name=<null>
+              expression: [845] PathExpression
+                type: [594] Type_Unknown
+                path: [844] Path name=SE_TID_IPAT absolute=0
+            arguments: [850] Argument name=<null>
+              expression: [849] PathExpression
+                type: [594] Type_Unknown
+                path: [848] Path name=TBL_LKUP_TYPE_INDEX absolute=0
+            arguments: [853] Argument name=<null>
+              expression: [852] PathExpression
+                type: [594] Type_Unknown
+                path: [851] Path name=Glsp absolute=0
+      components: [868] AssignmentStatement
+        left: [859] PathExpression
+          type: [594] Type_Unknown
+          path: [858] Path name=Status absolute=0
+        right: [866] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [861] PathExpression
+            type: [594] Type_Unknown
+            path: [860] Path name=_status absolute=0
+          typeArguments: [867] Vector<Type>
+          arguments: [865] Vector<Argument>
+            arguments: [864] Argument name=<null>
+              expression: [863] PathExpression
+                type: [594] Type_Unknown
+                path: [862] Path name=SE_TID_IPAT absolute=0
+      components: [891] MethodCallStatement
+        methodCall: [889] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [888] PathExpression
+            type: [594] Type_Unknown
+            path: [887] Path name=_memcpy absolute=0
+          typeArguments: [890] Vector<Type>
+          arguments: [873] Vector<Argument>
+            arguments: [872] Argument name=<null>
+              expression: [871] PathExpression
+                type: [594] Type_Unknown
+                path: [870] Path name=CompressedIpatRsp absolute=0
+            arguments: [886] Argument name=<null>
+              expression: [879] ListExpression
+                type: [884] Type_List
+                  components: [594] Type_Unknown
+                components: [875] PathExpression
+                  type: [594] Type_Unknown
+                  path: [874] Path name=Mem absolute=0
+      components: [895] ReturnStatement
+        expression: [893] PathExpression
+          type: [594] Type_Unknown
+          path: [894] Path name=CompressedIpatRsp absolute=0
+  objects: [940] P5Table name=IPAT_TBL declid=132
+    parameters: [902] ParameterList
+    body: [916] BlockStatement
+      components: [913] P5Key
+        elements: [908] P5KeyElement matchType=<null>
+          expr: [907] PathExpression
+            type: [594] Type_Unknown
+            path: [906] Path name=GLSP absolute=0
+      components: [926] Declaration_Variable name=IpatStatus declid=130
+        type: [173] Type_Bits size=2 isSigned=0...
+        initializer: [924] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [922] PathExpression
+            type: [594] Type_Unknown
+            path: [921] Path name=_status absolute=0
+          typeArguments: [925] Vector<Type>
+          arguments: [923] Vector<Argument>
+      components: [938] Declaration_Variable name=rsIpat declid=131
+        type: [929] Type_Name
+          path: [928] Path name=IPATFull_S absolute=0
+        initializer: [936] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [931] PathExpression
+            type: [594] Type_Unknown
+            path: [930] Path name=IpatLookup absolute=0
+          typeArguments: [937] Vector<Type>
+          arguments: [935] Vector<Argument>
+            arguments: [934] Argument name=<null>
+              expression: [933] PathExpression
+                type: [594] Type_Unknown
+                path: [932] Path name=IpatStatus absolute=0
+  objects: [966] P5Table name=IMA0_MATCH_TBL declid=134
+    parameters: [943] ParameterList
+    body: [954] BlockStatement
+      components: [952] Declaration_Variable name=tbIPAT declid=133
+        type: [946] Type_Name
+          path: [945] Path name=IPAT_TBL absolute=0
+        initializer: [950] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [948] PathExpression
+            type: [594] Type_Unknown
+            path: [947] Path name=IPAT_TBL absolute=0
+          typeArguments: [951] Vector<Type>
+          arguments: [949] Vector<Argument>
+      components: [965] MethodCallStatement
+        methodCall: [963] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [962] PathExpression
+            type: [594] Type_Unknown
+            path: [961] Path name=_apply absolute=0
+          typeArguments: [964] Vector<Type>
+          arguments: [960] Vector<Argument>
+            arguments: [959] Argument name=<null>
+              expression: [958] PathExpression
+                type: [594] Type_Unknown
+                path: [957] Path name=tbIPAT absolute=0
+  objects: [1049] Function name=iMA0Action declid=137
+    type: [1046] Type_Method name=iMA0Action
+      typeParameters: [1047] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [974] ParameterList
+        parameters: [972] Parameter name=rsIpat declid=135 direction=in
+          type: [971] Type_Name
+            path: [970] Path name=IPATFull_S absolute=0
+        parameters: [979] Parameter name=IpatStatus declid=136 direction=in
+          type: [173] Type_Bits size=2 isSigned=0...
+    body: [981] BlockStatement
+      components: [1045] IfStatement
+        condition: [1007] LAnd
+          type: [999] Type_Boolean
+          left: [991] MethodCallExpression
+            type: [594] Type_Unknown
+            method: [986] PathExpression
+              type: [594] Type_Unknown
+              path: [985] Path name=_valid absolute=0
+            typeArguments: [992] Vector<Type>
+            arguments: [990] Vector<Argument>
+              arguments: [989] Argument name=<null>
+                expression: [988] PathExpression
+                  type: [594] Type_Unknown
+                  path: [987] Path name=rsIpat absolute=0
+          right: [1006] LOr
+            type: [999] Type_Boolean
+            left: [998] Equ
+              type: [999] Type_Boolean
+              left: [995] Member member=L3Type
+                type: [594] Type_Unknown
+                expr: [994] PathExpression
+                  type: [594] Type_Unknown
+                  path: [993] Path name=PHI absolute=0
+              right: [997] PathExpression
+                type: [594] Type_Unknown
+                path: [996] Path name=L3_TYPE_IPv4 absolute=0
+            right: [1005] Equ
+              type: [999] Type_Boolean
+              left: [1002] Member member=L3Type
+                type: [594] Type_Unknown
+                expr: [1001] PathExpression
+                  type: [594] Type_Unknown
+                  path: [1000] Path name=PHI absolute=0
+              right: [1004] PathExpression
+                type: [594] Type_Unknown
+                path: [1003] Path name=L3_TYPE_IPv6 absolute=0
+        [1037] BlockStatement
+          components: [1009] BlockStatement
+            components: [1018] AssignmentStatement
+              left: [1014] PathExpression
+                type: [594] Type_Unknown
+                path: [1013] Path name=Vrf absolute=0
+              right: [1017] Member member=VrfId
+                type: [594] Type_Unknown
+                expr: [1016] PathExpression
+                  type: [594] Type_Unknown
+                  path: [1015] Path name=rsIpat absolute=0
+            components: [1024] AssignmentStatement
+              left: [1021] PathExpression
+                type: [594] Type_Unknown
+                path: [1020] Path name=IsUc absolute=0
+              right: [1023] Constant value=1 base=10
+                type: [1022] Type_InfInt declid=122
+        [1042] BlockStatement
+          components: [1026] BlockStatement
+            components: [1034] AssignmentStatement
+              left: [1031] PathExpression
+                type: [594] Type_Unknown
+                path: [1030] Path name=DropFlag absolute=0
+              right: [1033] Constant value=1 base=10
+                type: [1032] Type_InfInt declid=123
+  objects: [1078] P5Table name=IMA0_ACTION_TBL declid=139
+    parameters: [1057] ParameterList
+      parameters: [1055] Parameter name=tbIMA0Match declid=138 direction=in
+        type: [1054] Type_Name
+          path: [1053] Path name=IMA0_MATCH_TBL absolute=0
+    body: [1075] BlockStatement
+      components: [1074] MethodCallStatement
+        methodCall: [1072] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1071] PathExpression
+            type: [594] Type_Unknown
+            path: [1070] Path name=iMA0Action absolute=0
+          typeArguments: [1073] Vector<Type>
+          arguments: [1064] Vector<Argument>
+            arguments: [1063] Argument name=<null>
+              expression: [1062] Member member=rsIpat
+                type: [594] Type_Unknown
+                expr: [1061] Member member=tbIPAT
+                  type: [594] Type_Unknown
+                  expr: [1060] PathExpression
+                    type: [594] Type_Unknown
+                    path: [1059] Path name=tbIMA0Match absolute=0
+            arguments: [1069] Argument name=<null>
+              expression: [1068] Member member=IpatStatus
+                type: [594] Type_Unknown
+                expr: [1067] Member member=tbIPAT
+                  type: [594] Type_Unknown
+                  expr: [1066] PathExpression
+                    type: [594] Type_Unknown
+                    path: [1065] Path name=tbIMA0Match absolute=0
+  objects: [1143] Function name=iMA0Control declid=142
+    annotations: [1082] Annotation name=control structured=1
+    type: [1140] Type_Method name=iMA0Control
+      typeParameters: [1141] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1084] ParameterList
+    body: [1086] BlockStatement
+      components: [1101] Declaration_Variable name=tbIMA0Match declid=140
+        annotations: [1092] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [1090] StringLiteral value=
+            type: [594] Type_Unknown
+        type: [1095] Type_Name
+          path: [1094] Path name=IMA0_MATCH_TBL absolute=0
+        initializer: [1099] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1097] PathExpression
+            type: [594] Type_Unknown
+            path: [1096] Path name=IMA0_MATCH_TBL absolute=0
+          typeArguments: [1100] Vector<Type>
+          arguments: [1098] Vector<Argument>
+      components: [1118] Declaration_Variable name=tbIMA0Action declid=141
+        annotations: [1106] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [1104] StringLiteral value=
+            type: [594] Type_Unknown
+        type: [1109] Type_Name
+          path: [1108] Path name=IMA0_ACTION_TBL absolute=0
+        initializer: [1116] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1111] PathExpression
+            type: [594] Type_Unknown
+            path: [1110] Path name=IMA0_ACTION_TBL absolute=0
+          typeArguments: [1117] Vector<Type>
+          arguments: [1115] Vector<Argument>
+            arguments: [1114] Argument name=<null>
+              expression: [1113] PathExpression
+                type: [594] Type_Unknown
+                path: [1112] Path name=tbIMA0Match absolute=0
+      components: [1129] MethodCallStatement
+        methodCall: [1127] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1126] PathExpression
+            type: [594] Type_Unknown
+            path: [1125] Path name=_apply absolute=0
+          typeArguments: [1128] Vector<Type>
+          arguments: [1124] Vector<Argument>
+            arguments: [1123] Argument name=<null>
+              expression: [1122] PathExpression
+                type: [594] Type_Unknown
+                path: [1121] Path name=tbIMA0Match absolute=0
+      components: [1139] MethodCallStatement
+        methodCall: [1137] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1136] PathExpression
+            type: [594] Type_Unknown
+            path: [1135] Path name=_apply absolute=0
+          typeArguments: [1138] Vector<Type>
+          arguments: [1134] Vector<Argument>
+            arguments: [1133] Argument name=<null>
+              expression: [1132] PathExpression
+                type: [594] Type_Unknown
+                path: [1131] Path name=tbIMA0Action absolute=0
+  objects: [1164] Function name=ingress declid=143
+    annotations: [1147] Annotation name=control structured=1
+    type: [1161] Type_Method name=ingress
+      typeParameters: [1162] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1149] ParameterList
+    body: [1151] BlockStatement
+      components: [1160] MethodCallStatement
+        methodCall: [1158] MethodCallExpression
+          type: [594] Type_Unknown
+          method: [1157] PathExpression
+            type: [594] Type_Unknown
+            path: [1156] Path name=iMA0Control absolute=0
+          typeArguments: [1159] Vector<Type>
+          arguments: [1155] Vector<Argument>
+

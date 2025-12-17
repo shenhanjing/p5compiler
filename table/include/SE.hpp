@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SE_HPP
+#define SE_HPP
 
 #include <any>
 #include <cstdint>
@@ -179,3 +180,5 @@ std::unique_ptr<SearchEngine::BaseTable> SearchEngine::makeTable(MatchType match
             return std::make_unique<IndexTable<Key, Value>>(MatchType::INDEX);
     }
 }
+
+#endif // SE_HPP

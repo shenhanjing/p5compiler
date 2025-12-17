@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BUILTIN_HPP
+#define BUILTIN_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -97,3 +98,4 @@ inline void _memcpy(T &dst, const T &src) {
     dst = src;
 }
 
+#endif // BUILTIN_HPP
