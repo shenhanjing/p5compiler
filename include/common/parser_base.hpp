@@ -10,6 +10,57 @@
 // 注意：extract.h 需要 ParserState 的完整定义，所以先定义 ParserState，再包含 extract.h
 
 /**
+ * @brief FV (Field Values) 结构体
+ * 
+ * 包含解析过程中需要的所有字段值，这些值会被序列化到 gtvData 中
+ */
+struct FV_S {
+    // p5::uint<8> NGSFBuffer[64];  // 注释掉：不包含在 FV_S 中
+    p5::uint<10> GLSP;
+    p5::uint<10> GLTP;
+    p5::uint<6> LLTP;
+    p5::uint<8> Vrf;
+    p5::uint<6> FQID;
+    p5::uint<14> PktLength;
+    p5::uint<1> DropFlag;
+    p5::uint<1> IsUc;
+    p5::uint<12> Mgid;
+    p5::uint<8> SB;
+    p5::uint<8> SP;
+    p5::uint<8> TB;
+    p5::uint<8> TP;
+    p5::uint<16> HashValue;
+    p5::uint<8> TOS;
+    p5::uint<8> TTL;
+    p5::uint<8> EncapIndex;
+    p5::uint<3> HubSpkGrp;
+    p5::uint<2> EncapProfile;
+    
+    // 默认构造函数，初始化为 0
+    FV_S() {
+        GLSP = p5::uint<10>(0);
+        GLTP = p5::uint<10>(0);
+        LLTP = p5::uint<6>(0);
+        Vrf = p5::uint<8>(0);
+        FQID = p5::uint<6>(0);
+        PktLength = p5::uint<14>(0);
+        DropFlag = p5::uint<1>(0);
+        IsUc = p5::uint<1>(0);
+        Mgid = p5::uint<12>(0);
+        SB = p5::uint<8>(0);
+        SP = p5::uint<8>(0);
+        TB = p5::uint<8>(0);
+        TP = p5::uint<8>(0);
+        HashValue = p5::uint<16>(0);
+        TOS = p5::uint<8>(0);
+        TTL = p5::uint<8>(0);
+        EncapIndex = p5::uint<8>(0);
+        HubSpkGrp = p5::uint<3>(0);
+        EncapProfile = p5::uint<2>(0);
+    }
+};
+
+/**
  * @brief Parser 状态结构体
  * 
  * 包含解析过程中需要的所有状态信息
@@ -20,6 +71,7 @@ struct ParserState {
     size_t current_offset_bytes;       // 当前解析偏移量（字节）
     PHI_S phi_temp;                    // PHI 临时变量
     p5::uint<7> pho_temp[5];           // PHO 临时数组
+    FV_S fv;                           // FV 字段值（新增）
     
     // 初始化函数
     void init(const PktHeader& pkt_hdr, size_t start_offset = 0) {
@@ -32,6 +84,9 @@ struct ParserState {
         for (int i = 0; i < 5; i++) {
             pho_temp[i] = p5::uint<7>(0);
         }
+        
+        // 初始化 fv 为 0（新增）
+        fv = FV_S{};  // 使用默认构造函数，所有字段初始化为 0
     }
 };
 

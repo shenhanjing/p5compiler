@@ -28,6 +28,9 @@ void ParserImpl::PrsProcPkt(
     // 3. 设置 parser_hinfo 到 PHI
     state.phi_temp.PortType = p5::uint<4>(parser_hinfo.port_type & 0xF);
     
+    // 3.1 设置 parser_hinfo.port_id 到 FV.GLSP（新增）
+    state.fv.GLSP = p5::uint<10>(parser_hinfo.port_id);
+    
     // 4. 根据 direction 调用入口函数
     try {
         if (direction == 0) {  // ingress
@@ -46,7 +49,10 @@ void ParserImpl::PrsProcPkt(
     // 6. 序列化 PHO 到 phoData
     serialize_pho(state.pho_temp, 5, fv_info.phoData);
     
-    // 注意：udfData, gtvData, pgtvData 在 Parser 阶段不填充，保持默认值 0
+    // 7. 序列化 FV 到 gtvData（新增）
+    serialize_fv(state.fv, fv_info.gtvData);
+    
+    // 注意：udfData, pgtvData 在 Parser 阶段不填充，保持默认值 0
 }
 
 // ========== 入口函数实现 ==========

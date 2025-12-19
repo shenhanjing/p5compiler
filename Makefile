@@ -23,24 +23,26 @@ PARSER_SRCS := $(SRC_DIR)/generated/parser.cpp $(SRC_DIR)/common/parser_interfac
 # All library sources
 LIB_SRCS := $(RUNTIME_SRCS) $(PARSER_SRCS)
 
-.PHONY: all parser table clean dirs help
+.PHONY: all parser table parser_ma clean dirs help
 
 help:
 	@echo "P5toC Build System"
 	@echo "=================="
 	@echo "Available targets:"
-	@echo "  all     - Build all components (Parser and Table tests)"
-	@echo "  parser  - Build Parser test only"
-	@echo "  table   - Build Table test only"
-	@echo "  clean   - Remove all build artifacts"
+	@echo "  all       - Build all components (Parser, Table, and Parser+MA tests)"
+	@echo "  parser    - Build Parser test only"
+	@echo "  table     - Build Table test only"
+	@echo "  parser_ma - Build Parser+MA joint test only"
+	@echo "  clean     - Remove all build artifacts"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make parser"
 	@echo "  make table"
+	@echo "  make parser_ma"
 	@echo "  make all"
 
 # Default target: build all
-all: dirs parser table
+all: dirs parser table parser_ma
 
 dirs:
 	@mkdir -p $(BUILD_DIR) $(OBJ_DIR)/common $(OBJ_DIR)/generated $(OBJ_DIR)/test
@@ -115,6 +117,29 @@ $(TABLE_TEST_TARGET): $(TABLE_TEST_OBJS)
 # Note: test_ma.cpp includes "src/generated/generated_MA.cpp" via Unity Build
 $(OBJ_DIR)/test/test_ma.o: $(TABLE_TEST_SRC) $(INC_DIR)/generated/generated_MA.hpp
 	@echo "Compiling test_ma.cpp (Unity Build)..."
+	@mkdir -p $(OBJ_DIR)/test
+	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) -I$(ROOT_DIR) -c $< -o $@
+
+# ========== Parser + MA Joint Test Build ==========
+# Parser+MA test uses both parser and MA code with unity build pattern
+PARSER_MA_TEST_SRC := $(TEST_DIR)/test_parser_ma.cpp
+PARSER_MA_TEST_TARGET := $(BUILD_DIR)/test_parser_ma
+PARSER_MA_TEST_OBJ := $(OBJ_DIR)/test/test_parser_ma.o
+
+# Parser+MA test object files (unity build includes generated_MA.cpp directly)
+PARSER_MA_TEST_OBJS := $(PARSER_OBJS) $(RUNTIME_OBJS) $(PARSER_MA_TEST_OBJ)
+
+parser_ma: dirs $(PARSER_MA_TEST_TARGET)
+
+$(PARSER_MA_TEST_TARGET): $(PARSER_MA_TEST_OBJS)
+	@echo "Linking Parser+MA test..."
+	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) -I$(SRC_DIR)/generated $^ -o $@ $(LDFLAGS)
+	@echo "Parser+MA test built: $@"
+
+# Compile parser+ma test (unity build includes generated_MA.cpp directly)
+# Note: test_parser_ma.cpp includes "src/generated/generated_MA.cpp" via Unity Build
+$(OBJ_DIR)/test/test_parser_ma.o: $(PARSER_MA_TEST_SRC) $(INC_DIR)/generated/parser.hpp $(INC_DIR)/generated/generated_MA.hpp
+	@echo "Compiling test_parser_ma.cpp (Unity Build)..."
 	@mkdir -p $(OBJ_DIR)/test
 	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) -I$(ROOT_DIR) -c $< -o $@
 

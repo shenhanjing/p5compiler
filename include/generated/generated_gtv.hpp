@@ -66,11 +66,21 @@ namespace {
     template <typename Buffer, typename P5UInt>
     void assign_from_bits(const Buffer &buf, std::size_t &cursor, std::size_t width, P5UInt &target) {
         uint64_t v = 0;
-        for (std::size_t i = 0; i < width && cursor < buf.size() * 8; ++i, ++cursor) {
+        const std::size_t max_bits = buf.size() * 8;
+        for (std::size_t i = 0; i < width; ++i) {
+            // 在循环开始时检查边界，防止缓冲区越界
+            if (cursor >= max_bits) {
+                break;
+            }
             const std::size_t byte_idx = cursor / 8;
+            // 双重检查：确保 byte_idx 在有效范围内
+            if (byte_idx >= buf.size()) {
+                break;
+            }
             const std::size_t bit_idx = 7 - (cursor % 8); // 高位在前
             const bool bit = (buf[byte_idx] >> bit_idx) & 0x1;
             v = (v << 1) | static_cast<uint64_t>(bit);
+            ++cursor;
         }
         target = v;
     }
