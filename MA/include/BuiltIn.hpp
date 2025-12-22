@@ -67,35 +67,51 @@ struct _inflate : public T {
     }
 };
 
-// These are stubs; real implementations should hook into the actual table engine.
-template <typename T>
-inline T _key() {
-    return g_key.getKey<T>(bit_width_of_type<T>());
-}
+// 对接 search engine / key 的上下文封装，避免依赖全局变量。
+class BuiltInContext {
+public:
+    BuiltInContext(SearchEngine &se, KeyManager &key) : se_(se), key_(key) {}
 
-inline uint8_t _status(int tableId = 0) {
-    return static_cast<uint8_t>(g_se.status(tableId));
-}
-
-// Return an inflated value; on miss, valid=false with zeroed payload.
-template <typename Value, typename Key>
-inline _inflate<Value> _lookup(int tableId, int lookupType, const Key &key) {
-    const auto mt = static_cast<MatchType>(lookupType);
-    auto result = g_se.lookup<Key, Value>(tableId, mt, key);
-    if (result) {
-        return *result;  // valid=true via _inflate(Value)
+    template <typename T>
+    inline T _key() const {
+        return key_.getKey<T>(bit_width_of_type<T>());
     }
-    return std::nullopt; // valid=false
-}
 
-template <typename T>
-inline bool _valid(const _inflate<T> &v) {
-    return v.valid;
-}
+    inline uint8_t _status(int tableId = 0) const {
+        return static_cast<uint8_t>(se_.status(tableId));
+    }
 
-template <typename T>
-inline void _memcpy(T &dst, const T &src) {
-    dst = src;
-}
+    template <typename Value, typename Key>
+    inline _inflate<Value> _lookup(int tableId, int lookupType, const Key &key) {
+        const auto mt = static_cast<MatchType>(lookupType);
+        auto result = se_.lookup<Key, Value>(tableId, mt, key);
+        if (result) {
+            return *result;  // valid=true via _inflate(Value)
+        }
+        return std::nullopt; // valid=false
+    }
+
+    template <typename... Parts>
+    inline void buildKey(const Parts &...parts) {
+        key_.buildKey(parts...);
+    }
+
+    template <typename T>
+    inline bool _valid(const _inflate<T> &v) const {
+        return v.valid;
+    }
+
+    template <typename T>
+    inline void _memcpy(T &dst, const T &src) {
+        dst = src;
+    }
+
+    SearchEngine &searchEngine() { return se_; }
+    KeyManager &keyManager() { return key_; }
+
+private:
+    SearchEngine &se_;
+    KeyManager &key_;
+};
 
 #endif // BUILTIN_HPP
