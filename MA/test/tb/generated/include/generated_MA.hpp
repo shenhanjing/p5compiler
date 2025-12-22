@@ -9,13 +9,11 @@
 #include "BuiltIn.hpp"
 #include "p5_types.hpp"
 #include "model_intf_1027.h"
-#include "control.hpp"
-
 #include "generated_gtv.hpp"
 
-class Ingress : public Control {
+class Ingress : public GtvContext, public BuiltInContext {
 public:
-    explicit Ingress(SearchEngine &se, KeyManager &key);
+    Ingress();
 
     IPATFull_S IpatLookup(p5::uint<2> &Status);
     void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus);
@@ -24,6 +22,11 @@ public:
     void iMA0Control();
     void iMA1Control();
     void ingress();
+    void SingleMaProc(const int ma_id, const std::string &packet_id, const int port_id,
+                      const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);
+
+    SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }
+    KeyManager &keyManager() { return BuiltInContext::keyManager(); }
 
     // IPAT lookup table wrapper
     class IPAT_TBL : public Table {

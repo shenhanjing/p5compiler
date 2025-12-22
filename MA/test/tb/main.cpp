@@ -3,7 +3,7 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
-#include "generated_switch.hpp"
+#include "generated_MA.hpp"
 
 namespace {
 
@@ -78,10 +78,9 @@ struct CaseCfg {
 int main() {
     std::cout << "[tb_2 hand] SingleMaProc table + pack/unpack tests\n";
 
-    GeneratedSwitch sw;
-    auto &se = sw.searchEngine();
-    auto &key = sw.keyManager();
-    auto &ing = sw.ingress();
+    Ingress ing;
+    auto &se = ing.searchEngine();
+    auto &key = ing.keyManager();
 
     // 初始化查表与 key，匹配 generated.hpp 中 iMA0Control/iMA1Control 的逻辑
     se.initTable<p5::uint<10>, IPATRSP_S>(SE_TID_IPAT, MatchType::INDEX);
@@ -123,7 +122,7 @@ int main() {
         MaToMaFvInfoDef fv_in = build_fv_in(ing);
         MaToMaFvInfoDef fv_out{};
 
-        sw.SingleMaProc(0, "", 0, fv_in, fv_out);
+        ing.SingleMaProc(0, "", 0, fv_in, fv_out);
 
         bool drop_ok = (ing.DropFlag.to_ullong() == static_cast<uint64_t>(c.expect_drop));
         bool vrf_ok = (!c.expect_drop) ? (ing.Vrf.to_ullong() == c.expect_vrf) : true;
@@ -176,7 +175,7 @@ int main() {
         MaToMaFvInfoDef fv_in = build_fv_in(ing);
         MaToMaFvInfoDef fv_out{};
 
-        sw.SingleMaProc(1, "", 0, fv_in, fv_out);
+        ing.SingleMaProc(1, "", 0, fv_in, fv_out);
 
         const bool hit = (se.status(SE_TID_FIB) == SearchEngine::Status::MATCH);
         const bool port_ok = c.expect_hit ? (ing.GLTP.to_ullong() == c.expect_port) : (ing.GLTP.to_ullong() == 0);

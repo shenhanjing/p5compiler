@@ -67,10 +67,10 @@ struct _inflate : public T {
     }
 };
 
-// 对接 search engine / key 的上下文封装，避免依赖全局变量。
+// 对接 search engine / key 的上下文封装，内部自带实例。
 class BuiltInContext {
 public:
-    BuiltInContext(SearchEngine &se, KeyManager &key) : se_(se), key_(key) {}
+    BuiltInContext() = default;
 
     template <typename T>
     inline T _key() const {
@@ -110,8 +110,8 @@ public:
     KeyManager &keyManager() { return key_; }
 
 private:
-    SearchEngine &se_;
-    KeyManager &key_;
+    SearchEngine se_;
+    KeyManager key_;
 };
 
 #endif // BUILTIN_HPP

@@ -24,8 +24,9 @@ TEST_GEN_DIR := $(TEST_DIR)/generated
 TEST_GEN_INC_DIR := $(TEST_GEN_DIR)/include
 TEST_GEN_SRC_DIR := $(TEST_GEN_DIR)/src
 
-# Test source (unity build includes generated src via the test file itself).
-TEST_SRCS := $(TEST_ABS)
+# Test source + generated sources under test/tb/generated/src
+TEST_GEN_SRCS := $(wildcard $(TEST_GEN_SRC_DIR)/*.cpp)
+TEST_SRCS := $(TEST_ABS) $(TEST_GEN_SRCS)
 ALL_SRCS := $(SRCS) $(TEST_SRCS)
 
 .PHONY: all clean dirs
