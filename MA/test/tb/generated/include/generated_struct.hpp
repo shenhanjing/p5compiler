@@ -110,4 +110,11 @@ struct IPATRSP_S {
 
 using IPATFull_S = _inflate<IPATRSP_S>;
 
+struct FIBRSP_S {
+    p5::uint<10> Port;
+    p5::uint<8> EncapIndex;
+};
+
+using FIBFull_S = _inflate<FIBRSP_S>;
+
 #endif // GENERATED_STRUCT_HPP

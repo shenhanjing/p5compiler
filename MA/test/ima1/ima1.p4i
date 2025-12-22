@@ -1,0 +1,82 @@
+# 0 "ima1.p5"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "ima1.p5"
+struct FIBRSP_S {
+    uint<10> Port;
+    uint<8> EncapIndex;
+};
+
+typedef _inflate<FIBRSP_S> FIBFull_S;
+
+@lookup FIBFull_S FibLookup(uint<2> &Status, uint<4> tid)
+{
+    uint<128> FibKey;
+    _compressed_FIBRSP_S CompressedFibRsp = {0};
+    _compressed_FIBRSP_S Mem = {0};
+
+    FibKey = _key();
+
+    Mem = _lookup(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
+    Status = _status(SE_TID_FIB);
+    _memcpy(CompressedFibRsp, {Mem});
+
+    return CompressedFibRsp;
+}
+
+table FIB_TBL()
+{
+    key = {
+      switch (PHI.L3Type) {
+          case L3_TYPE_IPv4: { // ICIB:Heartbeat
+              IPv4.DIP;
+              (uint<32>) 0;
+              (uint<32>) 0;
+              (uint<32>) 0;
+          }
+          case L3_TYPE_IPv6: { // ICIB:Heartbeat
+              IPv6.DIP;
+          }
+          default: {
+            //Skip
+          }
+      }
+    }
+
+    uint<2> StatusFib = _status();
+    FIBFull_S rsFib = FibLookup(StatusFib, tid);
+};
+
+table IMA1_MATCH_TBL()
+{
+    FIB_TBL tbFib = FIB_TBL();
+    _apply(tbFib);
+};
+
+void iMA1Action(FIBFull_S rsFib)
+{
+    if (_valid(rsFib)) {
+        GLTP = rsFib.Port;
+        EncapIndex = rsFib.EncapIndex;
+        TTL = TTL - 1;
+    }
+}
+
+table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
+{
+    iMA1Action(tbIMA1Match.tbFib.rsFib);
+};
+
+@control void iMA1Control()
+{
+    @hw_map("IMA1_MATCH") IMA1_MATCH_TBL tbIMA1Match = IMA1_MATCH_TBL();
+    @hw_map("IMA1_ACTION") IMA1_ACTION_TBL tbIMA1Action = IMA1_ACTION_TBL(tbIMA1Match);
+
+    _apply(tbIMA1Match);
+    _apply(tbIMA1Action);
+}
+
+@control void ingress()
+{
+  iMA1Control();
+}

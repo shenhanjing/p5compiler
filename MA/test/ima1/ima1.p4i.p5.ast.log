@@ -1,0 +1,374 @@
+[502] P4Program
+  objects: [22] Type_Struct name=FIBRSP_S declid=0
+    typeParameters: [24] TypeParameters
+    fields: [11] StructField name=Port declid=0
+      type: [10] Type_Bits size=10 isSigned=0
+    fields: [18] StructField name=EncapIndex declid=1
+      type: [17] Type_Bits size=8 isSigned=0
+  objects: [30] Type_Typedef name=FIBFull_S declid=1
+    type: [29] Type_Name
+      path: [28] Path name=_inflate<FIBRSP_S> absolute=0
+  objects: [165] Function name=FibLookup declid=7
+    annotations: [34] Annotation name=lookup structured=1
+    type: [162] Type_Method name=FibLookup
+      typeParameters: [163] TypeParameters
+      returnType: [37] Type_Name
+        path: [36] Path name=FIBFull_S absolute=0
+      parameters: [44] ParameterList
+        parameters: [42] Parameter name=Status declid=2 direction=inout
+          type: [41] Type_Bits size=2 isSigned=0
+        parameters: [50] Parameter name=tid declid=3 direction=in
+          type: [49] Type_Bits size=4 isSigned=0
+    body: [52] BlockStatement
+      components: [59] Declaration_Variable name=FibKey declid=4
+        type: [58] Type_Bits size=128 isSigned=0
+      components: [77] Declaration_Variable name=CompressedFibRsp declid=5
+        type: [63] Type_Name
+          path: [62] Path name=_compressed_FIBRSP_S absolute=0
+        initializer: [69] ListExpression
+          type: [75] Type_List
+            components: [64] Type_InfInt declid=6
+          components: [65] Constant value=0 base=10
+            type: [64] Type_InfInt declid=6
+      components: [94] Declaration_Variable name=Mem declid=6
+        type: [81] Type_Name
+          path: [80] Path name=_compressed_FIBRSP_S absolute=0
+        initializer: [87] ListExpression
+          type: [92] Type_List
+            components: [82] Type_InfInt declid=7
+          components: [83] Constant value=0 base=10
+            type: [82] Type_InfInt declid=7
+      components: [104] AssignmentStatement
+        left: [98] PathExpression
+          type: [70] Type_Unknown
+          path: [97] Path name=FibKey absolute=0
+        right: [102] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [100] PathExpression
+            type: [70] Type_Unknown
+            path: [99] Path name=_key absolute=0
+          typeArguments: [103] Vector<Type>
+          arguments: [101] Vector<Argument>
+      components: [122] AssignmentStatement
+        left: [107] PathExpression
+          type: [70] Type_Unknown
+          path: [106] Path name=Mem absolute=0
+        right: [120] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [109] PathExpression
+            type: [70] Type_Unknown
+            path: [108] Path name=_lookup absolute=0
+          typeArguments: [121] Vector<Type>
+          arguments: [113] Vector<Argument>
+            arguments: [112] Argument name=<null>
+              expression: [111] PathExpression
+                type: [70] Type_Unknown
+                path: [110] Path name=SE_TID_FIB absolute=0
+            arguments: [116] Argument name=<null>
+              expression: [115] PathExpression
+                type: [70] Type_Unknown
+                path: [114] Path name=TBL_LKUP_TYPE_LPM absolute=0
+            arguments: [119] Argument name=<null>
+              expression: [118] PathExpression
+                type: [70] Type_Unknown
+                path: [117] Path name=FibKey absolute=0
+      components: [134] AssignmentStatement
+        left: [125] PathExpression
+          type: [70] Type_Unknown
+          path: [124] Path name=Status absolute=0
+        right: [132] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [127] PathExpression
+            type: [70] Type_Unknown
+            path: [126] Path name=_status absolute=0
+          typeArguments: [133] Vector<Type>
+          arguments: [131] Vector<Argument>
+            arguments: [130] Argument name=<null>
+              expression: [129] PathExpression
+                type: [70] Type_Unknown
+                path: [128] Path name=SE_TID_FIB absolute=0
+      components: [157] MethodCallStatement
+        methodCall: [155] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [154] PathExpression
+            type: [70] Type_Unknown
+            path: [153] Path name=_memcpy absolute=0
+          typeArguments: [156] Vector<Type>
+          arguments: [139] Vector<Argument>
+            arguments: [138] Argument name=<null>
+              expression: [137] PathExpression
+                type: [70] Type_Unknown
+                path: [136] Path name=CompressedFibRsp absolute=0
+            arguments: [152] Argument name=<null>
+              expression: [145] ListExpression
+                type: [150] Type_List
+                  components: [70] Type_Unknown
+                components: [141] PathExpression
+                  type: [70] Type_Unknown
+                  path: [140] Path name=Mem absolute=0
+      components: [161] ReturnStatement
+        expression: [159] PathExpression
+          type: [70] Type_Unknown
+          path: [160] Path name=CompressedFibRsp absolute=0
+  objects: [305] P5Table name=FIB_TBL declid=10
+    parameters: [168] ParameterList
+    body: [278] BlockStatement
+      components: [275] P5Key
+        select: [176] ListExpression
+          type: [181] Type_List
+            components: [70] Type_Unknown
+          components: [172] Member member=L3Type
+            type: [70] Type_Unknown
+            expr: [171] PathExpression
+              type: [70] Type_Unknown
+              path: [170] Path name=PHI absolute=0
+        cases: [239] P5KeyCase
+          label: [232] ListExpression
+            type: [237] Type_List
+              components: [70] Type_Unknown
+            components: [185] PathExpression
+              type: [70] Type_Unknown
+              path: [184] Path name=L3_TYPE_IPv4 absolute=0
+          elements: [192] P5KeyElement matchType=<null>
+            expr: [191] Member member=DIP
+              type: [70] Type_Unknown
+              expr: [190] PathExpression
+                type: [70] Type_Unknown
+                path: [189] Path name=IPv4 absolute=0
+          elements: [203] P5KeyElement matchType=<null>
+            expr: [202] Cast
+              type: [3] Type_Bits size=32 isSigned=0
+              expr: [201] Constant value=0 base=10
+                type: [200] Type_InfInt declid=9
+              destType: [3] Type_Bits size=32 isSigned=0...
+          elements: [214] P5KeyElement matchType=<null>
+            expr: [213] Cast
+              type: [3] Type_Bits size=32 isSigned=0...
+              expr: [212] Constant value=0 base=10
+                type: [211] Type_InfInt declid=11
+              destType: [3] Type_Bits size=32 isSigned=0...
+          elements: [225] P5KeyElement matchType=<null>
+            expr: [224] Cast
+              type: [3] Type_Bits size=32 isSigned=0...
+              expr: [223] Constant value=0 base=10
+                type: [222] Type_InfInt declid=13
+              destType: [3] Type_Bits size=32 isSigned=0...
+        cases: [266] P5KeyCase
+          label: [259] ListExpression
+            type: [264] Type_List
+              components: [70] Type_Unknown
+            components: [245] PathExpression
+              type: [70] Type_Unknown
+              path: [244] Path name=L3_TYPE_IPv6 absolute=0
+          elements: [252] P5KeyElement matchType=<null>
+            expr: [251] Member member=DIP
+              type: [70] Type_Unknown
+              expr: [250] PathExpression
+                type: [70] Type_Unknown
+                path: [249] Path name=IPv6 absolute=0
+        cases: [272] P5KeyCase
+          label: [271] DefaultExpression
+            type: [70] Type_Unknown
+      components: [288] Declaration_Variable name=StatusFib declid=8
+        type: [41] Type_Bits size=2 isSigned=0...
+        initializer: [286] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [284] PathExpression
+            type: [70] Type_Unknown
+            path: [283] Path name=_status absolute=0
+          typeArguments: [287] Vector<Type>
+          arguments: [285] Vector<Argument>
+      components: [303] Declaration_Variable name=rsFib declid=9
+        type: [291] Type_Name
+          path: [290] Path name=FIBFull_S absolute=0
+        initializer: [301] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [293] PathExpression
+            type: [70] Type_Unknown
+            path: [292] Path name=FibLookup absolute=0
+          typeArguments: [302] Vector<Type>
+          arguments: [297] Vector<Argument>
+            arguments: [296] Argument name=<null>
+              expression: [295] PathExpression
+                type: [70] Type_Unknown
+                path: [294] Path name=StatusFib absolute=0
+            arguments: [300] Argument name=<null>
+              expression: [299] PathExpression
+                type: [70] Type_Unknown
+                path: [298] Path name=tid absolute=0
+  objects: [331] P5Table name=IMA1_MATCH_TBL declid=12
+    parameters: [308] ParameterList
+    body: [319] BlockStatement
+      components: [317] Declaration_Variable name=tbFib declid=11
+        type: [311] Type_Name
+          path: [310] Path name=FIB_TBL absolute=0
+        initializer: [315] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [313] PathExpression
+            type: [70] Type_Unknown
+            path: [312] Path name=FIB_TBL absolute=0
+          typeArguments: [316] Vector<Type>
+          arguments: [314] Vector<Argument>
+      components: [330] MethodCallStatement
+        methodCall: [328] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [327] PathExpression
+            type: [70] Type_Unknown
+            path: [326] Path name=_apply absolute=0
+          typeArguments: [329] Vector<Type>
+          arguments: [325] Vector<Argument>
+            arguments: [324] Argument name=<null>
+              expression: [323] PathExpression
+                type: [70] Type_Unknown
+                path: [322] Path name=tbFib absolute=0
+  objects: [389] Function name=iMA1Action declid=14
+    type: [386] Type_Method name=iMA1Action
+      typeParameters: [387] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [339] ParameterList
+        parameters: [337] Parameter name=rsFib declid=13 direction=in
+          type: [336] Type_Name
+            path: [335] Path name=FIBFull_S absolute=0
+    body: [341] BlockStatement
+      components: [385] IfStatement
+        condition: [351] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [346] PathExpression
+            type: [70] Type_Unknown
+            path: [345] Path name=_valid absolute=0
+          typeArguments: [352] Vector<Type>
+          arguments: [350] Vector<Argument>
+            arguments: [349] Argument name=<null>
+              expression: [348] PathExpression
+                type: [70] Type_Unknown
+                path: [347] Path name=rsFib absolute=0
+        [382] BlockStatement
+          components: [354] BlockStatement
+            components: [363] AssignmentStatement
+              left: [359] PathExpression
+                type: [70] Type_Unknown
+                path: [358] Path name=GLTP absolute=0
+              right: [362] Member member=Port
+                type: [70] Type_Unknown
+                expr: [361] PathExpression
+                  type: [70] Type_Unknown
+                  path: [360] Path name=rsFib absolute=0
+            components: [370] AssignmentStatement
+              left: [366] PathExpression
+                type: [70] Type_Unknown
+                path: [365] Path name=EncapIndex absolute=0
+              right: [369] Member member=EncapIndex
+                type: [70] Type_Unknown
+                expr: [368] PathExpression
+                  type: [70] Type_Unknown
+                  path: [367] Path name=rsFib absolute=0
+            components: [379] AssignmentStatement
+              left: [373] PathExpression
+                type: [70] Type_Unknown
+                path: [372] Path name=TTL absolute=0
+              right: [378] Sub
+                type: [70] Type_Unknown
+                left: [375] PathExpression
+                  type: [70] Type_Unknown
+                  path: [374] Path name=TTL absolute=0
+                right: [377] Constant value=1 base=10
+                  type: [376] Type_InfInt declid=15
+  objects: [413] P5Table name=IMA1_ACTION_TBL declid=16
+    parameters: [397] ParameterList
+      parameters: [395] Parameter name=tbIMA1Match declid=15 direction=in
+        type: [394] Type_Name
+          path: [393] Path name=IMA1_MATCH_TBL absolute=0
+    body: [410] BlockStatement
+      components: [409] MethodCallStatement
+        methodCall: [407] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [406] PathExpression
+            type: [70] Type_Unknown
+            path: [405] Path name=iMA1Action absolute=0
+          typeArguments: [408] Vector<Type>
+          arguments: [404] Vector<Argument>
+            arguments: [403] Argument name=<null>
+              expression: [402] Member member=rsFib
+                type: [70] Type_Unknown
+                expr: [401] Member member=tbFib
+                  type: [70] Type_Unknown
+                  expr: [400] PathExpression
+                    type: [70] Type_Unknown
+                    path: [399] Path name=tbIMA1Match absolute=0
+  objects: [478] Function name=iMA1Control declid=19
+    annotations: [417] Annotation name=control structured=1
+    type: [475] Type_Method name=iMA1Control
+      typeParameters: [476] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [419] ParameterList
+    body: [421] BlockStatement
+      components: [436] Declaration_Variable name=tbIMA1Match declid=17
+        annotations: [427] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [425] StringLiteral value=
+            type: [70] Type_Unknown
+        type: [430] Type_Name
+          path: [429] Path name=IMA1_MATCH_TBL absolute=0
+        initializer: [434] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [432] PathExpression
+            type: [70] Type_Unknown
+            path: [431] Path name=IMA1_MATCH_TBL absolute=0
+          typeArguments: [435] Vector<Type>
+          arguments: [433] Vector<Argument>
+      components: [453] Declaration_Variable name=tbIMA1Action declid=18
+        annotations: [441] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [439] StringLiteral value=
+            type: [70] Type_Unknown
+        type: [444] Type_Name
+          path: [443] Path name=IMA1_ACTION_TBL absolute=0
+        initializer: [451] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [446] PathExpression
+            type: [70] Type_Unknown
+            path: [445] Path name=IMA1_ACTION_TBL absolute=0
+          typeArguments: [452] Vector<Type>
+          arguments: [450] Vector<Argument>
+            arguments: [449] Argument name=<null>
+              expression: [448] PathExpression
+                type: [70] Type_Unknown
+                path: [447] Path name=tbIMA1Match absolute=0
+      components: [464] MethodCallStatement
+        methodCall: [462] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [461] PathExpression
+            type: [70] Type_Unknown
+            path: [460] Path name=_apply absolute=0
+          typeArguments: [463] Vector<Type>
+          arguments: [459] Vector<Argument>
+            arguments: [458] Argument name=<null>
+              expression: [457] PathExpression
+                type: [70] Type_Unknown
+                path: [456] Path name=tbIMA1Match absolute=0
+      components: [474] MethodCallStatement
+        methodCall: [472] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [471] PathExpression
+            type: [70] Type_Unknown
+            path: [470] Path name=_apply absolute=0
+          typeArguments: [473] Vector<Type>
+          arguments: [469] Vector<Argument>
+            arguments: [468] Argument name=<null>
+              expression: [467] PathExpression
+                type: [70] Type_Unknown
+                path: [466] Path name=tbIMA1Action absolute=0
+  objects: [499] Function name=ingress declid=20
+    annotations: [482] Annotation name=control structured=1
+    type: [496] Type_Method name=ingress
+      typeParameters: [497] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [484] ParameterList
+    body: [486] BlockStatement
+      components: [495] MethodCallStatement
+        methodCall: [493] MethodCallExpression
+          type: [70] Type_Unknown
+          method: [492] PathExpression
+            type: [70] Type_Unknown
+            path: [491] Path name=iMA1Control absolute=0
+          typeArguments: [494] Vector<Type>
+          arguments: [490] Vector<Argument>
+

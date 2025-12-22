@@ -1,0 +1,82 @@
+struct IPATRSP_S {
+    @global_valid uint<1> Valid;
+    uint<1> RouterIntf;
+    uint<1> QinQ;
+    uint<8> VrfId;
+    VlanInfo_S Pvid;
+};
+typedef _inflate<IPATRSP_S> IPATFull_S;
+
+@lookup IPATFull_S IpatLookup(uint<2> &Status)
+{
+    uint<10> Glsp;
+    _compressed_IPATRSP_S CompressedIpatRsp = {0};
+    _compressed_IPATRSP_S Mem = {0};
+
+    Glsp = _key();
+
+    Mem = _lookup(SE_TID_IPAT, TBL_LKUP_TYPE_INDEX, Glsp);
+    Status = _status(SE_TID_IPAT);
+    _memcpy(CompressedIpatRsp, {Mem});
+    
+    return CompressedIpatRsp;
+}
+
+table IPAT_TBL()
+{
+    key =
+    {
+        switch (PHI.PortType)
+        {
+             case PORT_TYPE_ETH:
+             {
+                 GLSP;
+             }
+
+             default:
+             {
+             }
+        }
+    }
+
+    uint<2> IpatStatus = _status();
+    IPATFull_S rsIpat = IpatLookup(IpatStatus);
+}
+
+table IMA0_MATCH_TBL()
+{
+    IPAT_TBL tbIPAT = IPAT_TBL();
+
+    _apply(tbIPAT);
+}
+
+void iMA0Action(IPATFull_S rsIpat, uint<2> IpatStatus)
+{
+    if (_valid(rsIpat) && ((PHI.L3Type == L3_TYPE_IPv4) || (PHI.L3Type == L3_TYPE_IPv6)) ) {
+        Vrf = rsIpat.VrfId;
+        IsUc = 1;
+    } else {
+        DropFlag = 1;
+    }
+}
+
+table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
+{
+    iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
+}
+
+@control void iMA0Control()
+{
+  @hw_map("IMA0_MATCH")       IMA0_MATCH_TBL         tbIMA0Match       = IMA0_MATCH_TBL();
+  @hw_map("IMA0_ACTION")      IMA0_ACTION_TBL        tbIMA0Action      = IMA0_ACTION_TBL(tbIMA0Match);
+
+  _apply(tbIMA0Match);
+  _apply(tbIMA0Action);
+}
+
+@control void ingress()
+{
+ 
+  iMA0Control();
+
+}

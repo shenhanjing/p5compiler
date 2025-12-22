@@ -1,0 +1,176 @@
+
+struct ENCAP_LOCAL_ADDR_S {
+    uint<48> SMAC;
+};
+struct EPATRSP_S {
+    @global_valid uint<1> Valid;
+    uint<31> Rsvd;
+    @dma union {
+        ENCAP_LOCAL_ADDR_S Addr;
+    }Dma;
+};
+typedef _inflate<EPATRSP_S> EPATFull_S;
+
+struct ENCAP_ARP_S {
+    uint<48> DMAC;
+};
+
+struct ENCAPRSP_S {
+    @global_valid uint<1> Valid;
+    uint<31> Rsvd;
+
+    @dma union {
+        ENCAP_ARP_S Arp;
+    }Dma;
+};
+typedef _inflate<ENCAPRSP_S> ENCAPFull_S;
+
+@lookup EPATFull_S EpatLookup(uint<2> &Status)
+{
+    uint<10> Gltp;
+    _compressed_EPATRSP_S CompressedEpatRsp = {0};
+    _compressed_EPATRSP_S Mem = {0};
+
+    Gltp = _key();
+
+    Mem = _lookup(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
+    Status = _status(SE_TID_EPAT);
+    _memcpy(CompressedEpatRsp, {Mem});
+    
+    return CompressedEpatRsp;
+}
+
+@lookup ENCAPFull_S EncapLookup(uint<2> &Status)
+{
+    uint<8> index;
+    _compressed_ENCAPRSP_S CompressedEncapRsp = {0};
+    _compressed_ENCAPRSP_S Mem = {0};
+
+    index = _key();
+
+    Mem = _lookup(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
+    Status = _status(SE_TID_ENCAP);
+    _memcpy(CompressedEncapRsp, {Mem});
+    
+    return CompressedEncapRsp;
+}
+
+table EPAT_TBL()
+{
+    key =
+    {
+        switch (PHI.PortType)
+        {
+             //PHI.Part1.PortType
+             case PORT_TYPE_ETH:
+             {
+                 GLTP;
+             }
+
+             default:
+             {
+             }
+        }
+    }
+
+    uint<2> EpatStatus = _status();
+    EPATFull_S rsEpat = EpatLookup(EpatStatus);
+}
+table ENCAP_TBL()
+{
+    key =
+    {
+        switch (PHI.PortType)
+        {
+             //PHI.Part1.PortType
+             case PORT_TYPE_ETH:
+             {
+                 EncapIndex;
+             }
+
+             default:
+             {
+             }
+        }
+    }
+
+    // IPATFull_S rsIpat = _lookup();
+    uint<2> EncapStatus = _status();
+    ENCAPFull_S rsEncap = EncapLookup(EncapStatus);
+}
+
+table EMA0_MATCH_TBL()
+{
+    EPAT_TBL tbEPAT         = EPAT_TBL();
+    ENCAP_TBL tbEncap       = ENCAP_TBL();
+
+    _apply(tbEPAT);
+    _apply(tbEncap);
+}
+
+void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    if (IsUc) {
+        EncapProfile = 1;
+    } else {
+        EncapProfile = 0;
+    }
+}
+
+@control void eMA0Control()
+{
+  @hw_map("EMA0_MATCH")       EMA0_MATCH_TBL         tbEMA0Match       = EMA0_MATCH_TBL();
+  @hw_map("EMA0_ACTION")      EMA0_ACTION_TBL        tbEMA0Action      = EMA0_ACTION_TBL(tbEMA0Match);
+  @hw_map("EMA1_HM") @modifier EMA0_HM_TBL           tbEMA0HM          = EMA0_HM_TBL(tbEMA0Match);
+
+  _apply(tbEMA0Match);
+  _apply(tbEMA0Action);
+  _apply(tbEMA0HM);
+}
+
+table EMA0_ACTION_TBL(EMA0_MATCH_TBL tbEMA0Match)
+{
+    eMA0Action(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+}
+
+@dma_primitive void EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    switch (EncapProfile) {
+        case 1: {
+            ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
+            ETHER.Smac = rsEpat.Dma.Addr.SMAC;
+        }
+        default: {
+        }
+    }
+}
+@fwd_primitive void IpOverwrite()
+{
+    switch (EncapProfile)
+    {
+        case 1: {
+            IPv4.TTL = TTL;
+            IPv4.u_0.TOS = TOS;
+        } 
+        default: {
+        }
+    }
+}
+
+void eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    EthODma(rsEpat, rsEncap);
+
+    IpOverwrite();
+}
+
+table EMA0_HM_TBL(EMA0_MATCH_TBL tbEMA0Match)
+{
+    eMA0_HmProc(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+    ma_id = 0;
+}
+
+@control void egress()
+{
+  eMA0Control();
+}

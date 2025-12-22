@@ -22,6 +22,25 @@ void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
     }
 }
 
+FIBFull_S FibLookup(p5::uint<2> &Status) {
+    p5::uint<136> FibKey;
+    _inflate<FIBRSP_S> CompressedFibRsp = { 0 };
+    _inflate<FIBRSP_S> Mem = { 0 };
+    FibKey = _key<decltype(FibKey)>();
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
+    Status = _status(SE_TID_FIB);
+    _memcpy(CompressedFibRsp, { Mem });
+    return CompressedFibRsp;
+}
+
+void iMA1Action(FIBFull_S rsFib) {
+    if (_valid(rsFib)) {
+        GLTP = rsFib.Port;
+        EncapIndex = rsFib.EncapIndex;
+        TTL = TTL - 1;
+    }
+}
+
 void iMA0Control() {
     IMA0_MATCH_TBL tbIMA0Match = IMA0_MATCH_TBL();
     IMA0_ACTION_TBL tbIMA0Action = IMA0_ACTION_TBL(tbIMA0Match);
@@ -29,8 +48,16 @@ void iMA0Control() {
     tbIMA0Action.apply();
 }
 
+void iMA1Control() {
+    IMA1_MATCH_TBL  tbIMA1Match   =  IMA1_MATCH_TBL();
+    IMA1_ACTION_TBL tbIMA1Action  =  IMA1_ACTION_TBL(tbIMA1Match);
+    tbIMA1Match.apply();
+    tbIMA1Action.apply();
+}
+
 void ingress() {
     iMA0Control();
+    iMA1Control();
 }
 
 // 单个 MA 处理流程
@@ -57,7 +84,9 @@ void SingleMaProc(const int ma_id, const std::string &packet_id, const int port_
     if (ma_id == 0) {
         iMA0Control();
     }
-
+    else if (ma_id == 1) {
+        iMA1Control();
+    }
     // 3) 将最新的 PHI / PHO / GTV 打包写回输出 fv
     auto phiOut = pack_phi_to_bytes();
     auto phoOut = pack_pho_to_bytes();

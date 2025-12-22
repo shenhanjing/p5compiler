@@ -33,4 +33,3 @@ auto st = g_se.status(SE_TID_LU); // MATCH / NO_MATCH / ERROR ...
 - 按表 ID 存储不同的键/值类型，运行时使用 `std::type_index` 校验，避免类型混用。
 - 当前仅 `INDEX` 有实际逻辑，`EXACT/LPM/TCAM` 复用索引表实现，可在对应派生类中扩展。
 - `config` 覆盖同键表项；尚未提供删除单键接口，如需清空可重新 `initTable`。***
-
