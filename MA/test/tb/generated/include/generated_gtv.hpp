@@ -66,13 +66,7 @@ public:
         append_bits(bits, PHI.L4Type, 8);
 
         PhiPackedBuffer out{};
-        for (std::size_t i = 0; i < bits.size() && i < out.size() * 8; ++i) {
-            if (bits[i]) {
-                const std::size_t byte_idx = i / 8;
-                const std::size_t bit_idx = 7 - (i % 8);
-                out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);
-            }
-        }
+        write_bits_to_buffer(bits, out);
         return out;
     }
 
@@ -97,13 +91,7 @@ public:
         }
 
         PhoPackedBuffer out{};
-        for (std::size_t i = 0; i < bits.size() && i < out.size() * 8; ++i) {
-            if (bits[i]) {
-                const std::size_t byte_idx = i / 8;
-                const std::size_t bit_idx = 7 - (i % 8);
-                out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);
-            }
-        }
+        write_bits_to_buffer(bits, out);
         return out;
     }
 
@@ -141,13 +129,7 @@ public:
         append_bits(bits, EncapProfile, 2);
 
         FvPackedBuffer out{};
-        for (std::size_t i = 0; i < bits.size() && i < out.size() * 8; ++i) {
-            if (bits[i]) {
-                const std::size_t byte_idx = i / 8;
-                const std::size_t bit_idx = 7 - (i % 8); // 每个字节内同样高位在前
-                out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);
-            }
-        }
+        write_bits_to_buffer(bits, out);
         return out;
     }
 
@@ -196,6 +178,17 @@ protected:
             v = (v << 1) | static_cast<uint64_t>(bit);
         }
         target = v;
+    }
+
+    template <typename Buffer>
+    static void write_bits_to_buffer(const std::vector<bool> &bits, Buffer &out) {
+        for (std::size_t i = 0; i < bits.size() && i < out.size() * 8; ++i) {
+            if (bits[i]) {
+                const std::size_t byte_idx = i / 8;
+                const std::size_t bit_idx = 7 - (i % 8);
+                out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);
+            }
+        }
     }
 };
 
