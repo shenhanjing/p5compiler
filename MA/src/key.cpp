@@ -1,7 +1,5 @@
 #include "key.hpp"
 
-KeyManager g_key;
-
 std::unique_ptr<KeyManager::BaseSlot> KeyManager::makeSlot(std::size_t bits) {
     if (bits == 0 || bits > 256) return nullptr;
     return makeSlotRec<1>(bits);
