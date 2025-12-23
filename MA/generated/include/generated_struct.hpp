@@ -18,9 +18,14 @@ struct PHI_S {
     p5::uint<8> L4Type;
 };
 
+struct ETHER_TYPE_S {
+    p5::uint<16> Type;
+};
+
 struct ETHER_S {
     p5::uint<48> Dmac;
     p5::uint<48> Smac;
+    ETHER_TYPE_S ETHER_TYPE;
 };
 
 struct VlanInfo_S {
@@ -32,10 +37,7 @@ struct VlanInfo_S {
 struct VLAN_TAG_S {
     p5::uint<16> Tpid;
     VlanInfo_S VlanInfo;
-};
-
-struct ETHER_TYPE_S {
-    p5::uint<16> Type;
+    ETHER_TYPE_S ETHER_TYPE;
 };
 
 struct IPv4_S {

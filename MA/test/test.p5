@@ -86,10 +86,16 @@ struct PHI_S //18 | 3 | 5
   uint<8> L4Type;
 };
 
+struct ETHER_TYPE_S //16 | 2 | 2
+{
+  uint<16>    Type;
+};
+
 struct ETHER_S //96 | 12 | 12
 {
   uint<48> Dmac;
   uint<48> Smac;
+  ETHER_TYPE_S ETHER_TYPE;
 };
 
 struct VlanInfo_S { //16 | 2 | 3
@@ -102,10 +108,7 @@ struct VLAN_TAG_S //32 | 4 | 5
 {
   uint<16>     Tpid;
   VlanInfo_S   VlanInfo;
-};
-struct ETHER_TYPE_S //16 | 2 | 2
-{
-  uint<16>    Type;
+  ETHER_TYPE_S ETHER_TYPE;
 };
 
 struct IPv4_S //160 | 20 | 24
@@ -186,6 +189,7 @@ IPv6_S IPv6;
 UDP_S UDP;
 TCP_S TCP;
 
+/****************************        FV           *********************************/
 @segment("PHI") @volatile("PHI", "in", "in")          PHI_S             PHI;
 @segment("PHO") @volatile("PHO", "in", "inout")       uint<7>           PHO[5];
 uint<8>                                                                 NGSFBuffer[64];
@@ -210,6 +214,90 @@ uint<8>                                                                 EncapInd
 uint<3>                                                                 HubSpkGrp;
 uint<2>                                                                 EncapProfile;
 
+/****************************        Parser           *********************************/
+@parser void iprs( )
+{
+    return parse_ETHER();
+};
+
+@parser void eprs( )
+{
+    return parse_ETHER();
+};
+
+@parser(PG_OUTER_L2) 
+void  parse_ETHER()
+{
+  PHI.L2Type = L2_TYPE_ETHERNET;
+  PHO[PHO_OUTER_L2_START] = _extract(ETHER);
+
+  return switch(ETHER.ETHER_TYPE.Type)
+  {
+     case 0x8100: parse_VlanTag();
+     case 0x0800: parse_IPv4();
+     case 0x86dd: parse_IPv6();
+     default: _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L2)
+void parse_VlanTag()
+{
+  PHI.TagType = VLAN_SINGLE_TAGGED;
+  PHO[PHO_OUTER_VLANS_START] = _extract(VLAN_TAG0);
+
+  return switch (VLAN_TAG0.ETHER_TYPE.Type)
+  {
+     case 0x0800: parse_IPv4();
+     case 0x86dd: parse_IPv6();
+     default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv4()
+{
+  PHI.L3Type = L3_TYPE_IPv4;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv4);
+
+  return switch(IPv4.Protocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv6()
+{
+  PHI.L3Type = L3_TYPE_IPv6;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv6);
+
+  return switch(IPv6.NextProtocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L4)
+void  parse_TCP()
+{  
+  PHI.L4Type = L4_PROTOCOL_TCP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(TCP);
+
+  return _parser_next(0, 0);
+}
+@parser(PG_OUTER_L4)
+void  parse_UDP()
+{  
+  PHI.L4Type = L4_PROTOCOL_UDP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(UDP);
+
+  return _parser_next(0, 0);
+}
+
+/****************************        IMA0           *********************************/
 struct IPATRSP_S {
     @global_valid uint<1> Valid;
     uint<1> RouterIntf;
@@ -267,6 +355,86 @@ table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
     iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
 }
 
+/****************************        IMA1           *********************************/
+struct FIBRSP_S {
+    uint<10>  Port;
+    uint<8>   EncapIndex;
+};
+
+typedef _inflate<FIBRSP_S> FIBFull_S;
+
+@lookup FIBFull_S FibLookup(uint<2> &Status)
+{
+    uint<136> FibKey;
+    _compressed_FIBRSP_S CompressedFibRsp = {0};
+    _compressed_FIBRSP_S Mem = {0};
+
+    FibKey = _key();
+
+    Mem = _lookup(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
+    Status = _status(SE_TID_FIB);
+    _memcpy(CompressedFibRsp, {Mem});
+    
+    return CompressedFibRsp;
+}
+
+table FIB_TBL()
+{
+    key = {
+      switch (PHI.L3Type) {
+          case L3_TYPE_IPv4: { // ICIB:Heartbeat
+              Vrf;
+              IPv4.DIP;
+              (uint<32>) 0;
+              (uint<32>) 0;
+              (uint<32>) 0;
+          }
+          case L3_TYPE_IPv6: { // ICIB:Heartbeat
+              Vrf;
+              IPv6.DIP;
+          }
+          default: { 
+            //Skip
+          }
+      }
+    }
+
+    uint<2> StatusFib = _status();
+    FIBFull_S rsFib = FibLookup(StatusFib);
+};
+
+table IMA1_MATCH_TBL()
+{
+    FIB_TBL               tbFib           = FIB_TBL();
+    _apply(tbFib);
+};
+
+void iMA1Action(FIBFull_S rsFib)
+{
+    if (_valid(rsFib)) {
+        GLTP = rsFib.Port;
+        EncapIndex = rsFib.EncapIndex;
+        TTL = TTL - 1;
+    }
+}
+
+table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
+{  
+    iMA1Action(tbIMA1Match.tbFib.rsFib);
+};
+
+/****************************        IPPMAIN           *********************************/
+table IPRS_TBL()
+{  
+  iprs();
+};
+
+@control void pre_iMAControl()
+{
+  @hw_map("IPRS") IPRS_TBL tbIprs          = IPRS_TBL();
+  _apply(tbIprs);
+}
+
 @control void iMA0Control()
 {
   @hw_map("IMA0_MATCH")       IMA0_MATCH_TBL         tbIMA0Match       = IMA0_MATCH_TBL();
@@ -276,9 +444,21 @@ table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
   _apply(tbIMA0Action);
 }
 
+@control void iMA1Control()
+{
+  @hw_map("IMA1_MATCH")       IMA1_MATCH_TBL         tbIMA1Match       = IMA1_MATCH_TBL();
+  @hw_map("IMA1_ACTION")      IMA1_ACTION_TBL        tbIMA1Action      = IMA1_ACTION_TBL(tbIMA1Match);
+
+  _apply(tbIMA1Match);
+  _apply(tbIMA1Action);
+}
+
 @control void ingress()
 {
+  pre_iMAControl();
  
   iMA0Control();
+
+  iMA1Control();
 
 }

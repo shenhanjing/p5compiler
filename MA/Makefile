@@ -20,7 +20,7 @@ TEST_BASENAME := $(notdir $(basename $(TEST_ABS)))
 TARGET := $(BIN_DIR)/$(TEST_BASENAME)
 
 TEST_DIR := $(dir $(TEST_ABS))
-TEST_GEN_DIR := $(TEST_DIR)/generated
+TEST_GEN_DIR := $(ROOT_DIR)/generated
 TEST_GEN_INC_DIR := $(TEST_GEN_DIR)/include
 TEST_GEN_SRC_DIR := $(TEST_GEN_DIR)/src
 

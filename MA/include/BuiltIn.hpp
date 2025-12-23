@@ -73,18 +73,18 @@ public:
     BuiltInContext() = default;
 
     template <typename T>
-    inline T _key() const {
-        return key_.getKey<T>(bit_width_of_type<T>());
+        inline T _key() const {
+            return key_.getKey<T>(bit_width_of_type<T>());
     }
 
-    inline uint8_t _status(int tableId = 0) const {
-        return static_cast<uint8_t>(se_.status(tableId));
+        inline uint8_t _status(int tableId = 0) const {
+            return static_cast<uint8_t>(se_.status(tableId));
     }
 
     template <typename Value, typename Key>
     inline _inflate<Value> _lookup(int tableId, int lookupType, const Key &key) {
         const auto mt = static_cast<MatchType>(lookupType);
-        auto result = se_.lookup<Key, Value>(tableId, mt, key);
+            auto result = se_.lookup<Key, Value>(tableId, mt, key);
         if (result) {
             return *result;  // valid=true via _inflate(Value)
         }
@@ -97,7 +97,7 @@ public:
     }
 
     template <typename T>
-    inline bool _valid(const _inflate<T> &v) const {
+        inline bool _valid(const _inflate<T> &v) const {
         return v.valid;
     }
 

@@ -10,30 +10,37 @@
 #include "p5_types.hpp"
 #include "model_intf_1027.h"
 #include "generated_gtv.hpp"
+#include "packet.hpp"
 
-class Ingress : public GtvContext, public BuiltInContext {
+class Switch : public GtvContext, public BuiltInContext, public Packet {
 public:
-    Ingress();
+    Switch();
+
+    void iprs();
+    void eprs();
+    void parse_ETHER();
+    void parse_VlanTag();
+    void parse_IPv4();
+    void parse_IPv6();
+    void parse_TCP();
+    void parse_UDP();
 
     IPATFull_S IpatLookup(p5::uint<2> &Status);
     void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus);
     FIBFull_S FibLookup(p5::uint<2> &Status);
     void iMA1Action(FIBFull_S rsFib);
+
+    void pre_iMAControl();
     void iMA0Control();
     void iMA1Control();
     void ingress();
-    void SingleMaProc(const int ma_id, const std::string &packet_id, const int port_id,
-                      const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);
-
-    SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }
-    KeyManager &keyManager() { return BuiltInContext::keyManager(); }
 
     // IPAT lookup table wrapper
     class IPAT_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
     public:
-        explicit IPAT_TBL(Ingress &ctx_in) : ctx(ctx_in) {}
+        explicit IPAT_TBL(Switch &ctx_in) : ctx(ctx_in) {}
 
         p5::uint<2> IpatStatus;
         IPATFull_S rsIpat;
@@ -57,9 +64,9 @@ public:
 
     class IMA0_MATCH_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
     public:
-        explicit IMA0_MATCH_TBL(Ingress &ctx_in) : ctx(ctx_in) {}
+        explicit IMA0_MATCH_TBL(Switch &ctx_in) : ctx(ctx_in) {}
 
         IPAT_TBL tbIPAT = IPAT_TBL(ctx);
 
@@ -70,11 +77,11 @@ public:
 
     class IMA0_ACTION_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
         IMA0_MATCH_TBL &tbIMA0Match;
 
     public:
-        explicit IMA0_ACTION_TBL(Ingress &ctx_in, IMA0_MATCH_TBL &tbIMA0Match_in) : ctx(ctx_in), tbIMA0Match(tbIMA0Match_in) {}
+        explicit IMA0_ACTION_TBL(Switch &ctx_in, IMA0_MATCH_TBL &tbIMA0Match_in) : ctx(ctx_in), tbIMA0Match(tbIMA0Match_in) {}
 
         void apply() override {
             ctx.iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
@@ -83,9 +90,9 @@ public:
 
     class FIB_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
     public:
-        explicit FIB_TBL(Ingress &ctx_in) : ctx(ctx_in) {}
+        explicit FIB_TBL(Switch &ctx_in) : ctx(ctx_in) {}
     
         p5::uint<2> StatusFib;
         FIBFull_S rsFib;
@@ -113,9 +120,9 @@ public:
 
     class IMA1_MATCH_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
     public:
-        explicit IMA1_MATCH_TBL(Ingress &ctx_in) : ctx(ctx_in) {}    
+        explicit IMA1_MATCH_TBL(Switch &ctx_in) : ctx(ctx_in) {}    
         
         FIB_TBL tbFib = FIB_TBL(ctx);
 
@@ -126,15 +133,41 @@ public:
 
     class IMA1_ACTION_TBL : public Table {
     private:
-        Ingress &ctx;
+        Switch &ctx;
         IMA1_MATCH_TBL &tbIMA1Match;
     public:
-        explicit IMA1_ACTION_TBL(Ingress &ctx_in, IMA1_MATCH_TBL &tbIMA1Match_in) : ctx(ctx_in), tbIMA1Match(tbIMA1Match_in) {}
+        explicit IMA1_ACTION_TBL(Switch &ctx_in, IMA1_MATCH_TBL &tbIMA1Match_in) : ctx(ctx_in), tbIMA1Match(tbIMA1Match_in) {}
 
         void apply() override {
             ctx.iMA1Action(tbIMA1Match.tbFib.rsFib);
         }
     };
+
+    class IPRS_TBL : public Table {
+    private:
+        Switch &ctx;
+    public:
+        explicit IPRS_TBL(Switch &ctx_in) : ctx(ctx_in) {}
+
+        void apply() override {
+            ctx.iprs();
+        }
+    };
+
+public:
+    void PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef &nhi_info, 
+                    Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info);
+    void ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ima2IpmFvInfoDef &fv_out);
+    void EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ema2EpmFvInfoDef &fv_out);
+    void IpmProcPkt(const int port_id, const Ima2IpmFvInfoDef &fv_in, Np2NpHeader &np2np_hdr, 
+                    Np2TmHeader &np2tm_hdr);
+    void SingleMaProc(const int ma_id, const std::string &packet_id, const int port_id,
+                      const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);
+
+    void reset_all_fields();
+
+    SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }
+    KeyManager &keyManager() { return BuiltInContext::keyManager(); }
 };
 
 #endif // GENERATED_MA_HPP

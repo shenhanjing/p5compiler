@@ -8,6 +8,13 @@
 #include "p5_types.hpp"
 #include "model_intf_1027.h"
 
+#define PG_OUTER_L2  0
+#define PG_OUTER_L3  1
+#define PG_OUTER_L4  2
+
+#define IP_PROTOCOL_TCP      0x06
+#define IP_PROTOCOL_UDP      0x11
+
 enum RSP_STATUS_E {
     RSP_STATUS_MATCH = 0,
     RSP_STATUS_NO_MATCH = 1,

@@ -3,38 +3,38 @@
 #include <iostream>
 #include <tuple>
 #include <vector>
-#include "generated_MA.hpp"
+#include "generated_Switch.hpp"
 
 namespace {
 
 // 预置一些全局字段的基准值，方便复用
-void set_common_fields(Ingress &ing) {
-    ing.PHI.PortType = 0;
-    ing.PHI.L2Type = 2;
-    ing.PHI.TagType = 1;
-    ing.PHI.L4Type = 10; // TCP
+void set_common_fields(Switch &sw) {
+    sw.PHI.PortType = 0;
+    sw.PHI.L2Type = 2;
+    sw.PHI.TagType = 1;
+    sw.PHI.L4Type = 10; // TCP
 
     for (int i = 0; i < 5; ++i) {
-        ing.PHO[i] = static_cast<uint8_t>(i + 1);
+        sw.PHO[i] = static_cast<uint8_t>(i + 1);
     }
 
-    ing.GLTP = 200;
-    ing.LLTP = 15;
-    ing.FQID = 12;
-    ing.PktLength = 1500;
-    ing.DropFlag = 0;
-    ing.IsUc = 0;
-    ing.Mgid = 55;
-    ing.SB = 10;
-    ing.SP = 11;
-    ing.TB = 12;
-    ing.TP = 13;
-    ing.HashValue = 0xABCD;
-    ing.TOS = 0x10;
-    ing.TTL = 64;
-    ing.EncapIndex = 2;
-    ing.HubSpkGrp = 5;
-    ing.EncapProfile = 1;
+    sw.GLTP = 200;
+    sw.LLTP = 15;
+    sw.FQID = 12;
+    sw.PktLength = 1500;
+    sw.DropFlag = 0;
+    sw.IsUc = 0;
+    sw.Mgid = 55;
+    sw.SB = 10;
+    sw.SP = 11;
+    sw.TB = 12;
+    sw.TP = 13;
+    sw.HashValue = 0xABCD;
+    sw.TOS = 0x10;
+    sw.TTL = 64;
+    sw.EncapIndex = 2;
+    sw.HubSpkGrp = 5;
+    sw.EncapProfile = 1;
 }
 
 // 构造 IPv4 FIB 查表 key（Vrf + DIP + 3 个 32bit 0 填充）
@@ -54,11 +54,11 @@ p5::uint<136> make_fib_key_v4(uint8_t vrf, uint32_t dip) {
 }
 
 // 根据当前全局字段打包 fv_in
-MaToMaFvInfoDef build_fv_in(Ingress &ing) {
+MaToMaFvInfoDef build_fv_in(Switch &sw) {
     MaToMaFvInfoDef fv{};
-    auto phi_buf = ing.pack_phi_to_bytes();
-    auto pho_buf = ing.pack_pho_to_bytes();
-    auto gtv_buf = ing.pack_fv_to_bytes();
+    auto phi_buf = sw.pack_phi_to_bytes();
+    auto pho_buf = sw.pack_pho_to_bytes();
+    auto gtv_buf = sw.pack_gtv_to_bytes();
     std::memcpy(fv.phiData, phi_buf.data(), FV_PHI_BYTE_NUM);
     std::memcpy(fv.phoData, pho_buf.data(), FV_PHO_BYTE_NUM);
     std::memcpy(fv.gtvData, gtv_buf.data(), FV_GTV_MAX_BYTE_NUM);
@@ -78,9 +78,9 @@ struct CaseCfg {
 int main() {
     std::cout << "[tb_2 hand] SingleMaProc table + pack/unpack tests\n";
 
-    Ingress ing;
-    auto &se = ing.searchEngine();
-    auto &key = ing.keyManager();
+    Switch sw;
+    auto &se = sw.searchEngine();
+    auto &key = sw.keyManager();
 
     // 初始化查表与 key，匹配 generated.hpp 中 iMA0Control/iMA1Control 的逻辑
     se.initTable<p5::uint<10>, IPATRSP_S>(SE_TID_IPAT, MatchType::INDEX);
@@ -112,21 +112,21 @@ int main() {
 
     // -------- ma_id = 0 测试（已有）--------
     for (const auto &c : cases) {
-        set_common_fields(ing);
-        ing.GLSP = c.glsp;
-        ing.PHI.L3Type = c.l3_type;
-        ing.Vrf = 0;
-        ing.DropFlag = 0;
-        ing.IsUc = 0;
+        set_common_fields(sw);
+        sw.GLSP = c.glsp;
+        sw.PHI.L3Type = c.l3_type;
+        sw.Vrf = 0;
+        sw.DropFlag = 0;
+        sw.IsUc = 0;
 
-        MaToMaFvInfoDef fv_in = build_fv_in(ing);
+        MaToMaFvInfoDef fv_in = build_fv_in(sw);
         MaToMaFvInfoDef fv_out{};
 
-        ing.SingleMaProc(0, "", 0, fv_in, fv_out);
+        sw.SingleMaProc(0, "", 0, fv_in, fv_out);
 
-        bool drop_ok = (ing.DropFlag.to_ullong() == static_cast<uint64_t>(c.expect_drop));
-        bool vrf_ok = (!c.expect_drop) ? (ing.Vrf.to_ullong() == c.expect_vrf) : true;
-        bool isuc_ok = (!c.expect_drop) ? (ing.IsUc.to_ullong() == 1) : true;
+        bool drop_ok = (sw.DropFlag.to_ullong() == static_cast<uint64_t>(c.expect_drop));
+        bool vrf_ok = (!c.expect_drop) ? (sw.Vrf.to_ullong() == c.expect_vrf) : true;
+        bool isuc_ok = (!c.expect_drop) ? (sw.IsUc.to_ullong() == 1) : true;
 
         bool pack_phi_ok = std::memcmp(fv_out.phiData, fv_in.phiData, FV_PHI_BYTE_NUM) == 0;
         bool pack_pho_ok = std::memcmp(fv_out.phoData, fv_in.phoData, FV_PHO_BYTE_NUM) == 0;
@@ -136,9 +136,9 @@ int main() {
         all_pass = all_pass && pass;
 
         std::cout << c.name
-                  << " => drop=" << ing.DropFlag.to_ullong()
-                  << " vrf=" << ing.Vrf.to_ullong()
-                  << " isUc=" << ing.IsUc.to_ullong()
+                  << " => drop=" << sw.DropFlag.to_ullong()
+                  << " vrf=" << sw.Vrf.to_ullong()
+                  << " isUc=" << sw.IsUc.to_ullong()
                   << " pack_phi=" << (pack_phi_ok ? "OK" : "BAD")
                   << " pack_pho=" << (pack_pho_ok ? "OK" : "BAD")
                   << " => " << (pass ? "PASS" : "FAIL") << "\n";
@@ -163,33 +163,33 @@ int main() {
     };
 
     for (const auto &c : ma1_cases) {
-        set_common_fields(ing);
+        set_common_fields(sw);
         // 只跑 MA1，这里不依赖 IPAT，直接设置 Vrf/DIP
-        ing.Vrf = c.vrf;
-        ing.PHI.L3Type = c.l3_type;
-        ing.IPv4.DIP = c.dip;
-        ing.GLTP = 0;
-        ing.EncapIndex = 0;
-        ing.TTL = 64;
+        sw.Vrf = c.vrf;
+        sw.PHI.L3Type = c.l3_type;
+        sw.IPv4.DIP = c.dip;
+        sw.GLTP = 0;
+        sw.EncapIndex = 0;
+        sw.TTL = 64;
 
-        MaToMaFvInfoDef fv_in = build_fv_in(ing);
+        MaToMaFvInfoDef fv_in = build_fv_in(sw);
         MaToMaFvInfoDef fv_out{};
 
-        ing.SingleMaProc(1, "", 0, fv_in, fv_out);
+        sw.SingleMaProc(1, "", 0, fv_in, fv_out);
 
         const bool hit = (se.status(SE_TID_FIB) == SearchEngine::Status::MATCH);
-        const bool port_ok = c.expect_hit ? (ing.GLTP.to_ullong() == c.expect_port) : (ing.GLTP.to_ullong() == 0);
-        const bool encap_ok = c.expect_hit ? (ing.EncapIndex.to_ullong() == c.expect_encap) : (ing.EncapIndex.to_ullong() == 0);
-        const bool ttl_ok = c.expect_hit ? (ing.TTL.to_ullong() == 63) : (ing.TTL.to_ullong() == 64);
+        const bool port_ok = c.expect_hit ? (sw.GLTP.to_ullong() == c.expect_port) : (sw.GLTP.to_ullong() == 0);
+        const bool encap_ok = c.expect_hit ? (sw.EncapIndex.to_ullong() == c.expect_encap) : (sw.EncapIndex.to_ullong() == 0);
+        const bool ttl_ok = c.expect_hit ? (sw.TTL.to_ullong() == 63) : (sw.TTL.to_ullong() == 64);
 
         bool pass = (hit == c.expect_hit) && port_ok && encap_ok && ttl_ok;
         all_pass = all_pass && pass;
 
         std::cout << c.name
                   << " => hit=" << hit
-                  << " gltp=" << ing.GLTP.to_ullong()
-                  << " encap=" << ing.EncapIndex.to_ullong()
-                  << " ttl=" << ing.TTL.to_ullong()
+                  << " gltp=" << sw.GLTP.to_ullong()
+                  << " encap=" << sw.EncapIndex.to_ullong()
+                  << " ttl=" << sw.TTL.to_ullong()
                   << " => " << (pass ? "PASS" : "FAIL") << "\n";
     }
 

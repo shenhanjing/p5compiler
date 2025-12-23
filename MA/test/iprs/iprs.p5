@@ -1,0 +1,99 @@
+#define PG_OUTER_L2  0
+#define PG_OUTER_L3  1
+#define PG_OUTER_L4  2
+
+#define IP_PROTOCOL_TCP      0x06
+#define IP_PROTOCOL_UDP      0x11
+
+@parser void iprs( )
+{
+    return parse_ETHER();
+};
+
+@parser void eprs( )
+{
+    return parse_ETHER();
+};
+
+@parser(PG_OUTER_L2) 
+void  parse_ETHER()
+{
+  PHI.L2Type = L2_TYPE_ETHERNET;
+  PHO[PHO_OUTER_L2_START] = _extract(ETHER);
+
+  return switch(ETHER.ETHER_TYPE.Type)
+  {
+     case 0x8100: parse_VlanTag();
+     case 0x0800: parse_IPv4();
+     case 0x86dd: parse_IPv6();
+     default: _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L2)
+void parse_VlanTag()
+{
+  PHI.TagType = VLAN_SINGLE_TAGGED;
+  PHO[PHO_OUTER_VLANS_START] = _extract(VLAN_TAG0);
+
+  return switch (VLAN_TAG0.ETHER_TYPE.Type)
+  {
+     case 0x0800: parse_IPv4();
+     case 0x86dd: parse_IPv6();
+     default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv4()
+{
+  PHI.L3Type = L3_TYPE_IPv4;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv4);
+
+  return switch(IPv4.Protocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L3)
+void  parse_IPv6()
+{
+  PHI.L3Type = L3_TYPE_IPv6;
+  PHO[PHO_OUTER_L3_START] = _extract(IPv6);
+
+  return switch(IPv6.NextProtocol)
+  {
+	  case IP_PROTOCOL_UDP:  parse_UDP();
+	  case IP_PROTOCOL_TCP:  parse_TCP();
+    default : _parser_next(0, 0);
+  }
+}
+@parser(PG_OUTER_L4)
+void  parse_TCP()
+{  
+  PHI.L4Type = L4_PROTOCOL_TCP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(TCP);
+
+  return _parser_next(0, 0);
+}
+@parser(PG_OUTER_L4)
+void  parse_UDP()
+{  
+  PHI.L4Type = L4_PROTOCOL_UDP;
+
+  PHO[PHO_OUTER_L4_START] = _extract(UDP);
+
+  return _parser_next(0, 0);
+}
+
+table IPRS_TBL()
+{  
+  iprs();
+};
+
+@control void pre_iMAControl()
+{
+  @hw_map("IPRS") IPRS_TBL tbIprs          = IPRS_TBL();
+  _apply(tbIprs);
+}
