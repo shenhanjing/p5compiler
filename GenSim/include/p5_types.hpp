@@ -4,11 +4,23 @@
 #include <bitset>
 #include <cstdint>
 #include <cstring>
-#include <iterator>
 #include <type_traits>
+#include <utility>
+#include <iterator>
 #include <vector>
+#include <boost/pfr.hpp>
 
 namespace p5 {
+
+// 编译期描述位范围的标签，用于提供数组下标式的切片访问
+template<size_t High, size_t Low>
+struct bit_range_t {
+    static_assert(High >= Low, "High must be >= Low");
+};
+
+// 变量模板，便于以 p5::bit_range<hi, lo> 形式书写
+template<size_t High, size_t Low>
+inline constexpr bit_range_t<High, Low> bit_range{};
 
 /**
  * @brief P5 固定位宽整数类型
@@ -24,7 +36,70 @@ class uint {
 private:
     std::bitset<N> value;
 
+    // 可写切片代理，支持对固定编译期范围 [High:Low] 进行读写
+    template<size_t High, size_t Low>
+    class slice_proxy {
+        static_assert(High >= Low, "High must be >= Low");
+        static_assert(High < N, "High must be < N");
+
+        std::bitset<N> &bits;
+        static constexpr size_t width = High - Low + 1;
+
+    public:
+        explicit slice_proxy(std::bitset<N> &bits_ref) : bits(bits_ref) {}
+
+        // 读取切片，返回定长 uint<width>
+        operator uint<width>() const {
+            uint<width> result;
+            for (size_t i = 0; i < width; ++i) {
+                result[i] = bits[Low + i];
+            }
+            return result;
+        }
+
+        // 赋值自同宽度的 uint
+        slice_proxy &operator=(const uint<width> &rhs) {
+            for (size_t i = 0; i < width; ++i) {
+                bits[Low + i] = rhs[i];
+            }
+            return *this;
+        }
+
+        // 赋值自其他宽度的 uint，按较小位数复制
+        template<size_t M>
+        slice_proxy &operator=(const uint<M> &rhs) {
+            constexpr size_t copy_width = (M < width) ? M : width;
+            for (size_t i = 0; i < copy_width; ++i) {
+                bits[Low + i] = rhs[i];
+            }
+            // 多余位清零
+            if constexpr (width > copy_width) {
+                for (size_t i = copy_width; i < width; ++i) {
+                    bits[Low + i] = 0;
+                }
+            }
+            return *this;
+        }
+
+        // 赋值自整数（按低位写入，超出 64 位的部分清零）
+        template <typename Integral, typename = std::enable_if_t<std::is_integral_v<Integral>>>
+        slice_proxy &operator=(Integral rhs) {
+            uint64_t v = static_cast<uint64_t>(rhs);
+            for (size_t i = 0; i < width; ++i) {
+                bits[Low + i] = (v >> i) & 1ULL;
+            }
+            if constexpr (width > 64) {
+                for (size_t i = 64; i < width; ++i) {
+                    bits[Low + i] = 0;
+                }
+            }
+            return *this;
+        }
+    };
+
 public:
+    using bit_reference = typename std::bitset<N>::reference;
+
     // 默认构造函数
     uint() = default;
     
@@ -261,8 +336,24 @@ public:
     }
     
     // 单 bit 访问
+    bit_reference operator[](size_t pos) {
+        return value[pos];
+    }
+
     bool operator[](size_t pos) const {
         return value[pos];
+    }
+
+    // 编译期切片访问（可写）
+    template<size_t High, size_t Low>
+    slice_proxy<High, Low> operator[](bit_range_t<High, Low>) {
+        return slice_proxy<High, Low>(value);
+    }
+
+    // 编译期切片访问（只读）
+    template<size_t High, size_t Low>
+    uint<High - Low + 1> operator[](bit_range_t<High, Low>) const {
+        return slice<High, Low>();
     }
     
     // 获取底层值（用于调试）
@@ -301,6 +392,440 @@ public:
         return uint(0);
     }
 };
+
+// =========================
+//  Union-like bit overlay
+// =========================
+//
+// C++ 关键字冲突：无法命名为 p5::union，因此这里提供 p5::Union<Layout>。
+//
+// 设计目标：
+// - Union 只有一份底层 bit 存储（位宽=所有“成员视图”的最大位宽）
+// - 顶层成员（Layout 的字段）都从 bit offset=0 开始覆盖同一份存储（类似 union）
+// - 若某个成员是结构体（aggregate），则把它视为一个整体：其内部字段按声明顺序从 offset=0
+//   起顺序排布（位宽=各字段位宽之和），并支持嵌套结构体/嵌套 Union
+// - 访问成员使用“可读写视图”：
+//   - p5::member<p5::uint<N>>：把底层某段 bits 映射为 uint<N>
+//   - p5::Union<Layout2>：可作为成员被绑定成 view，继续以 .x/.y 方式访问
+//
+// 用法示例（见 test/test_uint_union.cpp）：
+// struct St { p5::member<p5::uint<3>> a; p5::member<p5::uint<3>> b; };
+// struct ULayout { p5::member<p5::uint<10>> long_; p5::member<p5::uint<2>> short_; St st; };
+// p5::Union<ULayout> u; u.long_ = p5::uint<10>(...); u.st.a = p5::uint<3>(...);
+
+namespace detail_p5_union {
+// type traits
+template <typename T>
+struct is_p5_uint : std::false_type {};
+template <std::size_t N>
+struct is_p5_uint<p5::uint<N>> : std::true_type {};
+
+template <typename...>
+struct always_false : std::false_type {};
+
+struct detail_union_binder; // fwd: used as friend of p5::member / p5::Union
+
+struct bit_access {
+    void *ctx{nullptr};
+    bool (*get)(void *, std::size_t){nullptr};
+    void (*set)(void *, std::size_t, bool){nullptr};
+};
+
+template <std::size_t Bits>
+inline bool get_bit_impl(void *ctx, std::size_t pos) {
+    return (*static_cast<p5::uint<Bits> *>(ctx))[pos];
+}
+template <std::size_t Bits>
+inline void set_bit_impl(void *ctx, std::size_t pos, bool v) {
+    (*static_cast<p5::uint<Bits> *>(ctx))[pos] = v;
+}
+
+template <std::size_t Bits>
+inline bit_access make_access(p5::uint<Bits> &u) {
+    return bit_access{&u, &get_bit_impl<Bits>, &set_bit_impl<Bits>};
+}
+
+}  // namespace detail_p5_union
+
+// ---- bit width metafunction ----
+template <typename T, typename Enable = void>
+struct bit_width;
+
+template <std::size_t N>
+struct bit_width<p5::uint<N>, void> : std::integral_constant<std::size_t, N> {};
+
+template <typename T>
+inline constexpr std::size_t bit_width_v = bit_width<std::decay_t<T>>::value;
+
+// A view of a fixed bit range interpreted as a p5::uint<N>.
+template <typename UIntT>
+class member {
+    static_assert(detail_p5_union::is_p5_uint<std::decay_t<UIntT>>::value,
+                  "p5::member<T> currently supports only p5::uint<N> as T");
+
+public:
+    using value_type = std::decay_t<UIntT>;
+    static constexpr std::size_t width() { return bit_width_v<value_type>; }
+
+    member() = default;
+
+    // Read as value_type (by value)
+    operator value_type() const { return read(); }
+
+    // Assign from same-width uint
+    member &operator=(const value_type &rhs) {
+        write_from(rhs);
+        return *this;
+    }
+
+    // Assign from other-width uint: copy low bits, clear remaining bits within this member.
+    template <std::size_t M>
+    member &operator=(const p5::uint<M> &rhs) {
+        write_from(rhs);
+        return *this;
+    }
+
+    // Assign from integer: write low bits.
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+    member &operator=(Integral rhs) {
+        write_from(rhs);
+        return *this;
+    }
+
+    // Convenience: debug extraction (note: p5::uint::to_ullong may overflow if width>64).
+    uint64_t to_ullong() const { return read().to_ullong(); }
+
+    // ---- ergonomic operators (so member behaves like a "real variable") ----
+    // Note: for operator expressions, C++不会通过隐式转换去引入 p5::uint 的成员运算符候选集，
+    // 因此需要在 member 自身提供常用比较/算术运算符。
+
+    // comparisons: member vs member
+    bool operator==(const member &rhs) const { return read() == rhs.read(); }
+    bool operator!=(const member &rhs) const { return read() != rhs.read(); }
+    bool operator<(const member &rhs) const { return read() < rhs.read(); }
+    bool operator<=(const member &rhs) const { return read() <= rhs.read(); }
+    bool operator>(const member &rhs) const { return read() > rhs.read(); }
+    bool operator>=(const member &rhs) const { return read() >= rhs.read(); }
+
+    // comparisons: member vs uint<N>
+    bool operator==(const value_type &rhs) const { return read() == rhs; }
+    bool operator!=(const value_type &rhs) const { return read() != rhs; }
+    bool operator<(const value_type &rhs) const { return read() < rhs; }
+    bool operator<=(const value_type &rhs) const { return read() <= rhs; }
+    bool operator>(const value_type &rhs) const { return read() > rhs; }
+    bool operator>=(const value_type &rhs) const { return read() >= rhs; }
+
+    // comparisons: member vs integral
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator==(Integral rhs) const {
+        return read() == static_cast<uint64_t>(rhs);
+    }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator!=(Integral rhs) const {
+        return read() != static_cast<uint64_t>(rhs);
+    }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator<(Integral rhs) const {
+        return read() < static_cast<uint64_t>(rhs);
+    }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator<=(Integral rhs) const {
+        return read() <= static_cast<uint64_t>(rhs);
+    }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator>(Integral rhs) const {
+        return read() > static_cast<uint64_t>(rhs);
+    }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator>=(Integral rhs) const {
+        return read() >= static_cast<uint64_t>(rhs);
+    }
+
+    // arithmetic: member + (member/uint/integral) -> uint<N>
+    value_type operator+(const member &rhs) const { return read() + rhs.read(); }
+    value_type operator+(const value_type &rhs) const { return read() + rhs; }
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    value_type operator+(Integral rhs) const {
+        return read() + value_type(rhs);
+    }
+
+private:
+    detail_p5_union::bit_access access_{};
+    std::size_t offset_{0};
+
+    template <std::size_t StorageBits>
+    void bind(p5::uint<StorageBits> &storage, std::size_t offset) {
+        static_assert(StorageBits > 0, "StorageBits must be > 0");
+        static_assert(offset + width() <= StorageBits, "member out of bound");
+        access_ = detail_p5_union::make_access(storage);
+        offset_ = offset;
+    }
+
+    void bind_view(detail_p5_union::bit_access access, std::size_t offset) {
+        access_ = access;
+        offset_ = offset;
+    }
+
+    value_type read() const {
+        // Unbound members read as zero.
+        value_type out{};
+        if (!access_.get) return out;
+        for (std::size_t i = 0; i < width(); ++i) {
+            out[i] = access_.get(access_.ctx, offset_ + i);
+        }
+        return out;
+    }
+
+    template <std::size_t M>
+    void write_from(const p5::uint<M> &rhs) {
+        if (!access_.set) return; // silently ignore if unbound
+        constexpr std::size_t copy_width = (M < width()) ? M : width();
+        for (std::size_t i = 0; i < copy_width; ++i) {
+            access_.set(access_.ctx, offset_ + i, rhs[i]);
+        }
+        if constexpr (width() > copy_width) {
+            for (std::size_t i = copy_width; i < width(); ++i) {
+                access_.set(access_.ctx, offset_ + i, false);
+            }
+        }
+    }
+
+    void write_from(uint64_t rhs) {
+        if (!access_.set) return;
+        for (std::size_t i = 0; i < width(); ++i) {
+            access_.set(access_.ctx, offset_ + i, (rhs >> i) & 1ULL);
+        }
+    }
+
+    friend struct detail_p5_union::detail_union_binder;
+    template <typename Layout>
+    friend class Union;
+};
+
+template <typename UIntT>
+struct bit_width<p5::member<UIntT>, void> : std::integral_constant<std::size_t, p5::member<UIntT>::width()> {};
+
+// Forward declaration
+template <typename Layout>
+class Union;
+
+namespace detail_p5_union {
+
+template <typename T>
+constexpr std::size_t aggregate_width();
+
+template <typename T, std::size_t... I>
+constexpr std::size_t aggregate_width_impl(std::index_sequence<I...>) {
+    return (p5::bit_width_v<typename boost::pfr::tuple_element_t<I, T>> + ... + 0);
+}
+
+template <typename T>
+constexpr std::size_t aggregate_width() {
+    constexpr std::size_t fields = boost::pfr::tuple_size_v<T>;
+    return aggregate_width_impl<T>(std::make_index_sequence<fields>{});
+}
+
+template <typename Layout, std::size_t... I>
+constexpr std::size_t union_width_impl(std::index_sequence<I...>) {
+    std::size_t m = 0;
+    ((m = (p5::bit_width_v<typename boost::pfr::tuple_element_t<I, Layout>> > m
+               ? p5::bit_width_v<typename boost::pfr::tuple_element_t<I, Layout>>
+               : m)),
+     ...);
+    return m;
+}
+
+template <typename Layout>
+constexpr std::size_t union_width() {
+    constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
+    static_assert(fields > 0, "p5::Union<Layout> requires Layout to have at least one field");
+    return union_width_impl<Layout>(std::make_index_sequence<fields>{});
+}
+
+// ---- binding (offset assignment) ----
+struct detail_union_binder {
+    // Leaf member<uint<N>>
+    template <typename UIntT>
+    static void bind_any(p5::member<UIntT> &m, bit_access access, std::size_t offset) {
+        m.bind_view(access, offset);
+    }
+
+    // Nested Union<Layout>
+    template <typename Layout>
+    static void bind_any(p5::Union<Layout> &u, bit_access access, std::size_t offset) {
+        u.bind_view(access, offset);
+    }
+
+    // Aggregate struct: bind its fields sequentially starting from offset
+    template <typename Agg>
+    static void bind_any(Agg &agg, bit_access access, std::size_t offset) {
+        static_assert(std::is_aggregate_v<Agg>,
+                      "Union member must be p5::member<p5::uint<N>>, p5::Union<...>, or an aggregate thereof.");
+        bind_aggregate(agg, access, offset);
+    }
+
+    template <typename Agg, std::size_t... I>
+    static void bind_aggregate_impl(Agg &agg, bit_access access, std::size_t base, std::index_sequence<I...>) {
+        // Compute per-field offsets as prefix sums.
+        std::size_t cur = base;
+        auto bind_one = [&](auto &field) {
+            bind_any(field, access, cur);
+            using FieldT = std::decay_t<decltype(field)>;
+            cur += p5::bit_width_v<FieldT>;
+        };
+        (bind_one(boost::pfr::get<I>(agg)), ...);
+    }
+
+    template <typename Agg>
+    static void bind_aggregate(Agg &agg, bit_access access, std::size_t base) {
+        constexpr std::size_t fields = boost::pfr::tuple_size_v<Agg>;
+        bind_aggregate_impl(agg, access, base, std::make_index_sequence<fields>{});
+    }
+};
+
+}  // namespace detail_p5_union
+
+template <typename T>
+struct bit_width<T, std::enable_if_t<std::is_aggregate_v<std::decay_t<T>>>> : std::integral_constant<std::size_t, detail_p5_union::aggregate_width<std::decay_t<T>>()> {};
+
+template <typename Layout>
+class Union : public Layout {
+public:
+    static constexpr std::size_t width() { return detail_p5_union::union_width<Layout>(); }
+    using storage_type = p5::uint<width()>;
+
+    Union() : Layout{} {
+        access_ = detail_p5_union::make_access(storage_);
+        base_offset_ = 0;
+        bind_members();
+    }
+
+    // Copy: copy bits, then re-bind all views to this.storage_
+    Union(const Union &other) : Layout{} {
+        access_ = detail_p5_union::make_access(storage_);
+        base_offset_ = 0;
+        copy_bits_from(other);
+        bind_members();
+    }
+
+    Union &operator=(const Union &other) {
+        if (this == &other) return *this;
+        // keep bound to our own storage_
+        copy_bits_from(other);
+        bind_members();
+        return *this;
+    }
+
+    // Convert to raw uint<width>
+    operator storage_type() const { return to_uint(); }
+
+    Union &operator=(const storage_type &rhs) {
+        set_from_uint(rhs);
+        return *this;
+    }
+
+    template <std::size_t M>
+    Union &operator=(const p5::uint<M> &rhs) {
+        set_from_uint(rhs);
+        return *this;
+    }
+
+    template <typename Integral,
+              typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+    Union &operator=(Integral rhs) {
+        storage_ = static_cast<uint64_t>(rhs);
+        return *this;
+    }
+
+    storage_type to_uint() const {
+        storage_type out{};
+        for (std::size_t i = 0; i < width(); ++i) {
+            out[i] = access_.get(access_.ctx, base_offset_ + i);
+        }
+        return out;
+    }
+
+    uint64_t to_ullong() const { return to_uint().to_ullong(); }
+
+private:
+    storage_type storage_{};
+    detail_p5_union::bit_access access_{};
+    std::size_t base_offset_{0};
+
+    void bind_members() {
+        // Top-level union fields all start at base_offset_
+        constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
+        bind_members_impl(std::make_index_sequence<fields>{});
+    }
+
+    template <std::size_t... I>
+    void bind_members_impl(std::index_sequence<I...>) {
+        auto &layout = static_cast<Layout &>(*this);
+        (detail_p5_union::detail_union_binder::bind_any(boost::pfr::get<I>(layout), access_, base_offset_), ...);
+    }
+
+    template <std::size_t M>
+    void set_from_uint(const p5::uint<M> &rhs) {
+        constexpr std::size_t copy_width = (M < width()) ? M : width();
+        for (std::size_t i = 0; i < copy_width; ++i) {
+            storage_[i] = rhs[i];
+        }
+        if constexpr (width() > copy_width) {
+            for (std::size_t i = copy_width; i < width(); ++i) {
+                storage_[i] = false;
+            }
+        }
+    }
+
+    void copy_bits_from(const Union &other) {
+        // Copy bits via view (works even if other is view-bound in future extensions).
+        auto v = other.to_uint();
+        set_from_uint(v);
+    }
+
+    // Bind this union object as a view into an external storage.
+    void bind_view(detail_p5_union::bit_access access, std::size_t base_offset) {
+        access_ = access;
+        base_offset_ = base_offset;
+        bind_members();
+    }
+
+    friend struct detail_p5_union::detail_union_binder;
+};
+
+template <typename Layout>
+struct bit_width<p5::Union<Layout>, void> : std::integral_constant<std::size_t, p5::Union<Layout>::width()> {};
+
+// ---- factory helpers (for "anonymous layout") ----
+namespace detail_p5_union {
+template <typename Factory>
+using layout_from_factory_t = std::decay_t<decltype(std::declval<Factory &>()())>;
+}  // namespace detail_p5_union
+
+/**
+ * @brief Create a p5::Union whose Layout type is deduced from a factory callable.
+ *
+ * The callable is never evaluated; it's only used for type deduction via decltype.
+ *
+ * Example:
+ *   auto u = p5::make_union([]{
+ *     struct Layout { p5::member<p5::uint<10>> a; p5::member<p5::uint<2>> b; };
+ *     return Layout{};
+ *   });
+ */
+template <typename Factory>
+inline auto make_union(Factory &&) {
+    using Layout = detail_p5_union::layout_from_factory_t<Factory>;
+    return p5::Union<Layout>{};
+}
 
 // 类型别名（常用位宽）
 using uint1 = uint<1>;
@@ -372,6 +897,44 @@ bool operator>=(uint64_t lhs, const uint<N>& rhs) {
 }
 
 } // namespace p5
+
+// =========================
+//  Convenience macros
+// =========================
+//
+// These macros provide a "factory-like" way to define an unnamed Layout (via a local struct)
+// and immediately obtain a p5::Union<Layout> object.
+//
+// Usage:
+//   auto u = P5_MAKE_UNION({
+//       p5::member<p5::uint<10>> long_;
+//       p5::member<p5::uint<2>>  short_;
+//       struct { p5::member<p5::uint<3>> a; p5::member<p5::uint<3>> b; } st;
+//   });
+//
+// Or declare a named variable:
+//   P5_DECLARE_UNION(U, {
+//       p5::member<p5::uint<10>> long_;
+//       // ...
+//   });
+//
+#define P5_DETAIL_CONCAT_INNER(a, b) a##b
+#define P5_DETAIL_CONCAT(a, b) P5_DETAIL_CONCAT_INNER(a, b)
+
+#define P5_UNION_MEMBER(name, layout_body) P5_UNION_MEMBER_IMPL(__COUNTER__, name, layout_body)
+#define P5_UNION_MEMBER_IMPL(id, name, layout_body)                                    \
+    struct P5_DETAIL_CONCAT(_p5_union_member_layout_, id) layout_body;                 \
+    ::p5::Union<P5_DETAIL_CONCAT(_p5_union_member_layout_, id)> name
+
+#define P5_MAKE_UNION(layout_body) P5_MAKE_UNION_IMPL(__COUNTER__, layout_body)
+#define P5_MAKE_UNION_IMPL(id, layout_body)                                            \
+    ::p5::make_union([&]() {                                                           \
+        struct P5_DETAIL_CONCAT(_p5_union_layout_, id) layout_body;                    \
+        return P5_DETAIL_CONCAT(_p5_union_layout_, id){};                              \
+    })
+
+#define P5_DECLARE_UNION(var_name, layout_body)                                        \
+    auto var_name = P5_MAKE_UNION(layout_body)
 
 // 为了兼容 P5 代码，可以使用全局命名空间
 // 注释掉以避免与系统 uint 冲突

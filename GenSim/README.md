@@ -17,6 +17,7 @@ GenSim 项目说明
   - `model_intf_1027.h`：模型接口与常量定义，供生成代码及运行时共享。
 - `generated/`：编译器生成的头/源文件（如 `generated_enum.hpp`、`generated_struct.hpp`、`generated_Switch.*`），承载从 P5 转出的数据结构和管线逻辑。
 - `docs/`：设计与实现文档（例如 `design_idea.md`、`conversion_logic.md`、`preP5.md` 等）。
+- `docs/p5_union.md`：`p5::Union`（确定行为的按位 overlay union）与 `p5::member`/宏工厂的实现与用法说明。
 - `test/`：示例与测试用例。包含 P5 源（`.p5`）、对应生成/手写的 C++ 测试（如 `test_ima.cpp`、`test_ingress_full.cpp`），以及分组子目录示例（`ima0/`、`ima1/`、`ema0/` 等）。
 - `bin/`：`make` 生成的可执行文件输出目录。
 
