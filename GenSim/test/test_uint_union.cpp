@@ -276,6 +276,10 @@ bool test_member_uint_like_ops() {
     ok &= expect_eq(s.to_ullong(), 0b101, "member: bit_range slice read/write");
     ok &= expect_eq(u.x.slice<3, 1>().to_ullong(), 0b101, "member: slice<High,Low>()");
 
+    // nested slice: (x[5:0])[2:1] maps to x[2:1]
+    u.x[p5::bit_range<5, 0>][p5::bit_range<2, 1>] = p5::uint<2>(0b10);
+    ok &= expect_eq(u.x[p5::bit_range<2, 1>].to_ullong(), 0b10, "member: nested slice write");
+
     return ok;
 }
 

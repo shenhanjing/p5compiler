@@ -11,8 +11,11 @@ LDFLAGS ?=
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 
 # Expect TEST to be provided (absolute or relative to ROOT_DIR).
+# Skip this check for 'clean' target
+ifneq ($(MAKECMDGOALS),clean)
 ifndef TEST
 $(error Please invoke with TEST=<path/to/test.cpp>)
+endif
 endif
 
 TEST_ABS := $(abspath $(TEST))
@@ -40,5 +43,5 @@ $(TARGET): $(ALL_SRCS) | dirs
 	$(CXX) $(CXXFLAGS) -I$(TEST_DIR) -I$(TEST_GEN_INC_DIR) $(ALL_SRCS) -o $@ $(LDFLAGS)
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm -rf $(BIN_DIR)/*
 
