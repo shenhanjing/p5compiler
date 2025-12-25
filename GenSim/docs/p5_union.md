@@ -194,7 +194,14 @@ P5_DECLARE_UNION(U, {
 });
 ```
 
-### 3) `P5_UNION_MEMBER(name, { ... })`：在 layout 内声明“嵌套 union 成员”
+### 3) `P5_UNION(name, { ... })`：一个宏同时支持“声明变量”和“声明嵌套成员”
+
+`P5_UNION(name, { ... })` 可用于：
+
+- 在函数/全局作用域声明一个 `p5::Union` 变量
+- 在 layout/struct 内声明一个嵌套 `p5::Union` 成员
+
+`P5_DECLARE_UNION` 与 `P5_UNION_MEMBER` 仍然保留，但都已变为 `P5_UNION` 的别名，推荐直接使用 `P5_UNION`。
 
 在 `P5_MAKE_UNION` 的 layout body 里，必须写“成员声明”，因此 **不支持**：
 
@@ -203,12 +210,12 @@ P5_DECLARE_UNION(U, {
 auto alt = P5_MAKE_UNION({ ... });
 ```
 
-正确方式是用 `P5_UNION_MEMBER`：
+正确方式是用 `P5_UNION`（或兼容别名 `P5_UNION_MEMBER`）：
 
 ```cpp
 auto u = P5_MAKE_UNION({
   p5::member<p5::uint<16>> whole;
-  P5_UNION_MEMBER(alt, {
+  P5_UNION(alt, {
     p5::member<p5::uint<6>> low6;
     p5::member<p5::uint<12>> low12;
   });

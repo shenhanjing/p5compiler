@@ -26,8 +26,10 @@ public:
     void parse_UDP();
 
     IPATFull_S IpatLookup(p5::uint<2> &Status);
+    IPATFull_S IpatLookup(p5::member<p5::uint<2>> &Status);
     void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus);
     FIBFull_S FibLookup(p5::uint<2> &Status);
+    FIBFull_S FibLookup(p5::member<p5::uint<2>> &Status);
     void iMA1Action(FIBFull_S rsFib);
 
     void pre_iMAControl();

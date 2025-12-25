@@ -55,6 +55,16 @@ private:
     struct is_p5_uint<p5::uint<N>> : std::true_type {};
 
     template <typename T>
+    struct is_p5_member : std::false_type {};
+    template <typename UIntT>
+    struct is_p5_member<p5::member<UIntT>> : std::true_type {};
+
+    template <typename T>
+    struct is_p5_union : std::false_type {};
+    template <typename Layout>
+    struct is_p5_union<p5::Union<Layout>> : std::true_type {};
+
+    template <typename T>
     static constexpr bool is_supported_header();
 
     template <typename T, std::size_t... I>
@@ -70,22 +80,25 @@ private:
     // ---- bit 赋值辅助 ----
     template <typename P5UInt>
     static void assign_bits(const std::vector<bool> &bits, std::size_t &cursor, P5UInt &target) {
-        const std::size_t width = P5UInt::width();
-        uint64_t v = 0;
+        using Decayed = std::decay_t<P5UInt>;
+        constexpr std::size_t width = Decayed::width();
+        p5::uint<width> tmp{};
+        // bits vector is in high-first order; assign tmp[width-1]..tmp[0].
         for (std::size_t i = 0; i < width && cursor < bits.size(); ++i, ++cursor) {
-            v = (v << 1) | static_cast<uint64_t>(bits[cursor]);
+            tmp[width - 1 - i] = bits[cursor];
         }
-        target = v;
+        // For p5::uint / p5::member / p5::Union: assignment writes to the underlying storage/view.
+        target = tmp;
     }
 
     template <typename Field>
     static void decode_any(const std::vector<bool> &bits, std::size_t &cursor, Field &target) {
         using Decayed = std::decay_t<Field>;
-        if constexpr (is_p5_uint<Decayed>::value) {
+        if constexpr (is_p5_uint<Decayed>::value || is_p5_member<Decayed>::value || is_p5_union<Decayed>::value) {
             assign_bits(bits, cursor, target);
         } else {
             static_assert(is_supported_header<Decayed>(),
-                          "Header fields must be p5::uint<N> or nested aggregates thereof.");
+                          "Header fields must be p5::uint<N>/p5::member/p5::Union or nested aggregates thereof.");
             boost::pfr::for_each_field(target, [&](auto &sub) { decode_any(bits, cursor, sub); });
         }
     }
@@ -93,7 +106,7 @@ private:
     template <typename Header>
     void process_header(Header &hdr, bool advance) const {
         static_assert(is_supported_header<Header>(),
-                      "_extract/_lookahead supports only p5::uint<N> or their aggregates.");
+                      "_extract/_lookahead supports only p5::uint<N>/p5::member/p5::Union or their aggregates.");
 
         constexpr std::size_t hdr_bits = bit_width_of<Header>();
         constexpr std::size_t hdr_len_bytes = (hdr_bits + 7) / 8;
@@ -133,6 +146,10 @@ inline constexpr bool Packet::is_supported_header() {
     using Decayed = std::decay_t<T>;
     if constexpr (is_p5_uint<Decayed>::value) {
         return true;
+    } else if constexpr (is_p5_member<Decayed>::value) {
+        return true;
+    } else if constexpr (is_p5_union<Decayed>::value) {
+        return true;
     } else if constexpr (std::is_aggregate_v<Decayed>) {
         constexpr std::size_t fields = boost::pfr::tuple_size_v<Decayed>;
         return is_supported_fields<Decayed>(std::make_index_sequence<fields>{});
@@ -151,11 +168,15 @@ inline constexpr std::size_t Packet::bit_width_of() {
     using Decayed = std::decay_t<T>;
     if constexpr (is_p5_uint<Decayed>::value) {
         return Decayed::width();
+    } else if constexpr (is_p5_member<Decayed>::value) {
+        return Decayed::width();
+    } else if constexpr (is_p5_union<Decayed>::value) {
+        return Decayed::width();
     } else {
         static_assert(std::is_aggregate_v<Decayed>,
                       "Header must be aggregate or p5::uint<N>.");
         static_assert(is_supported_header<Decayed>(),
-                      "All fields must be p5::uint<N> or nested aggregates thereof.");
+                      "All fields must be p5::uint<N>/p5::member/p5::Union or nested aggregates thereof.");
         constexpr std::size_t fields = boost::pfr::tuple_size_v<Decayed>;
         return bit_width_fields<Decayed>(std::make_index_sequence<fields>{});
     }

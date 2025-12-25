@@ -111,6 +111,7 @@ struct InnerMostLayout {
         p5::member<p5::uint<2>> q;  // bits2..3
     } pq;                           // width=4
 };
+using InnerMostUnion = p5::Union<InnerMostLayout>;
 
 struct AltLayout {
     p5::member<p5::uint<6>> low6;      // bits0..5
@@ -123,15 +124,15 @@ struct AltLayout {
 };
 
 bool test_complex_nested_layout() {
-    auto u = P5_MAKE_UNION({
+    P5_UNION(u, {
         p5::member<p5::uint<16>> whole;        // bits0..15 (widest => union base = 16)
         p5::member<p5::uint<4>>  low4;         // bits0..3
         struct {
             p5::member<p5::uint<1>> flag;      // bit0
-            p5::Union<InnerMostLayout> inner;  // bits1..5 (width=5)
+            InnerMostUnion inner;              // bits1..5 (width=5)
             p5::member<p5::uint<2>> pad;       // bits6..7
         } st;
-        P5_UNION_MEMBER(alt, {
+        P5_UNION(alt, {
             p5::member<p5::uint<6>> low6;      // bits0..5
             struct {
                 p5::member<p5::uint<2>> a;     // bits0..1
@@ -233,6 +234,51 @@ bool test_union_assign_from_integral() {
     return ok;
 }
 
+bool test_member_uint_like_ops() {
+    // A small union with a single member view, to exercise p5::member's uint-like APIs.
+    P5_UNION(u, { p5::member<p5::uint<8>> x; });
+
+    u.x = 0b10101100; // 0xAC
+    bool ok = true;
+
+    // Read without explicit cast.
+    ok &= expect_eq(u.x.to_ullong(), 0xAC, "member: to_ullong reads");
+
+    // integral-lhs and member-lhs expressions
+    ok &= ((u.x & 0x0FULL).to_ullong() == 0x0C);
+    ok &= ((0x0FULL & u.x).to_ullong() == 0x0C);
+    ok &= ((u.x | 0x01).to_ullong() == 0xAD);
+    ok &= ((u.x ^ 0xFF).to_ullong() == ((~0xACULL) & 0xFFULL));
+    ok &= ((1 + u.x).to_ullong() == 0xAD);
+
+    // compound ops
+    u.x += 1; // 0xAD
+    ok &= expect_eq(u.x.to_ullong(), 0xAD, "member: +=");
+    u.x &= 0x0F; // 0x0D
+    ok &= expect_eq(u.x.to_ullong(), 0x0D, "member: &=");
+    u.x <<= 1; // 0x1A
+    ok &= expect_eq(u.x.to_ullong(), 0x1A, "member: <<=");
+
+    // ++ / --
+    ++u.x; // 0x1B
+    ok &= expect_eq(u.x.to_ullong(), 0x1B, "member: pre++");
+    auto old = u.x++; // returns uint<8>(0x1B), then x=0x1C
+    ok &= expect_eq(old.to_ullong(), 0x1B, "member: post++ returns old");
+    ok &= expect_eq(u.x.to_ullong(), 0x1C, "member: post++ updates");
+
+    // bit access
+    u.x[0] = 1;
+    ok &= (u.x[0] == true);
+
+    // compile-time slice access
+    u.x[p5::bit_range<3, 1>] = p5::uint<3>(0b101);
+    p5::uint<3> s = u.x[p5::bit_range<3, 1>];
+    ok &= expect_eq(s.to_ullong(), 0b101, "member: bit_range slice read/write");
+    ok &= expect_eq(u.x.slice<3, 1>().to_ullong(), 0b101, "member: slice<High,Low>()");
+
+    return ok;
+}
+
 } // namespace
 
 int main() {
@@ -243,6 +289,7 @@ int main() {
     all_ok &= test_complex_nested_layout();
     all_ok &= test_integral_assignment_and_implicit_reads();
     all_ok &= test_union_assign_from_integral();
+    all_ok &= test_member_uint_like_ops();
 
     if (all_ok) {
         std::cout << "[PASS] p5::Union overlay tests\n";

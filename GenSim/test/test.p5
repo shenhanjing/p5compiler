@@ -99,8 +99,13 @@ struct ETHER_S //96 | 12 | 12
 };
 
 struct VlanInfo_S { //16 | 2 | 3
-    uint<3> Pri;
-    uint<1> Dei;
+    union {
+        uint<4> PriCfi;
+        struct {
+            uint<3> Pri;
+            uint<1> Dei;
+        };
+    };
     uint<12> VlanID;
 };
 
@@ -115,7 +120,12 @@ struct IPv4_S //160 | 20 | 24
 {
   uint<4>    Version;
   uint<4>    Ihl;
-  uint<8>    TOS;
+  union
+  {
+    uint<8>    TOS;
+    uint<6>    DSCP;
+    uint<3>    Precedence;
+  } u_0;
   uint<16>    TotalLen;
   uint<16>    Iden;
   uint<1>     R;
@@ -131,7 +141,12 @@ struct IPv4_S //160 | 20 | 24
 struct IPv6_S //320 | 40 | 41
 {
   uint<4>   Version;
-  uint<8>   TC;              /*Traffic Class*/
+  union
+  {
+    uint<8>   TC;              /*Traffic Class*/
+    uint<6>   DSCP;            /*Differentiated services code point*/
+    uint<3>   Precedence;      /*IP Precedence*/
+  };
   uint<20>  FlowLabel;            /*Flow Label*/
   uint<16>  PayloadLen;           /*Length of packet after IPv6 header*/
   uint<8>   NextProtocol;         /*Type of next header after this one*/
@@ -161,8 +176,16 @@ struct FlagCtrl_S //6 | 1 | 6
 struct DataCtrl_S //16 | 2 | 8
 {
   uint<4>    DataOffset;
-  uint<3>    Res;
-  uint<3>    Ecn;
+  union {
+    struct {
+      uint<3>    Res;
+      uint<3>    Ecn;
+    };
+    struct {
+      uint<4>    Hr2n;  // Private usage
+      uint<2>    Ecn1;
+    };
+  };
   FlagCtrl_S Ctrl;
 };
 
@@ -179,15 +202,15 @@ struct TCP_S //160 | 20 | 26
 };
 
 /****************************        Outer Headers           *********************************/
-ETHER_S ETHER;
-VLAN_TAG_S VLAN_TAG0;
-ETHER_TYPE_S ETHER_TYPE;
+header ETHER_S ETHER;
+header VLAN_TAG_S VLAN_TAG0;
+header ETHER_TYPE_S ETHER_TYPE;
 
-IPv4_S IPv4;
-IPv6_S IPv6;
+header IPv4_S IPv4;
+header IPv6_S IPv6;
 
-UDP_S UDP;
-TCP_S TCP;
+header UDP_S UDP;
+header TCP_S TCP;
 
 /****************************        FV           *********************************/
 @segment("PHI") @volatile("PHI", "in", "in")          PHI_S             PHI;
@@ -342,7 +365,7 @@ table IMA0_MATCH_TBL()
 
 void iMA0Action(IPATFull_S rsIpat, uint<2> IpatStatus)
 {
-    if (_valid(rsIpat) && ((PHI.L3Type == L3_TYPE_IPv4) || (PHI.L3Type == L3_TYPE_IPv6)) ) {
+    if (_valid(rsIpat) && PHI.L3Type[1:1] == 1 ) {
         Vrf = rsIpat.VrfId;
         IsUc = 1;
     } else {

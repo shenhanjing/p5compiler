@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdint>
+#include <type_traits>
 #include <vector>
 
 #include "table.hpp"
@@ -114,8 +115,7 @@ public:
         append_bits(bits, ETHER.ETHER_TYPE.Type);
 
         append_bits(bits, VLAN_TAG0.Tpid);
-        append_bits(bits, VLAN_TAG0.VlanInfo.Pri);
-        append_bits(bits, VLAN_TAG0.VlanInfo.Dei);
+        append_bits(bits, VLAN_TAG0.VlanInfo._noname_u_0);
         append_bits(bits, VLAN_TAG0.VlanInfo.VlanID);
         append_bits(bits, VLAN_TAG0.ETHER_TYPE.Type);
 
@@ -123,7 +123,7 @@ public:
 
         append_bits(bits, IPv4.Version);
         append_bits(bits, IPv4.Ihl);
-        append_bits(bits, IPv4.TOS);
+        append_bits(bits, IPv4.u_0);
         append_bits(bits, IPv4.TotalLen);
         append_bits(bits, IPv4.Iden);
         append_bits(bits, IPv4.R);
@@ -137,7 +137,7 @@ public:
         append_bits(bits, IPv4.DIP);
 
         append_bits(bits, IPv6.Version);
-        append_bits(bits, IPv6.TC);
+        append_bits(bits, IPv6._noname_u_0);
         append_bits(bits, IPv6.FlowLabel);
         append_bits(bits, IPv6.PayloadLen);
         append_bits(bits, IPv6.NextProtocol);
@@ -155,8 +155,7 @@ public:
         append_bits(bits, TCP.SeqNo);
         append_bits(bits, TCP.AckNo);
         append_bits(bits, TCP.DataCtrl.DataOffset);
-        append_bits(bits, TCP.DataCtrl.Res);
-        append_bits(bits, TCP.DataCtrl.Ecn);
+        append_bits(bits, TCP.DataCtrl._noname_u_0);
         append_bits(bits, TCP.DataCtrl.Ctrl.Urg);
         append_bits(bits, TCP.DataCtrl.Ctrl.Ack);
         append_bits(bits, TCP.DataCtrl.Ctrl.Psh);
@@ -203,8 +202,7 @@ public:
         assign_from_bits(in, cursor, ETHER.ETHER_TYPE.Type);
 
         assign_from_bits(in, cursor, VLAN_TAG0.Tpid);
-        assign_from_bits(in, cursor, VLAN_TAG0.VlanInfo.Pri);
-        assign_from_bits(in, cursor, VLAN_TAG0.VlanInfo.Dei);
+        assign_from_bits(in, cursor, VLAN_TAG0.VlanInfo._noname_u_0);
         assign_from_bits(in, cursor, VLAN_TAG0.VlanInfo.VlanID);
         assign_from_bits(in, cursor, VLAN_TAG0.ETHER_TYPE.Type);
 
@@ -212,7 +210,7 @@ public:
 
         assign_from_bits(in, cursor, IPv4.Version);
         assign_from_bits(in, cursor, IPv4.Ihl);
-        assign_from_bits(in, cursor, IPv4.TOS);
+        assign_from_bits(in, cursor, IPv4.u_0);
         assign_from_bits(in, cursor, IPv4.TotalLen);
         assign_from_bits(in, cursor, IPv4.Iden);
         assign_from_bits(in, cursor, IPv4.R);
@@ -226,7 +224,7 @@ public:
         assign_from_bits(in, cursor, IPv4.DIP);
 
         assign_from_bits(in, cursor, IPv6.Version);
-        assign_from_bits(in, cursor, IPv6.TC);
+        assign_from_bits(in, cursor, IPv6._noname_u_0);
         assign_from_bits(in, cursor, IPv6.FlowLabel);
         assign_from_bits(in, cursor, IPv6.PayloadLen);
         assign_from_bits(in, cursor, IPv6.NextProtocol);
@@ -244,8 +242,7 @@ public:
         assign_from_bits(in, cursor, TCP.SeqNo);
         assign_from_bits(in, cursor, TCP.AckNo);
         assign_from_bits(in, cursor, TCP.DataCtrl.DataOffset);
-        assign_from_bits(in, cursor, TCP.DataCtrl.Res);
-        assign_from_bits(in, cursor, TCP.DataCtrl.Ecn);
+        assign_from_bits(in, cursor, TCP.DataCtrl._noname_u_0);
         assign_from_bits(in, cursor, TCP.DataCtrl.Ctrl.Urg);
         assign_from_bits(in, cursor, TCP.DataCtrl.Ctrl.Ack);
         assign_from_bits(in, cursor, TCP.DataCtrl.Ctrl.Psh);
@@ -279,27 +276,45 @@ public:
     }
 
 protected:
+    template <typename T>
+    struct is_p5_union_type : std::false_type {};
+    template <typename Layout>
+    struct is_p5_union_type<p5::Union<Layout>> : std::true_type {};
+
     template <typename P5UInt>
     static void append_bits(std::vector<bool> &bits, const P5UInt &value) {
-        const std::size_t width = P5UInt::width();
-        uint64_t v = value.to_ullong();
-        for (std::size_t i = 0; i < width; ++i) {
-            const bool bit = (v >> (width - 1 - i)) & 0x1;
-            bits.push_back(bit);
+        using T = std::decay_t<P5UInt>;
+        constexpr std::size_t width = T::width();
+        if constexpr (is_p5_union_type<T>::value) {
+            // For p5::Union: treat it as its underlying storage bits (width = base storage width).
+            // Write bits in high-first order.
+            const auto raw = value.to_uint(); // p5::uint<width>
+            for (std::size_t i = 0; i < width; ++i) {
+                bits.push_back(raw[width - 1 - i]);
+            }
+        } else {
+            // For p5::uint / p5::member: read bits directly (high-first).
+            for (std::size_t i = 0; i < width; ++i) {
+                bits.push_back(value[width - 1 - i]);
+            }
         }
     }
 
     template <typename Buffer, typename P5UInt>
     static void assign_from_bits(const Buffer &buf, std::size_t &cursor, P5UInt &target) {
-        const std::size_t width = P5UInt::width();
-        uint64_t v = 0;
+        using T = std::decay_t<P5UInt>;
+        constexpr std::size_t width = T::width();
+
+        // Read width bits from buffer in high-first order, then assign to target.
+        // This works for p5::uint, p5::member and p5::Union (writes to union's base storage).
+        p5::uint<width> tmp{};
         for (std::size_t i = 0; i < width && cursor < buf.size() * 8; ++i, ++cursor) {
             const std::size_t byte_idx = cursor / 8;
             const std::size_t bit_idx = 7 - (cursor % 8); // 高位在前
             const bool bit = (buf[byte_idx] >> bit_idx) & 0x1;
-            v = (v << 1) | static_cast<uint64_t>(bit);
+            tmp[width - 1 - i] = bit; // i=0 is MSB
         }
-        target = v;
+        target = tmp;
     }
 
     template <typename Buffer>

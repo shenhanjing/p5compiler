@@ -31,6 +31,38 @@ bool test_slice_rw_uint() {
 
     p5::uint<3> read_back = v[p5::bit_range<3, 1>];
     ok &= expect_eq(read_back.to_ullong(), slice_val.to_ullong(), "read slice as uint<3>");
+
+    // 复合赋值：直接对切片 +=
+    v[p5::bit_range<3, 1>] += 1; // 0b101 + 1 = 0b110
+    ok &= expect_eq(v.to_ullong(), 0b00001100, "slice +=");
+
+    // 自增：++slice
+    ++v[p5::bit_range<3, 1>]; // 0b110 -> 0b111
+    ok &= expect_eq(v.to_ullong(), 0b00001110, "++slice");
+
+    // 位运算复合赋值：slice &= 0b011
+    v[p5::bit_range<3, 1>] &= 0b011; // 0b111 & 0b011 = 0b011
+    ok &= expect_eq(v.to_ullong(), 0b00000110, "slice &=");
+
+    // 切片内 bit 访问与修改：把该切片的最高位(相对 pos=2) 置 1
+    v[p5::bit_range<3, 1>][2] = 1; // slice[2] == abs bit 3
+    ok &= expect_eq(v.to_ullong(), 0b00001110, "slice bit write");
+
+    // 二级切片：对 [3:1] 再取 [1:0]（相对），应对应原始的 bits[2:1]
+    p5::uint<2> sub = v[p5::bit_range<3, 1>][p5::bit_range<1, 0>];
+    ok &= expect_eq(sub.to_ullong(), 0b11, "nested slice read");
+
+    // ---- comparisons (should work via implicit conversion to uint<width>) ----
+    ok &= (v[p5::bit_range<3, 1>] == p5::uint<3>(0b111));
+    ok &= (v[p5::bit_range<3, 1>] != p5::uint<3>(0b000));
+    ok &= (v[p5::bit_range<3, 1>] == 0b111);
+    ok &= (0b111 == v[p5::bit_range<3, 1>]);
+    ok &= (v[p5::bit_range<3, 1>] > 0b001);
+    ok &= (v[p5::bit_range<3, 1>] >= 0b111);
+    ok &= (v[p5::bit_range<3, 1>] < 0b1000);
+
+    // slice vs slice
+    ok &= (v[p5::bit_range<3, 1>] == v[p5::bit_range<3, 1>]);
     return ok;
 }
 

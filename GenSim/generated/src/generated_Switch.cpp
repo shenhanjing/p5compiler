@@ -87,9 +87,19 @@ IPATFull_S Switch::IpatLookup(p5::uint<2> &Status) {
     _memcpy(CompressedIpatRsp, { Mem });
     return CompressedIpatRsp;
 }
+IPATFull_S Switch::IpatLookup(p5::member<p5::uint<2>> &Status) {
+    p5::uint<10> Glsp;
+    _inflate<IPATRSP_S> CompressedIpatRsp = { 0 };
+    _inflate<IPATRSP_S> Mem = { 0 };
+    Glsp = _key<decltype(Glsp)>();
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_IPAT, TBL_LKUP_TYPE_INDEX, Glsp);
+    Status = _status(SE_TID_IPAT);
+    _memcpy(CompressedIpatRsp, { Mem });
+    return CompressedIpatRsp;
+}
 
 void Switch::iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
-    if (_valid(rsIpat) && (PHI.L3Type == L3_TYPE_IPv4 || PHI.L3Type == L3_TYPE_IPv6)) {
+    if (_valid(rsIpat) && PHI.L3Type[p5::bit_range<1, 1>] == 1) {
         Vrf = rsIpat.VrfId;
         IsUc = 1;
     } else {
@@ -98,6 +108,16 @@ void Switch::iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
 }
 
 FIBFull_S Switch::FibLookup(p5::uint<2> &Status) {
+    p5::uint<136> FibKey;
+    _inflate<FIBRSP_S> CompressedFibRsp = { 0 };
+    _inflate<FIBRSP_S> Mem = { 0 };
+    FibKey = _key<decltype(FibKey)>();
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
+    Status = _status(SE_TID_FIB);
+    _memcpy(CompressedFibRsp, { Mem });
+    return CompressedFibRsp;
+}
+FIBFull_S Switch::FibLookup(p5::member<p5::uint<2>> &Status) {
     p5::uint<136> FibKey;
     _inflate<FIBRSP_S> CompressedFibRsp = { 0 };
     _inflate<FIBRSP_S> Mem = { 0 };

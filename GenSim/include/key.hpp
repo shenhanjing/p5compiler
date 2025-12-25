@@ -75,8 +75,18 @@ private:
     struct is_p5_uint_type<p5::uint<N>> : std::true_type {};
 
     template <typename T>
+    struct is_p5_member_type : std::false_type {};
+    template <typename UIntT>
+    struct is_p5_member_type<p5::member<UIntT>> : std::true_type {};
+
+    template <typename T>
     static constexpr bool is_p5_uint() {
         return is_p5_uint_type<std::decay_t<T>>::value;
+    }
+
+    template <typename T>
+    static constexpr bool is_p5_member() {
+        return is_p5_member_type<std::decay_t<T>>::value;
     }
 
     template <typename T>
@@ -105,12 +115,26 @@ inline void append_uint_bits(const p5::uint<N> &v, std::vector<bool> &out) {
         out.push_back(v[N - 1 - i]);
     }
 }
+
+template <typename UIntT>
+inline void append_member_bits(const p5::member<UIntT> &m, std::vector<bool> &out) {
+    constexpr std::size_t N = p5::member<UIntT>::width();
+    for (std::size_t i = 0; i < N; ++i) {
+        out.push_back(m[N - 1 - i]);
+    }
+}
 }  // namespace detail_keymgr
 
 template <typename T>
 constexpr std::size_t KeyManager::bit_width_of() {
-    static_assert(is_p5_uint<T>(), "KeyManager only supports p5::uint<N> components");
-    return T::width();
+    using Decayed = std::decay_t<T>;
+    static_assert(is_p5_uint<Decayed>() || is_p5_member<Decayed>(),
+                  "KeyManager only supports p5::uint<N> or p5::member<p5::uint<N>> components");
+    if constexpr (is_p5_uint<Decayed>()) {
+        return Decayed::width();
+    } else {
+        return Decayed::width();
+    }
 }
 
 template <typename T>
@@ -126,6 +150,8 @@ template <typename T>
 void KeyManager::append_bits(const T &value, std::vector<bool> &out) {
     if constexpr (is_p5_uint<T>()) {
         detail_keymgr::append_uint_bits(value, out);
+    } else if constexpr (is_p5_member<T>()) {
+        detail_keymgr::append_member_bits(value, out);
     } else if constexpr (std::is_same_v<T, KeyPart>) {
         // KeyPart.value is interpreted with high bit first over 'bits' width.
         for (std::size_t i = 0; i < value.bits; ++i) {
