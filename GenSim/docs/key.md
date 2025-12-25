@@ -7,6 +7,7 @@
 - `KeyPart { uint64_t value; std::size_t bits; }`：单字段及其位宽（高位在前）。
 - `KeyManager::initKey(bitWidths)`：设定槽位宽列表（如 `{16, 32, 48}`），会清空已有数据。
 - `KeyManager::buildKey(parts)`：将若干 `KeyPart` 依序拼接，位宽之和需与某槽相等；匹配失败则忽略本次构建。
+- `KeyManager::KeyBuilder`：增量构建 Key（支持跨多个 switch/分支 append），最后 `commit()` 一次写入槽。
 - `KeyManager::getKey<T>(bits)`：按位宽找到对应槽并以类型 `T` 返回（未命中返回 0）。
 - `KeyManager::getKeyRaw(bits) -> std::optional<uint64_t>`：返回指定位宽槽的原始值。
 - 辅助：`bit_width_of_type<T>()`（定义在 `BuiltIn.h`）。
@@ -22,6 +23,28 @@ g_key.buildKey({KeyPart{KE0, bit_width_of_type<decltype(KE0)>()}});
 
 // 读取：指定位宽返回
 auto k = g_key.getKey<uint16_t>(16);
+```
+
+## 多 switch 共同构建同一个 key（增量 append + 最后 commit）
+当 table 的 key 字段会在多个 switch/分支里分别决定时，不适合在每个分支直接调用 `buildKey(...)`（它会“写槽”，不会合并多次调用）。
+推荐用 `KeyBuilder` 累积 bits，最后在 lookup 前 `commit()` 一次：
+
+```cpp
+KeyManager km;
+km.initKey({24});
+
+auto kb = km.keyBuilder(); // 或 ctx.keyBuilder()
+
+// switch 1: append 第一段 key
+kb.append(p5::uint<8>(0x12));
+
+// switch 2: append 第二段 key
+kb.append(p5::uint<16>(0x3456));
+
+// lookup 前：只 commit 一次
+kb.commit();
+
+auto key = km.getKey<p5::uint<24>>(24);
 ```
 
 ## 设计要点与限制

@@ -46,18 +46,27 @@ public:
         IPATFull_S rsIpat;
 
         void apply() override {
+            auto _KeyBuilder = ctx.keyBuilder();
+            bool _BuiltKey = true;
             switch (ctx.PHI.PortType.to_ullong())
             {
                 case PORT_TYPE_ETH:
                 {
-                    ctx.buildKey(ctx.GLSP);
+                    _KeyBuilder.append(ctx.GLSP);
                     break;
                 }
+                case PORT_TYPE_CPU:
+                case PORT_TYPE_STACK:
                 default:
                 {
+                    _BuiltKey = false;
                     break;
                 }
             }
+            if (_BuiltKey) {
+                _KeyBuilder.commit();
+            }
+
             rsIpat = ctx.IpatLookup(IpatStatus);
         }
     };
@@ -98,22 +107,38 @@ public:
         FIBFull_S rsFib;
 
         void apply() override {
+            auto _KeyBuilder = ctx.keyBuilder();
+            bool _BuiltKey = true;
             switch (ctx.PHI.L3Type.to_ullong()) 
             {
                 case L3_TYPE_IPv4: 
                 { 
-                    ctx.buildKey(ctx.Vrf, ctx.IPv4.DIP, p5::uint<32>(0), p5::uint<32>(0), p5::uint<32>(0));
+                    // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv4.DIP, p5::uint<32>(0), p5::uint<32>(0), p5::uint<32>(0));
+                    _KeyBuilder.append(ctx.Vrf);
+                    _KeyBuilder.append(ctx.IPv4.DIP);
+                    _KeyBuilder.append(p5::uint<32>(0));
+                    _KeyBuilder.append(p5::uint<32>(0));
+                    _KeyBuilder.append(p5::uint<32>(0));
                     break;
                 }
                 case L3_TYPE_IPv6: 
                 { 
-                    ctx.buildKey(ctx.Vrf, ctx.IPv6.DIP);
+                    // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv6.DIP);
+                    _KeyBuilder.append(ctx.Vrf);
+                    _KeyBuilder.append(ctx.IPv6.DIP);
                     break;
                 }
+                case L3_TYPE_NON_IP:
+                case L3_TYPE_INVALID:
                 default: { 
+                    _BuiltKey = false;
                     break;
                 }
             }
+            if (_BuiltKey) {
+                _KeyBuilder.commit();
+            }
+            
             rsFib = ctx.FibLookup(StatusFib);
         }
     };

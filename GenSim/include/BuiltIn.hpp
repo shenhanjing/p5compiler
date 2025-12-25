@@ -96,6 +96,10 @@ public:
         key_.buildKey(parts...);
     }
 
+    // Incremental key construction:
+    // auto kb = ctx.keyBuilder(); kb.append(...); ...; kb.commit();
+    inline KeyManager::KeyBuilder keyBuilder() { return key_.keyBuilder(); }
+
     template <typename T>
         inline bool _valid(const _inflate<T> &v) const {
         return v.valid;

@@ -349,7 +349,18 @@ table IPAT_TBL()
 {
     key =
     {
-        GLSP;
+      switch (PHI.PortType)
+      {
+        case PORT_TYPE_ETH:
+        {
+          GLSP;
+        }
+        case PORT_TYPE_CPU:
+        case PORT_TYPE_STACK:
+        default:
+        {
+        }
+      }
     }
 
     uint<2> IpatStatus = _status();
@@ -416,6 +427,8 @@ table FIB_TBL()
               Vrf;
               IPv6.DIP;
           }
+          case L3_TYPE_NON_IP:
+          case L3_TYPE_INVALID:
           default: { 
             //Skip
           }

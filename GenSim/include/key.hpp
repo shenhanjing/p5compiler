@@ -23,6 +23,42 @@ struct KeyPart {
 // the desired bitwidth explicitly.
 class KeyManager {
 public:
+    // Incremental key construction helper:
+    // - Call append(...) across multiple control branches/switches
+    // - Call commit() once before lookup to write into the matching key slot
+    class KeyBuilder {
+    public:
+        explicit KeyBuilder(KeyManager &km) : km_(km) {}
+
+        void reset() { bits_.clear(); }
+        std::size_t bits() const { return bits_.size(); }
+
+        template <typename Part>
+        void append(const Part &part) {
+            // Reuse KeyManager's bit extraction rules (p5::uint, p5::member, KeyPart)
+            KeyManager::append_bits(part, bits_);
+        }
+
+        template <typename... Parts>
+        void appendMany(const Parts &...parts) {
+            (append(parts), ...);
+        }
+
+        // Commit the accumulated bits into the slot whose bitwidth matches.
+        // Returns true if a slot matched and was updated.
+        bool commit() {
+            const std::size_t totalBits = bits_.size();
+            int idx = km_.findSlotByBits(totalBits);
+            if (idx < 0) return false;
+            km_.slots_[idx]->setBits(bits_);
+            return true;
+        }
+
+    private:
+        KeyManager &km_;
+        std::vector<bool> bits_;
+    };
+
     void initKey(std::initializer_list<std::size_t> bitWidths);
     void initKey(const std::vector<std::size_t> &bitWidths);
 
@@ -36,7 +72,11 @@ public:
     T getKey(std::size_t bits) const;
     std::optional<std::vector<bool>> getKeyBits(std::size_t bits) const;
 
+    // Create a builder for incremental key construction.
+    KeyBuilder keyBuilder() { return KeyBuilder(*this); }
+
 private:
+    friend class KeyBuilder;
     struct BaseSlot {
         virtual ~BaseSlot() = default;
         virtual std::size_t bits() const = 0;
