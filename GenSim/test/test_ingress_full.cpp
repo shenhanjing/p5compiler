@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "generated_Switch.hpp"
+#include "generated_switch.hpp"
 
 namespace {
 

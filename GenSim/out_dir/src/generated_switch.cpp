@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include "generated_Switch.hpp"
+#include "generated_switch.hpp"
 
 Switch::Switch() : GtvContext(), BuiltInContext(), Packet() {}
 

@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "../include/BuiltIn.hpp"
-#include "generated_Switch.hpp"
+#include "generated_switch.hpp"
 
 namespace {
 

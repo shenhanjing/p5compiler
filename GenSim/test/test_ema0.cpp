@@ -1,7 +1,7 @@
 // eMA0 tests: EPAT/ENCAP INDEX lookups + EncapProfile gating + HM overwrites
 #include <iostream>
 
-#include "generated_Switch.hpp"
+#include "generated_switch.hpp"
 
 namespace {
 
