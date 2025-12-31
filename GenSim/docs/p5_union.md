@@ -274,3 +274,72 @@ make TEST=test/test_uint_union.cpp
 ```
 
 
+# Union
+* 添加类型`p5::Union`以及`p5::member`，对这两种类型做适配
+* 大小上限
+
+## Member
+* 假设`p5::member`所支持的操作应和`p5::uint`的相同
+* “左值”和“右值”
+* 能作为函数uint参数，值传递（可以），引用传递（不可以，考虑将含有引用参数的函数写为模板）
+* `.ullong`数组索引（可以）
+* 键值构建中的组件
+
+## Union
+* 只会是struct中的成员？
+* `p5::Union`定义与声明分开的情况，`struct_union_type_declaration`，`IR::Type_Struct`
+```CPP
+union XX {
+    ...
+};
+XX var;
+```
+应转换为
+```cpp
+struct _Layout_XX {
+    ...
+};
+using XX = p5::Union<_Layout_XX>;
+using _member_XX = p5::Union<_Layout_XX>;
+XX var;
+```
+* 在struct/union中无类型名声明union成员时，`anonymous_struct_union_dec`，`IR::StructField`
+```CPP
+struct YY {
+    ...
+    union {
+        uint<8> a;
+        type b;
+        union {
+            uint<8> c;
+            type d;
+        }
+    } xx;
+    ...
+};
+```
+应转换为
+```cpp
+struct YY {
+    ...
+    P5_UNION(xx, {
+        ...
+    });
+    ...
+};
+```
+* 对所有匿名union成员添加一个名称
+* 所有p5的union在转换为C++的过程中，花括号内的成员执行如下逻辑：
+1. `uint<n>`转换为`p5::member<p5::uint<n>>`
+2. 有类型名struct/union成员声明将类型名加上`_inU_`前缀
+3. 无类型名struct成员对花括号内成员执行相同逻辑转换
+4. 无类型名union成员在转换为`P5_UNION`形式后执行相同逻辑转换
+* 所有p5的有类型名struct在转换为C++的过程中，除了正常转换之外，生成一个名称加上`_inU_`前缀的版本，其进行如上逻辑转换
+
+* 作为结构体成员的花括号赋值，匿名构造
+* 用`p5::Union`来作为函数返回类型以及参数类型，能作为函数参数，值传递，引用传递？
+* p5::uint引用传递的函数需要转换为模板类支持同时支持p5::uint&和p5::member&
+
+* 可以用作单独的变量定义
+* member可用作查表参数
+* union可用作函数参数值传递引用传递，可用作查表参数，可以用(union_s){0}，(union_s)0xFF0000构造，可以用来声明数组，切片操作（？）

@@ -17,6 +17,7 @@ struct PHI_S {
     p5::uint<2> L3Type;
     p5::uint<8> L4Type;
 };
+
 struct _inU_PHI_S {
     p5::member<p5::uint<4>> PortType;
     p5::member<p5::uint<2>> L2Type;
@@ -28,6 +29,7 @@ struct _inU_PHI_S {
 struct ETHER_TYPE_S {
     p5::uint<16> Type;
 };
+
 struct _inU_ETHER_TYPE_S {
     p5::member<p5::uint<16>> Type;
 };
@@ -37,6 +39,7 @@ struct ETHER_S {
     p5::uint<48> Smac;
     ETHER_TYPE_S ETHER_TYPE;
 };
+
 struct _inU_ETHER_S {
     p5::member<p5::uint<48>> Dmac;
     p5::member<p5::uint<48>> Smac;
@@ -44,22 +47,23 @@ struct _inU_ETHER_S {
 };
 
 struct VlanInfo_S {
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_1, {
         p5::member<p5::uint<4>> PriCfi;
         struct {
             p5::member<p5::uint<3>> Pri;
             p5::member<p5::uint<1>> Dei;
-        } _noname_st_0;
+        } _anon_0;
     });
     p5::uint<12> VlanID;
 };
+
 struct _inU_VlanInfo_S {
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_1, {
         p5::member<p5::uint<4>> PriCfi;
         struct {
             p5::member<p5::uint<3>> Pri;
             p5::member<p5::uint<1>> Dei;
-        } _noname_st_0;
+        } _anon_0;
     });
     p5::member<p5::uint<12>> VlanID;
 };
@@ -69,6 +73,7 @@ struct VLAN_TAG_S {
     VlanInfo_S VlanInfo;
     ETHER_TYPE_S ETHER_TYPE;
 };
+
 struct _inU_VLAN_TAG_S {
     p5::member<p5::uint<16>> Tpid;
     _inU_VlanInfo_S VlanInfo;
@@ -95,6 +100,7 @@ struct IPv4_S {
     p5::uint<32> SIP;
     p5::uint<32> DIP;
 };
+
 struct _inU_IPv4_S {
     p5::member<p5::uint<4>> Version;
     p5::member<p5::uint<4>> Ihl;
@@ -118,7 +124,7 @@ struct _inU_IPv4_S {
 
 struct IPv6_S {
     p5::uint<4> Version;
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_3, {
         p5::member<p5::uint<8>> TC;
         p5::member<p5::uint<6>> DSCP;
         p5::member<p5::uint<3>> Precedence;
@@ -130,9 +136,10 @@ struct IPv6_S {
     p5::uint<128> SIP;
     p5::uint<128> DIP;
 };
+
 struct _inU_IPv6_S {
     p5::member<p5::uint<4>> Version;
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_3, {
         p5::member<p5::uint<8>> TC;
         p5::member<p5::uint<6>> DSCP;
         p5::member<p5::uint<3>> Precedence;
@@ -151,6 +158,7 @@ struct UDP_S {
     p5::uint<16> Length;
     p5::uint<16> Checksum;
 };
+
 struct _inU_UDP_S {
     p5::member<p5::uint<16>> SrcPort;
     p5::member<p5::uint<16>> DstPort;
@@ -166,6 +174,7 @@ struct FlagCtrl_S {
     p5::uint<1> Syn;
     p5::uint<1> Fin;
 };
+
 struct _inU_FlagCtrl_S {
     p5::member<p5::uint<1>> Urg;
     p5::member<p5::uint<1>> Ack;
@@ -177,29 +186,30 @@ struct _inU_FlagCtrl_S {
 
 struct DataCtrl_S {
     p5::uint<4> DataOffset;
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_6, {
         struct {
             p5::member<p5::uint<3>> Res;
             p5::member<p5::uint<3>> Ecn;
-        } _noname_st_0;
+        } _anon_4;
         struct {
             p5::member<p5::uint<4>> Hr2n;
             p5::member<p5::uint<2>> Ecn1;
-        } _noname_st_1;
+        } _anon_5;
     });
     FlagCtrl_S Ctrl;
 };
+
 struct _inU_DataCtrl_S {
     p5::member<p5::uint<4>> DataOffset;
-    P5_UNION(_noname_u_0, {
+    P5_UNION(_anon_6, {
         struct {
             p5::member<p5::uint<3>> Res;
             p5::member<p5::uint<3>> Ecn;
-        } _noname_st_0;
+        } _anon_4;
         struct {
             p5::member<p5::uint<4>> Hr2n;
             p5::member<p5::uint<2>> Ecn1;
-        } _noname_st_1;
+        } _anon_5;
     });
     _inU_FlagCtrl_S Ctrl;
 };
@@ -214,6 +224,7 @@ struct TCP_S {
     p5::uint<16> Checksum;
     p5::uint<16> UrgentPtr;
 };
+
 struct _inU_TCP_S {
     p5::member<p5::uint<16>> SrcPort;
     p5::member<p5::uint<16>> DstPort;
@@ -232,6 +243,7 @@ struct IPATRSP_S {
     p5::uint<8> VrfId;
     VlanInfo_S Pvid;
 };
+
 struct _inU_IPATRSP_S {
     p5::member<p5::uint<1>> Valid;
     p5::member<p5::uint<1>> RouterIntf;
@@ -240,22 +252,20 @@ struct _inU_IPATRSP_S {
     _inU_VlanInfo_S Pvid;
 };
 
-using IPATFull_S = _inflate<IPATRSP_S>;
-
 struct FIBRSP_S {
     p5::uint<10> Port;
     p5::uint<8> EncapIndex;
 };
+
 struct _inU_FIBRSP_S {
     p5::member<p5::uint<10>> Port;
     p5::member<p5::uint<8>> EncapIndex;
 };
 
-using FIBFull_S = _inflate<FIBRSP_S>;
-
 struct ENCAP_LOCAL_ADDR_S {
     p5::uint<48> SMAC;
 };
+
 struct _inU_ENCAP_LOCAL_ADDR_S {
     p5::member<p5::uint<48>> SMAC;
 };
@@ -267,6 +277,7 @@ struct EPATRSP_S {
         _inU_ENCAP_LOCAL_ADDR_S Addr;
     });
 };
+
 struct _inU_EPATRSP_S {
     p5::member<p5::uint<1>> Valid;
     p5::member<p5::uint<31>> Rsvd;
@@ -275,11 +286,10 @@ struct _inU_EPATRSP_S {
     });
 };
 
-using EPATFull_S = _inflate<EPATRSP_S>;
-
 struct ENCAP_ARP_S {
     p5::uint<48> DMAC;
 };
+
 struct _inU_ENCAP_ARP_S {
     p5::member<p5::uint<48>> DMAC;
 };
@@ -291,6 +301,7 @@ struct ENCAPRSP_S {
         _inU_ENCAP_ARP_S Arp;
     });
 };
+
 struct _inU_ENCAPRSP_S {
     p5::member<p5::uint<1>> Valid;
     p5::member<p5::uint<31>> Rsvd;
@@ -299,6 +310,9 @@ struct _inU_ENCAPRSP_S {
     });
 };
 
+using IPATFull_S = _inflate<IPATRSP_S>;
+using FIBFull_S = _inflate<FIBRSP_S>;
+using EPATFull_S = _inflate<EPATRSP_S>;
 using ENCAPFull_S = _inflate<ENCAPRSP_S>;
 
 #endif // GENERATED_STRUCT_HPP

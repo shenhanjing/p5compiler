@@ -116,11 +116,81 @@ void Switch::iMA1Action(FIBFull_S rsFib) {
     }
 }
 
+EPATFull_S Switch::EpatLookup(p5::uint_ref<2> Status)
+{
+    p5::uint<10> Gltp;
+    _inflate<EPATRSP_S> CompressedEpatRsp = { 0 };
+    _inflate<EPATRSP_S> Mem = { 0 };
+    Gltp = _key<decltype(Gltp)>();
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
+    Status = _status(SE_TID_EPAT);
+    _memcpy(CompressedEpatRsp, { Mem });
+    return CompressedEpatRsp;
+}
+
+ENCAPFull_S Switch::EncapLookup(p5::uint_ref<2> Status)
+{
+    p5::uint<8> index;
+    _inflate<ENCAPRSP_S> CompressedEncapRsp = { 0 };
+    _inflate<ENCAPRSP_S> Mem = { 0 };
+    index = _key<decltype(index)>();
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
+    Status = _status(SE_TID_ENCAP);
+    _memcpy(CompressedEncapRsp, { Mem });
+    
+    return CompressedEncapRsp;
+}
+
+void Switch::eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    if (IsUc.to_ullong()) {
+        EncapProfile = 1;
+    } else {
+        EncapProfile = 0;
+    }
+}
+
+void Switch::EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    switch (EncapProfile.to_ullong()) {
+        case 1: {
+            ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
+            ETHER.Smac = rsEpat.Dma.Addr.SMAC;
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void Switch::IpOverwrite()
+{
+    switch (EncapProfile.to_ullong())
+    {
+        case 1: {
+            IPv4.TTL = TTL;
+            IPv4.u_0.TOS = TOS;
+            break;
+        } 
+        default: {
+            break;
+        }
+    }
+}
+
+void Switch::eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    EthODma(rsEpat, rsEncap);
+
+    IpOverwrite();
+}
+
 // ========== ingress 实现 ==========
 void Switch::pre_iMAControl()
 {
-  IPRS_TBL tbIprs = IPRS_TBL(*this);
-  tbIprs.apply();
+    IPRS_TBL tbIprs = IPRS_TBL(*this);
+    tbIprs.apply();
 }
 
 void Switch::iMA0Control() {
@@ -143,6 +213,29 @@ void Switch::ingress() {
     iMA1Control();
 }
 
+// ========== egress 实现 ==========
+void Switch::pre_eMAControl()
+{
+    EPRS_TBL tbEprs = EPRS_TBL(*this);
+    tbEprs.apply();
+}
+
+void Switch::eMA0Control()
+{
+    EMA0_MATCH_TBL tbEMA0Match = EMA0_MATCH_TBL(*this);
+    EMA0_ACTION_TBL tbEMA0Action = EMA0_ACTION_TBL(*this, tbEMA0Match);
+    EMA0_HM_TBL tbEMA0HM = EMA0_HM_TBL(*this, tbEMA0Match);
+    tbEMA0Match.apply();
+    tbEMA0Action.apply();
+    tbEMA0HM.apply();
+}
+
+void Switch::egress()
+{
+    pre_eMAControl();
+    eMA0Control();
+}
+
 // ========== interface 实现 ==========
 void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef &nhi_info, 
                     Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info) {
@@ -150,13 +243,15 @@ void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef
     (void)cp2np_hdr;
     // 载入原始包
     std::memcpy(data_.data(), pkt_hdr.pkt_data, PKT_HEADER_BYTE_LEN);
-    offset_ = 0;
+    reset_offset();
     // 基础字段
     PHI.PortType = parser_hinfo.port_type;
     GLSP = parser_hinfo.port_id;
 
     if (direction == 0) {
         pre_iMAControl();
+    } else if (direction == 1) {
+        pre_eMAControl();
     }
 
     // 打包输出
@@ -196,6 +291,8 @@ void Switch::SingleMaProc(const int ma_id, const std::string &packet_id, const i
         iMA0Control();
     } else if (ma_id == 1) {
         iMA1Control();
+    } else if (ma_id == 2) {
+        eMA0Control();
     }
 
     std::memcpy(fv_out.phData, data_.data(), PKT_HEADER_BYTE_LEN);
@@ -236,11 +333,38 @@ void Switch::ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ima2Ip
     std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);
 }
 
+void Switch::EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ema2EpmFvInfoDef &fv_out) {
+    (void)port_id;
+
+    // 载入 PH 数据
+    std::memcpy(data_.data(), fv_in.phData, PKT_HEADER_BYTE_LEN);
+
+    // 解包 PHI/PHO/GTV
+    PhiPackedBuffer phiIn{};
+    std::memcpy(phiIn.data(), fv_in.phiData, FV_PHI_BYTE_NUM);
+    unpack_phi_from_bytes(phiIn);
+
+    PhoPackedBuffer phoIn{};
+    std::memcpy(phoIn.data(), fv_in.phoData, FV_PHO_BYTE_NUM);
+    unpack_pho_from_bytes(phoIn);
+
+    GtvPackedBuffer gtvIn{};
+    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);
+    unpack_gtv_from_bytes(gtvIn);
+
+    // 执行 EMA 流程
+    eMA0Control();
+
+    // 打包输出，仅 gtvData
+    auto gtvOut = pack_gtv_to_bytes();
+    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);
+}
+
 // ========== 重置所有字段 ==========
 void Switch::reset_all_fields() {
     // 清零 data_/offset_
     std::memset(data_.data(), 0, data_.size());
-    offset_ = 0;
+    reset_offset();
 
     // 清零 PHI
     PHI = PHI_S{};

@@ -117,17 +117,6 @@ void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
     }
 }
 
-@control void eMA0Control()
-{
-  @hw_map("EMA0_MATCH")       EMA0_MATCH_TBL         tbEMA0Match       = EMA0_MATCH_TBL();
-  @hw_map("EMA0_ACTION")      EMA0_ACTION_TBL        tbEMA0Action      = EMA0_ACTION_TBL(tbEMA0Match);
-  @hw_map("EMA1_HM") @modifier EMA0_HM_TBL           tbEMA0HM          = EMA0_HM_TBL(tbEMA0Match);
-
-  _apply(tbEMA0Match);
-  _apply(tbEMA0Action);
-  _apply(tbEMA0HM);
-}
-
 table EMA0_ACTION_TBL(EMA0_MATCH_TBL tbEMA0Match)
 {
     eMA0Action(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
@@ -167,10 +156,34 @@ void eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 table EMA0_HM_TBL(EMA0_MATCH_TBL tbEMA0Match)
 {
     eMA0_HmProc(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
-    ma_id = 0;
+}
+
+table EPRS_TBL()
+{
+  eprs();
+};
+
+@control void pre_eMAControl()
+{
+  @hw_map("EPRS")       EPRS_TBL tbEprs		= EPRS_TBL();  
+
+  _apply(tbEprs); 
+}
+
+@control void eMA0Control()
+{
+  @hw_map("EMA0_MATCH")       EMA0_MATCH_TBL         tbEMA0Match       = EMA0_MATCH_TBL();
+  @hw_map("EMA0_ACTION")      EMA0_ACTION_TBL        tbEMA0Action      = EMA0_ACTION_TBL(tbEMA0Match);
+  @hw_map("EMA1_HM") @modifier EMA0_HM_TBL           tbEMA0HM          = EMA0_HM_TBL(tbEMA0Match);
+
+  _apply(tbEMA0Match);
+  _apply(tbEMA0Action);
+  _apply(tbEMA0HM);
 }
 
 @control void egress()
 {
+  pre_eMAControl();
+  
   eMA0Control();
 }

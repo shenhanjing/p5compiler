@@ -28,6 +28,12 @@ enum class MatchType {
 // enforced per table ID at runtime via dynamic dispatch per match type.
 class SearchEngine {
 public:
+    // Public control parameters (mirrors some P5 built-ins / control-plane knobs).
+    // They are stored in SearchEngine so higher-level contexts (BuiltInContext/Switch)
+    // can share and mutate them while keeping a single source of truth.
+    uint16_t table_id{0};
+    uint16_t command{0};
+
     enum class Status : uint8_t {
         MATCH = 0,
         NO_MATCH = 1,

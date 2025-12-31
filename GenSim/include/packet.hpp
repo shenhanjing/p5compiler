@@ -20,7 +20,39 @@ public:
 
     // 原始数据缓冲区（最多 PKT_HEADER_BYTE_LEN 字节）
     std::array<uint8_t, PKT_HEADER_BYTE_LEN> data_;
-    mutable p5::uint<7> offset_;   // 当前解析偏移，单位：字节
+    // 当前解析偏移：
+    // - offset_：以字节为单位（保持 7 位，不改动）
+    // - bit_offset_：字节内偏移（以 bit 为单位，0~7）
+    // 绝对 bit 光标 = offset_ * 8 + bit_offset_（bit_offset_ 采用 MSB-first：0 表示当前字节的最高位）
+    mutable p5::uint<7> offset_;
+    mutable p5::uint<3> bit_offset_{0};
+
+    // 重置解析偏移（不清理 data_ 内容）
+    void reset_offset() const {
+        offset_ = 0;
+        bit_offset_ = 0;
+    }
+
+    // Advance bit stream pointer by bits.
+    // Note: bit_offset_ is MSB-first within a byte (0 means the current byte's MSB).
+    void _advance(p5::uint<16> bits) const {
+        const std::size_t start_byte = static_cast<std::size_t>(offset_.to_ullong());
+        const std::size_t start_bit_in_byte = static_cast<std::size_t>(bit_offset_.to_ullong());
+        const std::size_t start_bit = start_byte * 8 + start_bit_in_byte;
+
+        const std::size_t total_bits = static_cast<std::size_t>(PKT_HEADER_BYTE_LEN) * 8;
+        std::size_t new_bit = start_bit + static_cast<std::size_t>(bits.to_ullong());
+        if (new_bit > total_bits) {
+            std::cerr << "[Packet] _advance overflow: start_bit=" << start_bit
+                      << " advance=" << bits.to_ullong()
+                      << " total_bits=" << total_bits
+                      << " (clamp to end)\n";
+            new_bit = total_bits;
+        }
+
+        offset_ = static_cast<uint64_t>(new_bit / 8);
+        bit_offset_ = static_cast<uint64_t>(new_bit % 8);
+    }
 
     template <typename Header>
     void _lookahead(Header &hdr) const {
@@ -109,33 +141,40 @@ private:
                       "_extract/_lookahead supports only p5::uint<N>/p5::member/p5::Union or their aggregates.");
 
         constexpr std::size_t hdr_bits = bit_width_of<Header>();
-        constexpr std::size_t hdr_len_bytes = (hdr_bits + 7) / 8;
-        const std::size_t start = static_cast<std::size_t>(offset_.to_ullong());
+        const std::size_t start_byte = static_cast<std::size_t>(offset_.to_ullong());
+        const std::size_t start_bit_in_byte = static_cast<std::size_t>(bit_offset_.to_ullong());
+        const std::size_t start_bit = start_byte * 8 + start_bit_in_byte;
+        const std::size_t end_bit = start_bit + hdr_bits;
+        const std::size_t total_bits = static_cast<std::size_t>(PKT_HEADER_BYTE_LEN) * 8;
 
-        if (start + hdr_len_bytes > PKT_HEADER_BYTE_LEN) {
-            std::cerr << "[Packet] insufficient data: need " << hdr_len_bytes
-                      << " bytes, have "
-                      << (PKT_HEADER_BYTE_LEN > start ? (PKT_HEADER_BYTE_LEN - start) : 0)
-                      << " bytes\n";
+        if (end_bit > total_bits) {
+            std::cerr << "[Packet] insufficient data: need " << hdr_bits
+                      << " bits, have "
+                      << (total_bits > start_bit ? (total_bits - start_bit) : 0)
+                      << " bits\n";
         }
 
         std::vector<bool> bits;
-        bits.reserve(hdr_len_bytes * 8);
-        for (std::size_t i = 0; i < hdr_len_bytes; ++i) {
+        bits.reserve(hdr_bits);
+        for (std::size_t i = 0; i < hdr_bits; ++i) {
+            const std::size_t abs_bit = start_bit + i;
+            const std::size_t byte_idx = abs_bit / 8;
+            const std::size_t bit_idx_in_byte = abs_bit % 8; // 0..7, MSB-first
             uint8_t byte = 0;
-            if (start + i < PKT_HEADER_BYTE_LEN) {
-                byte = data_[start + i];
+            if (byte_idx < PKT_HEADER_BYTE_LEN) {
+                byte = data_[byte_idx];
             }
-            for (int b = 7; b >= 0; --b) {
-                bits.push_back((byte >> b) & 0x1);
-            }
+            const uint8_t bit = static_cast<uint8_t>((byte >> (7 - bit_idx_in_byte)) & 0x1);
+            bits.push_back(bit != 0);
         }
 
         std::size_t cur = 0;
         decode_any(bits, cur, hdr);
 
         if (advance) {
-            offset_ = static_cast<uint64_t>(start + hdr_len_bytes);
+            const std::size_t new_bit = end_bit;
+            offset_ = static_cast<uint64_t>(new_bit / 8);
+            bit_offset_ = static_cast<uint64_t>(new_bit % 8);
         }
     }
 };

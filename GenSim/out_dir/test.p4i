@@ -1,65 +1,69 @@
-#define PG_OUTER_L2  0
-#define PG_OUTER_L3  1
-#define PG_OUTER_L4  2
+# 0 "./test/test.p5"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "./test/test.p5"
 
-#define IP_PROTOCOL_TCP      0x06
-#define IP_PROTOCOL_UDP      0x11
+
+
+
+
+
 
 enum RSP_STATUS_E
 {
-  RSP_STATUS_MATCH          = 0,
-  RSP_STATUS_NO_MATCH       = 1,
+  RSP_STATUS_MATCH = 0,
+  RSP_STATUS_NO_MATCH = 1,
   RSP_STATUS_LOOKUP_SKIPPED = 2,
-  RSP_STATUS_ERROR          = 3
+  RSP_STATUS_ERROR = 3
 };
 
 enum TLB_LKUP_TYPE_E
 {
-  TBL_LKUP_TYPE_INDEX                    = 0,
-  TBL_LKUP_TYPE_EM                       = 1,
-  TBL_LKUP_TYPE_LPM                      = 3,
-  TBL_LKUP_TYPE_TCAM                     = 4
+  TBL_LKUP_TYPE_INDEX = 0,
+  TBL_LKUP_TYPE_EM = 1,
+  TBL_LKUP_TYPE_LPM = 3,
+  TBL_LKUP_TYPE_TCAM = 4
 };
 
 enum SE_TID_E
 {
-    SE_TID_IPAT                    =    0,
-    SE_TID_FIB                     =    1,
-    SE_TID_EPAT                    =    2,
-    SE_TID_ENCAP                   =    3
+    SE_TID_IPAT = 0,
+    SE_TID_FIB = 1,
+    SE_TID_EPAT = 2,
+    SE_TID_ENCAP = 3
 };
 
 enum PORT_TYPE_E
 {
-    PORT_TYPE_ETH          = 0,
-    PORT_TYPE_CPU          = 1,
-    PORT_TYPE_STACK        = 2
+    PORT_TYPE_ETH = 0,
+    PORT_TYPE_CPU = 1,
+    PORT_TYPE_STACK = 2
 };
 
-enum PHO_OFFSETS_E 
+enum PHO_OFFSETS_E
 {
-  PHO_OUTER_L2_START                    = 0,
-  PHO_OUTER_VLANS_START                 = 1,
-  PHO_OUTER_L3_START                    = 2,
-  PHO_OUTER_L4_START                    = 3
+  PHO_OUTER_L2_START = 0,
+  PHO_OUTER_VLANS_START = 1,
+  PHO_OUTER_L3_START = 2,
+  PHO_OUTER_L4_START = 3
 
 };
 
 enum L4_PROTOCOL_E
 {
-  L4_PROTOCOL_NONE             = 0,
+  L4_PROTOCOL_NONE = 0,
 
-  L4_PROTOCOL_TCP              = 10,
-  
-  L4_PROTOCOL_UDP	             = 32
+  L4_PROTOCOL_TCP = 10,
+
+  L4_PROTOCOL_UDP = 32
 };
 
 enum L2_TYPE_E
 {
-  L2_TYPE_INVALID  = 0,
+  L2_TYPE_INVALID = 0,
   L2_TYPE_ETHERNET = 1,
-  L2_TYPE_OTHER    = 2,
-  L2_TYPE_RES      = 3
+  L2_TYPE_OTHER = 2,
+  L2_TYPE_RES = 3
 };
 
 enum VLAN_TYPE_E
@@ -88,7 +92,7 @@ struct PHI_S //18 | 3 | 5
 
 struct ETHER_TYPE_S //16 | 2 | 2
 {
-  uint<16>    Type;
+  uint<16> Type;
 };
 
 struct ETHER_S //96 | 12 | 12
@@ -111,79 +115,79 @@ struct VlanInfo_S { //16 | 2 | 3
 
 struct VLAN_TAG_S //32 | 4 | 5
 {
-  uint<16>     Tpid;
-  VlanInfo_S   VlanInfo;
+  uint<16> Tpid;
+  VlanInfo_S VlanInfo;
   ETHER_TYPE_S ETHER_TYPE;
 };
 
 struct IPv4_S //160 | 20 | 24
 {
-  uint<4>    Version;
-  uint<4>    Ihl;
+  uint<4> Version;
+  uint<4> Ihl;
   union
   {
-    uint<8>    TOS;
-    uint<6>    DSCP;
-    uint<3>    Precedence;
+    uint<8> TOS;
+    uint<6> DSCP;
+    uint<3> Precedence;
   } u_0;
-  uint<16>    TotalLen;
-  uint<16>    Iden;
-  uint<1>     R;
-  uint<1>     DF;
-  uint<1>     MF;
-  uint<13>    FragOffset;
-  uint<8>       TTL;
-  uint<8>       Protocol;
-  uint<16>      Checksum;
-  uint<32>      SIP;
-  uint<32>      DIP;
+  uint<16> TotalLen;
+  uint<16> Iden;
+  uint<1> R;
+  uint<1> DF;
+  uint<1> MF;
+  uint<13> FragOffset;
+  uint<8> TTL;
+  uint<8> Protocol;
+  uint<16> Checksum;
+  uint<32> SIP;
+  uint<32> DIP;
 };
 struct IPv6_S //320 | 40 | 41
 {
-  uint<4>   Version;
+  uint<4> Version;
   union
   {
-    uint<8>   TC;              /*Traffic Class*/
-    uint<6>   DSCP;            /*Differentiated services code point*/
-    uint<3>   Precedence;      /*IP Precedence*/
+    uint<8> TC; /*Traffic Class*/
+    uint<6> DSCP; /*Differentiated services code point*/
+    uint<3> Precedence; /*IP Precedence*/
   };
-  uint<20>  FlowLabel;            /*Flow Label*/
-  uint<16>  PayloadLen;           /*Length of packet after IPv6 header*/
-  uint<8>   NextProtocol;         /*Type of next header after this one*/
-  uint<8>   HopLmt;               /*Hop limit*/
-  uint<128>  SIP;                 /*Source address */
-  uint<128>  DIP;                 /*Destination address  */
+  uint<20> FlowLabel; /*Flow Label*/
+  uint<16> PayloadLen; /*Length of packet after IPv6 header*/
+  uint<8> NextProtocol; /*Type of next header after this one*/
+  uint<8> HopLmt; /*Hop limit*/
+  uint<128> SIP; /*Source address */
+  uint<128> DIP; /*Destination address  */
 };
 
 struct UDP_S //64 | 8 | 8
 {
-  uint<16>    SrcPort;
-  uint<16>    DstPort;
-  uint<16>    Length;
-  uint<16>    Checksum;
+  uint<16> SrcPort;
+  uint<16> DstPort;
+  uint<16> Length;
+  uint<16> Checksum;
 };
 
 struct FlagCtrl_S //6 | 1 | 6
 {
-  uint<1>    Urg;
-  uint<1>    Ack;
-  uint<1>    Psh;
-  uint<1>    Rst;
-  uint<1>    Syn;
-  uint<1>    Fin;
+  uint<1> Urg;
+  uint<1> Ack;
+  uint<1> Psh;
+  uint<1> Rst;
+  uint<1> Syn;
+  uint<1> Fin;
 };
 
 struct DataCtrl_S //16 | 2 | 8
 {
-  uint<4>    DataOffset;
+  uint<4> DataOffset;
   union {
     struct {
-      uint<3>    Res;
-      uint<3>    Ecn;
+      uint<3> Res;
+      uint<3> Ecn;
     };
     struct {
-      uint<4>    Hr2n;  // Private usage
-      uint<2>    Ecn1;
+      uint<4> Hr2n; // Private usage
+      uint<2> Ecn1;
     };
   };
   FlagCtrl_S Ctrl;
@@ -191,14 +195,14 @@ struct DataCtrl_S //16 | 2 | 8
 
 struct TCP_S //160 | 20 | 26
 {
-  uint<16>    SrcPort;
-  uint<16>    DstPort;
-  uint<32>    SeqNo;
-  uint<32>    AckNo;
-  DataCtrl_S  DataCtrl;
-  uint<16>    Window;
-  uint<16>    Checksum;
-  uint<16>    UrgentPtr;
+  uint<16> SrcPort;
+  uint<16> DstPort;
+  uint<32> SeqNo;
+  uint<32> AckNo;
+  DataCtrl_S DataCtrl;
+  uint<16> Window;
+  uint<16> Checksum;
+  uint<16> UrgentPtr;
 };
 
 /****************************        Outer Headers           *********************************/
@@ -213,29 +217,29 @@ header UDP_S UDP;
 header TCP_S TCP;
 
 /****************************        FV           *********************************/
-@segment("PHI") @volatile("PHI", "in", "in")          PHI_S             PHI;
-@segment("PHO") @volatile("PHO", "in", "inout")       uint<7>           PHO[5];
-uint<8>                                                                 NGSFBuffer[64];
-uint<10>                                                                GLSP;
-uint<10>                                                                GLTP;
-uint<6>                                                                 LLTP;
-uint<8>                                                                 Vrf;
-uint<6>                                                                 FQID;
-uint<14>                                                                PktLength;
-uint<1>                                                                 DropFlag;
-uint<1>                                                                 IsUc;
-uint<12>                                                                Mgid;
-uint<8>                                                                 SB;
-uint<8>                                                                 SP;
-uint<8>                                                                 TB;
-uint<8>                                                                 TP;
+@segment("PHI") @volatile("PHI", "in", "in") PHI_S PHI;
+@segment("PHO") @volatile("PHO", "in", "inout") uint<7> PHO[5];
+uint<8> NGSFBuffer[64];
+uint<10> GLSP;
+uint<10> GLTP;
+uint<6> LLTP;
+uint<8> Vrf;
+uint<6> FQID;
+uint<14> PktLength;
+uint<1> DropFlag;
+uint<1> IsUc;
+uint<12> Mgid;
+uint<8> SB;
+uint<8> SP;
+uint<8> TB;
+uint<8> TP;
 // register
-uint<16>                                                                HashValue;
-uint<8>                                                                 TOS;
-uint<8>                                                                 TTL;
-uint<8>                                                                 EncapIndex;
-uint<3>                                                                 HubSpkGrp;
-uint<2>                                                                 EncapProfile;
+uint<16> HashValue;
+uint<8> TOS;
+uint<8> TTL;
+uint<8> EncapIndex;
+uint<3> HubSpkGrp;
+uint<2> EncapProfile;
 
 /****************************        Parser           *********************************/
 @parser void iprs( )
@@ -248,8 +252,8 @@ uint<2>                                                                 EncapPro
     return parse_ETHER();
 };
 
-@parser(PG_OUTER_L2) 
-void  parse_ETHER()
+@parser(0)
+void parse_ETHER()
 {
   PHI.L2Type = L2_TYPE_ETHERNET;
   PHO[PHO_OUTER_L2_START] = _extract(ETHER);
@@ -262,7 +266,7 @@ void  parse_ETHER()
      default: _parser_next(0, 0);
   }
 }
-@parser(PG_OUTER_L2)
+@parser(0)
 void parse_VlanTag()
 {
   PHI.TagType = VLAN_SINGLE_TAGGED;
@@ -275,44 +279,44 @@ void parse_VlanTag()
      default : _parser_next(0, 0);
   }
 }
-@parser(PG_OUTER_L3)
-void  parse_IPv4()
+@parser(1)
+void parse_IPv4()
 {
   PHI.L3Type = L3_TYPE_IPv4;
   PHO[PHO_OUTER_L3_START] = _extract(IPv4);
 
   return switch(IPv4.Protocol)
   {
-	  case IP_PROTOCOL_UDP:  parse_UDP();
-	  case IP_PROTOCOL_TCP:  parse_TCP();
+   case 0x11: parse_UDP();
+   case 0x06: parse_TCP();
     default : _parser_next(0, 0);
   }
 }
-@parser(PG_OUTER_L3)
-void  parse_IPv6()
+@parser(1)
+void parse_IPv6()
 {
   PHI.L3Type = L3_TYPE_IPv6;
   PHO[PHO_OUTER_L3_START] = _extract(IPv6);
 
   return switch(IPv6.NextProtocol)
   {
-	  case IP_PROTOCOL_UDP:  parse_UDP();
-	  case IP_PROTOCOL_TCP:  parse_TCP();
+   case 0x11: parse_UDP();
+   case 0x06: parse_TCP();
     default : _parser_next(0, 0);
   }
 }
-@parser(PG_OUTER_L4)
-void  parse_TCP()
-{  
+@parser(2)
+void parse_TCP()
+{
   PHI.L4Type = L4_PROTOCOL_TCP;
 
   PHO[PHO_OUTER_L4_START] = _extract(TCP);
 
   return _parser_next(0, 0);
 }
-@parser(PG_OUTER_L4)
-void  parse_UDP()
-{  
+@parser(2)
+void parse_UDP()
+{
   PHI.L4Type = L4_PROTOCOL_UDP;
 
   PHO[PHO_OUTER_L4_START] = _extract(UDP);
@@ -341,7 +345,7 @@ typedef _inflate<IPATRSP_S> IPATFull_S;
     Mem = _lookup(SE_TID_IPAT, TBL_LKUP_TYPE_INDEX, Glsp);
     Status = _status(SE_TID_IPAT);
     _memcpy(CompressedIpatRsp, {Mem});
-    
+
     return CompressedIpatRsp;
 }
 
@@ -391,8 +395,8 @@ table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
 
 /****************************        IMA1           *********************************/
 struct FIBRSP_S {
-    uint<10>  Port;
-    uint<8>   EncapIndex;
+    uint<10> Port;
+    uint<8> EncapIndex;
 };
 
 typedef _inflate<FIBRSP_S> FIBFull_S;
@@ -408,7 +412,7 @@ typedef _inflate<FIBRSP_S> FIBFull_S;
     Mem = _lookup(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
     Status = _status(SE_TID_FIB);
     _memcpy(CompressedFibRsp, {Mem});
-    
+
     return CompressedFibRsp;
 }
 
@@ -429,7 +433,7 @@ table FIB_TBL()
           }
           case L3_TYPE_NON_IP: {}
           case L3_TYPE_INVALID: {}
-          default: { 
+          default: {
             //Skip
           }
       }
@@ -441,7 +445,7 @@ table FIB_TBL()
 
 table IMA1_MATCH_TBL()
 {
-    FIB_TBL               tbFib           = FIB_TBL();
+    FIB_TBL tbFib = FIB_TBL();
     _apply(tbFib);
 };
 
@@ -455,26 +459,26 @@ void iMA1Action(FIBFull_S rsFib)
 }
 
 table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
-{  
+{
     iMA1Action(tbIMA1Match.tbFib.rsFib);
 };
 
 /****************************        IPPMAIN           *********************************/
 table IPRS_TBL()
-{  
+{
   iprs();
 };
 
 @control void pre_iMAControl()
 {
-  @hw_map("IPRS") IPRS_TBL tbIprs          = IPRS_TBL();
+  @hw_map("IPRS") IPRS_TBL tbIprs = IPRS_TBL();
   _apply(tbIprs);
 }
 
 @control void iMA0Control()
 {
-  @hw_map("IMA0_MATCH")       IMA0_MATCH_TBL         tbIMA0Match       = IMA0_MATCH_TBL();
-  @hw_map("IMA0_ACTION")      IMA0_ACTION_TBL        tbIMA0Action      = IMA0_ACTION_TBL(tbIMA0Match);
+  @hw_map("IMA0_MATCH") IMA0_MATCH_TBL tbIMA0Match = IMA0_MATCH_TBL();
+  @hw_map("IMA0_ACTION") IMA0_ACTION_TBL tbIMA0Action = IMA0_ACTION_TBL(tbIMA0Match);
 
   _apply(tbIMA0Match);
   _apply(tbIMA0Action);
@@ -482,8 +486,8 @@ table IPRS_TBL()
 
 @control void iMA1Control()
 {
-  @hw_map("IMA1_MATCH")       IMA1_MATCH_TBL         tbIMA1Match       = IMA1_MATCH_TBL();
-  @hw_map("IMA1_ACTION")      IMA1_ACTION_TBL        tbIMA1Action      = IMA1_ACTION_TBL(tbIMA1Match);
+  @hw_map("IMA1_MATCH") IMA1_MATCH_TBL tbIMA1Match = IMA1_MATCH_TBL();
+  @hw_map("IMA1_ACTION") IMA1_ACTION_TBL tbIMA1Action = IMA1_ACTION_TBL(tbIMA1Match);
 
   _apply(tbIMA1Match);
   _apply(tbIMA1Action);
@@ -492,7 +496,7 @@ table IPRS_TBL()
 @control void ingress()
 {
   pre_iMAControl();
- 
+
   iMA0Control();
 
   iMA1Control();
@@ -537,7 +541,7 @@ typedef _inflate<ENCAPRSP_S> ENCAPFull_S;
     Mem = _lookup(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
     Status = _status(SE_TID_EPAT);
     _memcpy(CompressedEpatRsp, {Mem});
-    
+
     return CompressedEpatRsp;
 }
 
@@ -552,7 +556,7 @@ typedef _inflate<ENCAPRSP_S> ENCAPFull_S;
     Mem = _lookup(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
     Status = _status(SE_TID_ENCAP);
     _memcpy(CompressedEncapRsp, {Mem});
-    
+
     return CompressedEncapRsp;
 }
 
@@ -602,8 +606,8 @@ table ENCAP_TBL()
 
 table EMA0_MATCH_TBL()
 {
-    EPAT_TBL tbEPAT         = EPAT_TBL();
-    ENCAP_TBL tbEncap       = ENCAP_TBL();
+    EPAT_TBL tbEPAT = EPAT_TBL();
+    ENCAP_TBL tbEncap = ENCAP_TBL();
 
     _apply(tbEPAT);
     _apply(tbEncap);
@@ -611,7 +615,7 @@ table EMA0_MATCH_TBL()
 
 void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 {
-    if (IsUc != 0) {
+    if (IsUc) {
         EncapProfile = 1;
     } else {
         EncapProfile = 0;
@@ -641,7 +645,7 @@ table EMA0_ACTION_TBL(EMA0_MATCH_TBL tbEMA0Match)
         case 1: {
             IPv4.TTL = TTL;
             IPv4.u_0.TOS = TOS;
-        } 
+        }
         default: {
         }
     }
@@ -667,16 +671,16 @@ table EPRS_TBL()
 
 @control void pre_eMAControl()
 {
-  @hw_map("EPRS")       EPRS_TBL tbEprs		= EPRS_TBL();  
+  @hw_map("EPRS") EPRS_TBL tbEprs = EPRS_TBL();
 
-  _apply(tbEprs); 
+  _apply(tbEprs);
 }
 
 @control void eMA0Control()
 {
-  @hw_map("EMA0_MATCH")       EMA0_MATCH_TBL         tbEMA0Match       = EMA0_MATCH_TBL();
-  @hw_map("EMA0_ACTION")      EMA0_ACTION_TBL        tbEMA0Action      = EMA0_ACTION_TBL(tbEMA0Match);
-  @hw_map("EMA1_HM") @modifier EMA0_HM_TBL           tbEMA0HM          = EMA0_HM_TBL(tbEMA0Match);
+  @hw_map("EMA0_MATCH") EMA0_MATCH_TBL tbEMA0Match = EMA0_MATCH_TBL();
+  @hw_map("EMA0_ACTION") EMA0_ACTION_TBL tbEMA0Action = EMA0_ACTION_TBL(tbEMA0Match);
+  @hw_map("EMA1_HM") @modifier EMA0_HM_TBL tbEMA0HM = EMA0_HM_TBL(tbEMA0Match);
 
   _apply(tbEMA0Match);
   _apply(tbEMA0Action);
@@ -686,6 +690,6 @@ table EPRS_TBL()
 @control void egress()
 {
   pre_eMAControl();
-  
+
   eMA0Control();
 }
