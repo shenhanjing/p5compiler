@@ -30,11 +30,22 @@ TEST_BASENAME := $(notdir $(basename $(TEST_ABS)))
 TARGET := $(BIN_DIR)/$(TEST_BASENAME)
 
 TEST_DIR := $(dir $(TEST_ABS))
-TEST_GEN_DIR := $(ROOT_DIR)/generated
+#
+# Generated output directory (contains include/ and src/).
+# Default is ./generated, but you can override it:
+#   - make OUT_DIR=out_dir TEST=test/test_xxx.cpp
+# Also accepts lowercase out_dir for convenience.
+#
+OUT_DIR ?= $(out_dir)
+ifeq ($(strip $(OUT_DIR)),)
+OUT_DIR := $(ROOT_DIR)/generated
+endif
+
+TEST_GEN_DIR := $(abspath $(OUT_DIR))
 TEST_GEN_INC_DIR := $(TEST_GEN_DIR)/include
 TEST_GEN_SRC_DIR := $(TEST_GEN_DIR)/src
 
-# Test source + generated sources under test/tb/generated/src
+# Test source + generated sources under $(OUT_DIR)/src
 TEST_GEN_SRCS := $(wildcard $(TEST_GEN_SRC_DIR)/*.cpp)
 TEST_SRCS := $(TEST_ABS) $(TEST_GEN_SRCS)
 ALL_SRCS := $(SRCS) $(TEST_SRCS)
@@ -60,6 +71,7 @@ tests: run_tests
 help:
 	@echo "Targets:"
 	@echo "  make TEST=test/test_xxx.cpp    Build a single test binary into ./bin/"
+	@echo "  make OUT_DIR=out_dir TEST=...  Use generated code from OUT_DIR/{include,src}"
 	@echo "  make run_tests (or tests)      Build and run all tests via run_tests.sh"
 	@echo "  make clean                     Remove ./bin outputs"
 

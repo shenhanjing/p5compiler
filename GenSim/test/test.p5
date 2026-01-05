@@ -321,6 +321,11 @@ void  parse_UDP()
 }
 
 /****************************        IMA0           *********************************/
+struct IpatCtrlInfo_S
+{
+    uint<1> ForwardEn;
+};
+
 struct IPATRSP_S {
     @global_valid uint<1> Valid;
     uint<1> RouterIntf;
@@ -354,6 +359,10 @@ table IPAT_TBL()
         case PORT_TYPE_ETH:
         {
           GLSP;
+          control_parameters =
+          {
+            control_info = (IpatCtrlInfo_S){1};
+          }
         }
         case PORT_TYPE_CPU: {}
         case PORT_TYPE_STACK: {}
@@ -365,6 +374,7 @@ table IPAT_TBL()
 
     uint<2> IpatStatus = _status();
     IPATFull_S rsIpat = IpatLookup(IpatStatus);
+    IpatCtrlInfo_S   IpatCtrlInfo= _control_info();
 }
 
 table IMA0_MATCH_TBL()
@@ -372,11 +382,13 @@ table IMA0_MATCH_TBL()
     IPAT_TBL tbIPAT = IPAT_TBL();
 
     _apply(tbIPAT);
+
+    ma_id = 0;
 }
 
-void iMA0Action(IPATFull_S rsIpat, uint<2> IpatStatus)
+void iMA0Action(IPATFull_S rsIpat, uint<2> IpatStatus, IpatCtrlInfo_S CtrlInfo)
 {
-    if (_valid(rsIpat) && PHI.L3Type[1:1] == 1 ) {
+    if (_valid(rsIpat) && CtrlInfo.ForwardEn && PHI.L3Type[1:1] == 1 ) {
         Vrf = rsIpat.VrfId;
         IsUc = 1;
     } else {
@@ -386,7 +398,9 @@ void iMA0Action(IPATFull_S rsIpat, uint<2> IpatStatus)
 
 table IMA0_ACTION_TBL(IMA0_MATCH_TBL tbIMA0Match)
 {
-    iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
+    iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus, tbIMA0Match.tbIPAT.IpatCtrlInfo);
+
+    ma_id = 0;
 }
 
 /****************************        IMA1           *********************************/
@@ -397,9 +411,14 @@ struct FIBRSP_S {
 
 typedef _inflate<FIBRSP_S> FIBFull_S;
 
-@lookup FIBFull_S FibLookup(uint<2> &Status)
+struct FIBKEY_S {
+    uint<8> VrfId;
+    uint<128> DIP;
+};
+
+@lookup FIBFull_S FibLookup(uint<2> &Status, uint<4> tid)
 {
-    uint<136> FibKey;
+    FIBKEY_S FibKey;
     _compressed_FIBRSP_S CompressedFibRsp = {0};
     _compressed_FIBRSP_S Mem = {0};
 
@@ -422,10 +441,16 @@ table FIB_TBL()
               (uint<32>) 0;
               (uint<32>) 0;
               (uint<32>) 0;
+              control_parameters = {
+                  table_id = 0;
+              }
           }
           case L3_TYPE_IPv6: { // ICIB:Heartbeat
               Vrf;
               IPv6.DIP;
+              control_parameters = {
+                  table_id = 1;
+              }
           }
           case L3_TYPE_NON_IP: {}
           case L3_TYPE_INVALID: {}
@@ -436,13 +461,16 @@ table FIB_TBL()
     }
 
     uint<2> StatusFib = _status();
-    FIBFull_S rsFib = FibLookup(StatusFib);
+    uint<4> tid = _table_id();
+    FIBFull_S rsFib = FibLookup(StatusFib, tid);
 };
 
 table IMA1_MATCH_TBL()
 {
     FIB_TBL               tbFib           = FIB_TBL();
     _apply(tbFib);
+
+    ma_id = 1;
 };
 
 void iMA1Action(FIBFull_S rsFib)
@@ -457,6 +485,8 @@ void iMA1Action(FIBFull_S rsFib)
 table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
 {  
     iMA1Action(tbIMA1Match.tbFib.rsFib);
+
+    ma_id = 1;
 };
 
 /****************************        IPPMAIN           *********************************/
@@ -607,11 +637,12 @@ table EMA0_MATCH_TBL()
 
     _apply(tbEPAT);
     _apply(tbEncap);
+    ma_id = 0;
 }
 
 void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 {
-    if (IsUc != 0) {
+    if (IsUc) {
         EncapProfile = 1;
     } else {
         EncapProfile = 0;
@@ -621,6 +652,8 @@ void eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 table EMA0_ACTION_TBL(EMA0_MATCH_TBL tbEMA0Match)
 {
     eMA0Action(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+    
+    ma_id = 0;
 }
 
 @dma_primitive void EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
@@ -657,6 +690,8 @@ void eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 table EMA0_HM_TBL(EMA0_MATCH_TBL tbEMA0Match)
 {
     eMA0_HmProc(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+
+    ma_id = 0;
 }
 
 /****************************        EPPMAIN           *********************************/

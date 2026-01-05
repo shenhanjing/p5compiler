@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/pfr.hpp>
+
 #include "p5_types.hpp"
 
 struct KeyPart {
@@ -71,6 +73,16 @@ public:
     template <typename T>
     T getKey(std::size_t bits) const;
     std::optional<std::vector<bool>> getKeyBits(std::size_t bits) const;
+
+    // Assign current key bits into an output variable.
+    // Supports:
+    // - p5::uint<N>
+    // - p5::member<p5::uint<N>> (must be view-bound to storage, e.g. inside p5::Union)
+    // - p5::Union<Layout>
+    // - aggregate structs composed of the above (can be nested)
+    // Returns true if a matching key slot exists and assignment is performed.
+    template <typename T>
+    bool assignKey(T &out) const;
 
     // Create a builder for incremental key construction.
     KeyBuilder keyBuilder() { return KeyBuilder(*this); }
@@ -140,6 +152,42 @@ private:
 
     template <typename... Parts>
     static std::vector<bool> collect_bits(const Parts &...parts);
+
+    // ---- helpers for assignKey ----
+    template <typename T>
+    struct is_p5_union_type : std::false_type {};
+    template <typename Layout>
+    struct is_p5_union_type<p5::Union<Layout>> : std::true_type {};
+
+    template <typename T>
+    static constexpr bool is_p5_union() {
+        return is_p5_union_type<std::decay_t<T>>::value;
+    }
+
+    template <typename Field>
+    static void assign_bits_from_vector(const std::vector<bool> &bits, std::size_t &cursor, Field &target) {
+        using Decayed = std::decay_t<Field>;
+        constexpr std::size_t width = p5::bit_width_v<Decayed>;
+        p5::uint<width> tmp{};
+        // bits vector is MSB-first; assign tmp[width-1]..tmp[0].
+        for (std::size_t i = 0; i < width && cursor < bits.size(); ++i, ++cursor) {
+            tmp[width - 1 - i] = bits[cursor];
+        }
+        // For p5::uint / p5::member / p5::Union: assignment writes to underlying storage/view.
+        target = tmp;
+    }
+
+    template <typename Field>
+    static void decode_any(const std::vector<bool> &bits, std::size_t &cursor, Field &target) {
+        using Decayed = std::decay_t<Field>;
+        if constexpr (is_p5_uint<Decayed>() || is_p5_member<Decayed>() || is_p5_union<Decayed>()) {
+            assign_bits_from_vector(bits, cursor, target);
+        } else {
+            static_assert(std::is_aggregate_v<Decayed>,
+                          "assignKey supports only p5::uint/p5::member/p5::Union or aggregates composed of them.");
+            boost::pfr::for_each_field(target, [&](auto &sub) { decode_any(bits, cursor, sub); });
+        }
+    }
 };
 
 extern KeyManager g_key;
@@ -227,6 +275,18 @@ T KeyManager::getKey(std::size_t bits) const {
     const auto &bv = *bitsOpt;
     static_assert(is_p5_uint<T>(), "KeyManager getKey only supports p5::uint<N>");
     return T::from_bits(bv);
+}
+
+template <typename T>
+bool KeyManager::assignKey(T &out) const {
+    using Decayed = std::decay_t<T>;
+    constexpr std::size_t bits = p5::bit_width_v<Decayed>;
+    auto bitsOpt = getKeyBits(bits);
+    if (!bitsOpt) return false;
+    const auto &bv = *bitsOpt; // MSB-first
+    std::size_t cursor = 0;
+    decode_any(bv, cursor, out);
+    return true;
 }
 
 #endif // KEY_HPP

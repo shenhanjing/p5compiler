@@ -26,8 +26,8 @@ public:
     void parse_UDP();
 
     IPATFull_S IpatLookup(p5::uint_ref<2> Status);
-    void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus);
-    FIBFull_S FibLookup(p5::uint_ref<2> Status);
+    void iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus, IpatCtrlInfo_S CtrlInfo);
+    FIBFull_S FibLookup(p5::uint_ref<2> Status, p5::uint<4> tid);
     void iMA1Action(FIBFull_S rsFib);
     EPATFull_S EpatLookup(p5::uint_ref<2> Status);
     ENCAPFull_S EncapLookup(p5::uint_ref<2> Status);
@@ -54,6 +54,7 @@ public:
 
         p5::uint<2> IpatStatus;
         IPATFull_S rsIpat;
+        IpatCtrlInfo_S IpatCtrlInfo;
 
         void apply() override {
             auto _KeyBuilder = ctx.keyBuilder();
@@ -63,6 +64,7 @@ public:
                 case PORT_TYPE_ETH:
                 {
                     _KeyBuilder.append(ctx.GLSP);
+                    ctx.control_info = (IpatCtrlInfo_S){1};
                     break;
                 }
                 case PORT_TYPE_CPU:
@@ -77,7 +79,9 @@ public:
                 _KeyBuilder.commit();
             }
 
+            IpatStatus = ctx._status();
             rsIpat = ctx.IpatLookup(IpatStatus);
+            IpatCtrlInfo= ctx._control_info();
         }
     };
 
@@ -91,6 +95,7 @@ public:
 
         void apply() override {
             tbIPAT.apply();
+            ctx.ma_id = 0;
         }
     };
 
@@ -103,7 +108,8 @@ public:
         explicit IMA0_ACTION_TBL(Switch &ctx_in, IMA0_MATCH_TBL &tbIMA0Match_in) : ctx(ctx_in), tbIMA0Match(tbIMA0Match_in) {}
 
         void apply() override {
-            ctx.iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus);
+            ctx.iMA0Action(tbIMA0Match.tbIPAT.rsIpat, tbIMA0Match.tbIPAT.IpatStatus, tbIMA0Match.tbIPAT.IpatCtrlInfo);
+            ctx.ma_id = 0;
         }
     };
 
@@ -114,6 +120,7 @@ public:
         explicit FIB_TBL(Switch &ctx_in) : ctx(ctx_in) {}
     
         p5::uint<2> StatusFib;
+        p5::uint<4> tid;
         FIBFull_S rsFib;
 
         void apply() override {
@@ -129,6 +136,7 @@ public:
                     _KeyBuilder.append(p5::uint<32>(0));
                     _KeyBuilder.append(p5::uint<32>(0));
                     _KeyBuilder.append(p5::uint<32>(0));
+                    ctx.table_id = 0;
                     break;
                 }
                 case L3_TYPE_IPv6: 
@@ -136,6 +144,7 @@ public:
                     // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv6.DIP);
                     _KeyBuilder.append(ctx.Vrf);
                     _KeyBuilder.append(ctx.IPv6.DIP);
+                    ctx.table_id = 1;
                     break;
                 }
                 case L3_TYPE_NON_IP:
@@ -149,7 +158,9 @@ public:
                 _KeyBuilder.commit();
             }
             
-            rsFib = ctx.FibLookup(StatusFib);
+            StatusFib = ctx._status();
+            tid = ctx._table_id();
+            rsFib = ctx.FibLookup(StatusFib, tid);
         }
     };
 
@@ -163,6 +174,7 @@ public:
 
         void apply() override {
             tbFib.apply();
+            ctx.ma_id = 1;
         }
     };
 
@@ -175,6 +187,7 @@ public:
 
         void apply() override {
             ctx.iMA1Action(tbIMA1Match.tbFib.rsFib);
+            ctx.ma_id = 1;
         }
     };
 
@@ -267,6 +280,7 @@ public:
         void apply() override {
             tbEPAT.apply();
             tbEncap.apply();
+            ctx.ma_id = 0;
         }
     };
 
@@ -279,6 +293,7 @@ public:
 
         void apply() override {
             ctx.eMA0Action(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+            ctx.ma_id = 0;
         }
     };
 
@@ -291,6 +306,7 @@ public:
 
         void apply() override {
             ctx.eMA0_HmProc(tbEMA0Match.tbEPAT.rsEpat, tbEMA0Match.tbEncap.rsEncap);
+            ctx.ma_id = 0;
         }
     };
 

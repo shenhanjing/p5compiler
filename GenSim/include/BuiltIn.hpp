@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <type_traits>
 #include <utility>
+#include <vector>
+
+#include <boost/pfr.hpp>
 
 #include "key.hpp"
 #include "SE.hpp"
@@ -24,8 +27,53 @@ struct is_p5_uint : std::false_type {};
 template <std::size_t N>
 struct is_p5_uint<p5::uint<N>> : std::true_type {};
 
+template <typename T>
+struct is_p5_member : std::false_type {};
+template <typename UIntT>
+struct is_p5_member<p5::member<UIntT>> : std::true_type {};
+
+template <typename T>
+struct is_p5_union : std::false_type {};
+template <typename Layout>
+struct is_p5_union<p5::Union<Layout>> : std::true_type {};
+
 template <typename...>
 struct always_false : std::false_type {};
+
+template <typename T>
+inline void append_bits_msb_first(const T &value, std::vector<bool> &out) {
+    using D = std::decay_t<T>;
+    if constexpr (is_p5_uint<D>::value) {
+        constexpr std::size_t N = D::width();
+        for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
+    } else if constexpr (is_p5_member<D>::value) {
+        constexpr std::size_t N = D::width();
+        for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
+    } else if constexpr (is_p5_union<D>::value) {
+        // Convert union to its raw uint view and append.
+        auto raw = value.to_uint();
+        constexpr std::size_t N = decltype(raw)::width();
+        for (std::size_t i = 0; i < N; ++i) out.push_back(raw[N - 1 - i]);
+    } else if constexpr (std::is_aggregate_v<D>) {
+        boost::pfr::for_each_field(value, [&](const auto &sub) { append_bits_msb_first(sub, out); });
+    } else {
+        static_assert(always_false<T>::value,
+                      "Key pack supports p5::uint/p5::member/p5::Union or aggregates composed of them.");
+    }
+}
+
+template <typename Key>
+inline auto pack_key_to_uint(const Key &key) {
+    using D = std::decay_t<Key>;
+    constexpr std::size_t Bits = p5::bit_width_v<D>;
+    static_assert(Bits > 0, "Key bit width must be > 0");
+    static_assert(Bits <= 256, "Packed key width exceeds p5::uint<N> supported range (<=256)");
+    std::vector<bool> bits;
+    bits.reserve(Bits);
+    append_bits_msb_first(key, bits);
+    // Defensive: if someone passes an aggregate with unexpected width, clamp/pad via from_bits behavior.
+    return p5::uint<Bits>::from_bits(bits);
+}
 }  // namespace detail_builtin
 
 // Helper: bit width of a type (only p5::uint<N> is supported).
@@ -135,6 +183,13 @@ public:
         return key_.getKey<T>(bit_width_of_type<T>());
     }
 
+    // Assign key bits into an output variable (supports p5::uint/p5::member/p5::Union
+    // and aggregates composed of them).
+    template <typename T>
+    inline bool _key(T &out) const {
+        return key_.assignKey(out);
+    }
+
     // *********************** _status() ***********************
     // No-arg form: return an "empty" value for declarations like:
     //   p5::uint<2> IpatStatus = _status();
@@ -148,11 +203,20 @@ public:
     template <typename Value, typename Key>
     inline _inflate<Value> _lookup(int tableId, int lookupType, const Key &key) {
         const auto mt = static_cast<MatchType>(lookupType);
+        // If the key is an aggregate/union/member, pack it into a contiguous p5::uint<bits>
+        // by concatenating all fields MSB-first (same bit ordering as KeyManager buildKey).
+        using DK = std::decay_t<Key>;
+        if constexpr (detail_builtin::is_p5_uint<DK>::value) {
             auto result = se_.lookup<Key, Value>(tableId, mt, key);
-        if (result) {
-            return *result;  // valid=true via _inflate(Value)
+            if (result) return *result;
+            return std::nullopt;
+        } else {
+            auto packed = detail_builtin::pack_key_to_uint(key);
+            using PackedKey = decltype(packed);
+            auto result = se_.lookup<PackedKey, Value>(tableId, mt, packed);
+            if (result) return *result;
+            return std::nullopt;
         }
-        return std::nullopt; // valid=false
     }
 
     // *********************** Key Construction ***********************

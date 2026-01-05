@@ -225,6 +225,14 @@ struct _inU_TCP_S {
     p5::member<p5::uint<16>> UrgentPtr;
 };
 
+struct IpatCtrlInfo_S
+{
+    p5::uint<1> ForwardEn;
+};
+struct _inU_IpatCtrlInfo_S {
+    p5::member<p5::uint<1>> ForwardEn;
+};
+
 struct IPATRSP_S {
     p5::uint<1> Valid;
     p5::uint<1> RouterIntf;
@@ -252,6 +260,15 @@ struct _inU_FIBRSP_S {
 };
 
 using FIBFull_S = _inflate<FIBRSP_S>;
+
+struct FIBKEY_S {
+    p5::uint<8> VrfId;
+    p5::uint<128> DIP;
+};
+struct _inU_FIBKEY_S {
+    p5::member<p5::uint<8>> VrfId;
+    p5::member<p5::uint<128>> DIP;
+};
 
 struct ENCAP_LOCAL_ADDR_S {
     p5::uint<48> SMAC;

@@ -1,0 +1,52 @@
+table TBL()
+{
+    key =
+    {
+        switch (A)
+        {
+            case 1:
+            {
+                PART0;
+                control_parameters =
+                {
+                    table_id = 0;
+                    command = 0;
+                    ma_id = 0;
+                    _header_access = 0;
+                    decomp_profile = 0;
+                    control_info = (CtrlInfo_S){1};
+                }
+            }
+
+            default:
+            {
+            }
+        }
+        switch (B)
+        {
+            case 1:
+            {
+                PART1;
+                control_parameters =
+                {
+                    table_id = 1;
+                    command = 1;
+                    ma_id = 1;
+                    _header_access = 1;
+                    decomp_profile = 1;
+                    control_info = (CtrlInfo_S){2};
+                }
+            }
+
+            default:
+            {
+            }
+        }
+    }
+
+    uint<8> cmd = _command();
+    uint<5> tid = _table_id();
+    uint<3> pid = _profile_id();
+    CtrlInfo_S   CtrlInfo= _control_info();
+
+}

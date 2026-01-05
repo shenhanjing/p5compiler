@@ -76,20 +76,20 @@ void Switch::parse_UDP() {
     return _parser_next(0, 0);
 }
 
-// ========== MA实现 ==========
+// ========== iMA实现 ==========
 IPATFull_S Switch::IpatLookup(p5::uint_ref<2> Status) {
     p5::uint<10> Glsp;
     _inflate<IPATRSP_S> CompressedIpatRsp = { 0 };
     _inflate<IPATRSP_S> Mem = { 0 };
-    Glsp = _key<decltype(Glsp)>();
+    _key(Glsp);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_IPAT, TBL_LKUP_TYPE_INDEX, Glsp);
     Status = _status(SE_TID_IPAT);
     _memcpy(CompressedIpatRsp, { Mem });
     return CompressedIpatRsp;
 }
 
-void Switch::iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
-    if (_valid(rsIpat) && PHI.L3Type[p5::bit_range<1, 1>] == 1) {
+void Switch::iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus, IpatCtrlInfo_S CtrlInfo) {
+    if (_valid(rsIpat) && CtrlInfo.ForwardEn.to_ullong() && PHI.L3Type[p5::bit_range<1, 1>] == 1) {
         Vrf = rsIpat.VrfId;
         IsUc = 1;
     } else {
@@ -97,11 +97,11 @@ void Switch::iMA0Action(IPATFull_S rsIpat, p5::uint<2> IpatStatus) {
     }
 }
 
-FIBFull_S Switch::FibLookup(p5::uint_ref<2> Status) {
-    p5::uint<136> FibKey;
+FIBFull_S Switch::FibLookup(p5::uint_ref<2> Status, p5::uint<4> tid) {
+    FIBKEY_S FibKey;
     _inflate<FIBRSP_S> CompressedFibRsp = { 0 };
     _inflate<FIBRSP_S> Mem = { 0 };
-    FibKey = _key<decltype(FibKey)>();
+    _key(FibKey);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
     Status = _status(SE_TID_FIB);
     _memcpy(CompressedFibRsp, { Mem });
@@ -121,7 +121,7 @@ EPATFull_S Switch::EpatLookup(p5::uint_ref<2> Status)
     p5::uint<10> Gltp;
     _inflate<EPATRSP_S> CompressedEpatRsp = { 0 };
     _inflate<EPATRSP_S> Mem = { 0 };
-    Gltp = _key<decltype(Gltp)>();
+    _key(Gltp);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
     Status = _status(SE_TID_EPAT);
     _memcpy(CompressedEpatRsp, { Mem });
@@ -133,7 +133,7 @@ ENCAPFull_S Switch::EncapLookup(p5::uint_ref<2> Status)
     p5::uint<8> index;
     _inflate<ENCAPRSP_S> CompressedEncapRsp = { 0 };
     _inflate<ENCAPRSP_S> Mem = { 0 };
-    index = _key<decltype(index)>();
+    _key(index);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
     Status = _status(SE_TID_ENCAP);
     _memcpy(CompressedEncapRsp, { Mem });
