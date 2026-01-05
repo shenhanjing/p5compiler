@@ -15,14 +15,14 @@ void Switch::eprs() {
 
 void Switch::parse_ETHER() {
     PHI.L2Type = L2_TYPE_ETHERNET;
-    
+
     PHO[PHO_OUTER_L2_START] = _extract(ETHER);
 
     switch(ETHER.ETHER_TYPE.Type.to_ullong()) {
         case 0x8100: return parse_VlanTag();
-        case 0x0800: return parse_IPv4(); 
-        case 0x86dd: return parse_IPv6(); 
-        default: return _parser_next(0, 0); 
+        case 0x0800: return parse_IPv4();
+        case 0x86dd: return parse_IPv6();
+        default: return _parser_next(0, 0);
     }
 }
 
@@ -31,9 +31,9 @@ void Switch::parse_VlanTag() {
     PHO[PHO_OUTER_VLANS_START] = _extract(VLAN_TAG0);
 
     switch(VLAN_TAG0.ETHER_TYPE.Type.to_ullong()) {
-        case 0x0800: return parse_IPv4(); 
-        case 0x86dd: return parse_IPv6(); 
-        default: return _parser_next(0, 0); 
+        case 0x0800: return parse_IPv4();
+        case 0x86dd: return parse_IPv6();
+        default: return _parser_next(0, 0);
     }
 }
 
@@ -41,11 +41,11 @@ void Switch::parse_IPv4() {
     PHI.L3Type = L3_TYPE_IPv4;
 
     PHO[PHO_OUTER_L3_START] = _extract(IPv4);
-    
+
     switch(IPv4.Protocol.to_ullong()) {
-        case IP_PROTOCOL_UDP: return parse_UDP(); 
-        case IP_PROTOCOL_TCP: return parse_TCP(); 
-        default: return _parser_next(0, 0); 
+        case IP_PROTOCOL_UDP: return parse_UDP();
+        case IP_PROTOCOL_TCP: return parse_TCP();
+        default: return _parser_next(0, 0);
     }
 }
 
@@ -81,7 +81,7 @@ IPATFull_S Switch::IpatLookup(p5::uint_ref<2> Status) {
     p5::uint<10> Glsp;
     _inflate<IPATRSP_S> CompressedIpatRsp = { 0 };
     _inflate<IPATRSP_S> Mem = { 0 };
-    _key(Glsp);
+    Glsp = _key(Glsp);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_IPAT, TBL_LKUP_TYPE_INDEX, Glsp);
     Status = _status(SE_TID_IPAT);
     _memcpy(CompressedIpatRsp, { Mem });
@@ -101,7 +101,7 @@ FIBFull_S Switch::FibLookup(p5::uint_ref<2> Status, p5::uint<4> tid) {
     FIBKEY_S FibKey;
     _inflate<FIBRSP_S> CompressedFibRsp = { 0 };
     _inflate<FIBRSP_S> Mem = { 0 };
-    _key(FibKey);
+    FibKey = _key(FibKey);
     Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_FIB, TBL_LKUP_TYPE_LPM, FibKey);
     Status = _status(SE_TID_FIB);
     _memcpy(CompressedFibRsp, { Mem });
@@ -114,76 +114,6 @@ void Switch::iMA1Action(FIBFull_S rsFib) {
         EncapIndex = rsFib.EncapIndex;
         TTL = TTL - 1;
     }
-}
-
-EPATFull_S Switch::EpatLookup(p5::uint_ref<2> Status)
-{
-    p5::uint<10> Gltp;
-    _inflate<EPATRSP_S> CompressedEpatRsp = { 0 };
-    _inflate<EPATRSP_S> Mem = { 0 };
-    _key(Gltp);
-    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
-    Status = _status(SE_TID_EPAT);
-    _memcpy(CompressedEpatRsp, { Mem });
-    return CompressedEpatRsp;
-}
-
-ENCAPFull_S Switch::EncapLookup(p5::uint_ref<2> Status)
-{
-    p5::uint<8> index;
-    _inflate<ENCAPRSP_S> CompressedEncapRsp = { 0 };
-    _inflate<ENCAPRSP_S> Mem = { 0 };
-    _key(index);
-    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
-    Status = _status(SE_TID_ENCAP);
-    _memcpy(CompressedEncapRsp, { Mem });
-    
-    return CompressedEncapRsp;
-}
-
-void Switch::eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
-{
-    if (IsUc.to_ullong()) {
-        EncapProfile = 1;
-    } else {
-        EncapProfile = 0;
-    }
-}
-
-void Switch::EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
-{
-    switch (EncapProfile.to_ullong()) {
-        case 1: {
-            ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
-            ETHER.Smac = rsEpat.Dma.Addr.SMAC;
-            break;
-        }
-        default: {
-            break;
-        }
-    }
-}
-
-void Switch::IpOverwrite()
-{
-    switch (EncapProfile.to_ullong())
-    {
-        case 1: {
-            IPv4.TTL = TTL;
-            IPv4.u_0.TOS = TOS;
-            break;
-        } 
-        default: {
-            break;
-        }
-    }
-}
-
-void Switch::eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
-{
-    EthODma(rsEpat, rsEncap);
-
-    IpOverwrite();
 }
 
 // ========== ingress 实现 ==========
@@ -213,6 +143,77 @@ void Switch::ingress() {
     iMA1Control();
 }
 
+// ========== eMA 实现 ==========
+EPATFull_S Switch::EpatLookup(p5::uint_ref<2> Status)
+{
+    p5::uint<10> Gltp;
+    _inflate<EPATRSP_S> CompressedEpatRsp = { 0 };
+    _inflate<EPATRSP_S> Mem = { 0 };
+    Gltp = _key(Gltp);
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_EPAT, TBL_LKUP_TYPE_INDEX, Gltp);
+    Status = _status(SE_TID_EPAT);
+    _memcpy(CompressedEpatRsp, { Mem });
+    return CompressedEpatRsp;
+}
+
+ENCAPFull_S Switch::EncapLookup(p5::uint_ref<2> Status)
+{
+    p5::uint<8> index;
+    _inflate<ENCAPRSP_S> CompressedEncapRsp = { 0 };
+    _inflate<ENCAPRSP_S> Mem = { 0 };
+    index = _key(index);
+    Mem = _lookup<typename std::remove_reference_t<decltype(Mem)>::value_type>(SE_TID_ENCAP, TBL_LKUP_TYPE_INDEX, index);
+    Status = _status(SE_TID_ENCAP);
+    _memcpy(CompressedEncapRsp, { Mem });
+
+    return CompressedEncapRsp;
+}
+
+void Switch::eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    if (IsUc != 0) {
+        EncapProfile = 1;
+    } else {
+        EncapProfile = 0;
+    }
+}
+
+void Switch::EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    switch (EncapProfile.to_ullong()) {
+        case 1: {
+            ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
+            ETHER.Smac = rsEpat.Dma.Addr.SMAC;
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void Switch::IpOverwrite()
+{
+    switch (EncapProfile.to_ullong())
+    {
+        case 1: {
+            IPv4.TTL = TTL;
+            IPv4.u_0.TOS = TOS;
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+}
+
+void Switch::eMA0_HmProc(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
+{
+    EthODma(rsEpat, rsEncap);
+
+    IpOverwrite();
+}
+
 // ========== egress 实现 ==========
 void Switch::pre_eMAControl()
 {
@@ -237,7 +238,7 @@ void Switch::egress()
 }
 
 // ========== interface 实现 ==========
-void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef &nhi_info, 
+void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef &nhi_info,
                     Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info) {
     (void)nhi_info;
     (void)cp2np_hdr;
@@ -272,7 +273,7 @@ void Switch::SingleMaProc(const int ma_id, const std::string &packet_id, const i
 
     // 载入 PH 数据
     std::memcpy(data_.data(), fv_in.phData, PKT_HEADER_BYTE_LEN);
-    
+
     // 解包输入的 PHI / PHO / GTV
     PhiPackedBuffer phiIn{};
     std::memcpy(phiIn.data(), fv_in.phiData, FV_PHI_BYTE_NUM);

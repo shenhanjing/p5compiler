@@ -82,7 +82,13 @@ public:
     // - aggregate structs composed of the above (can be nested)
     // Returns true if a matching key slot exists and assignment is performed.
     template <typename T>
-    bool assignKey(T &out) const;
+    bool tryAssignKey(T &out) const;
+
+    // Assign and return the output variable itself so callers can write:
+    //   out = _key(out);
+    // If no matching slot exists, out is left unchanged and returned.
+    template <typename T>
+    T &assignKey(T &out) const;
 
     // Create a builder for incremental key construction.
     KeyBuilder keyBuilder() { return KeyBuilder(*this); }
@@ -278,7 +284,7 @@ T KeyManager::getKey(std::size_t bits) const {
 }
 
 template <typename T>
-bool KeyManager::assignKey(T &out) const {
+bool KeyManager::tryAssignKey(T &out) const {
     using Decayed = std::decay_t<T>;
     constexpr std::size_t bits = p5::bit_width_v<Decayed>;
     auto bitsOpt = getKeyBits(bits);
@@ -287,6 +293,12 @@ bool KeyManager::assignKey(T &out) const {
     std::size_t cursor = 0;
     decode_any(bv, cursor, out);
     return true;
+}
+
+template <typename T>
+T &KeyManager::assignKey(T &out) const {
+    (void)tryAssignKey(out);
+    return out;
 }
 
 #endif // KEY_HPP

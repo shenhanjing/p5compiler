@@ -47,7 +47,8 @@ int main() {
         km.buildKey(p5::uint<8>(0x12), p5::uint<16>(0x3456));
 
         KeyStruct out{};
-        ok &= expect_true(sw._key(out), "BuiltInContext::_key(out) returns true for matching slot");
+        ok &= expect_true(sw._try_key(out), "BuiltInContext::_try_key(out) returns true for matching slot");
+        out = sw._key(out); // exercise var = _key(var) style
         ok &= expect_eq_u64(out.a.to_ullong(), 0x12, "KeyStruct.a");
         ok &= expect_eq_u64(out.b.to_ullong(), 0x3456, "KeyStruct.b");
     }
@@ -60,7 +61,8 @@ int main() {
         km.buildKey(p5::uint<8>(0b10111001)); // 0xB9
 
         p5::Union<Layout> u{};
-        ok &= expect_true(sw._key(u.st), "_key(u.st) returns true for matching slot (member fields)");
+        ok &= expect_true(sw._try_key(u.st), "_try_key(u.st) returns true for matching slot (member fields)");
+        u.st = sw._key(u.st); // exercise var = _key(var) style
 
         auto a = static_cast<p5::uint<3>>(u.st.a).to_ullong();
         auto b = static_cast<p5::uint<5>>(u.st.b).to_ullong();
@@ -69,7 +71,8 @@ int main() {
 
         // Also verify assigning into the whole union works.
         p5::Union<Layout> u2{};
-        ok &= expect_true(sw._key(u2), "_key(union) returns true for matching slot");
+        ok &= expect_true(sw._try_key(u2), "_try_key(union) returns true for matching slot");
+        u2 = sw._key(u2); // exercise var = _key(var) style
         auto whole = static_cast<p5::uint<8>>(u2.whole).to_ullong();
         ok &= expect_eq_u64(whole, 0xB9, "u2.whole == 0xB9");
     }

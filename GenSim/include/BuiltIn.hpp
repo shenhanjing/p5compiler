@@ -186,9 +186,11 @@ public:
     // Assign key bits into an output variable (supports p5::uint/p5::member/p5::Union
     // and aggregates composed of them).
     template <typename T>
-    inline bool _key(T &out) const {
-        return key_.assignKey(out);
-    }
+    inline T &_key(T &out) const { return key_.assignKey(out); }
+
+    // If caller needs to check whether a matching key slot existed.
+    template <typename T>
+    inline bool _try_key(T &out) const { return key_.tryAssignKey(out); }
 
     // *********************** _status() ***********************
     // No-arg form: return an "empty" value for declarations like:
