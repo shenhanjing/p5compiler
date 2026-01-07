@@ -240,6 +240,9 @@ public:
     // *********************** _memcpy() ***********************
     template <typename T>
     inline void _memcpy(T &dst, const T &src) {
+        // NOTE:
+        // - 目前仅实现 demo 中用到的“同类型之间”的 _memcpy（语义等价于赋值拷贝）。
+        // - 后续会补充“不同类型之间”的版本（例如不同 struct 之间的字段级拷贝或按位宽拷贝），以覆盖更完整的 P5 内置语义。
         dst = src;
     }
 

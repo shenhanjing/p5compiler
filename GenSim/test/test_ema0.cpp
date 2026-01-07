@@ -1,4 +1,5 @@
 // eMA0 tests: EPAT/ENCAP INDEX lookups + EncapProfile gating + HM overwrites
+#include <cstring>
 #include <iostream>
 
 #include "generated_switch.hpp"
@@ -31,6 +32,23 @@ ENCAPRSP_S make_encap_rsp(uint64_t dmac48) {
     v.Rsvd = 0;
     v.Dma.Arp.DMAC = p5::uint<48>(dmac48);
     return v;
+}
+
+MaToMaFvInfoDef build_fv_in_from_switch(const Switch &sw) {
+    MaToMaFvInfoDef fv{};
+
+    // PHI / PHO are packed separately.
+    auto phi = sw.pack_phi_to_bytes();
+    auto pho = sw.pack_pho_to_bytes();
+    std::memcpy(fv.phiData, phi.data(), FV_PHI_BYTE_NUM);
+    std::memcpy(fv.phoData, pho.data(), FV_PHO_BYTE_NUM);
+
+    // GTV holds outer headers + many fv fields (GLTP/IsUc/TTL/TOS/EncapIndex/...).
+    auto gtv = sw.pack_gtv_to_bytes();
+    std::memcpy(fv.gtvData, gtv.data(), FV_GTV_MAX_BYTE_NUM);
+
+    // phData/udf/pgtv are unused by eMA0 in current generated flow; keep zeroed.
+    return fv;
 }
 
 } // namespace
@@ -76,7 +94,10 @@ int main() {
         sw.IPv4.TTL = p5::uint<8>(0);
         sw.IPv4.u_0.TOS = p5::uint<8>(0);
 
-        sw.eMA0Control();
+        MaToMaFvInfoDef fv_in = build_fv_in_from_switch(sw);
+        MaToMaFvInfoDef fv_out{};
+        sw.reset_all_fields();
+        sw.SingleMaProc(/*ma_id=*/2, /*packet_id=*/"", /*port_id=*/0, fv_in, fv_out);
 
         all_ok &= expect_eq_bool(se.status(SE_TID_EPAT) == SearchEngine::Status::MATCH, true, "EPAT status MATCH");
         all_ok &= expect_eq_bool(se.status(SE_TID_ENCAP) == SearchEngine::Status::MATCH, true, "ENCAP status MATCH");
@@ -104,7 +125,10 @@ int main() {
         sw.IPv4.TTL = p5::uint<8>(0x40);
         sw.IPv4.u_0.TOS = p5::uint<8>(0x12);
 
-        sw.eMA0Control();
+        MaToMaFvInfoDef fv_in = build_fv_in_from_switch(sw);
+        MaToMaFvInfoDef fv_out{};
+        sw.reset_all_fields();
+        sw.SingleMaProc(/*ma_id=*/2, /*packet_id=*/"", /*port_id=*/0, fv_in, fv_out);
 
         all_ok &= expect_eq_u64(sw.EncapProfile.to_ullong(), 0, "EncapProfile=0 when IsUc=0");
         all_ok &= expect_eq_u64(sw.ETHER.Dmac.to_ullong(), base_dmac, "ETHER.Dmac unchanged when EncapProfile=0");
@@ -126,7 +150,10 @@ int main() {
         sw.ETHER.Dmac = p5::uint<48>(0x123456789abcULL);
         sw.ETHER.Smac = p5::uint<48>(0xcba987654321ULL);
 
-        sw.eMA0Control();
+        MaToMaFvInfoDef fv_in = build_fv_in_from_switch(sw);
+        MaToMaFvInfoDef fv_out{};
+        sw.reset_all_fields();
+        sw.SingleMaProc(/*ma_id=*/2, /*packet_id=*/"", /*port_id=*/0, fv_in, fv_out);
 
         all_ok &= expect_eq_bool(se.status(SE_TID_EPAT) == SearchEngine::Status::MATCH, true, "EPAT status MATCH (case3)");
         all_ok &= expect_eq_bool(se.status(SE_TID_ENCAP) == SearchEngine::Status::NO_MATCH, true, "ENCAP status NO_MATCH (case3)");

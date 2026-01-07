@@ -6,6 +6,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <boost/pfr.hpp>
+
 #include "table.hpp"
 #include "SE.hpp"
 #include "key.hpp"
@@ -50,6 +52,39 @@ public:
     p5::uint<8> EncapIndex;
     p5::uint<3> HubSpkGrp;
     p5::uint<2> EncapProfile;
+
+    // ============================ NGSF stream state ============================
+    // Public direction selector for _add_to_ngsf():
+    // - ingress: append bits from argument into NGSFBuffer (stream write)
+    // - egress:  restore bits from NGSFBuffer into argument (stream read)
+    enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };
+    NgsfDirection ngsf_direction{NgsfDirection::INGRESS};
+
+    // Cursor within NGSFBuffer. bit_offset is MSB-first within a byte:
+    // - bit_offset==0 targets the current byte's MSB
+    // - bit_offset==7 targets the current byte's LSB
+    std::size_t ngsf_byte_offset{0};
+    uint8_t ngsf_bit_offset{0};
+
+    void reset_ngsf_offset() {
+        ngsf_byte_offset = 0;
+        ngsf_bit_offset = 0;
+    }
+
+    // Add to / restore from NGSF bit stream.
+    // Accepts:
+    // - p5::uint<N>
+    // - p5::member<p5::uint<N>>
+    // - p5::Union<Layout>
+    // - aggregate structs composed of the above (nesting allowed)
+    template <typename T>
+    void _add_to_ngsf(T &value) {
+        if (ngsf_direction == NgsfDirection::INGRESS) {
+            ngsf_append_any(value);
+        } else {
+            ngsf_restore_any(value);
+        }
+    }
 
     using GtvPackedBuffer = std::array<uint8_t, FV_GTV_MAX_BYTE_NUM>;
     using PhiPackedBuffer = std::array<uint8_t, FV_PHI_BYTE_NUM>;
@@ -277,6 +312,16 @@ public:
 
 protected:
     template <typename T>
+    struct is_p5_uint_type : std::false_type {};
+    template <std::size_t N>
+    struct is_p5_uint_type<p5::uint<N>> : std::true_type {};
+
+    template <typename T>
+    struct is_p5_member_type : std::false_type {};
+    template <typename UIntT>
+    struct is_p5_member_type<p5::member<UIntT>> : std::true_type {};
+
+    template <typename T>
     struct is_p5_union_type : std::false_type {};
     template <typename Layout>
     struct is_p5_union_type<p5::Union<Layout>> : std::true_type {};
@@ -325,6 +370,106 @@ protected:
                 const std::size_t bit_idx = 7 - (i % 8);
                 out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);
             }
+        }
+    }
+
+    // ============================ NGSF helpers ============================
+    bool ngsf_has_capacity(std::size_t bits_needed) const {
+        const std::size_t total_bits = sizeof(NGSFBuffer) / sizeof(NGSFBuffer[0]) * 8; // 64 bytes * 8
+        const std::size_t cur_bits = ngsf_byte_offset * 8 + ngsf_bit_offset;
+        return cur_bits + bits_needed <= total_bits;
+    }
+
+    void ngsf_write_bit(bool bit) {
+        if (ngsf_byte_offset >= 64) return;
+        // bit_offset is MSB-first; p5::uint bit index 7 is MSB.
+        NGSFBuffer[ngsf_byte_offset][static_cast<std::size_t>(7 - ngsf_bit_offset)] = bit;
+        ++ngsf_bit_offset;
+        if (ngsf_bit_offset >= 8) {
+            ngsf_bit_offset = 0;
+            ++ngsf_byte_offset;
+        }
+    }
+
+    bool ngsf_read_bit() {
+        if (ngsf_byte_offset >= 64) return false;
+        const bool bit = NGSFBuffer[ngsf_byte_offset][static_cast<std::size_t>(7 - ngsf_bit_offset)];
+        ++ngsf_bit_offset;
+        if (ngsf_bit_offset >= 8) {
+            ngsf_bit_offset = 0;
+            ++ngsf_byte_offset;
+        }
+        return bit;
+    }
+
+    template <typename P5T>
+    static constexpr std::size_t ngsf_width_bits() {
+        using D = std::decay_t<P5T>;
+        if constexpr (is_p5_union_type<D>::value) {
+            return D::width();
+        } else if constexpr (is_p5_uint_type<D>::value) {
+            return D::width();
+        } else if constexpr (is_p5_member_type<D>::value) {
+            return D::width();
+        } else {
+            return 0;
+        }
+    }
+
+    template <typename Field>
+    void ngsf_append_leaf(const Field &field) {
+        using D = std::decay_t<Field>;
+        constexpr std::size_t W = ngsf_width_bits<D>();
+        static_assert(W > 0, "Unsupported NGSF leaf type");
+
+        if constexpr (is_p5_union_type<D>::value) {
+            const auto raw = field.to_uint(); // p5::uint<W>
+            for (std::size_t i = 0; i < W; ++i) {
+                ngsf_write_bit(raw[W - 1 - i]);
+            }
+        } else {
+            for (std::size_t i = 0; i < W; ++i) {
+                ngsf_write_bit(field[W - 1 - i]);
+            }
+        }
+    }
+
+    template <typename Field>
+    void ngsf_restore_leaf(Field &field) {
+        using D = std::decay_t<Field>;
+        constexpr std::size_t W = ngsf_width_bits<D>();
+        static_assert(W > 0, "Unsupported NGSF leaf type");
+
+        p5::uint<W> tmp{};
+        for (std::size_t i = 0; i < W; ++i) {
+            const bool bit = ngsf_read_bit();
+            tmp[W - 1 - i] = bit;
+        }
+        // Works for p5::uint / p5::member / p5::Union (writes underlying storage/view).
+        field = tmp;
+    }
+
+    template <typename T>
+    void ngsf_append_any(const T &value) {
+        using D = std::decay_t<T>;
+        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {
+            ngsf_append_leaf(value);
+        } else {
+            static_assert(std::is_aggregate_v<D>,
+                          "_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.");
+            boost::pfr::for_each_field(value, [&](const auto &sub) { ngsf_append_any(sub); });
+        }
+    }
+
+    template <typename T>
+    void ngsf_restore_any(T &value) {
+        using D = std::decay_t<T>;
+        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {
+            ngsf_restore_leaf(value);
+        } else {
+            static_assert(std::is_aggregate_v<D>,
+                          "_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.");
+            boost::pfr::for_each_field(value, [&](auto &sub) { ngsf_restore_any(sub); });
         }
     }
 };
