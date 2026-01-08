@@ -627,9 +627,11 @@ public:
 //
 // 设计目标：
 // - Union 只有一份底层 bit 存储（位宽=所有“成员视图”的最大位宽）
-// - 顶层成员（Layout 的字段）都从 bit offset=0 开始覆盖同一份存储（类似 union）
-// - 若某个成员是结构体（aggregate），则把它视为一个整体：其内部字段按声明顺序从 offset=0
-//   起顺序排布（位宽=各字段位宽之和），并支持嵌套结构体/嵌套 Union
+// - 顶层成员（Layout 的字段）都 overlay 到同一份存储，但采用 **MSB 对齐**：
+//   - 若成员位宽 < raw(=Union::width)，则其映射到 raw 的高位区间（保留高位，截取低位）
+//   - 等价于：成员的最低位 bit0 对应 raw 的 bit (width - member_width)
+// - 若某个成员是结构体（aggregate），则把它视为一个整体（位宽=各字段位宽之和）并进行 MSB 对齐；
+//   结构体内部字段按声明顺序从 **高位到低位** 依次排布（支持嵌套结构体/嵌套 Union）
 // - 访问成员使用“可读写视图”：
 //   - p5::member<p5::uint<N>>：把底层某段 bits 映射为 uint<N>
 //   - p5::Union<Layout2>：可作为成员被绑定成 view，继续以 .x/.y 方式访问
@@ -2061,12 +2063,19 @@ struct detail_union_binder {
 
     template <typename Agg, std::size_t... I>
     static void bind_aggregate_impl(Agg &agg, bit_access access, std::size_t base, std::index_sequence<I...>) {
-        // Compute per-field offsets as prefix sums.
-        std::size_t cur = base;
+        // Compute per-field offsets as prefix sums, but place fields from MSB -> LSB.
+        // For an aggregate of total width W:
+        // - field0 occupies [W-1 : W-w0]
+        // - field1 occupies [W-w0-1 : W-w0-w1]
+        // ...
+        constexpr std::size_t W = p5::bit_width_v<Agg>;
+        std::size_t prefix = 0; // sum of widths of fields already placed (from MSB side)
         auto bind_one = [&](auto &field) {
-            bind_any(field, access, cur);
             using FieldT = std::decay_t<decltype(field)>;
-            cur += p5::bit_width_v<FieldT>;
+            constexpr std::size_t fw = p5::bit_width_v<FieldT>;
+            const std::size_t off = base + (W - prefix - fw);
+            bind_any(field, access, off);
+            prefix += fw;
         };
         (bind_one(boost::pfr::get<I>(agg)), ...);
     }
@@ -2156,7 +2165,16 @@ private:
     template <std::size_t... I>
     void bind_members_impl(std::index_sequence<I...>) {
         auto &layout = static_cast<Layout &>(*this);
-        (detail_p5_union::detail_union_binder::bind_any(boost::pfr::get<I>(layout), access_, base_offset_), ...);
+        // Top-level fields are MSB-aligned within this union's storage:
+        // each field's bit0 maps to (base_offset_ + (width - field_width)).
+        auto bind_one = [&](auto &field) {
+            using FieldT = std::decay_t<decltype(field)>;
+            constexpr std::size_t fw = p5::bit_width_v<FieldT>;
+            static_assert(fw <= width(), "Union field width must be <= Union::width()");
+            const std::size_t off = base_offset_ + (width() - fw);
+            detail_p5_union::detail_union_binder::bind_any(field, access_, off);
+        };
+        (bind_one(boost::pfr::get<I>(layout)), ...);
     }
 
     template <std::size_t M>

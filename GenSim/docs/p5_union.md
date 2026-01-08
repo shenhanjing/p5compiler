@@ -69,24 +69,27 @@
 - `width = max( bit_width(field_i) )`，对 `Layout` 顶层所有字段取最大值
 - 若某字段是 struct，则它的位宽按 “结构体整体” 计算（见下一节）
 
-因此：顶层字段像 union 成员一样都从 bit0 overlay；谁最宽，谁决定底层存储宽度。
+因此：顶层字段像 union 成员一样 overlay 到同一份 bits；谁最宽，谁决定底层存储宽度。
 
-### 3) 顶层字段：全部从 offset=0 开始 overlay
+### 3) 顶层字段：overlay + MSB 对齐
 
 对于 `Layout` 的每一个顶层字段：
 
 - 字段绑定到同一份底层存储
-- 字段的 base offset = 0
+- 字段采用 **MSB 对齐（保留高位、截取低位）**：
+  - 设 `W = Union::width()`，字段位宽为 `w`
+  - 字段 bit0（最低位）对应底层存储的 `offset = (W - w)` 处
+  - 因此字段映射到的区间是：`[W-1 : W-w]`
 
-这就是 union 语义：多个视图覆盖同一份 bits。
+这仍然是 union 语义：多个视图覆盖同一份 bits；只是对齐端从 LSB 改为 MSB。
 
-### 4) struct（aggregate）字段：内部按声明顺序顺排
+### 4) struct（aggregate）字段：内部按声明顺序从高位到低位排布
 
-若某个字段是 aggregate struct，则它内部的字段按声明顺序顺次排布：
+若某个字段是 aggregate struct，则它内部的字段按声明顺序从 **高位到低位** 依次排布（MSB→LSB）：
 
-- 第 0 个子字段 offset = base
-- 第 1 个子字段 offset = base + width(字段0)
-- 第 2 个子字段 offset = base + width(字段0)+width(字段1)
+- 设该结构体整体位宽为 `S`
+- 第 0 个子字段映射到结构体的高位区间：`[S-1 : S-w0]`
+- 第 1 个子字段紧接其后：`[S-w0-1 : S-w0-w1]`
 - ...
 
 结构体整体位宽为所有字段位宽之和，并支持递归嵌套。
@@ -149,9 +152,9 @@ struct ULayout {
 p5::Union<ULayout> u{};
 u.long_ = p5::uint<10>(0b1010110011);
 
-p5::uint<2> s = u.short_;     // bits0..1
-p5::uint<3> a = u.st.a;       // bits0..2
-p5::uint<3> b = u.st.b;       // bits3..5
+p5::uint<2> s = u.short_;      // bits8..9 (MSB-aligned)
+p5::uint<3> a = u.st.a;        // bits7..9 (struct MSB→LSB)
+p5::uint<3> b = u.st.b;        // bits4..6
 ```
 
 ### 示例 2：整型直接赋值 + 不显式转换读取/比较/算术
