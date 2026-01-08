@@ -1,0 +1,113 @@
+#ifndef FRONTENDS_P5_PASSES_P5_TO_C_H_
+#define FRONTENDS_P5_PASSES_P5_TO_C_H_
+
+#include <filesystem>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
+
+namespace P4::P5 {
+
+struct IndentGuard;
+
+class P5ToC {
+ public:
+    explicit P5ToC(std::ostream *out = &std::cout, const std::string &out_dir = ".")
+        : outputStream(out), defaultStream(out) {
+        CHECK_NULL(outputStream);
+        CHECK_NULL(defaultStream);
+        outputDir = std::filesystem::path(out_dir);
+        if (outputDir.empty()) {
+            outputDir = std::filesystem::current_path();
+        }
+        std::error_code ec;
+        std::filesystem::create_directories(outputDir, ec);
+        if (ec) {
+            ::P4::error("Could not create output directory %s: %s", outputDir.string(),
+                        ec.message());
+        }
+        std::filesystem::create_directories(outputDir / "include", ec);
+        if (ec) {
+            ::P4::error("Could not create output directory %s: %s",
+                        (outputDir / "include").string(), ec.message());
+        }
+        std::filesystem::create_directories(outputDir / "src", ec);
+        if (ec) {
+            ::P4::error("Could not create output directory %s: %s", (outputDir / "src").string(),
+                        ec.message());
+        }
+    }
+    void emitP5Program(const IR::P4Program *program);
+
+ private:
+    std::ostream *outputStream;
+    std::ostream *defaultStream;
+    std::string indent;
+    std::filesystem::path outputDir;
+    std::unordered_map<std::string, std::unique_ptr<std::ostream>> streams;
+    friend struct IndentGuard;
+    bool inSwitchMethod = false;
+
+    std::unordered_set<cstring> switchMembers;
+
+    std::ostream *getStream(const std::string &filename);
+    void flushCFile();
+
+    enum class EmitMode { Standard, Memberized };
+
+    bool isUnion(const IR::Type_Struct *st);
+    bool isAnonymous(const IR::Type_Struct *st);
+    void emitSerEnum(const IR::Type_SerEnum *serEnum);
+    void emitStructOrUnion(const IR::Type_Struct *st, bool isNested = false);
+    void emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, EmitMode mode, int &anon_counter);
+    void emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
+    void emitFieldType(const IR::Type *type, EmitMode mode = EmitMode::Standard);
+    void emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
+    void emitVariableDecl(const IR::Declaration_Variable *var);
+    void emitHeaderDecl(const IR::Declaration_Instance *inst);
+    void emitTypedef(const IR::Type_Typedef *td);
+    void emitTable(const IR::P5Table *tbl);
+    void emitIfStat(const IR::IfStatement *ifs);
+    bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os);
+    bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os);
+    void emitGtvHpp(const IR::P4Program *program);
+    void emitEnumsHpp(const IR::P4Program *program);
+    void emitStructHpp(const IR::P4Program *program);
+    void emitSwitch(const IR::P4Program *program);
+    void emitStructsAndUnions(const IR::P4Program *program);
+    void emitHeaders(const IR::P4Program *program);
+    void emitPackGtvToBytes(const IR::P4Program *program);
+    void emitUnpackGtvFromBytes(const IR::P4Program *program);
+    void emitPhiPackUnpack(const IR::P4Program *program);
+    void emitPhoPackUnpack(const IR::P4Program *program);
+    void emitResetAllFields(const IR::P4Program *program);
+    void emitStructFieldTraverse(const IR::Type_Struct* st, const std::string& prefix, const std::unordered_map<cstring, const IR::Type_Struct*>& structMap, int& anon_counter, bool emit = true, bool is_pack = true);
+    std::unordered_map<cstring, const IR::Function *> indexFunctions(const IR::P4Program *program);
+    std::vector<const IR::Function *> computeCallOrder(
+        const std::unordered_map<cstring, const IR::Function *> &funcIndex, cstring rootName);
+    bool hasParserAnnotation(const IR::Function *func);
+    void emitFunction(const IR::Function *func, const std::string &class_name = "");
+    void emitFunctionSignature(const IR::Function *func, const std::string &class_name = "");
+    void emitFunctionDeclaration(const IR::Function *func, const std::string &class_name = "");
+    void emitFunctionBody(const IR::BlockStatement *body);
+    void emitComponent(const IR::StatOrDecl *comp);
+    void emitExpressionWithCtx(const IR::Expression *expr,
+                               const std::unordered_set<cstring> &locals);
+    void emitSwitchStatement(const IR::SwitchStatement *swStmt);
+    void emitSwitchCase(const IR::SwitchCase *caseStmt);
+    bool endsWithBreak(const IR::Statement *stmt);
+    void replaceIdentifier(std::string &s, const std::string &from, const std::string &to);
+    bool isInlineInit(const IR::Declaration_Variable *var);
+};
+
+/// Convenience entry point: run the P5ToC on a P4Program.
+const IR::P4Program *runP5ToC(const IR::P4Program *program, const std::string &out_dir = ".");
+
+}  // namespace P4::P5
+
+#endif  // FRONTENDS_P5_PASSES_P5_TO_C_H_

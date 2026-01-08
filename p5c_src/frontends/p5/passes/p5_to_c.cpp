@@ -1,0 +1,2190 @@
+#include "frontends/p5/passes/p5_to_c.h"
+
+#include <cctype>
+#include <cstring>
+#include <filesystem>
+#include <functional>
+#include <fstream>
+#include <sstream>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include "lib/error.h"
+#include "lib/stringify.h"
+
+namespace P4::P5 {
+
+struct IndentGuard {
+    P5ToC *self;
+    std::string old;
+    explicit IndentGuard(P5ToC *s) : self(s), old(s->indent) { self->indent += "    "; }
+    ~IndentGuard() { self->indent = old; }
+};
+
+void P5ToC::emitP5Program(const IR::P4Program *program) {
+    // Collect Switch members
+    switchMembers.clear();
+    // Add predefined members
+    switchMembers.insert(cstring("_status"));
+    // Built-in control parameters / accessors (GenSim BuiltInContext)
+    switchMembers.insert(cstring("table_id"));
+    switchMembers.insert(cstring("command"));
+    switchMembers.insert(cstring("ma_id"));
+    switchMembers.insert(cstring("_header_access"));
+    switchMembers.insert(cstring("decomp_profile"));
+    switchMembers.insert(cstring("control_info"));
+    switchMembers.insert(cstring("_command"));
+    switchMembers.insert(cstring("_table_id"));
+    switchMembers.insert(cstring("_profile_id"));
+    switchMembers.insert(cstring("_control_info"));
+
+    for (const auto *obj : program->objects) {
+        if (auto *var = obj->to<IR::Declaration_Variable>()) {
+            switchMembers.insert(var->name);
+        } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+            switchMembers.insert(inst->name);
+        } else if (auto *func = obj->to<IR::Function>()) {
+            switchMembers.insert(func->name);
+        }
+    }
+
+    emitEnumsHpp(program);
+    emitStructHpp(program);
+    emitGtvHpp(program);
+    emitSwitch(program);
+
+    flushCFile();
+
+    return;
+}
+
+std::ostream *P5ToC::getStream(const std::string &filename) {
+    auto it = streams.find(filename);
+    if (it != streams.end()) return it->second.get();
+    auto path = outputDir / filename;
+    std::cout << "Open file: " << path << std::endl;
+    auto ofs = std::make_unique<std::ofstream>(path);
+
+    // Check if file opened successfully
+    if (!ofs->is_open()) {
+        ::P4::error("Could not open file %s for writing", path.string().c_str());
+        return outputStream;  // Fallback to original output stream
+    }
+
+    auto *ptr = ofs.get();
+    streams.emplace(filename, std::move(ofs));
+
+    return ptr;
+}
+
+void P5ToC::flushCFile() {
+    for (auto &[filename, stream] : streams) {
+        stream->flush();
+    }
+}
+
+class CollectCalls : public Inspector {
+    std::unordered_set<cstring> names;
+
+ public:
+    void postorder(const IR::MethodCallExpression *m) override {
+        auto *pe = m->method->to<IR::PathExpression>();
+        if (pe) names.insert(pe->path->name);
+    }
+    const std::unordered_set<cstring> &get() const { return names; }
+};
+
+bool P5ToC::isUnion(const IR::Type_Struct *st) {
+    if (st == nullptr) return false;
+    for (const auto *ann : st->annotations) {
+        if (ann->name == "union" || ann->name == IR::ID("union")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool P5ToC::isAnonymous(const IR::Type_Struct *st) {
+    if (st == nullptr) return false;
+    return st->name == " " || st->name.toString().startsWith("_anon_");
+}
+
+void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
+    if (type == nullptr) {
+        *outputStream << "void";
+        return;
+    }
+
+    if (auto *bits = type->to<IR::Type_Bits>()) {
+        if (mode == EmitMode::Memberized) *outputStream << "p5::member<";
+        if (!bits->isSigned) {
+            // 无符号 Type_Bits 生成 p5::uint<N>
+            *outputStream << "p5::uint<" << bits->size << ">";
+        } else {
+            // 有符号的生成标准整数类型
+            *outputStream << "int" << bits->size << "_t";
+        }
+        if (mode == EmitMode::Memberized) *outputStream << ">";
+        return;
+    }
+
+    if (auto *tn = type->to<IR::Type_Name>()) {
+        if (mode == EmitMode::Memberized) {
+            *outputStream << "_inU_" << tn->path->name;
+        } else {
+            *outputStream << tn->path->name;
+        }
+        return;
+    }
+
+    if (type->is<IR::Type_Boolean>()) {
+        if (mode == EmitMode::Memberized)
+            *outputStream << "p5::member<bool>";
+        else
+            *outputStream << "bool";
+        return;
+    }
+
+    // 处理嵌套的 struct/union
+    if (auto *st = type->to<IR::Type_Struct>()) {
+        if (isAnonymous(st)) {
+            // 匿名 struct/union，内联输出
+            // Caller handles this usually, but if called directly:
+            // We need a dummy counter or fail?
+            // emitFieldType is usually called for named types or primitives.
+            // Nested anonymous structs are handled in emitStructOrUnion loop directly calling
+            // emitNestedStructOrUnion. But if we end up here:
+            int dummy = 0;
+            emitNestedStructOrUnion(st, mode, dummy);
+        } else {
+            // 命名的 struct/union，使用类型名
+            if (mode == EmitMode::Memberized)
+                *outputStream << "_inU_" << st->name;
+            else
+                *outputStream << st->name;
+        }
+        return;
+    }
+
+    *outputStream << type->toString();
+}
+
+void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var) {
+    if (var == nullptr) return;
+
+    const IR::Type *baseType = var->type;
+    std::vector<const IR::Expression *> dims;
+
+    while (auto *stk = baseType->to<IR::Type_Stack>()) {
+        dims.push_back(stk->size);
+        baseType = stk->elementType;
+    }
+
+    // Map _compressed_X -> _inflate<X>, otherwise reuse emitFieldType
+    auto writeMappedType = [this](const IR::Type *type, std::ostream &os) {
+        if (auto *tn = type->to<IR::Type_Name>()) {
+            auto name = tn->path->name.toString();
+            if (name.startsWith("_compressed_")) {
+                auto inner = name.substr(strlen("_compressed_"));
+                os << "_inflate<" << inner << ">";
+                return;
+            }
+        }
+        auto *old = outputStream;
+        outputStream = &os;
+        emitFieldType(type);
+        outputStream = old;
+    };
+
+    std::ostringstream typeBuf;
+    writeMappedType(baseType, typeBuf);
+
+    *outputStream << indent << typeBuf.str() << " " << var->name;
+
+    for (auto *dim : dims) {
+        *outputStream << "[";
+        if (dim) {
+            *outputStream << dim->toString();
+        }
+        *outputStream << "]";
+    }
+
+    if (var->initializer) {
+        // Specialize _key/_lookup with lhs type when used in initializer
+        if (auto *mc = var->initializer->to<IR::MethodCallExpression>()) {
+            if (auto *pe = mc->method->to<IR::PathExpression>()) {
+                auto lhsName = var->name.toString();
+                auto argsToString = [mc]() {
+                    std::ostringstream os;
+                    if (mc->arguments) {
+                        bool first = true;
+                        for (const auto *arg : *mc->arguments) {
+                            if (!first) os << ", ";
+                            first = false;
+                            os << arg->toString();
+                        }
+                    }
+                    return os.str();
+                };
+                if (pe->path->name == "_key") {
+                    // Emit key assignment in out-parameter form:
+                    //   lhs = _key(lhs);
+                    // (Works for p5::uint as well as aggregates/union via overload.)
+                    (void)argsToString; // keep lambda for symmetry with other built-ins
+                    *outputStream << " = _key(" << lhsName << ")";
+                } else if (pe->path->name == "_lookup") {
+                    auto args = argsToString();
+                    *outputStream << " = _lookup<typename std::remove_reference_t<decltype("
+                                  << lhsName << ")>::value_type>(" << args << ")";
+                } else {
+                    *outputStream << " = ";
+                    emitExpressionWithCtx(var->initializer, {});
+                }
+            } else {
+                *outputStream << " = ";
+                emitExpressionWithCtx(var->initializer, {});
+            }
+        } else {
+            *outputStream << " = ";
+            emitExpressionWithCtx(var->initializer, {});
+        }
+    }
+
+    *outputStream << ";\n";
+}
+
+void P5ToC::emitHeaderDecl(const IR::Declaration_Instance *inst) {
+    if (inst == nullptr) return;
+
+    const IR::Type *baseType = inst->type;
+    std::vector<const IR::Expression *> dims;
+
+    while (auto *stk = baseType->to<IR::Type_Stack>()) {
+        dims.push_back(stk->size);
+        baseType = stk->elementType;
+    }
+
+    *outputStream << indent;
+    emitFieldType(baseType);
+    *outputStream << " " << inst->name;
+    for (auto *dim : dims) {
+        *outputStream << "[";
+        if (dim) {
+            *outputStream << dim->toString();
+        }
+        *outputStream << "]";
+    }
+    *outputStream << ";\n";
+}
+
+bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs,
+                           std::ostream &os) {
+    if (mc == nullptr || mc->method == nullptr) return false;
+    auto *pe = mc->method->to<IR::PathExpression>();
+    if (!pe) return false;
+
+    auto argsToString = [mc]() {
+        std::ostringstream osArgs;
+        if (mc->arguments) {
+            bool first = true;
+            for (const auto *arg : *mc->arguments) {
+                if (!first) osArgs << ", ";
+                first = false;
+                osArgs << arg->toString();
+            }
+        }
+        return osArgs.str();
+    };
+
+    if (pe->path->name == "_key") {
+        // Emit key assignment in out-parameter form:
+        //   lhs = _key(lhs);
+        // (Works for p5::uint as well as aggregates/union via overload.)
+        (void)argsToString; // keep lambda for symmetry with other built-ins
+        os << lhs << " = _key(" << lhs << ");";
+        return true;
+    }
+
+    if (pe->path->name == "_lookup") {
+        auto args = argsToString();
+        os << lhs << " = _lookup<typename std::remove_reference_t<decltype(" << lhs
+           << ")>::value_type>(" << args << ");";
+        return true;
+    }
+
+    return false;
+}
+
+bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os) {
+    if (mc == nullptr || mc->method == nullptr) return false;
+    auto *pe = mc->method->to<IR::PathExpression>();
+    if (!pe) return false;
+
+    if (pe->path->name == "_apply" && mc->arguments && mc->arguments->size() == 1) {
+        os << mc->arguments->at(0)->toString() << ".apply();";
+        return true;
+    }
+
+    return false;
+}
+
+void P5ToC::emitTypedef(const IR::Type_Typedef *td) {
+    if (td == nullptr) return;
+
+    // Render mapped type using existing emitFieldType (Standard)
+    std::ostringstream oss;
+    auto *oldStream = outputStream;
+    outputStream = &oss;
+    emitFieldType(td->type, EmitMode::Standard);
+    outputStream = oldStream;
+    std::string mappedType = oss.str();
+
+    *outputStream << indent;
+    *outputStream << "using " << td->name << " = " << mappedType << ";\n";
+}
+
+void P5ToC::emitSerEnum(const IR::Type_SerEnum *serEnum) {
+    if (serEnum == nullptr) return;
+
+    *outputStream << "enum " << serEnum->name << " {\n";
+
+    for (size_t i = 0; i < serEnum->members.size(); ++i) {
+        const auto *member = serEnum->members[i];
+        *outputStream << indent << "    " << member->name;
+
+        if (member->value) {
+            // 尝试获取常量值
+            if (auto *c = member->value->to<IR::Constant>()) {
+                *outputStream << " = " << c->value;
+            } else {
+                // 如果不是常量，输出表达式（简化处理）
+                *outputStream << " = " << member->value->toString();
+            }
+        }
+
+        if (i < serEnum->members.size() - 1) {
+            *outputStream << ",";
+        }
+        *outputStream << "\n";
+    }
+
+    *outputStream << "};\n\n";
+}
+
+bool P5ToC::hasParserAnnotation(const IR::Function *func) {
+    if (func == nullptr) return false;
+    for (const auto *ann : func->annotations) {
+        cstring annName = ann->name.toString();
+        if (annName.startsWith("parser")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &class_name) {
+    if (func == nullptr) return;
+
+    // 输出返回类型
+    if (auto *mt = func->type->to<IR::Type_Method>()) {
+        if (mt->returnType) {
+            emitFieldType(mt->returnType);
+        } else {
+            *outputStream << "void";
+        }
+    } else {
+        *outputStream << "void";
+    }
+
+    // 输出函数名
+    *outputStream << " " << class_name << func->name << "(";
+
+    // 输出参数列表
+    if (auto *mt = func->type->to<IR::Type_Method>()) {
+        if (mt->parameters) {
+            bool first = true;
+            for (const auto *param : mt->parameters->parameters) {
+                if (!first) {
+                    *outputStream << ", ";
+                }
+                first = false;
+                bool handled = false;
+                if (param->direction == IR::Direction::InOut) {
+                    if (auto *bits = param->type->to<IR::Type_Bits>()) {
+                        if (!bits->isSigned) {
+                            *outputStream << "p5::uint_ref<" << bits->size << "> " << param->name;
+                            handled = true;
+                        }
+                    }
+                }
+
+                if (!handled) {
+                    emitFieldType(param->type);
+                    if (param->direction == IR::Direction::InOut) {
+                        *outputStream << " &" << param->name;
+                    } else {
+                        *outputStream << " " << param->name;
+                    }
+                }
+            }
+        }
+    }
+
+    *outputStream << ")";
+}
+
+void P5ToC::emitFunctionBody(const IR::BlockStatement *body) {
+    if (body == nullptr) {
+        *outputStream << ";\n\n";
+        return;
+    }
+
+    *outputStream << " {\n";
+
+    {
+        IndentGuard ig(this);
+
+        for (const auto *comp : body->components) {
+            emitComponent(comp);
+        }
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+void P5ToC::emitComponent(const IR::StatOrDecl *comp) {
+    *outputStream << indent;
+    if (auto *ifs = comp->to<IR::IfStatement>()) {
+        emitIfStat(ifs);
+        return;
+    }
+    if (auto *mcs = comp->to<IR::MethodCallStatement>()) {
+        auto *mc = mcs->methodCall;
+        std::ostringstream os;
+        if (emitMethodCall(mc, os)) {
+            *outputStream << indent << os.str() << "\n";
+            return;
+        }
+        *outputStream << indent;
+        emitExpressionWithCtx(mc, {});
+        *outputStream << ";\n";
+        return;
+    }
+    if (auto *var = comp->to<IR::Declaration_Variable>()) {
+        emitVariableDecl(var);
+        return;
+    }
+    if (auto *as = comp->to<IR::AssignmentStatement>()) {
+        auto lhs = as->left->toString();
+        if (auto *mc = as->right->to<IR::MethodCallExpression>()) {
+            std::ostringstream os;
+            if (emitMethodCall(mc, lhs, os)) {
+                *outputStream << indent << os.str() << "\n";
+                return;
+            }
+        }
+        *outputStream << indent;
+        emitExpressionWithCtx(as->left, {});
+        *outputStream << " = ";
+        emitExpressionWithCtx(as->right, {});
+        *outputStream << ";\n";
+        return;
+    }
+    if (auto *swStmt = comp->to<IR::SwitchStatement>()) {
+        emitSwitchStatement(swStmt);
+        return;
+    }
+    if (auto *blk = comp->to<IR::BlockStatement>()) {
+        for (const auto *c : blk->components) emitComponent(c);
+        return;
+    }
+
+    auto text = comp->toString();
+    *outputStream << text << ";\n";
+
+    return;
+}
+
+bool P5ToC::endsWithBreak(const IR::Statement *stmt) {
+    if (!stmt) return false;
+    if (stmt->is<IR::BreakStatement>()) return true;
+    if (auto *blockStmt = stmt->to<IR::BlockStatement>()) {
+        if (blockStmt->components.empty()) return false;
+        const auto *lastStmt = blockStmt->components.back();
+        return lastStmt->is<IR::BreakStatement>();
+    }
+    return false;
+}
+
+void P5ToC::emitSwitchCase(const IR::SwitchCase *caseStmt) {
+    *outputStream << indent;
+    if (caseStmt->label->is<IR::DefaultExpression>()) {
+        *outputStream << "default: ";
+    } else {
+        const IR::Expression *label = caseStmt->label;
+        if (auto *listExpr = label->to<IR::ListExpression>()) {
+            if (listExpr->components.size() == 1) {
+                label = listExpr->components.at(0);
+            }
+        }
+        auto labelText = label->toString();
+        *outputStream << "case " << labelText << ": ";
+    }
+
+    if (caseStmt->statement) {
+        if (auto *blockStmt = caseStmt->statement->to<IR::BlockStatement>()) {
+            *outputStream << " {\n";  // Add brace
+            IndentGuard ig(this);
+            for (const auto *caseComp : blockStmt->components) {
+                emitComponent(caseComp);
+            }
+            *outputStream << indent << "break;\n";
+            *outputStream << ig.old << indent << "}";  // End brace, using old indent
+        } else {
+            *outputStream << "\n";
+            IndentGuard ig(this);
+            if (auto *stat = caseStmt->statement->to<IR::StatOrDecl>()) {
+                emitComponent(stat);
+            } else {
+                *outputStream << indent << caseStmt->statement->toString() << ";\n";
+            }
+            *outputStream << indent << "break;\n";
+        }
+    } else {
+        *outputStream << ";\n";
+        *outputStream << indent << "break;\n";
+    }
+
+    *outputStream << "\n";
+}
+
+void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt) {
+    const IR::Expression *expr = swStmt->expression;
+    if (auto *listExpr = expr->to<IR::ListExpression>()) {
+        if (listExpr->components.size() == 1) {
+            expr = listExpr->components.at(0);
+        }
+    }
+
+    *outputStream << "switch (";
+    emitExpressionWithCtx(expr, {});
+    *outputStream << ".to_ullong()) {\n";
+    {
+        IndentGuard ig(this);
+        for (const auto &caseStmt : swStmt->cases) {
+            emitSwitchCase(caseStmt);
+        }
+    }
+    *outputStream << indent << "}\n";
+}
+
+void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
+    if (ifs == nullptr) return;
+
+    std::function<void(const IR::Node *)> emitNode = [&](const IR::Node *node) {
+        if (node == nullptr) return;
+
+        if (auto *innerIf = node->to<IR::IfStatement>()) {
+            emitIfStat(innerIf);
+            return;
+        }
+
+        if (auto *blk = node->to<IR::BlockStatement>()) {
+            for (const auto *c : blk->components) emitNode(c);
+            return;
+        }
+
+        if (auto *mcs = node->to<IR::MethodCallStatement>()) {
+            auto *mc = mcs->methodCall;
+            std::ostringstream os;
+            if (emitMethodCall(mc, os)) {
+                *outputStream << indent << os.str() << "\n";
+                return;
+            }
+            *outputStream << indent << node->toString() << ";\n";
+            return;
+        }
+
+        if (auto *var = node->to<IR::Declaration_Variable>()) {
+            emitVariableDecl(var);
+            return;
+        }
+
+        if (auto *as = node->to<IR::AssignmentStatement>()) {
+            auto lhs = as->left->toString();
+            if (auto *mc = as->right->to<IR::MethodCallExpression>()) {
+                std::ostringstream os;
+                if (emitMethodCall(mc, lhs, os)) {
+                    *outputStream << indent << os.str() << "\n";
+                    return;
+                }
+            }
+            *outputStream << indent;
+            emitExpressionWithCtx(as->left, {});
+            *outputStream << " = ";
+            emitExpressionWithCtx(as->right, {});
+            *outputStream << ";\n";
+            return;
+        }
+
+        // Fallback for other statements/declarations
+        *outputStream << indent << node->toString() << ";\n";
+    };
+
+    // Emit condition with an extra rule:
+    // If a sub-expression is a "pure variable" (PathExpression / Member) used as a boolean,
+    // append ".to_ullong()" so code like:
+    //   if (IsUc)                 -> if (IsUc.to_ullong())
+    //   if (_valid(x) && y.Flag)  -> if (_valid(x) && y.Flag.to_ullong())
+    //
+    // Only applies to boolean-context operators (top-level, &&, ||, !) and does not
+    // change non-boolean operators (comparisons, arithmetic, etc.).
+    std::function<void(const IR::Expression *, bool)> emitIfCond =
+        [&](const IR::Expression *expr, bool boolContext) {
+            if (expr == nullptr) return;
+
+            // Unwrap single-element list expression (common artifact in this frontend).
+            if (auto *list = expr->to<IR::ListExpression>()) {
+                if (list->components.size() == 1) {
+                    emitIfCond(list->components.at(0), boolContext);
+                    return;
+                }
+            }
+
+            if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
+                emitExpressionWithCtx(expr, {});
+                if (boolContext) *outputStream << ".to_ullong()";
+                return;
+            }
+
+            if (auto *un = expr->to<IR::Operation_Unary>()) {
+                // Only treat logical NOT as boolean-context; other unary ops fall back.
+                if (un->getStringOp() == "!") {
+                    *outputStream << "!";
+                    emitIfCond(un->expr, true);
+                    return;
+                }
+                emitExpressionWithCtx(expr, {});
+                return;
+            }
+
+            if (auto *bin = expr->to<IR::Operation_Binary>()) {
+                const auto op = bin->getStringOp();
+                if (op == "&&" || op == "||") {
+                    *outputStream << "(";
+                    emitIfCond(bin->left, true);
+                    *outputStream << " " << op << " ";
+                    emitIfCond(bin->right, true);
+                    *outputStream << ")";
+                    return;
+                }
+                // Comparisons/arithmetic/etc: keep existing emission.
+                emitExpressionWithCtx(expr, {});
+                return;
+            }
+
+            // Default: keep existing emission.
+            emitExpressionWithCtx(expr, {});
+        };
+
+    *outputStream << indent << "if (";
+    emitIfCond(ifs->condition, true);
+    *outputStream << ") {\n";
+    {
+        IndentGuard ig(this);
+        if (ifs->ifTrue) {
+            emitNode(ifs->ifTrue);
+        }
+    }
+    *outputStream << indent << "}";
+
+    if (ifs->ifFalse) {
+        *outputStream << " else {\n";
+        {
+            IndentGuard ig(this);
+            emitNode(ifs->ifFalse);
+        }
+        *outputStream << indent << "}";
+    }
+
+    *outputStream << "\n";
+}
+
+void P5ToC::emitExpressionWithCtx(const IR::Expression *expr,
+                                  const std::unordered_set<cstring> &locals) {
+    if (expr == nullptr) return;
+
+    if (auto *pe = expr->to<IR::PathExpression>()) {
+        if (inSwitchMethod) {
+            *outputStream << pe->path->name;
+        } else {
+            if (locals.count(pe->path->name) || !switchMembers.count(pe->path->name)) {
+                *outputStream << pe->path->name;
+            } else {
+                *outputStream << "ctx." << pe->path->name;
+            }
+        }
+        return;
+    }
+
+    if (auto *mem = expr->to<IR::Member>()) {
+        emitExpressionWithCtx(mem->expr, locals);
+        *outputStream << "." << mem->member;
+        return;
+    }
+
+    if (auto *mc = expr->to<IR::MethodCallExpression>()) {
+        emitExpressionWithCtx(mc->method, locals);
+        *outputStream << "(";
+        bool addedCtx = false;
+        if (auto *pe = mc->method->to<IR::PathExpression>()) {
+            if (pe->path->name.toString().endsWith("_TBL")) {
+                if (inSwitchMethod) {
+                    *outputStream << "*this";
+                } else {
+                    *outputStream << "ctx";
+                }
+                addedCtx = true;
+            }
+        }
+
+        if (mc->arguments) {
+            bool first = !addedCtx;
+            for (const auto *arg : *mc->arguments) {
+                if (!first) *outputStream << ", ";
+                first = false;
+                emitExpressionWithCtx(arg->expression, locals);
+            }
+        }
+        *outputStream << ")";
+        return;
+    }
+
+    if (auto *cc = expr->to<IR::ConstructorCallExpression>()) {
+        emitFieldType(cc->constructedType);
+        *outputStream << "(";
+        bool addedCtx = false;
+        if (auto *tn = cc->constructedType->to<IR::Type_Name>()) {
+            if (tn->path->name.toString().endsWith("_TBL")) {
+                if (inSwitchMethod) {
+                    *outputStream << "*this";
+                } else {
+                    *outputStream << "ctx";
+                }
+                addedCtx = true;
+            }
+        }
+
+        if (cc->arguments) {
+            bool first = !addedCtx;
+            for (const auto *arg : *cc->arguments) {
+                if (!first) *outputStream << ", ";
+                first = false;
+                emitExpressionWithCtx(arg->expression, locals);
+            }
+        }
+        *outputStream << ")";
+        return;
+    }
+
+    if (auto *list = expr->to<IR::ListExpression>()) {
+        *outputStream << "{ ";
+        bool first = true;
+        for (auto *comp : list->components) {
+            if (!first) *outputStream << ", ";
+            first = false;
+            emitExpressionWithCtx(comp, locals);
+        }
+        *outputStream << " }";
+        return;
+    }
+
+    if (auto *slice = expr->to<IR::Slice>()) {
+        emitExpressionWithCtx(slice->e0, locals);
+        *outputStream << "[p5::bit_range<";
+        emitExpressionWithCtx(slice->e1, locals);
+        *outputStream << ", ";
+        emitExpressionWithCtx(slice->e2, locals);
+        *outputStream << ">]";
+        return;
+    }
+
+    if (auto *ai = expr->to<IR::ArrayIndex>()) {
+        emitExpressionWithCtx(ai->left, locals);
+        *outputStream << "[";
+        emitExpressionWithCtx(ai->right, locals);
+        *outputStream << "]";
+        return;
+    }
+
+    if (auto *cast = expr->to<IR::Cast>()) {
+        emitFieldType(cast->destType);
+        *outputStream << "(";
+        emitExpressionWithCtx(cast->expr, locals);
+        *outputStream << ")";
+        return;
+    }
+
+    if (auto *bin = expr->to<IR::Operation_Binary>()) {
+        *outputStream << "(";
+        emitExpressionWithCtx(bin->left, locals);
+        *outputStream << " " << bin->getStringOp() << " ";
+        emitExpressionWithCtx(bin->right, locals);
+        *outputStream << ")";
+        return;
+    }
+
+    if (auto *un = expr->to<IR::Operation_Unary>()) {
+        *outputStream << un->getStringOp();
+        emitExpressionWithCtx(un->expr, locals);
+        return;
+    }
+
+    if (auto *c = expr->to<IR::Constant>()) {
+        *outputStream << c->value;
+        return;
+    }
+
+    if (auto *b = expr->to<IR::BoolLiteral>()) {
+        *outputStream << (b->value ? "true" : "false");
+        return;
+    }
+
+    *outputStream << expr->toString();
+}
+
+bool P5ToC::isInlineInit(const IR::Declaration_Variable *var) {
+    if (!var->initializer) return false;
+
+    cstring typeName;
+    if (auto *tn = var->type->to<IR::Type_Name>()) {
+        typeName = tn->path->name;
+    }
+
+    if (typeName.isNullOrEmpty()) return false;
+
+    if (auto *mc = var->initializer->to<IR::MethodCallExpression>()) {
+        if (auto *pe = mc->method->to<IR::PathExpression>()) {
+            if (pe->path->name == typeName) return true;
+        }
+    } else if (auto *cc = var->initializer->to<IR::ConstructorCallExpression>()) {
+        if (auto *tn = cc->constructedType->to<IR::Type_Name>()) {
+            if (tn->path->name == typeName) return true;
+        }
+    }
+    return false;
+}
+
+void P5ToC::emitTable(const IR::P5Table *tbl) {
+    if (tbl == nullptr) return;
+
+    *outputStream << indent << "class " << tbl->name << " : public Table {\n";
+    {
+        IndentGuard ig(this);
+        *outputStream << ig.old << "private:\n";
+        *outputStream << indent << "Switch &ctx;\n";
+
+        std::unordered_set<cstring> locals;
+
+        if (tbl->parameters) {
+            for (const auto *param : tbl->parameters->parameters) {
+                locals.insert(param->name);
+                *outputStream << indent;
+                emitFieldType(param->type);
+                *outputStream << " &" << param->name << ";\n";
+            }
+        }
+
+        *outputStream << ig.old << "public:\n";
+
+        *outputStream << indent << "explicit " << tbl->name << "(Switch &ctx_in";
+        if (tbl->parameters) {
+            for (const auto *param : tbl->parameters->parameters) {
+                *outputStream << ", ";
+                emitFieldType(param->type);
+                *outputStream << " &" << param->name << "_in";
+            }
+        }
+        *outputStream << ") : ctx(ctx_in)";
+        if (tbl->parameters) {
+            for (const auto *param : tbl->parameters->parameters) {
+                *outputStream << ", " << param->name << "(" << param->name << "_in)";
+            }
+        }
+        *outputStream << " {}\n\n";
+
+        if (tbl->body) {
+            for (const auto *comp : tbl->body->components) {
+                if (auto *var = comp->to<IR::Declaration_Variable>()) {
+                        locals.insert(var->name);
+                        *outputStream << indent;
+                        emitFieldType(var->type);
+                        *outputStream << " " << var->name;
+
+                        if (isInlineInit(var)) {
+                            *outputStream << " = ";
+                            emitExpressionWithCtx(var->initializer, locals);
+                        }
+                        *outputStream << ";\n";
+                    }
+            }
+        }
+
+        *outputStream << "\n";
+        *outputStream << indent << "void apply() override {\n";
+        {
+            IndentGuard ig(this);
+            if (tbl->body) {
+                for (const auto *comp : tbl->body->components) {
+                    if (auto *keyNode = comp->to<IR::P5Key>()) {
+                        // Emit key-building code in the same order as it appears in the body.
+                        // Scope the builder variables so multiple key blocks do not collide.
+                        *outputStream << indent << "{\n";
+                        {
+                            IndentGuard igKey(this);
+                            *outputStream << indent << "auto _KeyBuilder = ctx.keyBuilder();\n";
+                            *outputStream << indent << "bool _BuiltKey = true;\n";
+
+                            // Emit statements from control blocks (e.g., control_parameters = { ... })
+                            // using the same ctx-qualification rules as regular table body code.
+                            std::function<void(const IR::Node *)> emitControlNode =
+                                [&](const IR::Node *node) {
+                                    if (node == nullptr) return;
+
+                                    if (auto *blk = node->to<IR::BlockStatement>()) {
+                                        for (const auto *c : blk->components) emitControlNode(c);
+                                        return;
+                                    }
+
+                                    // if (auto *var = node->to<IR::Declaration_Variable>()) {
+                                    //     // Keep as a simple statement; declarations inside control blocks
+                                    //     // are rare but supported for completeness.
+                                    //     *outputStream << indent;
+                                    //     emitFieldType(var->type);
+                                    //     *outputStream << " " << var->name;
+                                    //     if (var->initializer) {
+                                    //         *outputStream << " = ";
+                                    //         emitExpressionWithCtx(var->initializer, locals);
+                                    //     }
+                                    //     *outputStream << ";\n";
+                                    //     return;
+                                    // }
+
+                                    if (auto *as = node->to<IR::AssignmentStatement>()) {
+                                        *outputStream << indent;
+                                        emitExpressionWithCtx(as->left, locals);
+                                        *outputStream << " = ";
+                                        emitExpressionWithCtx(as->right, locals);
+                                        *outputStream << ";\n";
+                                        return;
+                                    }
+
+                                    // if (auto *mcs = node->to<IR::MethodCallStatement>()) {
+                                    //     if (auto *mc = mcs->methodCall) {
+                                    //         *outputStream << indent;
+                                    //         if (auto *pe = mc->method->to<IR::PathExpression>()) {
+                                    //             if (pe->path->name == "_apply" && mc->arguments &&
+                                    //                 mc->arguments->size() == 1) {
+                                    //                 emitExpressionWithCtx(mc->arguments->at(0)->expression,
+                                    //                                       locals);
+                                    //                 *outputStream << ".apply();\n";
+                                    //                 return;
+                                    //             }
+                                    //         }
+                                    //         emitExpressionWithCtx(mc, locals);
+                                    //         *outputStream << ";\n";
+                                    //         return;
+                                    //     }
+                                    // }
+
+                                    // Fallback: preserve ordering by emitting textual form.
+                                    *outputStream << indent << node->toString() << ";\n";
+                                };
+
+                            if (keyNode->select) {
+                                *outputStream << indent << "switch (";
+                                const IR::Expression *selExpr = keyNode->select;
+                                if (auto *list = selExpr->to<IR::ListExpression>()) {
+                                    if (list->components.size() == 1) selExpr = list->components.at(0);
+                                }
+                                emitExpressionWithCtx(selExpr, locals);
+                                *outputStream << ".to_ullong()) {\n";
+                                {
+                                    IndentGuard ig2(this);
+                                    if (!keyNode->cases.empty()) {
+                                        for (const auto *cse : keyNode->cases) {
+                                            *outputStream << indent;
+                                            if (!cse->label || cse->label->is<IR::DefaultExpression>()) {
+                                                *outputStream << "default: {\n";
+                                            } else {
+                                                *outputStream << "case ";
+                                                const IR::Expression *lblExpr = cse->label;
+                                                if (auto *list = lblExpr->to<IR::ListExpression>()) {
+                                                    if (list->components.size() == 1)
+                                                        lblExpr = list->components.at(0);
+                                                }
+                                                emitExpressionWithCtx(lblExpr, locals);
+                                                *outputStream << ": {\n";
+                                            }
+
+                                            {
+                                                IndentGuard ig3(this);
+                                                bool hasExpr = false;
+                                                for (const auto *elem : cse->elements) {
+                                                    if (elem->expr) {
+                                                        hasExpr = true;
+                                                        *outputStream << indent << "_KeyBuilder.append(";
+                                                        emitExpressionWithCtx(elem->expr, locals);
+                                                        *outputStream << ");\n";
+                                                    }
+                                                    if (!elem->control.components.empty()) {
+                                                        emitControlNode(&elem->control);
+                                                    }
+                                                }
+                                                // Mark the key as not built if this case contains no expr elements.
+                                                if (!hasExpr) {
+                                                    *outputStream << indent << "_BuiltKey = false;\n";
+                                                }
+                                                *outputStream << indent << "break;\n";
+                                            }
+                                            *outputStream << indent << "}\n";
+                                        }
+                                    }
+                                }
+                                *outputStream << indent << "}\n";
+                            } else if (!keyNode->elements.empty()) {
+                                bool hasExpr = false;
+                                for (const auto *elem : keyNode->elements) {
+                                    if (elem->expr) {
+                                        hasExpr = true;
+                                        *outputStream << indent << "_KeyBuilder.append(";
+                                        emitExpressionWithCtx(elem->expr, locals);
+                                        *outputStream << ");\n";
+                                    }
+                                    if (!elem->control.components.empty()) {
+                                        emitControlNode(&elem->control);
+                                    }
+                                }
+                                if (!hasExpr) {
+                                    *outputStream << indent << "_BuiltKey = false;\n";
+                                }
+                            }
+
+                            *outputStream << indent << "if (_BuiltKey) {\n";
+                            {
+                                IndentGuard igCommit(this);
+                                *outputStream << indent << "_KeyBuilder.commit();\n";
+                            }
+                            *outputStream << indent << "}\n";
+                        }
+                        *outputStream << indent << "}\n";
+                        continue;
+                    }
+
+                    if (auto *var = comp->to<IR::Declaration_Variable>()) {
+                        if (var->initializer && !isInlineInit(var)) {
+                            *outputStream << indent;
+                            *outputStream << var->name << " = ";
+                            emitExpressionWithCtx(var->initializer, locals);
+                            *outputStream << ";\n";
+                        }
+                        continue;
+                    }
+
+                    *outputStream << indent;
+
+                    if (auto *as = comp->to<IR::AssignmentStatement>()) {
+                        emitExpressionWithCtx(as->left, locals);
+                        *outputStream << " = ";
+                        emitExpressionWithCtx(as->right, locals);
+                        *outputStream << ";\n";
+                    } else if (auto *mcs = comp->to<IR::MethodCallStatement>()) {
+                        if (auto *mc = mcs->methodCall) {
+                            if (auto *pe = mc->method->to<IR::PathExpression>()) {
+                                if (pe->path->name == "_apply" && mc->arguments &&
+                                    mc->arguments->size() == 1) {
+                                    emitExpressionWithCtx(mc->arguments->at(0)->expression, locals);
+                                    *outputStream << ".apply();\n";
+                                    continue;
+                                }
+                            }
+                            emitExpressionWithCtx(mc, locals);
+                            *outputStream << ";\n";
+                        }
+                    } else {
+                        *outputStream << comp->toString() << ";\n";
+                    }
+                }
+            }
+        }
+        *outputStream << indent << "}\n";
+    }
+    *outputStream << indent << "};\n\n";
+}
+
+void P5ToC::replaceIdentifier(std::string &s, const std::string &from, const std::string &to) {
+    if (from.empty()) return;
+    std::string out;
+    out.reserve(s.size());
+    size_t i = 0;
+    while (i < s.size()) {
+        bool match = false;
+        if (i + from.size() <= s.size() && s.compare(i, from.size(), from) == 0) {
+            char left = (i == 0) ? '\0' : s[i - 1];
+            char right = (i + from.size() >= s.size()) ? '\0' : s[i + from.size()];
+            auto isIdent = [](char c) {
+                return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+            };
+            if (!isIdent(left) && !isIdent(right)) {
+                match = true;
+            }
+        }
+        if (match) {
+            out.append(to);
+            i += from.size();
+        } else {
+            out.push_back(s[i]);
+            i++;
+        }
+    }
+    s.swap(out);
+}
+
+void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name) {
+    if (func == nullptr) return;
+
+    bool oldInSwitch = inSwitchMethod;
+    if (class_name == "Switch::") {
+        inSwitchMethod = true;
+    }
+
+    emitFunctionSignature(func, class_name);
+    emitFunctionBody(func->body);
+
+    inSwitchMethod = oldInSwitch;
+}
+
+void P5ToC::emitFunctionDeclaration(const IR::Function *func, const std::string &class_name) {
+    if (func == nullptr) return;
+    *outputStream << indent;
+    emitFunctionSignature(func, class_name);
+    *outputStream << ";\n";
+}
+
+void P5ToC::emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter) {
+    if (st == nullptr) return;
+
+    IndentGuard ig(this);
+    for (const auto *field : st->fields) {
+        *outputStream << indent;
+
+        // Handle nested anonymous struct/union
+        if (auto *nestedSt = field->type->to<IR::Type_Struct>()) {
+            if (isAnonymous(nestedSt)) {
+                std::string name = field->name.toString().c_str();
+                bool isAnonField = (name == " " || name.empty());
+
+                if (isUnion(nestedSt)) {
+                    // Union: always use P5_UNION, members are always Memberized
+                    if (isAnonField) name = "_noname_u_" + std::to_string(anon_counter++);
+
+                    *outputStream << "P5_UNION(" << name << ", {\n";
+                    emitStructMembers(nestedSt, EmitMode::Memberized, anon_counter);
+                    *outputStream << indent << "});\n";
+                } else {
+                    // Struct: inherits mode
+                    if (isAnonField) name = "_noname_st_" + std::to_string(anon_counter++);
+
+                    *outputStream << "struct {\n";
+                    emitStructMembers(nestedSt, mode, anon_counter);
+                    *outputStream << indent << "} " << name << ";\n";
+                }
+                continue;
+            }
+        }
+
+        // Standard field
+        emitFieldType(field->type, mode);
+        if (field->name != " " && field->name != cstring::empty) {
+            *outputStream << " " << field->name;
+        }
+        *outputStream << ";\n";
+    }
+}
+
+void P5ToC::emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter) {
+    // Legacy/Fallback: Just emit struct body
+    *outputStream << "struct {\n";
+    emitStructMembers(st, mode, anon_counter);
+    *outputStream << indent << "}";
+}
+
+void P5ToC::emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, EmitMode mode,
+                                  int &anon_counter) {
+    if (st == nullptr) return;
+
+    bool isUnionType = isUnion(st);
+    if (isUnionType) {
+        // Top-level union
+        *outputStream << "union " << st->name << " {\n";
+        emitStructMembers(st, EmitMode::Memberized, anon_counter);
+        *outputStream << indent << "}";
+    } else {
+        // Top-level struct
+        std::string name = st->name.toString().c_str();
+        if (mode == EmitMode::Memberized) name = "_inU_" + name;
+
+        *outputStream << "struct " << name << " {\n";
+        emitStructMembers(st, mode, anon_counter);
+        *outputStream << indent << "}";
+    }
+
+    if (!isNested) {
+        *outputStream << ";\n\n";
+    }
+}
+
+void P5ToC::emitStructOrUnion(const IR::Type_Struct *st, bool isNested) {
+    int anon_counter = 0;
+
+    // Pass 1: Standard (or Memberized if Union)
+    bool isUnionType = isUnion(st);
+    if (isUnionType) {
+        emitStructOrUnionImpl(st, isNested, EmitMode::Memberized, anon_counter);
+    } else {
+        emitStructOrUnionImpl(st, isNested, EmitMode::Standard, anon_counter);
+
+        // Pass 2: Generate _inU_ version for named structs
+        if (!isNested && !isAnonymous(st)) {
+            anon_counter = 0;  // Reset counter to ensure deterministic names
+            emitStructOrUnionImpl(st, isNested, EmitMode::Memberized, anon_counter);
+        }
+    }
+}
+
+void P5ToC::emitEnumsHpp(const IR::P4Program *program) {
+    outputStream = getStream("include/generated_enum.hpp");
+
+    *outputStream << "#ifndef GENERATED_ENUM_HPP\n"
+                  << "#define GENERATED_ENUM_HPP\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "\n";
+    for (const auto *obj : program->objects) {
+        if (auto *serEnum = obj->to<IR::Type_SerEnum>()) {
+            emitSerEnum(serEnum);
+        }
+    }
+    *outputStream << "#endif // GENERATED_ENUM_HPP\n";
+
+    outputStream = defaultStream;
+}
+
+void P5ToC::emitStructHpp(const IR::P4Program *program) {
+    outputStream = getStream("include/generated_struct.hpp");
+
+    *outputStream << "#ifndef GENERATED_STRUCT_HPP\n"
+                  << "#define GENERATED_STRUCT_HPP\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "\n"
+                  << "#include \"generated_enum.hpp\"\n"
+                  << "\n";
+
+    emitStructsAndUnions(program);
+
+    for (const auto *obj : program->objects) {
+        if (auto *td = obj->to<IR::Type_Typedef>()) {
+            emitTypedef(td);
+        }
+    }
+
+    *outputStream << "\n#endif // GENERATED_STRUCT_HPP\n";
+
+    outputStream = defaultStream;
+}
+
+void P5ToC::emitGtvHpp(const IR::P4Program *program) {
+    outputStream = getStream("include/generated_gtv.hpp");
+
+    *outputStream << "#ifndef GENERATED_GTV_HPP\n"
+                  << "#define GENERATED_GTV_HPP\n"
+                  << "\n"
+                  << "#include <array>\n"
+                  << "#include <cstdint>\n"
+                  << "#include <type_traits>\n"
+                  << "#include <vector>\n"
+                  << "\n"
+                  << "#include <boost/pfr.hpp>\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "\n"
+                  << "#include \"generated_struct.hpp\"\n"
+                  << "\n";
+
+    *outputStream << "class GtvContext {\n"
+                  << "  public:\n";
+    {
+        IndentGuard ig(this);
+        emitHeaders(program);
+        *outputStream << "\n";
+
+        for (const auto *obj : program->objects) {
+            if (auto *var = obj->to<IR::Declaration_Variable>()) {
+                emitVariableDecl(var);
+            }
+        }
+        *outputStream << "\n";
+
+        *outputStream << indent << "enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };\n"
+                      << indent << "NgsfDirection ngsf_direction{NgsfDirection::INGRESS};\n"
+                      << "\n"
+                      << indent << "std::size_t ngsf_byte_offset{0};\n"
+                      << indent << "uint8_t ngsf_bit_offset{0};\n"
+                      << "\n"
+                      << indent << "void reset_ngsf_offset() { ngsf_byte_offset = 0; ngsf_bit_offset = 0; }\n"
+                      << "\n";
+
+        *outputStream << indent << "template <typename T>\n"
+                      << indent << "void _add_to_ngsf(T &value) { if (ngsf_direction == NgsfDirection::INGRESS) { ngsf_append_any(value); } else { ngsf_restore_any(value); }\n"
+                      << indent << "}\n"
+                      << "\n";
+
+        *outputStream << indent
+                      << "using GtvPackedBuffer = std::array<uint8_t, FV_GTV_MAX_BYTE_NUM>;\n"
+                      << indent << "using PhiPackedBuffer = std::array<uint8_t, FV_PHI_BYTE_NUM>;\n"
+                      << indent << "using PhoPackedBuffer = std::array<uint8_t, FV_PHO_BYTE_NUM>;\n"
+                      << "\n";
+
+        emitPhiPackUnpack(program);
+        emitPhoPackUnpack(program);
+        emitPackGtvToBytes(program);
+        emitUnpackGtvFromBytes(program);
+
+        *outputStream
+            << "protected:\n"
+            << "    template <typename T>\n"
+            << "    struct is_p5_uint_type : std::false_type {};\n"
+            << "    template <std::size_t N>\n"
+            << "    struct is_p5_uint_type<p5::uint<N>> : std::true_type {};\n"
+            << "\n"
+            << "    template <typename T>\n"
+            << "    struct is_p5_member_type : std::false_type {};\n"
+            << "    template <typename UIntT>\n"
+            << "    struct is_p5_member_type<p5::member<UIntT>> : std::true_type {};\n"
+            << "\n"
+            << "    template <typename T>\n"
+            << "    struct is_p5_union_type : std::false_type {};\n"
+            << "    template <typename Layout>\n"
+            << "    struct is_p5_union_type<p5::Union<Layout>> : std::true_type {};\n"
+            << "\n"
+            << "    template <typename P5UInt>\n"
+            << "    static void append_bits(std::vector<bool> &bits, const P5UInt &value) {\n"
+            << "        using T = std::decay_t<P5UInt>;\n"
+            << "        constexpr std::size_t width = T::width();\n"
+            << "        if constexpr (is_p5_union_type<T>::value) {\n"
+            << "            // For p5::Union: treat it as its underlying storage bits (width = "
+               "base storage width).\n"
+            << "            // Write bits in high-first order.\n"
+            << "            const auto raw = value.to_uint(); // p5::uint<width>\n"
+            << "            for (std::size_t i = 0; i < width; ++i) {\n"
+            << "                bits.push_back(raw[width - 1 - i]);\n"
+            << "            }\n"
+            << "        } else {\n"
+            << "            // For p5::uint / p5::member: read bits directly (high-first).\n"
+            << "            for (std::size_t i = 0; i < width; ++i) {\n"
+            << "                bits.push_back(value[width - 1 - i]);\n"
+            << "            }\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename Buffer, typename P5UInt>\n"
+            << "    static void assign_from_bits(const Buffer &buf, std::size_t &cursor, P5UInt "
+               "&target) {\n"
+            << "        using T = std::decay_t<P5UInt>;\n"
+            << "        constexpr std::size_t width = T::width();\n"
+            << "\n"
+            << "        // Read width bits from buffer in high-first order, then assign to "
+               "target.\n"
+            << "        // This works for p5::uint, p5::member and p5::Union (writes to union's "
+               "base storage).\n"
+            << "        p5::uint<width> tmp{};\n"
+            << "        for (std::size_t i = 0; i < width && cursor < buf.size() * 8; ++i, "
+               "++cursor) {\n"
+            << "            const std::size_t byte_idx = cursor / 8;\n"
+            << "            const std::size_t bit_idx = 7 - (cursor % 8); // 高位在前\n"
+            << "            const bool bit = (buf[byte_idx] >> bit_idx) & 0x1;\n"
+            << "            tmp[width - 1 - i] = bit; // i=0 is MSB\n"
+            << "        }\n"
+            << "        target = tmp;\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename Buffer>\n"
+            << "    static void write_bits_to_buffer(const std::vector<bool> &bits, Buffer &out) "
+               "{\n"
+            << "        for (std::size_t i = 0; i < bits.size() && i < out.size() * 8; ++i) {\n"
+            << "            if (bits[i]) {\n"
+            << "                const std::size_t byte_idx = i / 8;\n"
+            << "                const std::size_t bit_idx = 7 - (i % 8);\n"
+            << "                out[byte_idx] |= static_cast<uint8_t>(1u << bit_idx);\n"
+            << "            }\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    // ============================ NGSF helpers ============================\n"
+            << "    bool ngsf_has_capacity(std::size_t bits_needed) const {\n"
+            << "        const std::size_t total_bits = sizeof(NGSFBuffer) / sizeof(NGSFBuffer[0]) * 8; // 64 bytes * 8\n"
+            << "        const std::size_t cur_bits = ngsf_byte_offset * 8 + ngsf_bit_offset;\n"
+            << "        return cur_bits + bits_needed <= total_bits;\n"
+            << "    }\n"
+            << "\n"
+            << "    void ngsf_write_bit(bool bit) {\n"
+            << "        if (ngsf_byte_offset >= 64) return;\n"
+            << "        // bit_offset is MSB-first; p5::uint bit index 7 is MSB.\n"
+            << "        NGSFBuffer[ngsf_byte_offset][static_cast<std::size_t>(7 - ngsf_bit_offset)] = bit;\n"
+            << "        ++ngsf_bit_offset;\n"
+            << "        if (ngsf_bit_offset >= 8) {\n"
+            << "            ngsf_bit_offset = 0;\n"
+            << "            ++ngsf_byte_offset;\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    bool ngsf_read_bit() {\n"
+            << "        if (ngsf_byte_offset >= 64) return false;\n"
+            << "        const bool bit = NGSFBuffer[ngsf_byte_offset][static_cast<std::size_t>(7 - ngsf_bit_offset)];\n"
+            << "        ++ngsf_bit_offset;\n"
+            << "        if (ngsf_bit_offset >= 8) {\n"
+            << "            ngsf_bit_offset = 0;\n"
+            << "            ++ngsf_byte_offset;\n"
+            << "        }\n"
+            << "        return bit;\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename P5T>\n"
+            << "    static constexpr std::size_t ngsf_width_bits() {\n"
+            << "        using D = std::decay_t<P5T>;\n"
+            << "        if constexpr (is_p5_union_type<D>::value) {\n"
+            << "            return D::width();\n"
+            << "        } else if constexpr (is_p5_uint_type<D>::value) {\n"
+            << "            return D::width();\n"
+            << "        } else if constexpr (is_p5_member_type<D>::value) {\n"
+            << "            return D::width();\n"
+            << "        } else {\n"
+            << "            return 0;\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename Field>\n"
+            << "    void ngsf_append_leaf(const Field &field) {\n"
+            << "        using D = std::decay_t<Field>;\n"
+            << "        constexpr std::size_t W = ngsf_width_bits<D>();\n"
+            << "        static_assert(W > 0, \"Unsupported NGSF leaf type\");\n"
+            << "\n"
+            << "        if constexpr (is_p5_union_type<D>::value) {\n"
+            << "            const auto raw = field.to_uint(); // p5::uint<W>\n"
+            << "            for (std::size_t i = 0; i < W; ++i) {\n"
+            << "                ngsf_write_bit(raw[W - 1 - i]);\n"
+            << "            }\n"
+            << "        } else {\n"
+            << "            for (std::size_t i = 0; i < W; ++i) {\n"
+            << "                ngsf_write_bit(field[W - 1 - i]);\n"
+            << "            }\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename Field>\n"
+            << "    void ngsf_restore_leaf(Field &field) {\n"
+            << "        using D = std::decay_t<Field>;\n"
+            << "        constexpr std::size_t W = ngsf_width_bits<D>();\n"
+            << "        static_assert(W > 0, \"Unsupported NGSF leaf type\");\n"
+            << "\n"
+            << "        p5::uint<W> tmp{};\n"
+            << "        for (std::size_t i = 0; i < W; ++i) {\n"
+            << "            const bool bit = ngsf_read_bit();\n"
+            << "            tmp[W - 1 - i] = bit;\n"
+            << "        }\n"
+            << "        // Works for p5::uint / p5::member / p5::Union (writes underlying storage/view).\n"
+            << "        field = tmp;\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename T>\n"
+            << "    void ngsf_append_any(const T &value) {\n"
+            << "        using D = std::decay_t<T>;\n"
+            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {\n"
+            << "            ngsf_append_leaf(value);\n"
+            << "        } else {\n"
+            << "            static_assert(std::is_aggregate_v<D>,\n"
+            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "            boost::pfr::for_each_field(value, [&](const auto &sub) { ngsf_append_any(sub); });\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename T>\n"
+            << "    void ngsf_restore_any(T &value) {\n"
+            << "        using D = std::decay_t<T>;\n"
+            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {\n"
+            << "            ngsf_restore_leaf(value);\n"
+            << "        } else {\n"
+            << "            static_assert(std::is_aggregate_v<D>,\n"
+            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "            boost::pfr::for_each_field(value, [&](auto &sub) { ngsf_restore_any(sub); });\n"
+            << "        }\n"
+            << "    }\n";
+    }
+    *outputStream << "};\n";
+
+    *outputStream << "\n#endif // GENERATED_GTV_HPP\n";
+
+    outputStream = defaultStream;
+}
+
+void P5ToC::emitSwitch(const IR::P4Program *program) {
+    // 1. Emit Header
+    outputStream = getStream("include/generated_switch.hpp");
+    *outputStream << "#ifndef GENERATED_SWITCH_HPP\n"
+                  << "#define GENERATED_SWITCH_HPP\n"
+                  << "\n"
+                  << "#include <string>\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "#include \"generated_gtv.hpp\"\n"
+                  << "#include \"packet.hpp\"\n"
+                  << "\n";
+
+    *outputStream << "class Switch : public GtvContext, public BuiltInContext, public Packet {\n"
+                  << "public:\n"
+                  << "    Switch();\n"
+                  << "\n";
+
+    {
+        IndentGuard ig(this);
+
+        for (const auto *obj : program->objects) {
+            if (auto *func = obj->to<IR::Function>()) {
+                emitFunctionDeclaration(func);
+            }
+        }
+
+        for (const auto *obj : program->objects) {
+            if (auto *tbl = obj->to<IR::P5Table>()) {
+                emitTable(tbl);
+            }
+        }
+
+        *outputStream
+            << "public:\n"
+            << indent
+            << "void PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef "
+               "&nhi_info, "
+               "Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info);\n"
+            << indent
+            << "void ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ima2IpmFvInfoDef "
+               "&fv_out);\n"
+            << indent
+            << "void EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ema2EpmFvInfoDef "
+               "&fv_out);\n"
+            << indent
+            << "void IpmProcPkt(const int port_id, const Ima2IpmFvInfoDef &fv_in, Np2NpHeader "
+               "&np2np_hdr, Np2TmHeader &np2tm_hdr);\n"
+            << indent
+            << "void SingleMaProc(const int ma_id, const std::string &packet_id, const int "
+               "port_id, "
+               "const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);\n"
+            << "\n"
+            << indent << "void reset_all_fields();\n"
+            << "\n"
+            << indent << "SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }\n"
+            << indent << "KeyManager &keyManager() { return BuiltInContext::keyManager(); }\n"
+            << "\n";
+    }
+    *outputStream << "};\n";
+
+    *outputStream << "\n#endif // GENERATED_SWITCH_HPP\n";
+
+    // 2. Emit Source
+    outputStream = getStream("src/generated_switch.cpp");
+    *outputStream << "#include <cstring>\n"
+                  << "\n"
+                  << "#include \"generated_switch.hpp\"\n"
+                  << "\n"
+                  << "Switch::Switch() : GtvContext(), BuiltInContext(), Packet() {}\n"
+                  << "\n";
+
+    for (const auto *obj : program->objects) {
+        if (auto *func = obj->to<IR::Function>()) {
+            emitFunction(func, "Switch::");
+        }
+    }
+
+    *outputStream << "// ========== interface 实现 ==========\n"
+                  << "void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, "
+                     "NhiDef &nhi_info, \n"
+                  << "                    Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, "
+                     "Prs2Ma0FvInfoDef &fv_info) {\n"
+                  << "    (void)nhi_info;\n"
+                  << "    (void)cp2np_hdr;\n"
+                  << "    // 载入原始包\n"
+                  << "    std::memcpy(data_.data(), pkt_hdr.pkt_data, PKT_HEADER_BYTE_LEN);\n"
+                  << "    reset_offset();\n"
+                  << "    // 基础字段\n"
+                  << "    PHI.PortType = parser_hinfo.port_type;\n"
+                  << "    GLSP = parser_hinfo.port_id;\n"
+                  << "\n"
+                  << "    if (direction == 0) {\n"
+                  << "        pre_iMAControl();\n"
+                  << "    } else if (direction == 1) {\n"
+                  << "        pre_eMAControl();\n"
+                  << "    }\n"
+                  << "\n"
+                  << "    // 打包输出\n"
+                  << "    std::memcpy(fv_info.phData, data_.data(), PKT_HEADER_BYTE_LEN);\n"
+                  << "    auto phiOut = pack_phi_to_bytes();\n"
+                  << "    auto phoOut = pack_pho_to_bytes();\n"
+                  << "    auto gtvOut = pack_gtv_to_bytes();\n"
+                  << "    std::memcpy(fv_info.phiData, phiOut.data(), FV_PHI_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_info.phoData, phoOut.data(), FV_PHO_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_info.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "}\n"
+                  << "\n"
+                  << "// 单个 MA 处理流程\n"
+                  << "void Switch::SingleMaProc(const int ma_id, const std::string &packet_id, "
+                     "const int port_id,\n"
+                  << "    const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out) {\n"
+                  << "    (void)packet_id; // 当前流程未使用\n"
+                  << "    (void)port_id;   // 当前流程未使用\n"
+                  << "\n"
+                  << "    // 载入 PH 数据\n"
+                  << "    std::memcpy(data_.data(), fv_in.phData, PKT_HEADER_BYTE_LEN);\n"
+                  << "    \n"
+                  << "    // 解包输入的 PHI / PHO / GTV\n"
+                  << "    PhiPackedBuffer phiIn{};\n"
+                  << "    std::memcpy(phiIn.data(), fv_in.phiData, FV_PHI_BYTE_NUM);\n"
+                  << "    unpack_phi_from_bytes(phiIn);\n"
+                  << "\n"
+                  << "    PhoPackedBuffer phoIn{};\n"
+                  << "    std::memcpy(phoIn.data(), fv_in.phoData, FV_PHO_BYTE_NUM);\n"
+                  << "    unpack_pho_from_bytes(phoIn);\n"
+                  << "\n"
+                  << "    GtvPackedBuffer gtvIn{};\n"
+                  << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    unpack_gtv_from_bytes(gtvIn);\n"
+                  << "\n"
+                  << "    // 按 ma_id 选择执行的控制流程\n"
+                  << "    if (ma_id == 0) {\n"
+                  << "        iMA0Control();\n"
+                  << "    } else if (ma_id == 1) {\n"
+                  << "        iMA1Control();\n"
+                  << "    } else if (ma_id == 2) {\n"
+                  << "        eMA0Control();\n"
+                  << "    }\n"
+                  << "\n"
+                  << "    std::memcpy(fv_out.phData, data_.data(), PKT_HEADER_BYTE_LEN);\n"
+                  << "    // 将最新的 PHI / PHO / GTV 打包写回输出 fv\n"
+                  << "    auto phiOut = pack_phi_to_bytes();\n"
+                  << "    auto phoOut = pack_pho_to_bytes();\n"
+                  << "    auto gtvOut = pack_gtv_to_bytes();\n"
+                  << "    std::memcpy(fv_out.phiData, phiOut.data(), FV_PHI_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_out.phoData, phoOut.data(), FV_PHO_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "}\n"
+                  << "\n"
+                  << "void Switch::ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, "
+                     "Ima2IpmFvInfoDef &fv_out) {\n"
+                  << "    (void)port_id;\n"
+                  << "\n"
+                  << "    // 载入 PH 数据\n"
+                  << "    std::memcpy(data_.data(), fv_in.phData, PKT_HEADER_BYTE_LEN);\n"
+                  << "\n"
+                  << "    // 解包 PHI/PHO/GTV\n"
+                  << "    PhiPackedBuffer phiIn{};\n"
+                  << "    std::memcpy(phiIn.data(), fv_in.phiData, FV_PHI_BYTE_NUM);\n"
+                  << "    unpack_phi_from_bytes(phiIn);\n"
+                  << "\n"
+                  << "    PhoPackedBuffer phoIn{};\n"
+                  << "    std::memcpy(phoIn.data(), fv_in.phoData, FV_PHO_BYTE_NUM);\n"
+                  << "    unpack_pho_from_bytes(phoIn);\n"
+                  << "\n"
+                  << "    GtvPackedBuffer gtvIn{};\n"
+                  << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    unpack_gtv_from_bytes(gtvIn);\n"
+                  << "\n"
+                  << "    // 执行 IMA 流程\n"
+                  << "    iMA0Control();\n"
+                  << "    iMA1Control();\n"
+                  << "\n"
+                  << "    // 打包输出，仅 gtvData\n"
+                  << "    auto gtvOut = pack_gtv_to_bytes();\n"
+                  << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "}\n"
+                  << "void Switch::EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, "
+                     "Ema2EpmFvInfoDef &fv_out) {\n"
+                  << "    (void)port_id;\n"
+                  << "\n"
+                  << "    // 载入 PH 数据\n"
+                  << "    std::memcpy(data_.data(), fv_in.phData, PKT_HEADER_BYTE_LEN);\n"
+                  << "\n"
+                  << "    // 解包 PHI/PHO/GTV\n"
+                  << "    PhiPackedBuffer phiIn{};\n"
+                  << "    std::memcpy(phiIn.data(), fv_in.phiData, FV_PHI_BYTE_NUM);\n"
+                  << "    unpack_phi_from_bytes(phiIn);\n"
+                  << "\n"
+                  << "    PhoPackedBuffer phoIn{};\n"
+                  << "    std::memcpy(phoIn.data(), fv_in.phoData, FV_PHO_BYTE_NUM);\n"
+                  << "    unpack_pho_from_bytes(phoIn);\n"
+                  << "\n"
+                  << "    GtvPackedBuffer gtvIn{};\n"
+                  << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    unpack_gtv_from_bytes(gtvIn);\n"
+                  << "\n"
+                  << "    // 执行 EMA 流程\n"
+                  << "    eMA0Control();\n"
+                  << "\n"
+                  << "    // 打包输出，仅 gtvData\n"
+                  << "    auto gtvOut = pack_gtv_to_bytes();\n"
+                  << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "}\n"
+                  << "\n";
+
+    emitResetAllFields(program);
+
+    outputStream = defaultStream;
+}
+
+void P5ToC::emitStructsAndUnions(const IR::P4Program *program) {
+    for (const auto *obj : program->objects) {
+        if (auto *st = obj->to<IR::Type_Struct>()) {
+            emitStructOrUnion(st);
+        }
+    }
+}
+
+void P5ToC::emitHeaders(const IR::P4Program *program) {
+    for (const auto *obj : program->objects) {
+        if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+            emitHeaderDecl(inst);
+        }
+    }
+}
+
+std::unordered_map<cstring, const IR::Function *> P5ToC::indexFunctions(
+    const IR::P4Program *program) {
+    std::unordered_map<cstring, const IR::Function *> funcIndex;
+    for (const auto *obj : program->objects) {
+        if (auto *func = obj->to<IR::Function>()) {
+            funcIndex.emplace(func->name, func);
+        }
+    }
+    return funcIndex;
+}
+
+std::vector<const IR::Function *> P5ToC::computeCallOrder(
+    const std::unordered_map<cstring, const IR::Function *> &funcIndex, cstring rootName) {
+    std::vector<const IR::Function *> order;
+    auto it = funcIndex.find(rootName);
+    if (it == funcIndex.end()) return order;
+    std::vector<const IR::Function *> stack;
+    std::unordered_set<cstring> visited;
+    stack.push_back(it->second);
+    while (!stack.empty()) {
+        auto *f = stack.back();
+        stack.pop_back();
+        if (!visited.insert(f->name).second) continue;
+        order.push_back(f);
+        if (f->body) {
+            CollectCalls cc;
+            f->body->apply(cc);
+            for (auto &calleeName : cc.get()) {
+                auto jt = funcIndex.find(calleeName);
+                if (jt != funcIndex.end() && !visited.count(calleeName)) {
+                    stack.push_back(jt->second);
+                }
+            }
+        }
+    }
+    return order;
+}
+
+void P5ToC::emitStructFieldTraverse(
+    const IR::Type_Struct *st, const std::string &prefix,
+    const std::unordered_map<cstring, const IR::Type_Struct *> &structMap, int &anon_counter,
+    bool emit, bool is_pack) {
+    for (const auto *field : st->fields) {
+        std::string fieldName = field->name.toString().c_str();
+        bool isAnonField = (fieldName == " " || fieldName.empty());
+
+        if (auto *nestedSt = field->type->to<IR::Type_Struct>()) {
+            if (isAnonymous(nestedSt)) {
+                if (isUnion(nestedSt)) {
+                    if (isAnonField) fieldName = "_noname_u_" + std::to_string(anon_counter++);
+                    std::string fullName = prefix + "." + fieldName;
+
+                    if (emit) {
+                        if (is_pack) {
+                            *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+                        } else {
+                            *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
+                                          << ");\n";
+                        }
+                    }
+
+                    // Recurse to update counter, but don't emit members
+                    emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, false,
+                                            is_pack);
+
+                } else {
+                    if (isAnonField) fieldName = "_noname_st_" + std::to_string(anon_counter++);
+                    std::string fullName = prefix + "." + fieldName;
+                    emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, emit,
+                                            is_pack);
+                }
+                continue;
+            }
+        }
+
+        if (!emit) continue;
+
+        std::string fullName = prefix + "." + fieldName;
+
+        if (auto *tn = field->type->to<IR::Type_Name>()) {
+            cstring typeName = tn->path->name;
+            if (structMap.count(typeName)) {
+                const auto *typeSt = structMap.at(typeName);
+                if (isUnion(typeSt)) {
+                    if (is_pack) {
+                        *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+                    } else {
+                        *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
+                                      << ");\n";
+                    }
+                } else {
+                    int subCounter = 0;
+                    emitStructFieldTraverse(typeSt, fullName, structMap, subCounter, true, is_pack);
+                }
+                continue;
+            }
+        }
+
+        if (is_pack) {
+            *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+        } else {
+            *outputStream << indent << "assign_from_bits(in, cursor, " << fullName << ");\n";
+        }
+    }
+}
+
+void P5ToC::emitPhiPackUnpack(const IR::P4Program *program) {
+    // const IR::Declaration_Instance *phiInst = nullptr;
+    const IR::Type_Struct *phiStruct = nullptr;
+
+    std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+    for (const auto *obj : program->objects) {
+        if (auto *st = obj->to<IR::Type_Struct>()) {
+            structMap[st->name] = st;
+        }
+    }
+
+    for (const auto *obj : program->objects) {
+        if (auto *var = obj->to<IR::Declaration_Variable>()) {
+            if (var->name == "PHI") {
+                if (auto *tn = var->type->to<IR::Type_Name>()) {
+                    if (structMap.count(tn->path->name)) {
+                        phiStruct = structMap.at(tn->path->name);
+                    }
+                } else if (auto *st = var->type->to<IR::Type_Struct>()) {
+                    phiStruct = st;
+                }
+                if (phiStruct) break;
+            }
+        } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+            if (inst->name == "PHI") {
+                // phiInst = inst;
+                if (auto *tn = inst->type->to<IR::Type_Name>()) {
+                    if (structMap.count(tn->path->name)) {
+                        phiStruct = structMap.at(tn->path->name);
+                    }
+                } else if (auto *st = inst->type->to<IR::Type_Struct>()) {
+                    phiStruct = st;
+                }
+                break;
+            }
+        }
+    }
+
+    if (!phiStruct) return;
+
+    // pack_phi_to_bytes
+    *outputStream << indent << "// 将 PHI 字段按声明顺序拼成 10 字节数组\n";
+    *outputStream << indent << "PhiPackedBuffer pack_phi_to_bytes() const {\n";
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::vector<bool> bits;\n";
+        *outputStream << indent << "bits.reserve(32);\n\n";
+
+        int anon_counter = 0;
+        emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, true);
+
+        *outputStream << "\n";
+        *outputStream << indent << "PhiPackedBuffer out{};\n";
+        *outputStream << indent << "write_bits_to_buffer(bits, out);\n";
+        *outputStream << indent << "return out;\n";
+    }
+    *outputStream << indent << "}\n\n";
+
+    // unpack_phi_from_bytes
+    *outputStream << indent << "// 从 10 字节数组按同样顺序解析回 PHI 字段\n";
+    *outputStream << indent << "void unpack_phi_from_bytes(const PhiPackedBuffer &in) {\n";
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::size_t cursor = 0;\n\n";
+        int anon_counter = 0;
+        emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, false);
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+void P5ToC::emitPhoPackUnpack(const IR::P4Program *program) {
+    const IR::Declaration_Variable *phoVar = nullptr;
+    const IR::Declaration_Instance *phoInst = nullptr;
+
+    for (const auto *obj : program->objects) {
+        if (auto *var = obj->to<IR::Declaration_Variable>()) {
+            if (var->name == "PHO") {
+                phoVar = var;
+                break;
+            }
+        } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+            if (inst->name == "PHO") {
+                phoInst = inst;
+                break;
+            }
+        }
+    }
+
+    if (!phoVar && !phoInst) return;
+
+    // pack_pho_to_bytes
+    *outputStream << indent << "// 将 PHO[5] (每个 7bit) 按顺序拼成 32 字节数组\n";
+    *outputStream << indent << "PhoPackedBuffer pack_pho_to_bytes() const {\n";
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::vector<bool> bits;\n";
+        *outputStream << indent << "bits.reserve(40);\n\n";
+
+        *outputStream << indent << "for (const auto &v : PHO) {\n";
+        *outputStream << indent << "    append_bits(bits, v);\n";
+        *outputStream << indent << "}\n\n";
+
+        *outputStream << indent << "PhoPackedBuffer out{};\n";
+        *outputStream << indent << "write_bits_to_buffer(bits, out);\n";
+        *outputStream << indent << "return out;\n";
+    }
+    *outputStream << indent << "}\n\n";
+
+    // unpack_pho_from_bytes
+    *outputStream << indent << "// 从 32 字节数组解析回 PHO[5]\n";
+    *outputStream << indent << "void unpack_pho_from_bytes(const PhoPackedBuffer &in) {\n";
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::size_t cursor = 0;\n";
+        *outputStream << indent << "for (auto &v : PHO) {\n";
+        *outputStream << indent << "    assign_from_bits(in, cursor, v);\n";
+        *outputStream << indent << "}\n";
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+void P5ToC::emitPackGtvToBytes(const IR::P4Program *program) {
+    *outputStream << indent << "// 按字段声明顺序将位拼接到字节数组（大端 bit 顺序）\n";
+    *outputStream << indent << "GtvPackedBuffer pack_gtv_to_bytes() const {\n";
+
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::vector<bool> bits;\n";
+        *outputStream << indent << "bits.reserve(1200); // 外层头部 + fv\n\n";
+
+        std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+        for (const auto *obj : program->objects) {
+            if (auto *st = obj->to<IR::Type_Struct>()) {
+                structMap[st->name] = st;
+            }
+        }
+
+        *outputStream << indent << "// outer headers\n";
+        for (const auto *obj : program->objects) {
+            if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+                cstring typeName;
+                if (auto *tn = inst->type->to<IR::Type_Name>()) {
+                    typeName = tn->path->name;
+                } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
+                    typeName = ts->name;
+                }
+
+                if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
+                    int anon_counter = 0;
+                    emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
+                                            structMap, anon_counter, true, true);
+                } else {
+                    // Fallback for non-struct types or unknown structs
+                    *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
+                }
+            }
+        }
+        *outputStream << "\n";
+
+        *outputStream << indent << "// fv fields\n";
+
+        std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
+        for (const auto *obj : program->objects) {
+            if (auto *var = obj->to<IR::Declaration_Variable>()) {
+                if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {
+                    continue;
+                }
+                *outputStream << indent << "append_bits(bits, " << var->name << ");\n";
+            }
+        }
+
+        *outputStream << "\n";
+        *outputStream << indent << "GtvPackedBuffer out{};\n";
+        *outputStream << indent << "write_bits_to_buffer(bits, out);\n";
+        *outputStream << indent << "return out;\n";
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+void P5ToC::emitUnpackGtvFromBytes(const IR::P4Program *program) {
+    *outputStream << indent << "// 从字节数组按同样顺序解析出各个字段\n";
+    *outputStream << indent << "void unpack_gtv_from_bytes(const GtvPackedBuffer &in) {\n";
+
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "std::size_t cursor = 0;\n\n";
+
+        std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+        for (const auto *obj : program->objects) {
+            if (auto *st = obj->to<IR::Type_Struct>()) {
+                structMap[st->name] = st;
+            }
+        }
+
+        *outputStream << indent << "// outer headers\n";
+        for (const auto *obj : program->objects) {
+            if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+                cstring typeName;
+                if (auto *tn = inst->type->to<IR::Type_Name>()) {
+                    typeName = tn->path->name;
+                } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
+                    typeName = ts->name;
+                }
+
+                if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
+                    int anon_counter = 0;
+                    emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
+                                            structMap, anon_counter, true, false);
+                } else {
+                    // Fallback for non-struct types or unknown structs
+                    *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name
+                                  << ");\n";
+                }
+            }
+        }
+        *outputStream << "\n";
+
+        *outputStream << indent << "// fv fields\n";
+        std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
+        for (const auto *obj : program->objects) {
+            if (auto *var = obj->to<IR::Declaration_Variable>()) {
+                if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {
+                    continue;
+                }
+                *outputStream << indent << "assign_from_bits(in, cursor, " << var->name << ");\n";
+            }
+        }
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+void P5ToC::emitResetAllFields(const IR::P4Program *program) {
+    *outputStream << indent << "// ========== 重置所有字段 ==========\n";
+    *outputStream << indent << "void Switch::reset_all_fields() {\n";
+
+    {
+        IndentGuard ig(this);
+        *outputStream << indent << "// 清零 data_/offset_\n";
+        *outputStream << indent << "std::memset(data_.data(), 0, data_.size());\n";
+        *outputStream << indent << "reset_offset();\n\n";
+
+        *outputStream << indent << "// 清零 PHI\n";
+        *outputStream << indent << "PHI = PHI_S{};\n";
+        *outputStream << indent << "// 清零 PHO\n";
+        *outputStream << indent << "for (auto &v : PHO) v = 0;\n";
+
+        *outputStream << indent << "// 清零 headers\n";
+        for (const auto *obj : program->objects) {
+            if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+                if (inst->name != "PHI" && inst->name != "PHO") {
+                    cstring typeName;
+                    if (auto *tn = inst->type->to<IR::Type_Name>()) {
+                        typeName = tn->path->name;
+                    } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
+                        typeName = ts->name;
+                    }
+                    if (!typeName.isNullOrEmpty()) {
+                        *outputStream << indent << inst->name << " = " << typeName << "{};\n";
+                    }
+                }
+            }
+        }
+        *outputStream << "\n";
+
+        *outputStream << indent << "// 清零 fv字段\n";
+        for (const auto *obj : program->objects) {
+            if (auto *var = obj->to<IR::Declaration_Variable>()) {
+                // Check if it's an array (like NGSFBuffer)
+                if (var->type->is<IR::Type_Stack>() ||
+                    (var->type->is<IR::Type_Name>() &&
+                     var->type->to<IR::Type_Name>()->path->name == "PHO")) {
+                    // Skip PHO here as it's already handled, but handle other arrays if any
+                    if (var->name != "PHO") {
+                        *outputStream << indent << "// " << var->name << "\n";
+                        *outputStream << indent << "for (auto &b : " << var->name << ") b = 0;\n";
+                    }
+                } else if (var->name != "PHI" && var->name != "PHO") {
+                    *outputStream << indent << var->name << " = 0;\n";
+                }
+            }
+        }
+    }
+    *outputStream << indent << "}\n\n";
+}
+
+const IR::P4Program *runP5ToC(const IR::P4Program *program, const std::string &out_dir) {
+    CHECK_NULL(program);
+
+    P5ToC p5_to_c(&std::cout, out_dir);
+    p5_to_c.emitP5Program(program);
+
+    return program;
+}
+
+}  // namespace P4::P5

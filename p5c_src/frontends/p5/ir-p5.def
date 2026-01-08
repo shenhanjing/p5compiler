@@ -1,0 +1,45 @@
+class P5Table : Declaration, IAnnotated, ISimpleNamespace {
+    optional inline Vector<Annotation> annotations;
+    ParameterList parameters;
+    BlockStatement body;
+
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
+
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return parameters->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return parameters->getDeclByName(name); }
+    IDeclaration getDeclByName(std::string_view name) const override {
+        return parameters->getDeclByName(name); }
+
+    dbprint { out << "P5Table " << name; }
+}
+
+class P5KeyElement : IAnnotated {
+    optional inline Vector<Annotation> annotations;
+    optional NullOK Expression expr;
+    optional NullOK ID matchType;
+    optional NullOK inline BlockStatement control;
+    dbprint { out << "P5KeyElement"; }
+
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
+}
+
+class P5KeyCase : IAnnotated {
+    optional inline Vector<Annotation> annotations;
+    optional NullOK Expression label;
+    optional inline Vector<P5KeyElement> elements;
+    dbprint { out << "P5KeyCase"; }
+
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
+}
+
+class P5Key : Statement {
+    optional NullOK Expression select;            // if present, switch style
+    optional inline Vector<P5KeyCase> cases;      // switch cases (optional)
+    optional inline Vector<P5KeyElement> elements; // flat list (optional)
+    dbprint { out << "P5Key"; }
+}

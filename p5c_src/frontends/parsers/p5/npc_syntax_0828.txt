@@ -1,0 +1,453 @@
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Expression functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+const_value
+        : INT_CONST_DEC
+        | INT_CONST_HEX
+
+primary_expression
+   	: field_ref
+   	| const_value
+    	| string_lit
+        | '(' expression ')'
+        | '{' expression_list '}'
+    	;
+
+postfix_expression
+    	: primary_expression
+    	| postfix_expression '(' arg_list ')'
+    	;
+
+unary_expression
+   	: postfix_expression
+    	| '+'  cast_expression
+    	| '-'  cast_expression
+    	| '!'  cast_expression
+   	| '~'  cast_expression
+  	;
+
+cast_expression
+    	: unary_expression
+    	| '(' type_ref ')' cast_expression
+    	;
+
+multiplicative_expression
+    	: cast_expression
+    	| multiplicative_expression '*' cast_expression
+    	| multiplicative_expression '/' cast_expression
+    	| multiplicative_expression '%' cast_expression
+    	;
+
+additive_expression
+    	: multiplicative_expression
+    	| multiplicative_expression '+' multiplicative_expression
+    	| multiplicative_expression '-' multiplicative_expression
+    	;
+
+shift_expression
+    	: additive_expression
+    	| shift_expression LEFT_OP additive_expression
+    	| shift_expression RIGHT_OP additive_expression
+    	;
+
+relational_expression
+    	: shift_expression
+    	| relational_expression '<' shift_expression
+    	| relational_expression '>' shift_expression
+    	| relational_expression '<=' shift_expression
+    	| relational_expression '>=' shift_expression
+    	;
+
+equality_expression
+    	: relational_expression
+   	| equality_expression EQ_OP relational_expression
+    	| equality_expression NE_OP relational_expression
+    	;
+
+and_expression
+    	: equality_expression
+    	| and_expression '&' equality_expression
+    	;
+
+exclusive_or_expression
+    	: and_expression
+    	| exclusive_or_expression '^' and_expression
+    	;
+
+inclusive_or_expression
+    	: exclusive_or_expression
+    	| inclusive_or_expression '|' exclusive_or_expression
+    	;
+
+logical_and_expression
+    	: inclusive_or_expression
+    	| logical_and_expression AND_OP inclusive_or_expression
+    	;
+
+logical_or_expression
+    	: logical_and_expression
+    	| logical_or_expression OR_OP logical_and_expression
+    	;
+
+conditional_expression
+    	: logical_or_expression
+    	| logical_or_expression '?' expression ':' conditional_expression
+    	;
+
+expression
+    	: conditional_expression
+    	| '{' expression_list '}'
+        | expression '++'
+        | '.' field_ref '=' expression
+        | '[' field_ref ']' '=' expression
+    	;
+
+expression_list
+        : expression
+        | expression_list ',' expression
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Annotations
+//
+//////////////////////////////////////////////////////////////////////////
+
+annotation
+        : '@' ID
+        | '@' ID '(' expression ')
+        | '@' ID '(' expression_list ')'
+
+annotations
+        : empty
+        | annotations annotation
+
+//////////////////////////////////////////////////////////////////////////
+//
+// field decl functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+type_ref: UINT '<' postfix_expression '>'
+        | INT  '<' postfix_expression '>'
+        | structUnionTypeDeclaration
+        | ID
+        | ID '::' ID
+        | ID '<' ID '>'
+        | ID '<' ID '::' ID '>'
+
+field_ref_no_slice:
+        : ID
+        | field_ref '.' ID
+        | field_ref '[' expression ']'
+        | ID '::' field_ref
+
+field_ref
+        : field_ref_no_slice
+        | field_ref '[' expression ':' expression ']'
+        | '[' expression ':' expression ']'
+
+field_dec
+        : annotations type_ref ID ';'
+        | annotations type_ref ID '=' expression ';'
+        | annotations type_ref ID '[' expression ']' ';'
+        | annotations type_ref ID '[' expression ']' '[' expression ']' ';'
+
+struct_field_list
+        : field_dec
+        | struct_field_list field_dec
+
+//////////////////////////////////////////////////////////////////////////
+//
+// constant declarations
+// header/variable instance functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+constant_declaration
+        : annotations CONST type_ref ID '=' expression ';'
+        | annotations CONST type_ref ID '[' expression ']' '=' expression ';'
+        | annotations CONST type_ref ID '[' expression ']' '[' expression ']' '=' expression ';'
+
+header_declaration
+        : HEADER type_ref ID ';'
+        | HEADER type_ref ID '[' expression ']' ';'
+
+variable_declaration
+        : annotations type_ref ID ';'
+        | annotations type_ref ID '=' expression ';'
+        | annotations type_ref ID '[' expression ']' ';'
+        | annotations type_ref ID '[' expression ']' '=' expression ';'
+        | annotations type_ref ID '[' expression ']' '[' expression ']' ';'
+        | annotations type_ref ID '[' expression ']' '[' expression ']' '=' expression ';'
+        | annotations USING NAMESPACE ID ';'
+
+//////////////////////////////////////////////////////////////////////////
+//
+// parser functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+return_value_type
+        : ID ';'
+        | ID '(' arg_list ')' ';'
+        | '{' return_value_type_list '}'
+
+return_value_type_list
+        : return_value_type
+        | return_value_type_list return_value_type
+
+value_masked_or_set
+        : expression
+        | expression '&&&' expression
+
+value_list
+        : value_masked_or_set
+        | value_list ',' value_masked_or_set
+
+case_entry
+        : CASE value_list ':' return_value_type ';'
+        | DEFAULT ':' return_value_type ';'
+
+case_list
+        : case_entry
+        | case_list case_entry
+
+field_ref_or_func
+        : field_ref
+        | ID '(' arg_list ')'
+
+select_exp
+        : field_ref_or_func
+        | select_exp ','  field_ref_or_func
+
+return_select_statement
+        : SWITCH '(' select_exp ')' '{' case_list '}'
+
+return_statement
+        : RETURN return_select_statement
+        | RETURN return_value_type
+
+break_statement
+        : BREAK ';'
+
+//////////////////////////////////////////////////////////////////////////
+//
+// control, actions and statements  functions
+//
+//////////////////////////////////////////////////////////////////////////
+parameter
+        : annotations type_ref ID
+        | annotations type_ref ID '=' expression
+        | annotations type_ref '&' ID
+        | annotations type_ref '&' ID = expression
+        | annotations type_ref ID '[' ']'
+
+param_list
+        : parameter
+        | param_list COMMA parameter
+
+arg
+        : expression
+
+arg_list: arg
+        | arg_list COMMA arg
+
+do_while_statement
+        : DO action_statement WHILE '(' expression ')'
+
+conditional_statement
+        : IF '(' expression ')' action_statement
+        | IF '(' expression ')' action_statement ELSE action_statement
+
+for_loop_statement
+        : FOR '(' parameter ';' expression ';' assignment_or_call_statement ')' action_statement
+
+case    : CASE value_list ':' action_statement
+        | DEFAULT ':' action_statement
+
+switch_cases
+        : empty
+        | switch_cases case
+
+switch_statement
+        : SWITCH '(' expression ')' '{' switch_cases '}'
+
+assignment_or_call_statement
+        : field_ref_or_func ';'
+        | field_ref '=' expression ';'
+        | field_ref '-=' expression ';'
+        | field_ref '+=' expression ';'
+        | field_ref '*=' expression ';'
+        | field_ref '/=' expression ';'
+        | field_ref '%=' expression ';'
+        | field_ref '|=' expression ';'
+        | field_ref '^=' expression ';'
+        | field_ref '<<=' expression ';'
+        | field_ref '>>=' expression ';'
+        | field_ref '++' ';'
+        | field_ref '--' ';'
+
+action_statement
+        : empty
+        | annotations variable_declaration
+        | annotations constant_declaration
+        | annotations action_compound_statement
+        | annotations conditional_statement
+        | annotations switch_statement
+        | annotations do_while_statement
+        | annotations for_loop_statement
+        | annotations return_statement
+        | annotations break_statement
+        | annotations assignment_or_call_statement
+
+action_statement_list
+        : empty
+        | action_statement_list action_statement
+
+action_compound_statement
+        : '{' action_statement_list '}'
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Table declaration functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+key_element
+        : annotations expression ':' ID ';'
+        | annotations expression ';'
+
+key_element_list
+        : key_element
+        | key_element_list key_element
+
+key_case_entry
+        : annotations CASE value_list ':' '{' key_element_list '}'
+        | annotations DEFAULT ':' '{' key_element_list '}'
+
+key_case_list
+        : key_case_entry
+        | key_case_list key_case_entry
+
+program_selection_statement
+        : constant_declaration
+        | variable_declaration
+        | assignment_or_call_statement
+
+program_selection_statement_list
+        : program_selection_statement
+        | program_selection_statement_list program_selection_statement
+
+table_case_entry
+        : annotations CASE value_list ':' '{' program_selection_statement_list '}'
+        | annotations DEFAULT ':' '{' program_selection_statement_list '}'
+
+table_case_list
+        : table_case_entry
+        | table_case_list table_case_entry
+
+control_param_entry
+        : ID '=' expression
+        | ID '=' '{' expression_list '}'
+        | ID '=' '(' ID ')' '{' expression_list '}'
+
+control_params_list
+        : control_param_entry
+        | control_params_list control_param_entry
+
+table_property
+        : KEY '=' '{' key_element_list '}'
+        | KEY '=' '{' SWITCH '(' select_exp ')' '{' key_case_list '}' '}'
+        | SWITCH '(' select_exp ')' '{' table_case_list '}'
+        | ID '=' expression ';'
+        | assignment_or_call_statement
+        | constant_declaration
+        | variable_declaration
+        ;
+
+table_property_list
+        : table_property
+        | table_property_list table_property
+
+table_declaration
+        : TABLE ID '(' param_list ')' '{' table_property_list '}'
+        | TABLE ID '{' table_property_list '}'
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Type Declarations
+//
+//////////////////////////////////////////////////////////////////////////
+
+typedef_declaration
+        :  TYPEDEF type_ref ID
+
+enumerator
+        : ID
+        | ID '=' expression
+
+enumerator_list
+        : enumerator
+        | enumerator_list ',' enumerator
+
+enum_declaration
+        : ENUM ID '{' enumerator_list '}'
+
+struct_union_type_declaration
+        : STRUCT ID '{' struct_field_list '}'
+        | UNION ID '{' struct_field_list '}'
+
+class_declaration
+        : CLASS ID '(' param_list ')' '{' declaration_list_with_specifier '}'
+        | CLASS ID '(' param_list ')' ':' ID '(' param_list ')' '{' declaration_list_with_specifier '}'
+        ;
+
+type_declaration
+        : struct_union_type_Declaration ';
+        | class_declaration ';'
+        | enum_declaration ';
+        | typedef_declaration  ';'
+
+function_declaration
+        : type_ref ID '(' param_list ')' action_compound_statement
+
+namespace
+        : NAMESPACE ID '{' declaration_list '}'
+        ;
+
+//////////////////////////////////////////////////////////////////////////
+//
+// decl functions
+//
+//////////////////////////////////////////////////////////////////////////
+
+declaration
+        : annotations constant_declaration
+        | annotations type_declaration
+        | annotations header_declaration
+        | annotations table_declaration
+        | annotations namespace declaration
+        | annotations variable_declaration
+        | annotations function_declaration
+
+declaration_list
+        : declaration
+        | declararion_list declaration
+
+specifier
+        : 'public' ':'
+        | 'private' ':'
+        | 'protected' ':'
+
+declaration_list_with_specifier
+        : declaration
+        | specifier
+        | declaration_list_with_specifier declaration
+        | declaration_list_with_specifier specifier
+
+program : declaration_list
+        | empty

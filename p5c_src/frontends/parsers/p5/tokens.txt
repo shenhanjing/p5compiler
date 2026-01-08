@@ -1,0 +1,42 @@
+break
+case
+class
+const
+default
+do
+else
+enum
+for
+if
+int
+namespace
+private
+protected
+public
+return
+struct
+switch
+typedef
+union
+uint
+using
+while
+void
+
+Table Attributes:
+key
+control_paramters
+ma_id
+size (p5 only)
+ma_cache_enable (p5 only)
+instances (p5 only)
+physical_location (p5 only)
+
+Expression Tokens
+‘(‘ ‘)’ ‘{‘ ‘}’ ‘[‘ ‘]’
+‘@’ ‘.’ ‘,’ ‘~’ ‘?’ ‘:’ ‘::’
+‘=’ ‘+’ ‘++’ ‘+=’ ‘-‘ ‘--‘ ‘-=’ ‘*’ ‘**’ ‘*=’ ‘/’ ‘/=’ ‘%’ ‘%=’
+‘!’ ‘==’ ‘!=’ ‘>’ ‘<’ ‘>=’ ‘<=’
+‘&’ ‘&&’ ‘&=’ ‘|’ ‘||’ ‘|=’ ‘^’ ‘^=’
+‘>>’ ‘>>=’ ‘<<’ ‘<<=’ 
+‘#’ ‘;’ ‘\n’ ‘\r’ ‘”’ ‘’’
