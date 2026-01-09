@@ -55,6 +55,8 @@ add_executable(p5c
 target_include_directories(p5c PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/p5c_src
   ${CMAKE_CURRENT_SOURCE_DIR}/p5c_src/include
+  # Vendored Flex header for the pre-generated C++ lexer.
+  ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flex
 )
 
 target_compile_definitions(p5c PRIVATE

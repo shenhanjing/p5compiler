@@ -19,13 +19,13 @@
   sudo apt install -y g++
   sudo apt install -y build-essential
 ```
-- **FLEX**
-```
-  sudo apt install -y flex libfl-dev
-```
 - **BOOST**
 ```
   sudo apt install -y libboost-all-dev
+```
+- **FLEX**：不再需要，已经被集成到项目当中
+```
+  sudo apt install -y flex libfl-dev
 ```
 - **Python 3**: 仅用于你自己的脚本场景（本工程构建不强依赖；可选）
 - **网络**: 不需要（Abseil 已以源码形式 vendored 在 `third_party/abseil-src` 并随工程一起编译）
