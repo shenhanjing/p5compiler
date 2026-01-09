@@ -11,7 +11,22 @@
 
 ### 编译依赖
 - **CMake**: 3.20+
+```
+  sudo apt update && sudo apt install -y cmake
+```
 - **C++ 编译器**: GCC/Clang，支持 **C++17**
+```
+  sudo apt install -y g++
+  sudo apt install -y build-essential
+```
+- **FLEX**
+```
+  sudo apt install -y flex libfl-dev
+```
+- **BOOST**
+```
+  sudo apt install -y libboost-all-dev
+```
 - **Python 3**: 仅用于你自己的脚本场景（本工程构建不强依赖；可选）
 - **网络**: 不需要（Abseil 已以源码形式 vendored 在 `third_party/abseil-src` 并随工程一起编译）
 
@@ -90,9 +105,9 @@ cmake --build . -j$(nproc)
 ### 示例
 
 ```bash
-rm -rf /root/p5compiler/out_dir
-mkdir -p /root/p5compiler/out_dir
-/root/p5compiler/build_p5c/p5c /root/p4c/GenSim/test/test.p5 -o /root/p5compiler/out_dir
+rm -rf /root/p5compiler/GenSim/out_dir
+mkdir -p /root/p5compiler/GenSim/out_dir
+/root/p5compiler/build_p5c/p5c /root/p5compiler/GenSim/test/test.p5 -o /root/p5compiler/GenSim/out_dir/
 ```
 
 ---
