@@ -18,11 +18,19 @@ void Switch::parse_ETHER() {
 
     PHO[PHO_OUTER_L2_START] = _extract(ETHER);
 
-    switch(ETHER.ETHER_TYPE.Type.to_ullong()) {
-        case 0x8100: return parse_VlanTag();
-        case 0x0800: return parse_IPv4();
-        case 0x86dd: return parse_IPv6();
-        default: return _parser_next(0, 0);
+    {
+        auto _msw = p5::mswitch::tie(ETHER.ETHER_TYPE.Type);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, 0x8100)) _tag = 1;
+        else if (p5::mswitch::match(_msw, 0x0800)) _tag = 2;
+        else if (p5::mswitch::match(_msw, 0x86dd)) _tag = 3;
+
+        switch (_tag) {
+            case 1: return parse_VlanTag();
+            case 2: return parse_IPv4();
+            case 3: return parse_IPv6();
+            default: return _parser_next(0, 0);
+        }
     }
 }
 
@@ -30,10 +38,17 @@ void Switch::parse_VlanTag() {
     PHI.TagType = VLAN_SINGLE_TAGGED;
     PHO[PHO_OUTER_VLANS_START] = _extract(VLAN_TAG0);
 
-    switch(VLAN_TAG0.ETHER_TYPE.Type.to_ullong()) {
-        case 0x0800: return parse_IPv4();
-        case 0x86dd: return parse_IPv6();
-        default: return _parser_next(0, 0);
+    {
+        auto _msw = p5::mswitch::tie(VLAN_TAG0.ETHER_TYPE.Type);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, 0x0800)) _tag = 1;
+        else if (p5::mswitch::match(_msw, 0x86dd)) _tag = 2;
+
+        switch (_tag) {
+            case 1: return parse_IPv4();
+            case 2: return parse_IPv6();
+            default: return _parser_next(0, 0);
+        }
     }
 }
 
@@ -42,10 +57,17 @@ void Switch::parse_IPv4() {
 
     PHO[PHO_OUTER_L3_START] = _extract(IPv4);
 
-    switch(IPv4.Protocol.to_ullong()) {
-        case IP_PROTOCOL_UDP: return parse_UDP();
-        case IP_PROTOCOL_TCP: return parse_TCP();
-        default: return _parser_next(0, 0);
+    {
+        auto _msw = p5::mswitch::tie(IPv4.Protocol);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, IP_PROTOCOL_UDP)) _tag = 1;
+        else if (p5::mswitch::match(_msw, IP_PROTOCOL_TCP)) _tag = 2;
+
+        switch (_tag) {
+            case 1: return parse_UDP();
+            case 2: return parse_TCP();
+            default: return _parser_next(0, 0);
+        }
     }
 }
 
@@ -53,10 +75,17 @@ void Switch::parse_IPv6() {
     PHI.L3Type = L3_TYPE_IPv6;
     PHO[PHO_OUTER_L3_START] = _extract(IPv6);
 
-    switch(IPv6.NextProtocol.to_ullong()) {
-        case IP_PROTOCOL_UDP: return parse_UDP();
-        case IP_PROTOCOL_TCP: return parse_TCP();
-        default: return _parser_next(0, 0);
+    {
+        auto _msw = p5::mswitch::tie(IPv6.NextProtocol);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, IP_PROTOCOL_UDP)) _tag = 1;
+        else if (p5::mswitch::match(_msw, IP_PROTOCOL_TCP)) _tag = 2;
+
+        switch (_tag) {
+            case 1: return parse_UDP();
+            case 2: return parse_TCP();
+            default: return _parser_next(0, 0);
+        }
     }
 }
 
@@ -180,29 +209,41 @@ void Switch::eMA0Action(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 
 void Switch::EthODma(EPATFull_S rsEpat, ENCAPFull_S rsEncap)
 {
-    switch (EncapProfile.to_ullong()) {
-        case 1: {
-            ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
-            ETHER.Smac = rsEpat.Dma.Addr.SMAC;
-            break;
-        }
-        default: {
-            break;
+    {
+        auto _msw = p5::mswitch::tie(EncapProfile);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, 1)) _tag = 1;
+
+        switch (_tag) {
+            case 1: {
+                ETHER.Dmac = rsEncap.Dma.Arp.DMAC;
+                ETHER.Smac = rsEpat.Dma.Addr.SMAC;
+                break;
+            }
+            default: {
+                break;
+            }
         }
     }
 }
 
 void Switch::IpOverwrite()
 {
-    switch (EncapProfile.to_ullong())
     {
-        case 1: {
-            IPv4.TTL = TTL;
-            IPv4.u_0.TOS = TOS;
-            break;
-        }
-        default: {
-            break;
+        auto _msw = p5::mswitch::tie(EncapProfile);
+        int _tag = 0;
+        if (p5::mswitch::match(_msw, 1)) _tag = 1;
+
+        switch (_tag)
+        {
+            case 1: {
+                IPv4.TTL = TTL;
+                IPv4.u_0.TOS = TOS;
+                break;
+            }
+            default: {
+                break;
+            }
         }
     }
 }

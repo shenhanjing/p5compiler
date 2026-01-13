@@ -1,5 +1,5 @@
-#ifndef GENERATED_MA_HPP
-#define GENERATED_MA_HPP
+#ifndef GENERATED_SWITCH_HPP
+#define GENERATED_SWITCH_HPP
 
 #include <string>
 
@@ -8,6 +8,7 @@
 #include "key.hpp"
 #include "BuiltIn.hpp"
 #include "p5_types.hpp"
+#include "p5_mswitch.hpp"
 #include "model_intf_1027.h"
 #include "generated_gtv.hpp"
 #include "packet.hpp"
@@ -59,20 +60,28 @@ public:
         void apply() override {
             auto _KeyBuilder = ctx.keyBuilder();
             bool _BuiltKey = true;
-            switch (ctx.PHI.PortType.to_ullong())
             {
-                case PORT_TYPE_ETH:
+                auto _msw = p5::mswitch::tie(ctx.PHI.PortType);
+                int _tag = 0;
+                if (p5::mswitch::match(_msw, PORT_TYPE_ETH)) _tag = 1;
+                else if (p5::mswitch::match(_msw, PORT_TYPE_CPU)) _tag = 2;
+                else if (p5::mswitch::match(_msw, PORT_TYPE_STACK)) _tag = 3;
+
+                switch (_tag)
                 {
-                    _KeyBuilder.append(ctx.GLSP);
-                    ctx.control_info = (IpatCtrlInfo_S){1};
-                    break;
-                }
-                case PORT_TYPE_CPU:
-                case PORT_TYPE_STACK:
-                default:
-                {
-                    _BuiltKey = false;
-                    break;
+                    case 1:
+                    {
+                        _KeyBuilder.append(ctx.GLSP);
+                        ctx.control_info = (IpatCtrlInfo_S){1};
+                        break;
+                    }
+                    case 2:
+                    case 3:
+                    default:
+                    {
+                        _BuiltKey = false;
+                        break;
+                    }
                 }
             }
             if (_BuiltKey) {
@@ -126,32 +135,42 @@ public:
         void apply() override {
             auto _KeyBuilder = ctx.keyBuilder();
             bool _BuiltKey = true;
-            switch (ctx.PHI.L3Type.to_ullong()) 
             {
-                case L3_TYPE_IPv4: 
-                { 
-                    // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv4.DIP, p5::uint<32>(0), p5::uint<32>(0), p5::uint<32>(0));
-                    _KeyBuilder.append(ctx.Vrf);
-                    _KeyBuilder.append(ctx.IPv4.DIP);
-                    _KeyBuilder.append(p5::uint<32>(0));
-                    _KeyBuilder.append(p5::uint<32>(0));
-                    _KeyBuilder.append(p5::uint<32>(0));
-                    ctx.table_id = 0;
-                    break;
-                }
-                case L3_TYPE_IPv6: 
-                { 
-                    // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv6.DIP);
-                    _KeyBuilder.append(ctx.Vrf);
-                    _KeyBuilder.append(ctx.IPv6.DIP);
-                    ctx.table_id = 1;
-                    break;
-                }
-                case L3_TYPE_NON_IP:
-                case L3_TYPE_INVALID:
-                default: { 
-                    _BuiltKey = false;
-                    break;
+                auto _msw = p5::mswitch::tie(ctx.PHI.L3Type);
+                int _tag = 0;
+                if (p5::mswitch::match(_msw, L3_TYPE_IPv4)) _tag = 1;
+                else if (p5::mswitch::match(_msw, L3_TYPE_IPv6)) _tag = 2;
+                else if (p5::mswitch::match(_msw, L3_TYPE_NON_IP)) _tag = 3;
+                else if (p5::mswitch::match(_msw, L3_TYPE_INVALID)) _tag = 4;
+
+                switch (_tag)
+                {
+                    case 1:
+                    {
+                        // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv4.DIP, p5::uint<32>(0), p5::uint<32>(0), p5::uint<32>(0));
+                        _KeyBuilder.append(ctx.Vrf);
+                        _KeyBuilder.append(ctx.IPv4.DIP);
+                        _KeyBuilder.append(p5::uint<32>(0));
+                        _KeyBuilder.append(p5::uint<32>(0));
+                        _KeyBuilder.append(p5::uint<32>(0));
+                        ctx.table_id = 0;
+                        break;
+                    }
+                    case 2:
+                    {
+                        // _KeyBuilder.appendMany(ctx.Vrf, ctx.IPv6.DIP);
+                        _KeyBuilder.append(ctx.Vrf);
+                        _KeyBuilder.append(ctx.IPv6.DIP);
+                        ctx.table_id = 1;
+                        break;
+                    }
+                    case 3:
+                    case 4:
+                    default:
+                    {
+                        _BuiltKey = false;
+                        break;
+                    }
                 }
             }
             if (_BuiltKey) {
@@ -214,17 +233,23 @@ public:
         void apply() override {
             auto _KeyBuilder = ctx.keyBuilder();
             bool _BuiltKey = true;
-            switch (ctx.PHI.PortType.to_ullong())
             {
-                case PORT_TYPE_ETH:
+                auto _msw = p5::mswitch::tie(ctx.PHI.PortType);
+                int _tag = 0;
+                if (p5::mswitch::match(_msw, PORT_TYPE_ETH)) _tag = 1;
+
+                switch (_tag)
                 {
-                    _KeyBuilder.append(ctx.GLTP);
-                    break;
-                }
-                default:
-                {
-                    _BuiltKey = false;
-                    break;
+                    case 1:
+                    {
+                        _KeyBuilder.append(ctx.GLTP);
+                        break;
+                    }
+                    default:
+                    {
+                        _BuiltKey = false;
+                        break;
+                    }
                 }
             }
             if (_BuiltKey) {
@@ -247,17 +272,23 @@ public:
         void apply() override {
             auto _KeyBuilder = ctx.keyBuilder();
             bool _BuiltKey = true;
-            switch (ctx.PHI.PortType.to_ullong())
             {
-                case PORT_TYPE_ETH:
+                auto _msw = p5::mswitch::tie(ctx.PHI.PortType);
+                int _tag = 0;
+                if (p5::mswitch::match(_msw, PORT_TYPE_ETH)) _tag = 1;
+
+                switch (_tag)
                 {
-                    _KeyBuilder.append(ctx.EncapIndex);
-                    break;
-                }
-                default:
-                {
-                    _BuiltKey = false;
-                    break;
+                    case 1:
+                    {
+                        _KeyBuilder.append(ctx.EncapIndex);
+                        break;
+                    }
+                    default:
+                    {
+                        _BuiltKey = false;
+                        break;
+                    }
                 }
             }
             if (_BuiltKey) {
@@ -337,4 +368,4 @@ public:
     KeyManager &keyManager() { return BuiltInContext::keyManager(); }
 };
 
-#endif // GENERATED_MA_HPP
+#endif // GENERATED_SWITCH_HPP
