@@ -246,6 +246,171 @@ public:
         dst = src;
     }
 
+    // ======================= Placeholder builtins =======================
+    // Some P5 built-ins may appear in generated code but are not semantically
+    // required for current unit tests. Provide permissive placeholders that:
+    // - accept any arguments (single arg or multiple args)
+    // - can be used as an rvalue in assignments/initializations (convertible to any T)
+    struct _any_rvalue {
+        template <typename T>
+        operator T() const {
+            return T{};
+        }
+    };
+
+    // Intrisic functions placeholders.
+    // NOTE: Implementations are intentionally no-ops for bring-up/testing.
+    //  _sizeof() replace sizeof()
+    template <typename... Args>
+    inline _any_rvalue _sizeof(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _lenof(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _offsetof(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _min(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _max(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _log2(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _valid_set(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _stack_push(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _checksum16(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _anchor(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _packet_len_get(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _printf(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _restrict(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _extend(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _suppress_warning(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _array_to_list(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _list_flatten(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _slice(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _BALU_priority_selectField(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _reg_select(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _trans_offset_load(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _trans_offset_store(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _port_type(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _hdr_bind(Args &&... /*args*/) {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _hdr_ref(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _hdr_expand(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _hdr_shrink(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _memove(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _mapping_converter(Args &&... /*args*/) const {
+        return {};
+    }
+
+    template <typename... Args>
+    inline _any_rvalue _pkt_offset_reached(Args &&... /*args*/) const {
+        return {};
+    }
+
     // *********************** searchEngine() ***********************
     SearchEngine &searchEngine() { return se_; }
 

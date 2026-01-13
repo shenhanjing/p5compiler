@@ -65,6 +65,12 @@ public:
         return offset_;
     }
 
+    template <typename Header>
+    p5::uint<7> _extract(Header &hdr, p5::uint<16> variableFieldSize) {
+        process_header(hdr, /*advance=*/true);
+        return offset_;
+    }
+
     // ========== 内置函数：_parser_next ==========
     /**
      * @brief Parser 状态转换函数
