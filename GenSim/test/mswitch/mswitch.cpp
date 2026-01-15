@@ -1,16 +1,18 @@
 void func0()
 {
-    uint<8> A = 1;
-    uint<8> B = 2;
-    uint<8> C = 3;
+    p5::uint<8> A = 1;
+    p5::uint<8> B = 2;
+    p5::uint<8> C = 3;
+    p5::uint<4> a = 0;
+    p5::uint<4> b = 0;
 
     { //switch
         auto _msw = p5::mswitch::tie(A, B, C);
         int _tag = 0;
         if (p5::mswitch::match(_msw, 1, 2, 3)) _tag = 1;
-        else if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 4)) _tag = 2;
-        else if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 5)) _tag = 3;
-        else if (p5::mswitch::match(_msw, p5::mswitch::_, 2, 1)) _tag = 4;
+        else if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(0, 0), 4)) _tag = 2;
+        else if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(1, 0), 5)) _tag = 3;
+        else if (p5::mswitch::match(_msw, p5::mswitch::mask(a, b), 2, 1)) _tag = 4;
 
         switch (_tag) {
             case 1: return parse_IPv4();
@@ -24,16 +26,16 @@ void func0()
 
 void func1()
 {
-    uint<8> A = 1;
-    uint<8> B = 2;
-    uint<8> C = 3;
-    uint<8> Z;
+    p5::uint<8> A = 1;
+    p5::uint<8> B = 2;
+    p5::uint<8> C = 3;
+    p5::uint<8> Z;
 
     { //switch
         auto _msw = p5::mswitch::tie(A, B, C);
         int _tag = 0;
-        if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 4)) _tag = 1;
-        else if (p5::mswitch::match(_msw, p5::mswitch::_, 2, 1)) _tag = 2;
+        if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(0, 0), 4)) _tag = 1;
+        else if (p5::mswitch::match(_msw, p5::mswitch::mask(0, 0), 2, 1)) _tag = 2;
         else if (p5::mswitch::match(_msw, 1, 2, 3)) _tag = 3;
         else if (p5::mswitch::match(_msw, 1, 3, 3)) _tag = 4;
         else if (p5::mswitch::match(_msw, 1, 4, 3)) _tag = 5;
@@ -76,8 +78,8 @@ public:
         { //switch
             auto _msw = p5::mswitch::tie(A, B, C);
             int _tag = 0;
-            if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 4)) _tag = 1;
-            else if (p5::mswitch::match(_msw, p5::mswitch::_, 2, 1)) _tag = 2;
+            if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(0, 0), 4)) _tag = 1;
+            else if (p5::mswitch::match(_msw, p5::mswitch::mask(0, 0), 2, 1)) _tag = 2;
             else if (p5::mswitch::match(_msw, 1, 2, 3)) _tag = 3;
             else if (p5::mswitch::match(_msw, 1, 3, 3)) _tag = 4;
             else if (p5::mswitch::match(_msw, 1, 4, 3)) _tag = 5;
@@ -127,8 +129,8 @@ public:
             { //switch
                 auto _msw = p5::mswitch::tie(A, B, C);
                 int _tag = 0;
-                if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 4)) _tag = 1;
-                else if (p5::mswitch::match(_msw, p5::mswitch::_, 2, 1)) _tag = 2;
+                if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(0, 0), 4)) _tag = 1;
+                else if (p5::mswitch::match(_msw, p5::mswitch::mask(0, 0), 2, 1)) _tag = 2;
                 else if (p5::mswitch::match(_msw, 1, 2, 3)) _tag = 3;
                 else if (p5::mswitch::match(_msw, 1, 3, 3)) _tag = 4;
                 else if (p5::mswitch::match(_msw, 1, 4, 3)) _tag = 5;
@@ -164,8 +166,8 @@ public:
             { //switch
                 auto _msw = p5::mswitch::tie(A, B, C);
                 int _tag = 0;
-                if (p5::mswitch::match(_msw, 1, p5::mswitch::_, 4)) _tag = 1;
-                else if (p5::mswitch::match(_msw, p5::mswitch::_, 2, 1)) _tag = 2;
+                if (p5::mswitch::match(_msw, 1, p5::mswitch::mask(0, 0), 4)) _tag = 1;
+                else if (p5::mswitch::match(_msw, p5::mswitch::mask(0, 0), 2, 1)) _tag = 2;
                 else if (p5::mswitch::match(_msw, 1, 2, 3)) _tag = 3;
                 else if (p5::mswitch::match(_msw, 1, 3, 3)) _tag = 4;
                 else if (p5::mswitch::match(_msw, 1, 4, 3)) _tag = 5;
