@@ -56,3 +56,20 @@ class P5Key : Statement {
     optional inline Vector<P5KeySwitch> switches;
     dbprint { out << "P5Key"; }
 }
+
+// Expression forms needed by the P5 frontend (primarily for C-style initializer lists).
+class P5DesignatedInitializer : Expression {
+    // When true, emit ".<designator> = <value>".
+    // When false, emit "[<designator>] = <value>".
+    bool isMember;
+    Expression designator;
+    Expression value;
+    dbprint { out << "P5DesignatedInitializer"; }
+}
+
+// Post-increment as an expression: "expr++".
+// Codegen is responsible for preserving the value/side-effect semantics.
+class P5PostIncrement : Expression {
+    Expression expr;
+    dbprint { out << "P5PostIncrement"; }
+}

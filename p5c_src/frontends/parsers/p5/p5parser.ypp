@@ -441,9 +441,19 @@ conditional_expression
 
 expression
         : conditional_expression  { $$ = $1; }
-//        | expression "++"
-//        | "." field_ref "=" expression
-//        | "[" field_ref "]" "=" expression
+        // Post-increment as an expression (C-like): expr++
+        | expression "++" {
+                $$ = new IR::P5PostIncrement(@1 + @2, $1);
+        }
+        // C-style designated initializer entries (usable inside "{ ... }" list expressions):
+        //   .field = expr
+        | "." field_ref "=" expression {
+                $$ = new IR::P5DesignatedInitializer(@1 + @4, /*isMember=*/true, $2, $4);
+        }
+        //   [idx] = expr
+        | "[" field_ref "]" "=" expression {
+                $$ = new IR::P5DesignatedInitializer(@1 + @5, /*isMember=*/false, $2, $5);
+        }
     	;
 
 expression_list

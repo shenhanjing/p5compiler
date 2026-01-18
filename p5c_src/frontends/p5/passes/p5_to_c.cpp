@@ -696,6 +696,28 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr,
                                   const std::unordered_set<cstring> &locals) {
     if (expr == nullptr) return;
 
+    if (auto *di = expr->to<IR::P5DesignatedInitializer>()) {
+        if (di->isMember) {
+            *outputStream << "." << di->designator->toString() << " = ";
+            emitExpressionWithCtx(di->value, locals);
+        } else {
+            *outputStream << "[";
+            emitExpressionWithCtx(di->designator, locals);
+            *outputStream << "] = ";
+            emitExpressionWithCtx(di->value, locals);
+        }
+        return;
+    }
+
+    if (auto *pi = expr->to<IR::P5PostIncrement>()) {
+        // Emit native C++ post-increment expression.
+        // p5_types.hpp provides operator++(int) for the relevant P5 value wrappers.
+        *outputStream << "(";
+        emitExpressionWithCtx(pi->expr, locals);
+        *outputStream << ")++";
+        return;
+    }
+
     if (auto *pe = expr->to<IR::PathExpression>()) {
         if (inSwitchMethod) {
             *outputStream << pe->path->name;

@@ -4,7 +4,9 @@ SRC_DIR := $(ROOT_DIR)/src
 INC_DIR := $(ROOT_DIR)/include
 BIN_DIR := $(ROOT_DIR)/bin
 
-CXXFLAGS ?= -std=c++17 -Wall -Wextra
+# Use GNU C++17 mode so we can use C++ designated initializers in tests (".field = ...").
+# Note: GCC does not support C99-style array designators ("[idx] = ...") in C++ mode here.
+CXXFLAGS ?= -std=gnu++17 -Wall -Wextra
 CXXFLAGS += -I$(INC_DIR)
 LDFLAGS ?=
 
