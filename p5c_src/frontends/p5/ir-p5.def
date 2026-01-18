@@ -40,9 +40,19 @@ class P5KeyCase : IAnnotated {
     Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
+class P5KeySwitch : IAnnotated {
+    optional inline Vector<Annotation> annotations;
+    Expression select;
+    optional inline Vector<P5KeyCase> cases;
+    dbprint { out << "P5KeySwitch"; }
+
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
+}
+
 class P5Key : Statement {
-    optional NullOK Expression select;            // if present, switch style
-    optional inline Vector<P5KeyCase> cases;      // switch cases (optional)
     optional inline Vector<P5KeyElement> elements; // flat list (optional)
+    // Switch-style key blocks in source order; allows multiple switches in a single key={...}.
+    optional inline Vector<P5KeySwitch> switches;
     dbprint { out << "P5Key"; }
 }

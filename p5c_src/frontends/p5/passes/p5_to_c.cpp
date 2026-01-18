@@ -876,119 +876,124 @@ void P5ToC::emitTableConstructor(const IR::P5Table *tbl) {
 }
 
 void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
-    *outputStream << indent << "{\n";
-    {
-        IndentGuard igSwitch(this);
-        *outputStream << indent << "auto _msw = p5::mswitch::tie(";
-        const IR::Expression *expr = keyNode->select;
-        if (auto *list = expr->to<IR::ListExpression>()) {
-            bool first = true;
-            for (auto *comp : list->components) {
-                if (!first) *outputStream << ", ";
-                first = false;
-                emitExpressionWithCtx(comp, locals);
-            }
-        } else {
-            emitExpressionWithCtx(expr, locals);
-        }
-        *outputStream << ");\n";
-
-        *outputStream << indent << "int _tag = 0;\n";
-
-        int caseId = 0;
-        bool firstMatch = true;
-        if (!keyNode->cases.empty()) {
-            for (const auto *cse : keyNode->cases) {
-                caseId++;
-                if (!cse->label || cse->label->is<IR::DefaultExpression>()) continue;
-
-                *outputStream << indent;
-                if (!firstMatch) *outputStream << "else ";
-                *outputStream << "if (p5::mswitch::match(_msw, ";
-
-                auto emitMatchArg = [&](const IR::Expression *e) {
-                    if (auto *m = e->to<IR::Mask>()) {
-                        *outputStream << "p5::mswitch::mask(";
-                        emitExpressionWithCtx(m->left, locals);
-                        *outputStream << ", ";
-                        emitExpressionWithCtx(m->right, locals);
-                        *outputStream << ")";
-                        return;
-                    }
-                    emitExpressionWithCtx(e, locals);
-                };
-
-                const IR::Expression *label = cse->label;
-                if (auto *list = label->to<IR::ListExpression>()) {
-                    bool firstArg = true;
-                    for (auto *comp : list->components) {
-                        if (!firstArg) *outputStream << ", ";
-                        firstArg = false;
-                        emitMatchArg(comp);
-                    }
-                } else {
-                    emitMatchArg(label);
-                }
-
-                *outputStream << ")) _tag = " << caseId << ";\n";
-                firstMatch = false;
-            }
-        }
-
-        *outputStream << indent << "switch (_tag) {\n";
+    auto emitOneKeySwitch = [&](const IR::Expression *expr, const IR::Vector<IR::P5KeyCase> &cases) {
+        *outputStream << indent << "{\n";
         {
-            IndentGuard igCase(this);
-            caseId = 0;
-            if (!keyNode->cases.empty()) {
-                for (const auto *cse : keyNode->cases) {
+            IndentGuard igSwitch(this);
+            *outputStream << indent << "auto _msw = p5::mswitch::tie(";
+            if (auto *list = expr->to<IR::ListExpression>()) {
+                bool first = true;
+                for (auto *comp : list->components) {
+                    if (!first) *outputStream << ", ";
+                    first = false;
+                    emitExpressionWithCtx(comp, locals);
+                }
+            } else {
+                emitExpressionWithCtx(expr, locals);
+            }
+            *outputStream << ");\n";
+
+            *outputStream << indent << "int _tag = 0;\n";
+
+            int caseId = 0;
+            bool firstMatch = true;
+            if (!cases.empty()) {
+                for (const auto *cse : cases) {
                     caseId++;
+                    if (!cse->label || cse->label->is<IR::DefaultExpression>()) continue;
+
                     *outputStream << indent;
-                    const bool isDefault = (!cse->label || cse->label->is<IR::DefaultExpression>());
-                    // Support empty case body ("case ...:" with nothing after ':') as a pure
-                    // fallthrough label. In the IR we mark it via P5KeyCase::fallthrough.
-                    const bool isFallthroughOnly = cse->fallthrough;
+                    if (!firstMatch) *outputStream << "else ";
+                    *outputStream << "if (p5::mswitch::match(_msw, ";
 
-                    if (isDefault) {
-                        *outputStream << "default:";
+                    auto emitMatchArg = [&](const IR::Expression *e) {
+                        if (auto *m = e->to<IR::Mask>()) {
+                            *outputStream << "p5::mswitch::mask(";
+                            emitExpressionWithCtx(m->left, locals);
+                            *outputStream << ", ";
+                            emitExpressionWithCtx(m->right, locals);
+                            *outputStream << ")";
+                            return;
+                        }
+                        emitExpressionWithCtx(e, locals);
+                    };
+
+                    const IR::Expression *label = cse->label;
+                    if (auto *list = label->to<IR::ListExpression>()) {
+                        bool firstArg = true;
+                        for (auto *comp : list->components) {
+                            if (!firstArg) *outputStream << ", ";
+                            firstArg = false;
+                            emitMatchArg(comp);
+                        }
                     } else {
-                        *outputStream << "case " << caseId << ":";
+                        emitMatchArg(label);
                     }
 
-                    if (isFallthroughOnly) {
-                        *outputStream << "\n";
-                        continue;
-                    }
+                    *outputStream << ")) _tag = " << caseId << ";\n";
+                    firstMatch = false;
+                }
+            }
 
-                    *outputStream << " {\n";
+            *outputStream << indent << "switch (_tag) {\n";
+            {
+                IndentGuard igCase(this);
+                caseId = 0;
+                if (!cases.empty()) {
+                    for (const auto *cse : cases) {
+                        caseId++;
+                        *outputStream << indent;
+                        const bool isDefault = (!cse->label || cse->label->is<IR::DefaultExpression>());
+                        const bool isFallthroughOnly = cse->fallthrough;
 
-                    {
-                        IndentGuard igBody(this);
-                        bool hasExpr = false;
-                        for (const auto *elem : cse->elements) {
-                            if (elem->expr) {
-                                hasExpr = true;
-                                *outputStream << indent << "_KeyBuilder.append(";
-                                emitExpressionWithCtx(elem->expr, locals);
-                                *outputStream << ");\n";
-                            }
-                            if (!elem->control.components.empty()) {
-                                for (const auto *c : elem->control.components) {
-                                    emitComponent(c, locals);
+                        if (isDefault) {
+                            *outputStream << "default:";
+                        } else {
+                            *outputStream << "case " << caseId << ":";
+                        }
+
+                        if (isFallthroughOnly) {
+                            *outputStream << "\n";
+                            continue;
+                        }
+
+                        *outputStream << " {\n";
+                        {
+                            IndentGuard igBody(this);
+                            bool hasExpr = false;
+                            for (const auto *elem : cse->elements) {
+                                if (elem->expr) {
+                                    hasExpr = true;
+                                    *outputStream << indent << "_KeyBuilder.append(";
+                                    emitExpressionWithCtx(elem->expr, locals);
+                                    *outputStream << ");\n";
+                                }
+                                if (!elem->control.components.empty()) {
+                                    for (const auto *c : elem->control.components) {
+                                        emitComponent(c, locals);
+                                    }
                                 }
                             }
+                            if (!hasExpr) {
+                                *outputStream << indent << "_BuiltKey = false;\n";
+                            }
+                            *outputStream << indent << "break;\n";
                         }
-                        if (!hasExpr) {
-                            *outputStream << indent << "_BuiltKey = false;\n";
-                        }
-                        *outputStream << indent << "break;\n";
+                        *outputStream << indent << "}\n";
                     }
-                    *outputStream << indent << "}\n";
                 }
             }
+            *outputStream << indent << "}\n";
         }
         *outputStream << indent << "}\n";
+    };
+
+    if (!keyNode->switches.empty()) {
+        for (const auto *sw : keyNode->switches) {
+            emitOneKeySwitch(sw->select, sw->cases);
+        }
+        return;
     }
-    *outputStream << indent << "}\n";
 }
 
 void P5ToC::emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
@@ -1020,7 +1025,7 @@ void P5ToC::emitTableKeyMatching(const IR::P5Key *keyNode, const std::unordered_
         *outputStream << indent << "auto _KeyBuilder = ctx.keyBuilder();\n";
         *outputStream << indent << "bool _BuiltKey = true;\n";
 
-        if (keyNode->select) {
+        if (!keyNode->switches.empty()) {
             emitTableKeySelect(keyNode, locals);
         } else if (!keyNode->elements.empty()) {
             emitTableKeyElements(keyNode, locals);

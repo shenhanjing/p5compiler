@@ -276,6 +276,8 @@ static int globalAnonCount = 0;
 %type<IR::Vector<IR::P5KeyElement>*>    key_element_list
 %type<IR::P5KeyCase*>                   key_case_entry
 %type<IR::Vector<IR::P5KeyCase>*>       key_case_list
+%type<IR::P5KeySwitch*>                 key_switch_entry
+%type<IR::Vector<IR::P5KeySwitch>*>     key_switch_list
 %type<IR::StatOrDecl*>                  program_selection_statement
 %type<IR::BlockStatement*>              program_selection_statement_list
 %type<IR::SwitchCase*>                  table_case_entry
@@ -1110,7 +1112,7 @@ key_element_list
 key_case_entry
         : annotations CASE value_list ":" "{" key_element_list "}" {
                 auto label = new IR::ListExpression(@3, *$3);
-                auto kce = new IR::P5KeyCase(@1);
+                auto kce = new IR::P5KeyCase(@1, false);
                 kce->annotations = *$1;
                 kce->label = label;
                 kce->elements = *$6;
@@ -1120,7 +1122,7 @@ key_case_entry
         | annotations CASE value_list ":" {
                 // Empty case body (fallthrough): "case ...:" with nothing after ':'
                 auto label = new IR::ListExpression(@3, *$3);
-                auto kce = new IR::P5KeyCase(@1);
+                auto kce = new IR::P5KeyCase(@1, true);
                 kce->annotations = *$1;
                 kce->label = label;
                 // Keep elements as an empty vector to avoid relying on nullptr checks.
@@ -1130,7 +1132,7 @@ key_case_entry
         }
         | annotations DEFAULT ":" "{" key_element_list "}" {
                 auto label = new IR::DefaultExpression(@2);
-                auto kce = new IR::P5KeyCase(@1);
+                auto kce = new IR::P5KeyCase(@1, false);
                 kce->annotations = *$1;
                 kce->label = label;
                 kce->elements = *$5;
@@ -1140,7 +1142,7 @@ key_case_entry
         | annotations DEFAULT ":" {
                 // Empty default body (fallthrough).
                 auto label = new IR::DefaultExpression(@2);
-                auto kce = new IR::P5KeyCase(@1);
+                auto kce = new IR::P5KeyCase(@1, true);
                 kce->annotations = *$1;
                 kce->label = label;
                 kce->elements = IR::Vector<IR::P5KeyElement>();
@@ -1157,6 +1159,25 @@ key_case_list
         | key_case_list key_case_entry {
                 $1->push_back($2);
                 $$ = $1;
+        }
+
+key_switch_entry
+        : SWITCH "(" select_exp ")" "{" key_case_list "}" {
+                // P5KeySwitch is a dedicated IR node so a single key={...} can contain
+                // multiple switch blocks in source order.
+                $$ = new IR::P5KeySwitch(@1, $3, *$6);
+        }
+
+key_switch_list
+        : key_switch_entry {
+                $$ = new IR::Vector<IR::P5KeySwitch>();
+                $$->push_back($1);
+                $$->srcInfo = @1;
+        }
+        | key_switch_entry key_switch_list {
+                $$ = $2;
+                $$->insert($$->begin(), $1);
+                $$->srcInfo = @1 + @2;
         }
 
 program_selection_statement
@@ -1230,10 +1251,9 @@ table_property
                 key->elements = *$4;
                 $$ = key;
         }
-        | KEY "=" "{" SWITCH "(" select_exp ")" "{" key_case_list "}" "}" {
+        | KEY "=" "{" key_switch_list "}" {
                 auto key = new IR::P5Key(@1);
-                key->select = $6;
-                key->cases = *$9;
+                key->switches = *$4;
                 $$ = key;
         }
         | SWITCH "(" select_exp ")" "{" table_case_list "}" {
