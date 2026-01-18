@@ -68,13 +68,13 @@ class P5ToC {
     void emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitFieldType(const IR::Type *type, EmitMode mode = EmitMode::Standard);
     void emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
-    void emitVariableDecl(const IR::Declaration_Variable *var);
+    void emitVariableDecl(const IR::Declaration_Variable *var, const std::unordered_set<cstring> &locals = {});
     void emitHeaderDecl(const IR::Declaration_Instance *inst);
     void emitTypedef(const IR::Type_Typedef *td);
     void emitTable(const IR::P5Table *tbl);
-    void emitIfStat(const IR::IfStatement *ifs);
-    bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os);
-    bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os);
+    void emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstring> &locals = {});
+    bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os, const std::unordered_set<cstring> &locals = {});
+    bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const std::unordered_set<cstring> &locals = {});
     void emitGtvHpp(const IR::P4Program *program);
     void emitEnumsHpp(const IR::P4Program *program);
     void emitStructHpp(const IR::P4Program *program);
@@ -87,21 +87,22 @@ class P5ToC {
     void emitPhoPackUnpack(const IR::P4Program *program);
     void emitResetAllFields(const IR::P4Program *program);
     void emitStructFieldTraverse(const IR::Type_Struct* st, const std::string& prefix, const std::unordered_map<cstring, const IR::Type_Struct*>& structMap, int& anon_counter, bool emit = true, bool is_pack = true);
-    std::unordered_map<cstring, const IR::Function *> indexFunctions(const IR::P4Program *program);
-    std::vector<const IR::Function *> computeCallOrder(
-        const std::unordered_map<cstring, const IR::Function *> &funcIndex, cstring rootName);
-    bool hasParserAnnotation(const IR::Function *func);
+    void emitGtvFieldLoop(const IR::P4Program *program, bool is_pack);
     void emitFunction(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionSignature(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionDeclaration(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionBody(const IR::BlockStatement *body);
-    void emitComponent(const IR::StatOrDecl *comp);
+    void emitComponent(const IR::StatOrDecl *comp, const std::unordered_set<cstring> &locals = {});
     void emitExpressionWithCtx(const IR::Expression *expr,
                                const std::unordered_set<cstring> &locals);
-    void emitSwitchStatement(const IR::SwitchStatement *swStmt);
-    void emitSwitchCase(const IR::SwitchCase *caseStmt);
-    bool endsWithBreak(const IR::Statement *stmt);
-    void replaceIdentifier(std::string &s, const std::string &from, const std::string &to);
+    void emitSwitchStatement(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
+    void emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
+    void emitSwitchDispatch(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
+    void emitSwitchRuntimeImpl();
+    void emitTableConstructor(const IR::P5Table *tbl);
+    void emitTableKeyMatching(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
+    void emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
+    void emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
     bool isInlineInit(const IR::Declaration_Variable *var);
 };
 

@@ -31,6 +31,9 @@ class P5KeyCase : IAnnotated {
     optional inline Vector<Annotation> annotations;
     optional NullOK Expression label;
     optional inline Vector<P5KeyElement> elements;
+    // When true, this case has no body and should fall through to next case.
+    // This is used to represent "case ...:" with nothing after ':' (C-style stacked labels).
+    optional inline bool fallthrough;
     dbprint { out << "P5KeyCase"; }
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }

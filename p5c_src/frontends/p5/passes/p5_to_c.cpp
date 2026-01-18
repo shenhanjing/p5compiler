@@ -56,8 +56,6 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
     emitSwitch(program);
 
     flushCFile();
-
-    return;
 }
 
 std::ostream *P5ToC::getStream(const std::string &filename) {
@@ -84,17 +82,6 @@ void P5ToC::flushCFile() {
         stream->flush();
     }
 }
-
-class CollectCalls : public Inspector {
-    std::unordered_set<cstring> names;
-
- public:
-    void postorder(const IR::MethodCallExpression *m) override {
-        auto *pe = m->method->to<IR::PathExpression>();
-        if (pe) names.insert(pe->path->name);
-    }
-    const std::unordered_set<cstring> &get() const { return names; }
-};
 
 bool P5ToC::isUnion(const IR::Type_Struct *st) {
     if (st == nullptr) return false;
@@ -151,11 +138,6 @@ void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
     if (auto *st = type->to<IR::Type_Struct>()) {
         if (isAnonymous(st)) {
             // 匿名 struct/union，内联输出
-            // Caller handles this usually, but if called directly:
-            // We need a dummy counter or fail?
-            // emitFieldType is usually called for named types or primitives.
-            // Nested anonymous structs are handled in emitStructOrUnion loop directly calling
-            // emitNestedStructOrUnion. But if we end up here:
             int dummy = 0;
             emitNestedStructOrUnion(st, mode, dummy);
         } else {
@@ -171,7 +153,7 @@ void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
     *outputStream << type->toString();
 }
 
-void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var) {
+void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const std::unordered_set<cstring> &locals) {
     if (var == nullptr) return;
 
     const IR::Type *baseType = var->type;
@@ -240,15 +222,15 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var) {
                                   << lhsName << ")>::value_type>(" << args << ")";
                 } else {
                     *outputStream << " = ";
-                    emitExpressionWithCtx(var->initializer, {});
+                    emitExpressionWithCtx(var->initializer, locals);
                 }
             } else {
                 *outputStream << " = ";
-                emitExpressionWithCtx(var->initializer, {});
+                emitExpressionWithCtx(var->initializer, locals);
             }
         } else {
             *outputStream << " = ";
-            emitExpressionWithCtx(var->initializer, {});
+            emitExpressionWithCtx(var->initializer, locals);
         }
     }
 
@@ -280,21 +262,24 @@ void P5ToC::emitHeaderDecl(const IR::Declaration_Instance *inst) {
 }
 
 bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs,
-                           std::ostream &os) {
+                           std::ostream &os, const std::unordered_set<cstring> &locals) {
     if (mc == nullptr || mc->method == nullptr) return false;
     auto *pe = mc->method->to<IR::PathExpression>();
     if (!pe) return false;
 
-    auto argsToString = [mc]() {
+    auto argsToString = [this, mc, &locals]() {
         std::ostringstream osArgs;
+        auto *old = outputStream;
+        outputStream = &osArgs;
         if (mc->arguments) {
             bool first = true;
             for (const auto *arg : *mc->arguments) {
-                if (!first) osArgs << ", ";
+                if (!first) *outputStream << ", ";
                 first = false;
-                osArgs << arg->toString();
+                emitExpressionWithCtx(arg->expression, locals);
             }
         }
+        outputStream = old;
         return osArgs.str();
     };
 
@@ -317,13 +302,17 @@ bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lh
     return false;
 }
 
-bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os) {
+bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const std::unordered_set<cstring> &locals) {
     if (mc == nullptr || mc->method == nullptr) return false;
     auto *pe = mc->method->to<IR::PathExpression>();
     if (!pe) return false;
 
     if (pe->path->name == "_apply" && mc->arguments && mc->arguments->size() == 1) {
-        os << mc->arguments->at(0)->toString() << ".apply();";
+        auto *old = outputStream;
+        outputStream = &os;
+        emitExpressionWithCtx(mc->arguments->at(0)->expression, locals);
+        outputStream = old;
+        os << ".apply();";
         return true;
     }
 
@@ -371,17 +360,6 @@ void P5ToC::emitSerEnum(const IR::Type_SerEnum *serEnum) {
     }
 
     *outputStream << "};\n\n";
-}
-
-bool P5ToC::hasParserAnnotation(const IR::Function *func) {
-    if (func == nullptr) return false;
-    for (const auto *ann : func->annotations) {
-        cstring annName = ann->name.toString();
-        if (annName.startsWith("parser")) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &class_name) {
@@ -453,184 +431,187 @@ void P5ToC::emitFunctionBody(const IR::BlockStatement *body) {
     *outputStream << indent << "}\n\n";
 }
 
-void P5ToC::emitComponent(const IR::StatOrDecl *comp) {
-    *outputStream << indent;
+void P5ToC::emitComponent(const IR::StatOrDecl *comp, const std::unordered_set<cstring> &locals) {
+    // *outputStream << indent;
     if (auto *ifs = comp->to<IR::IfStatement>()) {
-        emitIfStat(ifs);
+        emitIfStat(ifs, locals);
         return;
     }
     if (auto *mcs = comp->to<IR::MethodCallStatement>()) {
         auto *mc = mcs->methodCall;
         std::ostringstream os;
-        if (emitMethodCall(mc, os)) {
+        if (emitMethodCall(mc, os, locals)) {
             *outputStream << indent << os.str() << "\n";
             return;
         }
         *outputStream << indent;
-        emitExpressionWithCtx(mc, {});
+        emitExpressionWithCtx(mc, locals);
         *outputStream << ";\n";
         return;
     }
     if (auto *var = comp->to<IR::Declaration_Variable>()) {
-        emitVariableDecl(var);
+        emitVariableDecl(var, locals);
         return;
     }
     if (auto *as = comp->to<IR::AssignmentStatement>()) {
         auto lhs = as->left->toString();
         if (auto *mc = as->right->to<IR::MethodCallExpression>()) {
             std::ostringstream os;
-            if (emitMethodCall(mc, lhs, os)) {
+            if (emitMethodCall(mc, lhs, os, locals)) {
                 *outputStream << indent << os.str() << "\n";
                 return;
             }
         }
         *outputStream << indent;
-        emitExpressionWithCtx(as->left, {});
+        emitExpressionWithCtx(as->left, locals);
         *outputStream << " = ";
-        emitExpressionWithCtx(as->right, {});
+        emitExpressionWithCtx(as->right, locals);
         *outputStream << ";\n";
         return;
     }
     if (auto *swStmt = comp->to<IR::SwitchStatement>()) {
-        emitSwitchStatement(swStmt);
+        emitSwitchStatement(swStmt, locals);
         return;
     }
     if (auto *blk = comp->to<IR::BlockStatement>()) {
-        for (const auto *c : blk->components) emitComponent(c);
+        for (const auto *c : blk->components) emitComponent(c, locals);
         return;
     }
 
     auto text = comp->toString();
-    *outputStream << text << ";\n";
+    *outputStream << indent << text << ";\n";
 
     return;
 }
 
-bool P5ToC::endsWithBreak(const IR::Statement *stmt) {
-    if (!stmt) return false;
-    if (stmt->is<IR::BreakStatement>()) return true;
-    if (auto *blockStmt = stmt->to<IR::BlockStatement>()) {
-        if (blockStmt->components.empty()) return false;
-        const auto *lastStmt = blockStmt->components.back();
-        return lastStmt->is<IR::BreakStatement>();
-    }
-    return false;
-}
 
-void P5ToC::emitSwitchCase(const IR::SwitchCase *caseStmt) {
-    *outputStream << indent;
-    if (caseStmt->label->is<IR::DefaultExpression>()) {
-        *outputStream << "default: ";
-    } else {
-        const IR::Expression *label = caseStmt->label;
-        if (auto *listExpr = label->to<IR::ListExpression>()) {
-            if (listExpr->components.size() == 1) {
-                label = listExpr->components.at(0);
-            }
-        }
-        auto labelText = label->toString();
-        *outputStream << "case " << labelText << ": ";
-    }
 
-    if (caseStmt->statement) {
-        if (auto *blockStmt = caseStmt->statement->to<IR::BlockStatement>()) {
-            *outputStream << " {\n";  // Add brace
-            IndentGuard ig(this);
-            for (const auto *caseComp : blockStmt->components) {
-                emitComponent(caseComp);
-            }
-            *outputStream << indent << "break;\n";
-            *outputStream << ig.old << indent << "}";  // End brace, using old indent
-        } else {
-            *outputStream << "\n";
-            IndentGuard ig(this);
-            if (auto *stat = caseStmt->statement->to<IR::StatOrDecl>()) {
-                emitComponent(stat);
-            } else {
-                *outputStream << indent << caseStmt->statement->toString() << ";\n";
-            }
-            *outputStream << indent << "break;\n";
-        }
-    } else {
-        *outputStream << ";\n";
-        *outputStream << indent << "break;\n";
-    }
-
-    *outputStream << "\n";
-}
-
-void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt) {
+void P5ToC::emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+    // 2. Emit tie
+    *outputStream << indent << "auto _msw = p5::mswitch::tie(";
     const IR::Expression *expr = swStmt->expression;
-    if (auto *listExpr = expr->to<IR::ListExpression>()) {
-        if (listExpr->components.size() == 1) {
-            expr = listExpr->components.at(0);
+    if (auto *list = expr->to<IR::ListExpression>()) {
+        bool first = true;
+        for (auto *comp : list->components) {
+            if (!first) *outputStream << ", ";
+            first = false;
+            emitExpressionWithCtx(comp, locals);
         }
+    } else {
+        emitExpressionWithCtx(expr, locals);
     }
+    *outputStream << ");\n";
 
-    *outputStream << "switch (";
-    emitExpressionWithCtx(expr, {});
-    *outputStream << ".to_ullong()) {\n";
+    // 3. Emit tag
+    *outputStream << indent << "int _tag = 0;\n";
+
+    // 4. Emit match logic
+    int caseId = 0;
+    bool firstMatch = true;
+    for (const auto &caseStmt : swStmt->cases) {
+        caseId++;
+        if (caseStmt->label->is<IR::DefaultExpression>()) continue;
+
+        *outputStream << indent;
+        if (!firstMatch) *outputStream << "else ";
+        *outputStream << "if (p5::mswitch::match(_msw, ";
+
+        // Helper to emit match args
+        auto emitMatchArg = [&](const IR::Expression *e) {
+            if (auto *m = e->to<IR::Mask>()) {
+                *outputStream << "p5::mswitch::mask(";
+                emitExpressionWithCtx(m->left, locals);
+                *outputStream << ", ";
+                emitExpressionWithCtx(m->right, locals);
+                *outputStream << ")";
+                return;
+            }
+            emitExpressionWithCtx(e, locals);
+        };
+
+        const IR::Expression *label = caseStmt->label;
+        if (auto *list = label->to<IR::ListExpression>()) {
+            bool firstArg = true;
+            for (auto *comp : list->components) {
+                if (!firstArg) *outputStream << ", ";
+                firstArg = false;
+                emitMatchArg(comp);
+            }
+        } else {
+            emitMatchArg(label);
+        }
+
+        *outputStream << ")) _tag = " << caseId << ";\n";
+        firstMatch = false;
+    }
+}
+
+void P5ToC::emitSwitchDispatch(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+    // 5. Emit switch
+    *outputStream << indent << "switch (_tag) {\n";
     {
-        IndentGuard ig(this);
+        IndentGuard igSwitch(this);
+        int caseId = 0;
         for (const auto &caseStmt : swStmt->cases) {
-            emitSwitchCase(caseStmt);
+            caseId++;
+            *outputStream << indent;
+            if (caseStmt->label->is<IR::DefaultExpression>()) {
+                *outputStream << "default: ";
+            } else {
+                *outputStream << "case " << caseId << ": ";
+            }
+
+            if (caseStmt->statement) {
+                bool isEmptyBlock = false;
+                if (auto *bs = caseStmt->statement->to<IR::BlockStatement>()) {
+                    if (bs->components.empty()) isEmptyBlock = true;
+                }
+
+                if (isEmptyBlock) {
+                    *outputStream << "{\n";
+                    *outputStream << indent << "    break;\n";
+                    *outputStream << indent << "}\n";
+                } else {
+                    *outputStream << "{\n";
+                    {
+                        IndentGuard igBody(this);
+                        if (auto *bs = caseStmt->statement->to<IR::BlockStatement>()) {
+                            for (const auto *comp : bs->components) {
+                                emitComponent(comp, locals);
+                            }
+                        } else {
+                            if (auto *stat = caseStmt->statement->to<IR::StatOrDecl>()) {
+                                emitComponent(stat, locals);
+                            } else {
+                                *outputStream << indent << caseStmt->statement->toString() << ";\n";
+                            }
+                        }
+                        *outputStream << indent << "break;\n";
+                    }
+                    *outputStream << indent << "}\n";
+                }
+            } else {
+                *outputStream << "\n";
+            }
         }
     }
     *outputStream << indent << "}\n";
 }
 
-void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
+void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+    // 1. Emit block start
+    *outputStream << indent << "{\n";
+    IndentGuard ig(this);
+
+    emitSwitchTagMatching(swStmt, locals);
+    emitSwitchDispatch(swStmt, locals);
+
+    // 6. Close block
+    *outputStream << indent << "}\n";
+}
+
+void P5ToC::emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstring> &locals) {
     if (ifs == nullptr) return;
-
-    std::function<void(const IR::Node *)> emitNode = [&](const IR::Node *node) {
-        if (node == nullptr) return;
-
-        if (auto *innerIf = node->to<IR::IfStatement>()) {
-            emitIfStat(innerIf);
-            return;
-        }
-
-        if (auto *blk = node->to<IR::BlockStatement>()) {
-            for (const auto *c : blk->components) emitNode(c);
-            return;
-        }
-
-        if (auto *mcs = node->to<IR::MethodCallStatement>()) {
-            auto *mc = mcs->methodCall;
-            std::ostringstream os;
-            if (emitMethodCall(mc, os)) {
-                *outputStream << indent << os.str() << "\n";
-                return;
-            }
-            *outputStream << indent << node->toString() << ";\n";
-            return;
-        }
-
-        if (auto *var = node->to<IR::Declaration_Variable>()) {
-            emitVariableDecl(var);
-            return;
-        }
-
-        if (auto *as = node->to<IR::AssignmentStatement>()) {
-            auto lhs = as->left->toString();
-            if (auto *mc = as->right->to<IR::MethodCallExpression>()) {
-                std::ostringstream os;
-                if (emitMethodCall(mc, lhs, os)) {
-                    *outputStream << indent << os.str() << "\n";
-                    return;
-                }
-            }
-            *outputStream << indent;
-            emitExpressionWithCtx(as->left, {});
-            *outputStream << " = ";
-            emitExpressionWithCtx(as->right, {});
-            *outputStream << ";\n";
-            return;
-        }
-
-        // Fallback for other statements/declarations
-        *outputStream << indent << node->toString() << ";\n";
-    };
 
     // Emit condition with an extra rule:
     // If a sub-expression is a "pure variable" (PathExpression / Member) used as a boolean,
@@ -653,7 +634,7 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
             }
 
             if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
-                emitExpressionWithCtx(expr, {});
+                emitExpressionWithCtx(expr, locals);
                 if (boolContext) *outputStream << ".to_ullong()";
                 return;
             }
@@ -665,7 +646,7 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
                     emitIfCond(un->expr, true);
                     return;
                 }
-                emitExpressionWithCtx(expr, {});
+                emitExpressionWithCtx(expr, locals);
                 return;
             }
 
@@ -680,12 +661,12 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
                     return;
                 }
                 // Comparisons/arithmetic/etc: keep existing emission.
-                emitExpressionWithCtx(expr, {});
+                emitExpressionWithCtx(expr, locals);
                 return;
             }
 
             // Default: keep existing emission.
-            emitExpressionWithCtx(expr, {});
+            emitExpressionWithCtx(expr, locals);
         };
 
     *outputStream << indent << "if (";
@@ -694,7 +675,7 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
     {
         IndentGuard ig(this);
         if (ifs->ifTrue) {
-            emitNode(ifs->ifTrue);
+            emitComponent(ifs->ifTrue, locals);
         }
     }
     *outputStream << indent << "}";
@@ -703,7 +684,7 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs) {
         *outputStream << " else {\n";
         {
             IndentGuard ig(this);
-            emitNode(ifs->ifFalse);
+            emitComponent(ifs->ifFalse, locals);
         }
         *outputStream << indent << "}";
     }
@@ -876,6 +857,185 @@ bool P5ToC::isInlineInit(const IR::Declaration_Variable *var) {
     return false;
 }
 
+void P5ToC::emitTableConstructor(const IR::P5Table *tbl) {
+    *outputStream << indent << "explicit " << tbl->name << "(Switch &ctx_in";
+    if (tbl->parameters) {
+        for (const auto *param : tbl->parameters->parameters) {
+            *outputStream << ", ";
+            emitFieldType(param->type);
+            *outputStream << " &" << param->name << "_in";
+        }
+    }
+    *outputStream << ") : ctx(ctx_in)";
+    if (tbl->parameters) {
+        for (const auto *param : tbl->parameters->parameters) {
+            *outputStream << ", " << param->name << "(" << param->name << "_in)";
+        }
+    }
+    *outputStream << " {}\n\n";
+}
+
+void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
+    *outputStream << indent << "{\n";
+    {
+        IndentGuard igSwitch(this);
+        *outputStream << indent << "auto _msw = p5::mswitch::tie(";
+        const IR::Expression *expr = keyNode->select;
+        if (auto *list = expr->to<IR::ListExpression>()) {
+            bool first = true;
+            for (auto *comp : list->components) {
+                if (!first) *outputStream << ", ";
+                first = false;
+                emitExpressionWithCtx(comp, locals);
+            }
+        } else {
+            emitExpressionWithCtx(expr, locals);
+        }
+        *outputStream << ");\n";
+
+        *outputStream << indent << "int _tag = 0;\n";
+
+        int caseId = 0;
+        bool firstMatch = true;
+        if (!keyNode->cases.empty()) {
+            for (const auto *cse : keyNode->cases) {
+                caseId++;
+                if (!cse->label || cse->label->is<IR::DefaultExpression>()) continue;
+
+                *outputStream << indent;
+                if (!firstMatch) *outputStream << "else ";
+                *outputStream << "if (p5::mswitch::match(_msw, ";
+
+                auto emitMatchArg = [&](const IR::Expression *e) {
+                    if (auto *m = e->to<IR::Mask>()) {
+                        *outputStream << "p5::mswitch::mask(";
+                        emitExpressionWithCtx(m->left, locals);
+                        *outputStream << ", ";
+                        emitExpressionWithCtx(m->right, locals);
+                        *outputStream << ")";
+                        return;
+                    }
+                    emitExpressionWithCtx(e, locals);
+                };
+
+                const IR::Expression *label = cse->label;
+                if (auto *list = label->to<IR::ListExpression>()) {
+                    bool firstArg = true;
+                    for (auto *comp : list->components) {
+                        if (!firstArg) *outputStream << ", ";
+                        firstArg = false;
+                        emitMatchArg(comp);
+                    }
+                } else {
+                    emitMatchArg(label);
+                }
+
+                *outputStream << ")) _tag = " << caseId << ";\n";
+                firstMatch = false;
+            }
+        }
+
+        *outputStream << indent << "switch (_tag) {\n";
+        {
+            IndentGuard igCase(this);
+            caseId = 0;
+            if (!keyNode->cases.empty()) {
+                for (const auto *cse : keyNode->cases) {
+                    caseId++;
+                    *outputStream << indent;
+                    const bool isDefault = (!cse->label || cse->label->is<IR::DefaultExpression>());
+                    // Support empty case body ("case ...:" with nothing after ':') as a pure
+                    // fallthrough label. In the IR we mark it via P5KeyCase::fallthrough.
+                    const bool isFallthroughOnly = cse->fallthrough;
+
+                    if (isDefault) {
+                        *outputStream << "default:";
+                    } else {
+                        *outputStream << "case " << caseId << ":";
+                    }
+
+                    if (isFallthroughOnly) {
+                        *outputStream << "\n";
+                        continue;
+                    }
+
+                    *outputStream << " {\n";
+
+                    {
+                        IndentGuard igBody(this);
+                        bool hasExpr = false;
+                        for (const auto *elem : cse->elements) {
+                            if (elem->expr) {
+                                hasExpr = true;
+                                *outputStream << indent << "_KeyBuilder.append(";
+                                emitExpressionWithCtx(elem->expr, locals);
+                                *outputStream << ");\n";
+                            }
+                            if (!elem->control.components.empty()) {
+                                for (const auto *c : elem->control.components) {
+                                    emitComponent(c, locals);
+                                }
+                            }
+                        }
+                        if (!hasExpr) {
+                            *outputStream << indent << "_BuiltKey = false;\n";
+                        }
+                        *outputStream << indent << "break;\n";
+                    }
+                    *outputStream << indent << "}\n";
+                }
+            }
+        }
+        *outputStream << indent << "}\n";
+    }
+    *outputStream << indent << "}\n";
+}
+
+void P5ToC::emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
+    bool hasExpr = false;
+    for (const auto *elem : keyNode->elements) {
+        if (elem->expr) {
+            hasExpr = true;
+            *outputStream << indent << "_KeyBuilder.append(";
+            emitExpressionWithCtx(elem->expr, locals);
+            *outputStream << ");\n";
+        }
+        if (!elem->control.components.empty()) {
+            for (const auto *c : elem->control.components) {
+                emitComponent(c, locals);
+            }
+        }
+    }
+    if (!hasExpr) {
+        *outputStream << indent << "_BuiltKey = false;\n";
+    }
+}
+
+void P5ToC::emitTableKeyMatching(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
+    // Emit key-building code in the same order as it appears in the body.
+    // Scope the builder variables so multiple key blocks do not collide.
+    *outputStream << indent << "{\n";
+    {
+        IndentGuard igKey(this);
+        *outputStream << indent << "auto _KeyBuilder = ctx.keyBuilder();\n";
+        *outputStream << indent << "bool _BuiltKey = true;\n";
+
+        if (keyNode->select) {
+            emitTableKeySelect(keyNode, locals);
+        } else if (!keyNode->elements.empty()) {
+            emitTableKeyElements(keyNode, locals);
+        }
+
+        *outputStream << indent << "if (_BuiltKey) {\n";
+        {
+            IndentGuard igCommit(this);
+            *outputStream << indent << "_KeyBuilder.commit();\n";
+        }
+        *outputStream << indent << "}\n";
+    }
+    *outputStream << indent << "}\n";
+}
+
 void P5ToC::emitTable(const IR::P5Table *tbl) {
     if (tbl == nullptr) return;
 
@@ -898,21 +1058,7 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
 
         *outputStream << ig.old << "public:\n";
 
-        *outputStream << indent << "explicit " << tbl->name << "(Switch &ctx_in";
-        if (tbl->parameters) {
-            for (const auto *param : tbl->parameters->parameters) {
-                *outputStream << ", ";
-                emitFieldType(param->type);
-                *outputStream << " &" << param->name << "_in";
-            }
-        }
-        *outputStream << ") : ctx(ctx_in)";
-        if (tbl->parameters) {
-            for (const auto *param : tbl->parameters->parameters) {
-                *outputStream << ", " << param->name << "(" << param->name << "_in)";
-            }
-        }
-        *outputStream << " {}\n\n";
+        emitTableConstructor(tbl);
 
         if (tbl->body) {
             for (const auto *comp : tbl->body->components) {
@@ -938,147 +1084,7 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
             if (tbl->body) {
                 for (const auto *comp : tbl->body->components) {
                     if (auto *keyNode = comp->to<IR::P5Key>()) {
-                        // Emit key-building code in the same order as it appears in the body.
-                        // Scope the builder variables so multiple key blocks do not collide.
-                        *outputStream << indent << "{\n";
-                        {
-                            IndentGuard igKey(this);
-                            *outputStream << indent << "auto _KeyBuilder = ctx.keyBuilder();\n";
-                            *outputStream << indent << "bool _BuiltKey = true;\n";
-
-                            // Emit statements from control blocks (e.g., control_parameters = { ... })
-                            // using the same ctx-qualification rules as regular table body code.
-                            std::function<void(const IR::Node *)> emitControlNode =
-                                [&](const IR::Node *node) {
-                                    if (node == nullptr) return;
-
-                                    if (auto *blk = node->to<IR::BlockStatement>()) {
-                                        for (const auto *c : blk->components) emitControlNode(c);
-                                        return;
-                                    }
-
-                                    // if (auto *var = node->to<IR::Declaration_Variable>()) {
-                                    //     // Keep as a simple statement; declarations inside control blocks
-                                    //     // are rare but supported for completeness.
-                                    //     *outputStream << indent;
-                                    //     emitFieldType(var->type);
-                                    //     *outputStream << " " << var->name;
-                                    //     if (var->initializer) {
-                                    //         *outputStream << " = ";
-                                    //         emitExpressionWithCtx(var->initializer, locals);
-                                    //     }
-                                    //     *outputStream << ";\n";
-                                    //     return;
-                                    // }
-
-                                    if (auto *as = node->to<IR::AssignmentStatement>()) {
-                                        *outputStream << indent;
-                                        emitExpressionWithCtx(as->left, locals);
-                                        *outputStream << " = ";
-                                        emitExpressionWithCtx(as->right, locals);
-                                        *outputStream << ";\n";
-                                        return;
-                                    }
-
-                                    // if (auto *mcs = node->to<IR::MethodCallStatement>()) {
-                                    //     if (auto *mc = mcs->methodCall) {
-                                    //         *outputStream << indent;
-                                    //         if (auto *pe = mc->method->to<IR::PathExpression>()) {
-                                    //             if (pe->path->name == "_apply" && mc->arguments &&
-                                    //                 mc->arguments->size() == 1) {
-                                    //                 emitExpressionWithCtx(mc->arguments->at(0)->expression,
-                                    //                                       locals);
-                                    //                 *outputStream << ".apply();\n";
-                                    //                 return;
-                                    //             }
-                                    //         }
-                                    //         emitExpressionWithCtx(mc, locals);
-                                    //         *outputStream << ";\n";
-                                    //         return;
-                                    //     }
-                                    // }
-
-                                    // Fallback: preserve ordering by emitting textual form.
-                                    *outputStream << indent << node->toString() << ";\n";
-                                };
-
-                            if (keyNode->select) {
-                                *outputStream << indent << "switch (";
-                                const IR::Expression *selExpr = keyNode->select;
-                                if (auto *list = selExpr->to<IR::ListExpression>()) {
-                                    if (list->components.size() == 1) selExpr = list->components.at(0);
-                                }
-                                emitExpressionWithCtx(selExpr, locals);
-                                *outputStream << ".to_ullong()) {\n";
-                                {
-                                    IndentGuard ig2(this);
-                                    if (!keyNode->cases.empty()) {
-                                        for (const auto *cse : keyNode->cases) {
-                                            *outputStream << indent;
-                                            if (!cse->label || cse->label->is<IR::DefaultExpression>()) {
-                                                *outputStream << "default: {\n";
-                                            } else {
-                                                *outputStream << "case ";
-                                                const IR::Expression *lblExpr = cse->label;
-                                                if (auto *list = lblExpr->to<IR::ListExpression>()) {
-                                                    if (list->components.size() == 1)
-                                                        lblExpr = list->components.at(0);
-                                                }
-                                                emitExpressionWithCtx(lblExpr, locals);
-                                                *outputStream << ": {\n";
-                                            }
-
-                                            {
-                                                IndentGuard ig3(this);
-                                                bool hasExpr = false;
-                                                for (const auto *elem : cse->elements) {
-                                                    if (elem->expr) {
-                                                        hasExpr = true;
-                                                        *outputStream << indent << "_KeyBuilder.append(";
-                                                        emitExpressionWithCtx(elem->expr, locals);
-                                                        *outputStream << ");\n";
-                                                    }
-                                                    if (!elem->control.components.empty()) {
-                                                        emitControlNode(&elem->control);
-                                                    }
-                                                }
-                                                // Mark the key as not built if this case contains no expr elements.
-                                                if (!hasExpr) {
-                                                    *outputStream << indent << "_BuiltKey = false;\n";
-                                                }
-                                                *outputStream << indent << "break;\n";
-                                            }
-                                            *outputStream << indent << "}\n";
-                                        }
-                                    }
-                                }
-                                *outputStream << indent << "}\n";
-                            } else if (!keyNode->elements.empty()) {
-                                bool hasExpr = false;
-                                for (const auto *elem : keyNode->elements) {
-                                    if (elem->expr) {
-                                        hasExpr = true;
-                                        *outputStream << indent << "_KeyBuilder.append(";
-                                        emitExpressionWithCtx(elem->expr, locals);
-                                        *outputStream << ");\n";
-                                    }
-                                    if (!elem->control.components.empty()) {
-                                        emitControlNode(&elem->control);
-                                    }
-                                }
-                                if (!hasExpr) {
-                                    *outputStream << indent << "_BuiltKey = false;\n";
-                                }
-                            }
-
-                            *outputStream << indent << "if (_BuiltKey) {\n";
-                            {
-                                IndentGuard igCommit(this);
-                                *outputStream << indent << "_KeyBuilder.commit();\n";
-                            }
-                            *outputStream << indent << "}\n";
-                        }
-                        *outputStream << indent << "}\n";
+                        emitTableKeyMatching(keyNode, locals);
                         continue;
                     }
 
@@ -1092,29 +1098,7 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
                         continue;
                     }
 
-                    *outputStream << indent;
-
-                    if (auto *as = comp->to<IR::AssignmentStatement>()) {
-                        emitExpressionWithCtx(as->left, locals);
-                        *outputStream << " = ";
-                        emitExpressionWithCtx(as->right, locals);
-                        *outputStream << ";\n";
-                    } else if (auto *mcs = comp->to<IR::MethodCallStatement>()) {
-                        if (auto *mc = mcs->methodCall) {
-                            if (auto *pe = mc->method->to<IR::PathExpression>()) {
-                                if (pe->path->name == "_apply" && mc->arguments &&
-                                    mc->arguments->size() == 1) {
-                                    emitExpressionWithCtx(mc->arguments->at(0)->expression, locals);
-                                    *outputStream << ".apply();\n";
-                                    continue;
-                                }
-                            }
-                            emitExpressionWithCtx(mc, locals);
-                            *outputStream << ";\n";
-                        }
-                    } else {
-                        *outputStream << comp->toString() << ";\n";
-                    }
+                    emitComponent(comp, locals);
                 }
             }
         }
@@ -1123,33 +1107,7 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
     *outputStream << indent << "};\n\n";
 }
 
-void P5ToC::replaceIdentifier(std::string &s, const std::string &from, const std::string &to) {
-    if (from.empty()) return;
-    std::string out;
-    out.reserve(s.size());
-    size_t i = 0;
-    while (i < s.size()) {
-        bool match = false;
-        if (i + from.size() <= s.size() && s.compare(i, from.size(), from) == 0) {
-            char left = (i == 0) ? '\0' : s[i - 1];
-            char right = (i + from.size() >= s.size()) ? '\0' : s[i + from.size()];
-            auto isIdent = [](char c) {
-                return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
-            };
-            if (!isIdent(left) && !isIdent(right)) {
-                match = true;
-            }
-        }
-        if (match) {
-            out.append(to);
-            i += from.size();
-        } else {
-            out.push_back(s[i]);
-            i++;
-        }
-    }
-    s.swap(out);
-}
+
 
 void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
@@ -1352,17 +1310,26 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
         }
         *outputStream << "\n";
 
-        *outputStream << indent << "enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };\n"
+        *outputStream << indent
+                      << "enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };\n"
                       << indent << "NgsfDirection ngsf_direction{NgsfDirection::INGRESS};\n"
                       << "\n"
                       << indent << "std::size_t ngsf_byte_offset{0};\n"
                       << indent << "uint8_t ngsf_bit_offset{0};\n"
                       << "\n"
-                      << indent << "void reset_ngsf_offset() { ngsf_byte_offset = 0; ngsf_bit_offset = 0; }\n"
+                      << indent << "void reset_ngsf_offset() { \n"
+                      << indent << "    ngsf_byte_offset = 0;\n"
+                      << indent << "    ngsf_bit_offset = 0;\n"
+                      << indent << "}\n"
                       << "\n";
 
         *outputStream << indent << "template <typename T>\n"
-                      << indent << "void _add_to_ngsf(T &value) { if (ngsf_direction == NgsfDirection::INGRESS) { ngsf_append_any(value); } else { ngsf_restore_any(value); }\n"
+                      << indent << "void _add_to_ngsf(T &value) {\n"
+                      << indent << "    if (ngsf_direction == NgsfDirection::INGRESS) {\n"
+                      << indent << "        ngsf_append_any(value);\n"
+                      << indent << "    } else {\n"
+                      << indent << "        ngsf_restore_any(value);\n"
+                      << indent << "    }\n"
                       << indent << "}\n"
                       << "\n";
 
@@ -1554,89 +1521,7 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
     outputStream = defaultStream;
 }
 
-void P5ToC::emitSwitch(const IR::P4Program *program) {
-    // 1. Emit Header
-    outputStream = getStream("include/generated_switch.hpp");
-    *outputStream << "#ifndef GENERATED_SWITCH_HPP\n"
-                  << "#define GENERATED_SWITCH_HPP\n"
-                  << "\n"
-                  << "#include <string>\n"
-                  << "\n"
-                  << "#include \"table.hpp\"\n"
-                  << "#include \"SE.hpp\"\n"
-                  << "#include \"key.hpp\"\n"
-                  << "#include \"BuiltIn.hpp\"\n"
-                  << "#include \"p5_types.hpp\"\n"
-                  << "#include \"model_intf_1027.h\"\n"
-                  << "#include \"generated_gtv.hpp\"\n"
-                  << "#include \"packet.hpp\"\n"
-                  << "\n";
-
-    *outputStream << "class Switch : public GtvContext, public BuiltInContext, public Packet {\n"
-                  << "public:\n"
-                  << "    Switch();\n"
-                  << "\n";
-
-    {
-        IndentGuard ig(this);
-
-        for (const auto *obj : program->objects) {
-            if (auto *func = obj->to<IR::Function>()) {
-                emitFunctionDeclaration(func);
-            }
-        }
-
-        for (const auto *obj : program->objects) {
-            if (auto *tbl = obj->to<IR::P5Table>()) {
-                emitTable(tbl);
-            }
-        }
-
-        *outputStream
-            << "public:\n"
-            << indent
-            << "void PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef "
-               "&nhi_info, "
-               "Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info);\n"
-            << indent
-            << "void ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ima2IpmFvInfoDef "
-               "&fv_out);\n"
-            << indent
-            << "void EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ema2EpmFvInfoDef "
-               "&fv_out);\n"
-            << indent
-            << "void IpmProcPkt(const int port_id, const Ima2IpmFvInfoDef &fv_in, Np2NpHeader "
-               "&np2np_hdr, Np2TmHeader &np2tm_hdr);\n"
-            << indent
-            << "void SingleMaProc(const int ma_id, const std::string &packet_id, const int "
-               "port_id, "
-               "const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);\n"
-            << "\n"
-            << indent << "void reset_all_fields();\n"
-            << "\n"
-            << indent << "SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }\n"
-            << indent << "KeyManager &keyManager() { return BuiltInContext::keyManager(); }\n"
-            << "\n";
-    }
-    *outputStream << "};\n";
-
-    *outputStream << "\n#endif // GENERATED_SWITCH_HPP\n";
-
-    // 2. Emit Source
-    outputStream = getStream("src/generated_switch.cpp");
-    *outputStream << "#include <cstring>\n"
-                  << "\n"
-                  << "#include \"generated_switch.hpp\"\n"
-                  << "\n"
-                  << "Switch::Switch() : GtvContext(), BuiltInContext(), Packet() {}\n"
-                  << "\n";
-
-    for (const auto *obj : program->objects) {
-        if (auto *func = obj->to<IR::Function>()) {
-            emitFunction(func, "Switch::");
-        }
-    }
-
+void P5ToC::emitSwitchRuntimeImpl() {
     *outputStream << "// ========== interface 实现 ==========\n"
                   << "void Switch::PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, "
                      "NhiDef &nhi_info, \n"
@@ -1765,6 +1650,93 @@ void P5ToC::emitSwitch(const IR::P4Program *program) {
                   << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
                   << "}\n"
                   << "\n";
+}
+
+void P5ToC::emitSwitch(const IR::P4Program *program) {
+    // 1. Emit Header
+    outputStream = getStream("include/generated_switch.hpp");
+    *outputStream << "#ifndef GENERATED_SWITCH_HPP\n"
+                  << "#define GENERATED_SWITCH_HPP\n"
+                  << "\n"
+                  << "#include <string>\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"p5_mswitch.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "#include \"generated_gtv.hpp\"\n"
+                  << "#include \"packet.hpp\"\n"
+                  << "\n";
+
+    *outputStream << "class Switch : public GtvContext, public BuiltInContext, public Packet {\n"
+                  << "public:\n"
+                  << "    Switch();\n"
+                  << "\n";
+
+    {
+        IndentGuard ig(this);
+
+        for (const auto *obj : program->objects) {
+            if (auto *func = obj->to<IR::Function>()) {
+                emitFunctionDeclaration(func);
+            }
+        }
+
+        for (const auto *obj : program->objects) {
+            if (auto *tbl = obj->to<IR::P5Table>()) {
+                emitTable(tbl);
+            }
+        }
+
+        *outputStream
+            << "public:\n"
+            << indent
+            << "void PrsProcPkt(bool direction, const ParserHwInfo &parser_hinfo, NhiDef "
+               "&nhi_info, "
+               "Cp2NpHeader &cp2np_hdr, const PktHeader &pkt_hdr, Prs2Ma0FvInfoDef &fv_info);\n"
+            << indent
+            << "void ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ima2IpmFvInfoDef "
+               "&fv_out);\n"
+            << indent
+            << "void EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, Ema2EpmFvInfoDef "
+               "&fv_out);\n"
+            << indent
+            << "void IpmProcPkt(const int port_id, const Ima2IpmFvInfoDef &fv_in, Np2NpHeader "
+               "&np2np_hdr, Np2TmHeader &np2tm_hdr);\n"
+            << indent
+            << "void SingleMaProc(const int ma_id, const std::string &packet_id, const int "
+               "port_id, "
+               "const MaToMaFvInfoDef &fv_in, MaToMaFvInfoDef &fv_out);\n"
+            << "\n"
+            << indent << "void reset_all_fields();\n"
+            << "\n"
+            << indent << "SearchEngine &searchEngine() { return BuiltInContext::searchEngine(); }\n"
+            << indent << "KeyManager &keyManager() { return BuiltInContext::keyManager(); }\n"
+            << "\n";
+    }
+    *outputStream << "};\n";
+
+    *outputStream << "\n#endif // GENERATED_SWITCH_HPP\n";
+
+    // 2. Emit Source
+    outputStream = getStream("src/generated_switch.cpp");
+    *outputStream << "#include <cstring>\n"
+                  << "\n"
+                  << "#include \"generated_switch.hpp\"\n"
+                  << "\n"
+                  << "Switch::Switch() : GtvContext(), BuiltInContext(), Packet() {}\n"
+                  << "\n";
+
+    for (const auto *obj : program->objects) {
+        if (auto *func = obj->to<IR::Function>()) {
+            emitFunction(func, "Switch::");
+        }
+    }
+
+    emitSwitchRuntimeImpl();
 
     emitResetAllFields(program);
 
@@ -1785,44 +1757,6 @@ void P5ToC::emitHeaders(const IR::P4Program *program) {
             emitHeaderDecl(inst);
         }
     }
-}
-
-std::unordered_map<cstring, const IR::Function *> P5ToC::indexFunctions(
-    const IR::P4Program *program) {
-    std::unordered_map<cstring, const IR::Function *> funcIndex;
-    for (const auto *obj : program->objects) {
-        if (auto *func = obj->to<IR::Function>()) {
-            funcIndex.emplace(func->name, func);
-        }
-    }
-    return funcIndex;
-}
-
-std::vector<const IR::Function *> P5ToC::computeCallOrder(
-    const std::unordered_map<cstring, const IR::Function *> &funcIndex, cstring rootName) {
-    std::vector<const IR::Function *> order;
-    auto it = funcIndex.find(rootName);
-    if (it == funcIndex.end()) return order;
-    std::vector<const IR::Function *> stack;
-    std::unordered_set<cstring> visited;
-    stack.push_back(it->second);
-    while (!stack.empty()) {
-        auto *f = stack.back();
-        stack.pop_back();
-        if (!visited.insert(f->name).second) continue;
-        order.push_back(f);
-        if (f->body) {
-            CollectCalls cc;
-            f->body->apply(cc);
-            for (auto &calleeName : cc.get()) {
-                auto jt = funcIndex.find(calleeName);
-                if (jt != funcIndex.end() && !visited.count(calleeName)) {
-                    stack.push_back(jt->second);
-                }
-            }
-        }
-    }
-    return order;
 }
 
 void P5ToC::emitStructFieldTraverse(
@@ -2014,6 +1948,56 @@ void P5ToC::emitPhoPackUnpack(const IR::P4Program *program) {
     *outputStream << indent << "}\n\n";
 }
 
+void P5ToC::emitGtvFieldLoop(const IR::P4Program *program, bool is_pack) {
+    std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+    for (const auto *obj : program->objects) {
+        if (auto *st = obj->to<IR::Type_Struct>()) {
+            structMap[st->name] = st;
+        }
+    }
+
+    *outputStream << indent << "// outer headers\n";
+    for (const auto *obj : program->objects) {
+        if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+            cstring typeName;
+            if (auto *tn = inst->type->to<IR::Type_Name>()) {
+                typeName = tn->path->name;
+            } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
+                typeName = ts->name;
+            }
+
+            if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
+                int anon_counter = 0;
+                emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
+                                        structMap, anon_counter, true, is_pack);
+            } else {
+                if (is_pack) {
+                    *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
+                } else {
+                    *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name
+                                  << ");\n";
+                }
+            }
+        }
+    }
+    *outputStream << "\n";
+
+    *outputStream << indent << "// fv fields\n";
+    std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
+    for (const auto *obj : program->objects) {
+        if (auto *var = obj->to<IR::Declaration_Variable>()) {
+            if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {
+                continue;
+            }
+            if (is_pack) {
+                *outputStream << indent << "append_bits(bits, " << var->name << ");\n";
+            } else {
+                *outputStream << indent << "assign_from_bits(in, cursor, " << var->name << ");\n";
+            }
+        }
+    }
+}
+
 void P5ToC::emitPackGtvToBytes(const IR::P4Program *program) {
     *outputStream << indent << "// 按字段声明顺序将位拼接到字节数组（大端 bit 顺序）\n";
     *outputStream << indent << "GtvPackedBuffer pack_gtv_to_bytes() const {\n";
@@ -2023,46 +2007,7 @@ void P5ToC::emitPackGtvToBytes(const IR::P4Program *program) {
         *outputStream << indent << "std::vector<bool> bits;\n";
         *outputStream << indent << "bits.reserve(1200); // 外层头部 + fv\n\n";
 
-        std::unordered_map<cstring, const IR::Type_Struct *> structMap;
-        for (const auto *obj : program->objects) {
-            if (auto *st = obj->to<IR::Type_Struct>()) {
-                structMap[st->name] = st;
-            }
-        }
-
-        *outputStream << indent << "// outer headers\n";
-        for (const auto *obj : program->objects) {
-            if (auto *inst = obj->to<IR::Declaration_Instance>()) {
-                cstring typeName;
-                if (auto *tn = inst->type->to<IR::Type_Name>()) {
-                    typeName = tn->path->name;
-                } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
-                    typeName = ts->name;
-                }
-
-                if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
-                    int anon_counter = 0;
-                    emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
-                                            structMap, anon_counter, true, true);
-                } else {
-                    // Fallback for non-struct types or unknown structs
-                    *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
-                }
-            }
-        }
-        *outputStream << "\n";
-
-        *outputStream << indent << "// fv fields\n";
-
-        std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
-        for (const auto *obj : program->objects) {
-            if (auto *var = obj->to<IR::Declaration_Variable>()) {
-                if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {
-                    continue;
-                }
-                *outputStream << indent << "append_bits(bits, " << var->name << ");\n";
-            }
-        }
+        emitGtvFieldLoop(program, true);
 
         *outputStream << "\n";
         *outputStream << indent << "GtvPackedBuffer out{};\n";
@@ -2080,46 +2025,7 @@ void P5ToC::emitUnpackGtvFromBytes(const IR::P4Program *program) {
         IndentGuard ig(this);
         *outputStream << indent << "std::size_t cursor = 0;\n\n";
 
-        std::unordered_map<cstring, const IR::Type_Struct *> structMap;
-        for (const auto *obj : program->objects) {
-            if (auto *st = obj->to<IR::Type_Struct>()) {
-                structMap[st->name] = st;
-            }
-        }
-
-        *outputStream << indent << "// outer headers\n";
-        for (const auto *obj : program->objects) {
-            if (auto *inst = obj->to<IR::Declaration_Instance>()) {
-                cstring typeName;
-                if (auto *tn = inst->type->to<IR::Type_Name>()) {
-                    typeName = tn->path->name;
-                } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
-                    typeName = ts->name;
-                }
-
-                if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
-                    int anon_counter = 0;
-                    emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
-                                            structMap, anon_counter, true, false);
-                } else {
-                    // Fallback for non-struct types or unknown structs
-                    *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name
-                                  << ");\n";
-                }
-            }
-        }
-        *outputStream << "\n";
-
-        *outputStream << indent << "// fv fields\n";
-        std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
-        for (const auto *obj : program->objects) {
-            if (auto *var = obj->to<IR::Declaration_Variable>()) {
-                if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {
-                    continue;
-                }
-                *outputStream << indent << "assign_from_bits(in, cursor, " << var->name << ");\n";
-            }
-        }
+        emitGtvFieldLoop(program, false);
     }
     *outputStream << indent << "}\n\n";
 }

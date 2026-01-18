@@ -210,6 +210,7 @@ static int globalAnonCount = 0;
 %token      LE "<="
 %token      BIT_AND "&"
 %token      AND_OP "&&"
+%token      MASK "&&&"
 %token      ASSIGN_BIT_AND "&="
 %token      BIT_OR "|"
 %token      OR_OP "||"
@@ -740,6 +741,12 @@ case_entry
                 }
                 $$ = new IR::SwitchCase(@1, le, stmt);
         }
+        | CASE value_list ":"
+        {
+                // Empty case body (fallthrough): "case ...:" with nothing after ':'
+                IR::Expression* le =  new IR::ListExpression(@1, *$2);
+                $$ = new IR::SwitchCase(@1, le, nullptr);
+        }
         | DEFAULT ":" return_value_type
         {
                 auto label = new IR::DefaultExpression(@1);
@@ -750,6 +757,12 @@ case_entry
                         stmt = block;
                 }
                 $$ = new IR::SwitchCase(@1, label, stmt);
+        }
+        | DEFAULT ":"
+        {
+                // Empty default body (fallthrough).
+                auto label = new IR::DefaultExpression(@1);
+                $$ = new IR::SwitchCase(@1, label, nullptr);
         }
 
 case_list
@@ -936,6 +949,12 @@ case    : CASE value_list ":" action_statement
 
                 $$ = new IR::SwitchCase(@1, vl, as);
         }
+        | CASE value_list ":"
+        {
+                // Empty case body (fallthrough).
+                IR::Expression* vl = new IR::ListExpression(@1, *$2);
+                $$ = new IR::SwitchCase(@1, vl, nullptr);
+        }
         | DEFAULT ":" action_statement {
                 IR::IndexedVector<IR::StatOrDecl> as_vec;
                 as_vec.push_back($3);
@@ -944,6 +963,11 @@ case    : CASE value_list ":" action_statement
                 auto label = new IR::DefaultExpression(@1);
 
                 $$ = new IR::SwitchCase(@1, label, as);
+        }
+        | DEFAULT ":" {
+                // Empty default body (fallthrough).
+                auto label = new IR::DefaultExpression(@1);
+                $$ = new IR::SwitchCase(@1, label, nullptr);
         }
 
 switch_cases
@@ -954,7 +978,7 @@ switch_cases
         }
 
 switch_statement
-        : SWITCH "(" expression ")" "{" switch_cases "}" {
+        : SWITCH "(" select_exp ")" "{" switch_cases "}" {
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
         }
 
@@ -1090,6 +1114,18 @@ key_case_entry
                 kce->annotations = *$1;
                 kce->label = label;
                 kce->elements = *$6;
+                kce->fallthrough = false;
+                $$ = kce;
+        }
+        | annotations CASE value_list ":" {
+                // Empty case body (fallthrough): "case ...:" with nothing after ':'
+                auto label = new IR::ListExpression(@3, *$3);
+                auto kce = new IR::P5KeyCase(@1);
+                kce->annotations = *$1;
+                kce->label = label;
+                // Keep elements as an empty vector to avoid relying on nullptr checks.
+                kce->elements = IR::Vector<IR::P5KeyElement>();
+                kce->fallthrough = true;
                 $$ = kce;
         }
         | annotations DEFAULT ":" "{" key_element_list "}" {
@@ -1098,6 +1134,17 @@ key_case_entry
                 kce->annotations = *$1;
                 kce->label = label;
                 kce->elements = *$5;
+                kce->fallthrough = false;
+                $$ = kce;
+        }
+        | annotations DEFAULT ":" {
+                // Empty default body (fallthrough).
+                auto label = new IR::DefaultExpression(@2);
+                auto kce = new IR::P5KeyCase(@1);
+                kce->annotations = *$1;
+                kce->label = label;
+                kce->elements = IR::Vector<IR::P5KeyElement>();
+                kce->fallthrough = true;
                 $$ = kce;
         }
 
@@ -1118,7 +1165,10 @@ program_selection_statement
         | assignment_or_call_statement   { $$ = $1; }
 
 program_selection_statement_list
-        : program_selection_statement {
+        : %empty {
+                $$ = new IR::BlockStatement(@$);
+        }
+        | program_selection_statement {
                 auto blk = new IR::BlockStatement(@1);
                 blk->push_back($1);
                 $$ = blk;
@@ -1139,6 +1189,11 @@ table_case_entry
                 }
                 $$ = new IR::SwitchCase(@2, label, stmt);
         }
+        | annotations CASE value_list ":" {
+                // Empty case body (fallthrough).
+                IR::Expression* label = new IR::ListExpression(@3, *$3);
+                $$ = new IR::SwitchCase(@2, label, nullptr);
+        }
         | annotations DEFAULT ":" "{" program_selection_statement_list "}" {
                 IR::Expression* label = new IR::DefaultExpression(@2);
                 const IR::Statement* stmt = $5;
@@ -1148,6 +1203,11 @@ table_case_entry
                         stmt = blk;
                 }
                 $$ = new IR::SwitchCase(@2, label, stmt);
+        }
+        | annotations DEFAULT ":" {
+                // Empty default body (fallthrough).
+                IR::Expression* label = new IR::DefaultExpression(@2);
+                $$ = new IR::SwitchCase(@2, label, nullptr);
         }
 
 table_case_list
