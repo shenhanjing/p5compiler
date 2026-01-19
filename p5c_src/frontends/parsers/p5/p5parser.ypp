@@ -856,8 +856,21 @@ parameter
                 }
                 $$ = param;
         }
+        | annotations type_ref "&" ID "[" "]" {
+                // Unsized array parameter passed by reference (inout).
+                // IR::Type_Stack does not accept a nullptr size, so we preserve "[]" using an annotation.
+                auto param = new IR::Parameter(@4, *$4, IR::Direction::InOut, $2);
+                param->addAnnotation(new IR::Annotation("p5_unsized_array", {}));
+                if ($1) {
+                        for (auto *ann : *$1) param->addAnnotation(ann);
+                }
+                $$ = param;
+        }
         | annotations type_ref ID "[" "]" {
+                // Unsized array parameter.
+                // IR::Type_Stack does not accept a nullptr size, so we preserve "[]" using an annotation.
                 auto param = new IR::Parameter(@3, *$3, IR::Direction::In, $2);
+                param->addAnnotation(new IR::Annotation("p5_unsized_array", {}));
                 if ($1) {
                         for (auto *ann : *$1) param->addAnnotation(ann);
                 }

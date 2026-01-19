@@ -164,6 +164,36 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const std::uno
         baseType = stk->elementType;
     }
 
+    // Special cases for uint<0> declarations:
+    // 1) uint<0> newVec = _list_alloc(oldVec);  -> decltype(oldVec) newVec(oldVec.size());
+    // 2) Other uint<0> scalar declarations      -> auto newVar (= ...);
+    const bool isUint0Scalar = dims.empty() && [&]() {
+        if (auto *bits = baseType->to<IR::Type_Bits>()) {
+            return !bits->isSigned && bits->size == 0;
+        }
+        return false;
+    }();
+
+    if (isUint0Scalar && var->initializer) {
+        if (auto *mc = var->initializer->to<IR::MethodCallExpression>()) {
+            if (auto *pe = mc->method->to<IR::PathExpression>()) {
+                if (pe->path->name == "_list_alloc" && mc->arguments && mc->arguments->size() == 1) {
+                    // Render the argument expression with the same context rules (ctx./locals).
+                    std::ostringstream argOs;
+                    auto *old = outputStream;
+                    outputStream = &argOs;
+                    emitExpressionWithCtx(mc->arguments->at(0)->expression, locals);
+                    outputStream = old;
+                    const auto argStr = argOs.str();
+
+                    *outputStream << indent << "decltype(" << argStr << ") " << var->name << "("
+                                  << argStr << ".size());\n";
+                    return;
+                }
+            }
+        }
+    }
+
     // Map _compressed_X -> _inflate<X>, otherwise reuse emitFieldType
     auto writeMappedType = [this](const IR::Type *type, std::ostream &os) {
         if (auto *tn = type->to<IR::Type_Name>()) {
@@ -183,7 +213,12 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const std::uno
     std::ostringstream typeBuf;
     writeMappedType(baseType, typeBuf);
 
-    *outputStream << indent << typeBuf.str() << " " << var->name;
+    // For uint<0> scalar declarations, emit 'auto' (unless handled by _list_alloc rewrite above).
+    if (isUint0Scalar) {
+        *outputStream << indent << "auto " << var->name;
+    } else {
+        *outputStream << indent << typeBuf.str() << " " << var->name;
+    }
 
     for (auto *dim : dims) {
         *outputStream << "[";
@@ -365,6 +400,63 @@ void P5ToC::emitSerEnum(const IR::Type_SerEnum *serEnum) {
 void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
 
+    // Pre-scan parameters to collect generic template typenames for uint<0>.
+    // Rules:
+    // - uint<0> var        -> Tn var
+    // - uint<0> list[]     -> std::vector<Tn> list
+    // Each occurrence gets its own distinct typename.
+    std::vector<std::string> genericTypenames;
+    std::unordered_map<const IR::Parameter *, std::string> paramTypeOverride;
+
+    auto isUnsizedArrayParam = [](const IR::Parameter *p) -> bool {
+        if (p == nullptr) return false;
+        for (const auto *ann : p->annotations) {
+            if (ann->name == "p5_unsized_array" || ann->name == IR::ID("p5_unsized_array")) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    if (auto *mt = func->type->to<IR::Type_Method>()) {
+        if (mt->parameters) {
+            int tIndex = 0;
+            auto nextT = [&]() {
+                return std::string("T") + std::to_string(tIndex++);
+            };
+
+            for (const auto *param : mt->parameters->parameters) {
+                if (!param || !param->type) continue;
+
+                if (auto *bits = param->type->to<IR::Type_Bits>()) {
+                    if (!bits->isSigned && bits->size == 0) {
+                        auto t = nextT();
+                        genericTypenames.push_back(t);
+                        if (isUnsizedArrayParam(param)) {
+                            paramTypeOverride.emplace(param, "std::vector<" + t + ">");
+                        } else {
+                            paramTypeOverride.emplace(param, t);
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    // Emit template first (if needed), then the function signature.
+    if (!genericTypenames.empty()) {
+        *outputStream << indent << "template <";
+        for (size_t i = 0; i < genericTypenames.size(); ++i) {
+            if (i != 0) *outputStream << ", ";
+            *outputStream << "typename " << genericTypenames[i];
+        }
+        *outputStream << ">\n";
+        *outputStream << indent;
+    }
+
+    *outputStream << indent;
+
     // 输出返回类型
     if (auto *mt = func->type->to<IR::Type_Method>()) {
         if (mt->returnType) {
@@ -389,7 +481,35 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                 }
                 first = false;
                 bool handled = false;
-                if (param->direction == IR::Direction::InOut) {
+
+                // Override uint<0> (scalar/array) to generic types.
+                if (auto it = paramTypeOverride.find(param); it != paramTypeOverride.end()) {
+                    *outputStream << it->second;
+                    if (param->direction == IR::Direction::InOut) {
+                        *outputStream << " &" << param->name;
+                    } else {
+                        *outputStream << " " << param->name;
+                    }
+                    handled = true;
+                }
+
+                // Unsized array parameters (T a[]) are represented via annotation.
+                // Keep the original "[]" form in the generated signature.
+                if (!handled && isUnsizedArrayParam(param)) {
+                    emitFieldType(param->type);
+                    if (param->direction == IR::Direction::InOut) {
+                        // C++: reference to array of unknown bound: T (&name)[]
+                        *outputStream << " (&" << param->name << ")[]";
+                    } else {
+                        // C/C++: parameter as array: T name[]
+                        *outputStream << " " << param->name << "[]";
+                    }
+                    handled = true;
+                }
+
+                // For regular inout uint<N> (N != 0), keep existing p5::uint_ref<N> emission.
+                // If the parameter was already overridden (e.g. uint<0> -> Tn), do not emit again.
+                if (!handled && param->direction == IR::Direction::InOut) {
                     if (auto *bits = param->type->to<IR::Type_Bits>()) {
                         if (!bits->isSigned) {
                             *outputStream << "p5::uint_ref<" << bits->size << "> " << param->name;
@@ -1686,6 +1806,7 @@ void P5ToC::emitSwitch(const IR::P4Program *program) {
                   << "#define GENERATED_SWITCH_HPP\n"
                   << "\n"
                   << "#include <string>\n"
+                  << "#include <vector>\n"
                   << "\n"
                   << "#include \"table.hpp\"\n"
                   << "#include \"SE.hpp\"\n"
@@ -1711,6 +1832,7 @@ void P5ToC::emitSwitch(const IR::P4Program *program) {
                 emitFunctionDeclaration(func);
             }
         }
+        *outputStream << "\n";
 
         for (const auto *obj : program->objects) {
             if (auto *tbl = obj->to<IR::P5Table>()) {

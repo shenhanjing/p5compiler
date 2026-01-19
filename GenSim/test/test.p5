@@ -869,3 +869,8 @@ void dot_ex(){
   UDP_S test = { .SrcPort = 1 };
 
 }
+
+void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> &list1[]){
+  uint<0> TempVAR= var0;
+  uint<0> TempLIST= _list_alloc(list0);
+}
