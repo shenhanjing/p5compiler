@@ -585,19 +585,22 @@ namespace P4 { namespace P5 {
       // key_element
       char dummy16[sizeof (IR::P5KeyElement*)];
 
+      // key_switch_entry
+      char dummy17[sizeof (IR::P5KeySwitch*)];
+
       // table_declaration
-      char dummy17[sizeof (IR::P5Table*)];
+      char dummy18[sizeof (IR::P5Table*)];
 
       // parameter
-      char dummy18[sizeof (IR::Parameter*)];
+      char dummy19[sizeof (IR::Parameter*)];
 
       // param_list
-      char dummy19[sizeof (IR::ParameterList*)];
+      char dummy20[sizeof (IR::ParameterList*)];
 
       // action_statement
       // program_selection_statement
       // table_property
-      char dummy20[sizeof (IR::StatOrDecl*)];
+      char dummy21[sizeof (IR::StatOrDecl*)];
 
       // return_value_type
       // return_select_statement
@@ -608,63 +611,66 @@ namespace P4 { namespace P5 {
       // for_loop_statement
       // switch_statement
       // assignment_or_call_statement
-      char dummy21[sizeof (IR::Statement*)];
+      char dummy22[sizeof (IR::Statement*)];
 
       // string_lit
-      char dummy22[sizeof (IR::StringLiteral*)];
+      char dummy23[sizeof (IR::StringLiteral*)];
 
       // field_dec
       // anonymous_struct_union_dec
       // struct_field_dec
-      char dummy23[sizeof (IR::StructField*)];
+      char dummy24[sizeof (IR::StructField*)];
 
       // case_entry
       // case
       // table_case_entry
-      char dummy24[sizeof (IR::SwitchCase*)];
+      char dummy25[sizeof (IR::SwitchCase*)];
 
       // enum_declaration
       // type_declaration
-      char dummy25[sizeof (IR::Type_Declaration*)];
+      char dummy26[sizeof (IR::Type_Declaration*)];
 
       // struct_union_type_declaration
-      char dummy26[sizeof (IR::Type_Struct*)];
+      char dummy27[sizeof (IR::Type_Struct*)];
 
       // typedef_declaration
-      char dummy27[sizeof (IR::Type_Typedef*)];
+      char dummy28[sizeof (IR::Type_Typedef*)];
 
       // annotations
-      char dummy28[sizeof (IR::Vector<IR::Annotation>*)];
+      char dummy29[sizeof (IR::Vector<IR::Annotation>*)];
 
       // arg_list
-      char dummy29[sizeof (IR::Vector<IR::Argument>*)];
+      char dummy30[sizeof (IR::Vector<IR::Argument>*)];
 
       // expression_list
       // value_list
-      char dummy30[sizeof (IR::Vector<IR::Expression>*)];
+      char dummy31[sizeof (IR::Vector<IR::Expression>*)];
 
       // declaration_list
-      char dummy31[sizeof (IR::Vector<IR::Node>*)];
+      char dummy32[sizeof (IR::Vector<IR::Node>*)];
 
       // key_case_list
-      char dummy32[sizeof (IR::Vector<IR::P5KeyCase>*)];
+      char dummy33[sizeof (IR::Vector<IR::P5KeyCase>*)];
 
       // key_element_list
-      char dummy33[sizeof (IR::Vector<IR::P5KeyElement>*)];
+      char dummy34[sizeof (IR::Vector<IR::P5KeyElement>*)];
+
+      // key_switch_list
+      char dummy35[sizeof (IR::Vector<IR::P5KeySwitch>*)];
 
       // case_list
       // switch_cases
       // table_case_list
-      char dummy34[sizeof (IR::Vector<IR::SwitchCase>*)];
+      char dummy36[sizeof (IR::Vector<IR::SwitchCase>*)];
 
       // enumerator
-      char dummy35[sizeof (P4::P5::EnumItem*)];
+      char dummy37[sizeof (P4::P5::EnumItem*)];
 
       // INTEGER
-      char dummy36[sizeof (UnparsedConstant)];
+      char dummy38[sizeof (UnparsedConstant)];
 
       // type_ref
-      char dummy37[sizeof (const IR::Type*)];
+      char dummy39[sizeof (const IR::Type*)];
 
       // BREAK
       // CASE
@@ -697,7 +703,7 @@ namespace P4 { namespace P5 {
       // TABLE
       // IDENTIFIER
       // STRING_LITERAL
-      char dummy38[sizeof (cstring)];
+      char dummy40[sizeof (cstring)];
     };
 
     /// The size of the largest semantic type.
@@ -788,53 +794,54 @@ namespace P4 { namespace P5 {
     TOK_LE = 293,                  // "<="
     TOK_BIT_AND = 294,             // "&"
     TOK_AND_OP = 295,              // "&&"
-    TOK_ASSIGN_BIT_AND = 296,      // "&="
-    TOK_BIT_OR = 297,              // "|"
-    TOK_OR_OP = 298,               // "||"
-    TOK_ASSIGN_BIT_OR = 299,       // "|="
-    TOK_BIT_XOR = 300,             // "^"
-    TOK_ASSIGN_BIT_XOR = 301,      // "^="
-    TOK_RIGHT_OP = 302,            // ">>"
-    TOK_ASSIGN_SHR = 303,          // ">>="
-    TOK_LEFT_OP = 304,             // "<<"
-    TOK_ASSIGN_SHL = 305,          // "<<="
-    TOK_SHARP = 306,               // "#"
-    TOK_SEMICOLON = 307,           // ";"
-    TOK_NEWLINE = 308,             // NEWLINE
-    TOK_BREAK = 309,               // BREAK
-    TOK_CASE = 310,                // CASE
-    TOK_CONST = 311,               // CONST
-    TOK_CLASS = 312,               // CLASS
-    TOK_DEFAULT = 313,             // DEFAULT
-    TOK_DO = 314,                  // DO
-    TOK_ELSE = 315,                // ELSE
-    TOK_ENUM = 316,                // ENUM
-    TOK_FOR = 317,                 // FOR
-    TOK_IF = 318,                  // IF
-    TOK_INT = 319,                 // INT
-    TOK_NAMESPACE = 320,           // NAMESPACE
-    TOK_PRIVATE = 321,             // PRIVATE
-    TOK_PROTECTED = 322,           // PROTECTED
-    TOK_PUBLIC = 323,              // PUBLIC
-    TOK_RETURN = 324,              // RETURN
-    TOK_STRUCT = 325,              // STRUCT
-    TOK_SWITCH = 326,              // SWITCH
-    TOK_TYPEDEF = 327,             // TYPEDEF
-    TOK_UNION = 328,               // UNION
-    TOK_UINT = 329,                // UINT
-    TOK_USING = 330,               // USING
-    TOK_WHILE = 331,               // WHILE
-    TOK_VOID = 332,                // VOID
-    TOK_KEY = 333,                 // KEY
-    TOK_SIZE = 334,                // SIZE
-    TOK_CONTROL_PARAMETERS = 335,  // CONTROL_PARAMETERS
-    TOK_HEADER = 336,              // HEADER
-    TOK_TABLE = 337,               // TABLE
-    TOK_IDENTIFIER = 338,          // IDENTIFIER
-    TOK_STRING_LITERAL = 339,      // STRING_LITERAL
-    TOK_INTEGER = 340,             // INTEGER
-    TOK_LPAREN_PREC = 341,         // LPAREN_PREC
-    TOK_THEN = 342                 // THEN
+    TOK_MASK = 296,                // "&&&"
+    TOK_ASSIGN_BIT_AND = 297,      // "&="
+    TOK_BIT_OR = 298,              // "|"
+    TOK_OR_OP = 299,               // "||"
+    TOK_ASSIGN_BIT_OR = 300,       // "|="
+    TOK_BIT_XOR = 301,             // "^"
+    TOK_ASSIGN_BIT_XOR = 302,      // "^="
+    TOK_RIGHT_OP = 303,            // ">>"
+    TOK_ASSIGN_SHR = 304,          // ">>="
+    TOK_LEFT_OP = 305,             // "<<"
+    TOK_ASSIGN_SHL = 306,          // "<<="
+    TOK_SHARP = 307,               // "#"
+    TOK_SEMICOLON = 308,           // ";"
+    TOK_NEWLINE = 309,             // NEWLINE
+    TOK_BREAK = 310,               // BREAK
+    TOK_CASE = 311,                // CASE
+    TOK_CONST = 312,               // CONST
+    TOK_CLASS = 313,               // CLASS
+    TOK_DEFAULT = 314,             // DEFAULT
+    TOK_DO = 315,                  // DO
+    TOK_ELSE = 316,                // ELSE
+    TOK_ENUM = 317,                // ENUM
+    TOK_FOR = 318,                 // FOR
+    TOK_IF = 319,                  // IF
+    TOK_INT = 320,                 // INT
+    TOK_NAMESPACE = 321,           // NAMESPACE
+    TOK_PRIVATE = 322,             // PRIVATE
+    TOK_PROTECTED = 323,           // PROTECTED
+    TOK_PUBLIC = 324,              // PUBLIC
+    TOK_RETURN = 325,              // RETURN
+    TOK_STRUCT = 326,              // STRUCT
+    TOK_SWITCH = 327,              // SWITCH
+    TOK_TYPEDEF = 328,             // TYPEDEF
+    TOK_UNION = 329,               // UNION
+    TOK_UINT = 330,                // UINT
+    TOK_USING = 331,               // USING
+    TOK_WHILE = 332,               // WHILE
+    TOK_VOID = 333,                // VOID
+    TOK_KEY = 334,                 // KEY
+    TOK_SIZE = 335,                // SIZE
+    TOK_CONTROL_PARAMETERS = 336,  // CONTROL_PARAMETERS
+    TOK_HEADER = 337,              // HEADER
+    TOK_TABLE = 338,               // TABLE
+    TOK_IDENTIFIER = 339,          // IDENTIFIER
+    TOK_STRING_LITERAL = 340,      // STRING_LITERAL
+    TOK_INTEGER = 341,             // INTEGER
+    TOK_LPAREN_PREC = 342,         // LPAREN_PREC
+    TOK_THEN = 343                 // THEN
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -894,58 +901,58 @@ namespace P4 { namespace P5 {
         S_LE = 38,                               // "<="
         S_BIT_AND = 39,                          // "&"
         S_AND_OP = 40,                           // "&&"
-        S_ASSIGN_BIT_AND = 41,                   // "&="
-        S_BIT_OR = 42,                           // "|"
-        S_OR_OP = 43,                            // "||"
-        S_ASSIGN_BIT_OR = 44,                    // "|="
-        S_BIT_XOR = 45,                          // "^"
-        S_ASSIGN_BIT_XOR = 46,                   // "^="
-        S_RIGHT_OP = 47,                         // ">>"
-        S_ASSIGN_SHR = 48,                       // ">>="
-        S_LEFT_OP = 49,                          // "<<"
-        S_ASSIGN_SHL = 50,                       // "<<="
-        S_SHARP = 51,                            // "#"
-        S_SEMICOLON = 52,                        // ";"
-        S_NEWLINE = 53,                          // NEWLINE
-        S_BREAK = 54,                            // BREAK
-        S_CASE = 55,                             // CASE
-        S_CONST = 56,                            // CONST
-        S_CLASS = 57,                            // CLASS
-        S_DEFAULT = 58,                          // DEFAULT
-        S_DO = 59,                               // DO
-        S_ELSE = 60,                             // ELSE
-        S_ENUM = 61,                             // ENUM
-        S_FOR = 62,                              // FOR
-        S_IF = 63,                               // IF
-        S_INT = 64,                              // INT
-        S_NAMESPACE = 65,                        // NAMESPACE
-        S_PRIVATE = 66,                          // PRIVATE
-        S_PROTECTED = 67,                        // PROTECTED
-        S_PUBLIC = 68,                           // PUBLIC
-        S_RETURN = 69,                           // RETURN
-        S_STRUCT = 70,                           // STRUCT
-        S_SWITCH = 71,                           // SWITCH
-        S_TYPEDEF = 72,                          // TYPEDEF
-        S_UNION = 73,                            // UNION
-        S_UINT = 74,                             // UINT
-        S_USING = 75,                            // USING
-        S_WHILE = 76,                            // WHILE
-        S_VOID = 77,                             // VOID
-        S_KEY = 78,                              // KEY
-        S_SIZE = 79,                             // SIZE
-        S_CONTROL_PARAMETERS = 80,               // CONTROL_PARAMETERS
-        S_HEADER = 81,                           // HEADER
-        S_TABLE = 82,                            // TABLE
-        S_IDENTIFIER = 83,                       // IDENTIFIER
-        S_STRING_LITERAL = 84,                   // STRING_LITERAL
-        S_INTEGER = 85,                          // INTEGER
-        S_LPAREN_PREC = 86,                      // LPAREN_PREC
-        S_THEN = 87,                             // THEN
-        S_88_ = 88,                              // '['
-        S_89_ = 89,                              // ']'
-        S_90_ = 90,                              // '='
-        S_91_ = 91,                              // ';'
-        S_92_ = 92,                              // "&&&"
+        S_MASK = 41,                             // "&&&"
+        S_ASSIGN_BIT_AND = 42,                   // "&="
+        S_BIT_OR = 43,                           // "|"
+        S_OR_OP = 44,                            // "||"
+        S_ASSIGN_BIT_OR = 45,                    // "|="
+        S_BIT_XOR = 46,                          // "^"
+        S_ASSIGN_BIT_XOR = 47,                   // "^="
+        S_RIGHT_OP = 48,                         // ">>"
+        S_ASSIGN_SHR = 49,                       // ">>="
+        S_LEFT_OP = 50,                          // "<<"
+        S_ASSIGN_SHL = 51,                       // "<<="
+        S_SHARP = 52,                            // "#"
+        S_SEMICOLON = 53,                        // ";"
+        S_NEWLINE = 54,                          // NEWLINE
+        S_BREAK = 55,                            // BREAK
+        S_CASE = 56,                             // CASE
+        S_CONST = 57,                            // CONST
+        S_CLASS = 58,                            // CLASS
+        S_DEFAULT = 59,                          // DEFAULT
+        S_DO = 60,                               // DO
+        S_ELSE = 61,                             // ELSE
+        S_ENUM = 62,                             // ENUM
+        S_FOR = 63,                              // FOR
+        S_IF = 64,                               // IF
+        S_INT = 65,                              // INT
+        S_NAMESPACE = 66,                        // NAMESPACE
+        S_PRIVATE = 67,                          // PRIVATE
+        S_PROTECTED = 68,                        // PROTECTED
+        S_PUBLIC = 69,                           // PUBLIC
+        S_RETURN = 70,                           // RETURN
+        S_STRUCT = 71,                           // STRUCT
+        S_SWITCH = 72,                           // SWITCH
+        S_TYPEDEF = 73,                          // TYPEDEF
+        S_UNION = 74,                            // UNION
+        S_UINT = 75,                             // UINT
+        S_USING = 76,                            // USING
+        S_WHILE = 77,                            // WHILE
+        S_VOID = 78,                             // VOID
+        S_KEY = 79,                              // KEY
+        S_SIZE = 80,                             // SIZE
+        S_CONTROL_PARAMETERS = 81,               // CONTROL_PARAMETERS
+        S_HEADER = 82,                           // HEADER
+        S_TABLE = 83,                            // TABLE
+        S_IDENTIFIER = 84,                       // IDENTIFIER
+        S_STRING_LITERAL = 85,                   // STRING_LITERAL
+        S_INTEGER = 86,                          // INTEGER
+        S_LPAREN_PREC = 87,                      // LPAREN_PREC
+        S_THEN = 88,                             // THEN
+        S_89_ = 89,                              // '['
+        S_90_ = 90,                              // ']'
+        S_91_ = 91,                              // '='
+        S_92_ = 92,                              // ';'
         S_YYACCEPT = 93,                         // $accept
         S_program = 94,                          // program
         S_string_lit = 95,                       // string_lit
@@ -1009,24 +1016,26 @@ namespace P4 { namespace P5 {
         S_key_element_list = 153,                // key_element_list
         S_key_case_entry = 154,                  // key_case_entry
         S_key_case_list = 155,                   // key_case_list
-        S_program_selection_statement = 156,     // program_selection_statement
-        S_program_selection_statement_list = 157, // program_selection_statement_list
-        S_table_case_entry = 158,                // table_case_entry
-        S_table_case_list = 159,                 // table_case_list
-        S_table_property = 160,                  // table_property
-        S_table_property_list = 161,             // table_property_list
-        S_table_declaration = 162,               // table_declaration
-        S_typedef_declaration = 163,             // typedef_declaration
-        S_enumerator = 164,                      // enumerator
-        S_enumerator_list = 165,                 // enumerator_list
-        S_enum_declaration = 166,                // enum_declaration
-        S_struct_union_type_declaration = 167,   // struct_union_type_declaration
-        S_type_declaration = 168,                // type_declaration
-        S_function_declaration = 169,            // function_declaration
-        S_namespace = 170,                       // namespace
-        S_declaration = 171,                     // declaration
-        S_declaration_list = 172,                // declaration_list
-        S_input = 173                            // input
+        S_key_switch_entry = 156,                // key_switch_entry
+        S_key_switch_list = 157,                 // key_switch_list
+        S_program_selection_statement = 158,     // program_selection_statement
+        S_program_selection_statement_list = 159, // program_selection_statement_list
+        S_table_case_entry = 160,                // table_case_entry
+        S_table_case_list = 161,                 // table_case_list
+        S_table_property = 162,                  // table_property
+        S_table_property_list = 163,             // table_property_list
+        S_table_declaration = 164,               // table_declaration
+        S_typedef_declaration = 165,             // typedef_declaration
+        S_enumerator = 166,                      // enumerator
+        S_enumerator_list = 167,                 // enumerator_list
+        S_enum_declaration = 168,                // enum_declaration
+        S_struct_union_type_declaration = 169,   // struct_union_type_declaration
+        S_type_declaration = 170,                // type_declaration
+        S_function_declaration = 171,            // function_declaration
+        S_namespace = 172,                       // namespace
+        S_declaration = 173,                     // declaration
+        S_declaration_list = 174,                // declaration_list
+        S_input = 175                            // input
       };
     };
 
@@ -1150,6 +1159,10 @@ namespace P4 { namespace P5 {
         value.move< IR::P5KeyElement* > (std::move (that.value));
         break;
 
+      case symbol_kind::S_key_switch_entry: // key_switch_entry
+        value.move< IR::P5KeySwitch* > (std::move (that.value));
+        break;
+
       case symbol_kind::S_table_declaration: // table_declaration
         value.move< IR::P5Table* > (std::move (that.value));
         break;
@@ -1232,6 +1245,10 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_key_element_list: // key_element_list
         value.move< IR::Vector<IR::P5KeyElement>* > (std::move (that.value));
+        break;
+
+      case symbol_kind::S_key_switch_list: // key_switch_list
+        value.move< IR::Vector<IR::P5KeySwitch>* > (std::move (that.value));
         break;
 
       case symbol_kind::S_case_list: // case_list
@@ -1534,6 +1551,20 @@ namespace P4 { namespace P5 {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, IR::P5KeySwitch*&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const IR::P5KeySwitch*& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, IR::P5Table*&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1772,6 +1803,20 @@ namespace P4 { namespace P5 {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, IR::Vector<IR::P5KeySwitch>*&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const IR::Vector<IR::P5KeySwitch>*& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, IR::Vector<IR::SwitchCase>*&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1952,6 +1997,10 @@ switch (yykind)
         value.template destroy< IR::P5KeyElement* > ();
         break;
 
+      case symbol_kind::S_key_switch_entry: // key_switch_entry
+        value.template destroy< IR::P5KeySwitch* > ();
+        break;
+
       case symbol_kind::S_table_declaration: // table_declaration
         value.template destroy< IR::P5Table* > ();
         break;
@@ -2034,6 +2083,10 @@ switch (yykind)
 
       case symbol_kind::S_key_element_list: // key_element_list
         value.template destroy< IR::Vector<IR::P5KeyElement>* > ();
+        break;
+
+      case symbol_kind::S_key_switch_list: // key_switch_list
+        value.template destroy< IR::Vector<IR::P5KeySwitch>* > ();
         break;
 
       case symbol_kind::S_case_list: // case_list
@@ -2191,8 +2244,7 @@ switch (yykind)
                    || tok == 91
                    || tok == 93
                    || tok == 61
-                   || tok == 59
-                   || tok == 343);
+                   || tok == 59);
 #endif
       }
 #if 201103L <= YY_CPLUSPLUS
@@ -2880,6 +2932,21 @@ switch (yykind)
       make_AND_OP (const location_type& l)
       {
         return symbol_type (token::TOK_AND_OP, l);
+      }
+#endif
+#if 201103L <= YY_CPLUSPLUS
+      static
+      symbol_type
+      make_MASK (location_type l)
+      {
+        return symbol_type (token::TOK_MASK, std::move (l));
+      }
+#else
+      static
+      symbol_type
+      make_MASK (const location_type& l)
+      {
+        return symbol_type (token::TOK_MASK, l);
       }
 #endif
 #if 201103L <= YY_CPLUSPLUS
@@ -3640,7 +3707,7 @@ switch (yykind)
     static bool yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT;
 
     static const short yypact_ninf_;
-    static const signed char yytable_ninf_;
+    static const short yytable_ninf_;
 
     /// Convert a scanner token kind \a t to a symbol kind.
     /// In theory \a t should be a token_kind_type, but character literals
@@ -3917,8 +3984,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 843,     ///< Last index in yytable_.
-      yynnts_ = 81,  ///< Number of nonterminal symbols.
+      yylast_ = 889,     ///< Last index in yytable_.
+      yynnts_ = 83,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
@@ -3944,11 +4011,11 @@ switch (yykind)
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    91,
-       2,    90,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    92,
+       2,    91,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    88,     2,    89,     2,     2,     2,     2,     2,     2,
+       2,    89,     2,    90,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -3973,7 +4040,7 @@ switch (yykind)
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
       65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
       75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
-      85,    86,    87,    92
+      85,    86,    87,    88
     };
     // Last valid token kind.
     const int code_max = 343;
@@ -4082,6 +4149,10 @@ switch (yykind)
         value.copy< IR::P5KeyElement* > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_key_switch_entry: // key_switch_entry
+        value.copy< IR::P5KeySwitch* > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_table_declaration: // table_declaration
         value.copy< IR::P5Table* > (YY_MOVE (that.value));
         break;
@@ -4164,6 +4235,10 @@ switch (yykind)
 
       case symbol_kind::S_key_element_list: // key_element_list
         value.copy< IR::Vector<IR::P5KeyElement>* > (YY_MOVE (that.value));
+        break;
+
+      case symbol_kind::S_key_switch_list: // key_switch_list
+        value.copy< IR::Vector<IR::P5KeySwitch>* > (YY_MOVE (that.value));
         break;
 
       case symbol_kind::S_case_list: // case_list
@@ -4336,6 +4411,10 @@ switch (yykind)
         value.move< IR::P5KeyElement* > (YY_MOVE (s.value));
         break;
 
+      case symbol_kind::S_key_switch_entry: // key_switch_entry
+        value.move< IR::P5KeySwitch* > (YY_MOVE (s.value));
+        break;
+
       case symbol_kind::S_table_declaration: // table_declaration
         value.move< IR::P5Table* > (YY_MOVE (s.value));
         break;
@@ -4418,6 +4497,10 @@ switch (yykind)
 
       case symbol_kind::S_key_element_list: // key_element_list
         value.move< IR::Vector<IR::P5KeyElement>* > (YY_MOVE (s.value));
+        break;
+
+      case symbol_kind::S_key_switch_list: // key_switch_list
+        value.move< IR::Vector<IR::P5KeySwitch>* > (YY_MOVE (s.value));
         break;
 
       case symbol_kind::S_case_list: // case_list
@@ -4539,7 +4622,7 @@ switch (yykind)
 
 #line 7 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 } } // P4::P5
-#line 4543 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
+#line 4626 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
 
 
 

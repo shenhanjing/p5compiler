@@ -63,6 +63,7 @@ extern template class IR::Vector<IR::Primitive>;
 extern template class IR::Vector<IR::CaseEntry>;
 extern template class IR::Vector<IR::P5KeyElement>;
 extern template class IR::Vector<IR::P5KeyCase>;
+extern template class IR::Vector<IR::P5KeySwitch>;
 extern template class IR::Vector<IR::DpdkDeclaration>;
 extern template class IR::IndexedVector<IR::DpdkDeclaration>;
 extern template class IR::Vector<IR::DpdkExternDeclaration>;
@@ -87,23 +88,23 @@ extern template class IR::IndexedVector<IR::DpdkLearner>;
 
 #line 16 "/root/p4c/ir/base.def"
 #include "absl/strings/str_cat.h"
-#line 91 "/root/p4c/build/ir/ir-generated.h"
+#line 92 "/root/p4c/build/ir/ir-generated.h"
 #line 17 "/root/p4c/ir/base.def"
 #include "absl/strings/str_join.h"
-#line 94 "/root/p4c/build/ir/ir-generated.h"
+#line 95 "/root/p4c/build/ir/ir-generated.h"
 #line 18 "/root/p4c/ir/base.def"
 #include "frontends/common/constantParsing.h"
-#line 97 "/root/p4c/build/ir/ir-generated.h"
+#line 98 "/root/p4c/build/ir/ir-generated.h"
 #line 19 "/root/p4c/ir/base.def"
 #include "ir/annotations.h"
-#line 100 "/root/p4c/build/ir/ir-generated.h"
+#line 101 "/root/p4c/build/ir/ir-generated.h"
 namespace P4::IR {
 /// a value that can be evaluated at compile-time
 class CompileTimeValue : public virtual INode {
  public:
 #line 22 "/root/p4c/ir/base.def"
     bool equiv(IR::CompileTimeValue const & other) const;
-#line 107 "/root/p4c/build/ir/ir-generated.h"
+#line 108 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(CompileTimeValue, NodeKind::CompileTimeValue, INode);
 };
 }  // namespace P4::IR
@@ -122,16 +123,16 @@ class Type : public Node {
     typedef Type_String         String;
     typedef Type_Varbits        Varbits;
     typedef Type_Void           Void;
-#line 126 "/root/p4c/build/ir/ir-generated.h"
+#line 127 "/root/p4c/build/ir/ir-generated.h"
 /// Well-defined only for types with fixed width
 #line 42 "/root/p4c/ir/base.def"
     virtual int width_bits() const;
-#line 130 "/root/p4c/build/ir/ir-generated.h"
+#line 131 "/root/p4c/build/ir/ir-generated.h"
 /// When possible returns the corresponding type that can be inserted
 /// in a P4 program; may return a Type_Name
 #line 45 "/root/p4c/ir/base.def"
     virtual IR::Type const * getP4Type() const = 0;
-#line 135 "/root/p4c/build/ir/ir-generated.h"
+#line 136 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type"_cs; }
@@ -157,7 +158,7 @@ class IMayBeGenericType : public virtual INode {
 /// Allows the retrieval of type parameters
 #line 52 "/root/p4c/ir/base.def"
     virtual IR::TypeParameters const * getTypeParameters() const = 0;
-#line 161 "/root/p4c/build/ir/ir-generated.h"
+#line 162 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IMayBeGenericType, NodeKind::IMayBeGenericType, INode);
 };
 }  // namespace P4::IR
@@ -169,10 +170,10 @@ class IApply : public virtual INode {
 /// @returns the type signature of the apply method
 #line 59 "/root/p4c/ir/base.def"
     virtual IR::Type_Method const * getApplyMethodType() const = 0;
-#line 173 "/root/p4c/build/ir/ir-generated.h"
+#line 174 "/root/p4c/build/ir/ir-generated.h"
 #line 60 "/root/p4c/ir/base.def"
     virtual IR::ParameterList const * getApplyParameters() const = 0;
-#line 176 "/root/p4c/build/ir/ir-generated.h"
+#line 177 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IApply, NodeKind::IApply, INode);
 };
 }  // namespace P4::IR
@@ -182,7 +183,7 @@ class INamespace : public virtual INode {
  public:
 #line 65 "/root/p4c/ir/base.def"
     virtual Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const = 0;
-#line 186 "/root/p4c/build/ir/ir-generated.h"
+#line 187 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(INamespace, NodeKind::INamespace, INode);
 };
 }  // namespace P4::IR
@@ -192,10 +193,10 @@ class ISimpleNamespace : public virtual INode, public virtual INamespace {
  public:
 #line 70 "/root/p4c/ir/base.def"
     virtual const IR::IDeclaration *getDeclByName(cstring name) const = 0;
-#line 196 "/root/p4c/build/ir/ir-generated.h"
+#line 197 "/root/p4c/build/ir/ir-generated.h"
 #line 71 "/root/p4c/ir/base.def"
     virtual const IR::IDeclaration *getDeclByName(std::string_view name) const = 0;
-#line 199 "/root/p4c/build/ir/ir-generated.h"
+#line 200 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(ISimpleNamespace, NodeKind::ISimpleNamespace, INode, INamespace);
 };
 }  // namespace P4::IR
@@ -206,14 +207,14 @@ class IGeneralNamespace : public virtual INode, public virtual INamespace {
  public:
 #line 77 "/root/p4c/ir/base.def"
     virtual Util::Enumerator<const IR::IDeclaration *> * getDeclsByName(cstring name) const;
-#line 210 "/root/p4c/build/ir/ir-generated.h"
+#line 211 "/root/p4c/build/ir/ir-generated.h"
 /// prints an error if it finds duplicate names
 #line 79 "/root/p4c/ir/base.def"
     void checkDuplicateDeclarations() const;
-#line 214 "/root/p4c/build/ir/ir-generated.h"
+#line 215 "/root/p4c/build/ir/ir-generated.h"
 #line 80 "/root/p4c/ir/base.def"
     void validate() const override;
-#line 217 "/root/p4c/build/ir/ir-generated.h"
+#line 218 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IGeneralNamespace, NodeKind::IGeneralNamespace, INode, INamespace);
 };
 }  // namespace P4::IR
@@ -223,10 +224,10 @@ class INestedNamespace : public virtual INode, public virtual INamespace {
  public:
 #line 86 "/root/p4c/ir/base.def"
     virtual std::vector<const IR::INamespace *> getNestedNamespaces() const = 0;
-#line 227 "/root/p4c/build/ir/ir-generated.h"
+#line 228 "/root/p4c/build/ir/ir-generated.h"
 #line 87 "/root/p4c/ir/base.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 230 "/root/p4c/build/ir/ir-generated.h"
+#line 231 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(INestedNamespace, NodeKind::INestedNamespace, INode, INamespace);
 };
 }  // namespace P4::IR
@@ -238,12 +239,12 @@ class IFunctional : public virtual INode {
 /// The parameters of the functional object
 #line 94 "/root/p4c/ir/base.def"
     virtual const IR::ParameterList *getParameters() const = 0;
-#line 242 "/root/p4c/build/ir/ir-generated.h"
+#line 243 "/root/p4c/build/ir/ir-generated.h"
 /// Returns true if the parameters can be matched with the
 /// supplied arguments.
 #line 97 "/root/p4c/ir/base.def"
     bool callMatches(const IR::Vector<IR::Argument>* arguments) const;
-#line 247 "/root/p4c/build/ir/ir-generated.h"
+#line 248 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IFunctional, NodeKind::IFunctional, INode);
 };
 }  // namespace P4::IR
@@ -253,13 +254,13 @@ class ITypeVar : public virtual INode {
  public:
 #line 102 "/root/p4c/ir/base.def"
     virtual cstring getVarName() const = 0;
-#line 257 "/root/p4c/build/ir/ir-generated.h"
+#line 258 "/root/p4c/build/ir/ir-generated.h"
 #line 103 "/root/p4c/ir/base.def"
     const IR::Type *asType() const { return to<Type>(); }
-#line 260 "/root/p4c/build/ir/ir-generated.h"
+#line 261 "/root/p4c/build/ir/ir-generated.h"
 #line 104 "/root/p4c/ir/base.def"
     virtual int getDeclId() const = 0;
-#line 263 "/root/p4c/build/ir/ir-generated.h"
+#line 264 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(ITypeVar, NodeKind::ITypeVar, INode);
 };
 }  // namespace P4::IR
@@ -269,18 +270,18 @@ class IContainer : public virtual INode, public virtual IMayBeGenericType, publi
  public:
 #line 109 "/root/p4c/ir/base.def"
     virtual const IR::Type *getType() const = 0;
-#line 273 "/root/p4c/build/ir/ir-generated.h"
+#line 274 "/root/p4c/build/ir/ir-generated.h"
 /// The type of the constructor as a method
 #line 111 "/root/p4c/ir/base.def"
     virtual const IR::Type_Method *getConstructorMethodType() const = 0;
-#line 277 "/root/p4c/build/ir/ir-generated.h"
+#line 278 "/root/p4c/build/ir/ir-generated.h"
 #line 112 "/root/p4c/ir/base.def"
     virtual const IR::ParameterList *getConstructorParameters() const = 0;
-#line 280 "/root/p4c/build/ir/ir-generated.h"
+#line 281 "/root/p4c/build/ir/ir-generated.h"
 
 #line 114 "/root/p4c/ir/base.def"
     const IR::ParameterList *getParameters() const override;
-#line 284 "/root/p4c/build/ir/ir-generated.h"
+#line 285 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IContainer, NodeKind::IContainer, INode, IMayBeGenericType, IDeclaration, IFunctional);
 };
 }  // namespace P4::IR
@@ -291,7 +292,7 @@ class Type_Base : public Type {
  public:
 #line 120 "/root/p4c/ir/base.def"
     IR::Type const * getP4Type() const override;
-#line 295 "/root/p4c/build/ir/ir-generated.h"
+#line 296 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Base const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Base"_cs; }
@@ -316,13 +317,13 @@ class Type_Unknown : public Type_Base {
  public:
 #line 126 "/root/p4c/ir/base.def"
     static const IR::Type_Unknown *get();
-#line 320 "/root/p4c/build/ir/ir-generated.h"
+#line 321 "/root/p4c/build/ir/ir-generated.h"
 #line 127 "/root/p4c/ir/base.def"
     static const IR::Type_Unknown *get(Util::SourceInfo const & si);
-#line 323 "/root/p4c/build/ir/ir-generated.h"
+#line 324 "/root/p4c/build/ir/ir-generated.h"
 #line 128 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 326 "/root/p4c/build/ir/ir-generated.h"
+#line 327 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Unknown const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Unknown"_cs; }
@@ -372,16 +373,16 @@ class Declaration : public StatOrDecl, public virtual IDeclaration {
     long declid = nextId++;
 #line 139 "/root/p4c/ir/base.def"
     IR::ID getName() const override;
-#line 376 "/root/p4c/build/ir/ir-generated.h"
+#line 377 "/root/p4c/build/ir/ir-generated.h"
 #line 140 "/root/p4c/ir/base.def"
     bool equiv(IR::Node const & a_) const override;
-#line 379 "/root/p4c/build/ir/ir-generated.h"
+#line 380 "/root/p4c/build/ir/ir-generated.h"
  private:
     static long nextId;
  public:
 #line 144 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 385 "/root/p4c/build/ir/ir-generated.h"
+#line 386 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Declaration const & a) const override;
     cstring node_type_name() const override { return "Declaration"_cs; }
     static cstring static_type_name() { return "Declaration"_cs; }
@@ -413,19 +414,19 @@ class Type_Declaration : public Type, public virtual IDeclaration {
     long declid = nextId++;
 #line 155 "/root/p4c/ir/base.def"
     IR::ID getName() const override;
-#line 417 "/root/p4c/build/ir/ir-generated.h"
+#line 418 "/root/p4c/build/ir/ir-generated.h"
 #line 156 "/root/p4c/ir/base.def"
     bool equiv(IR::Node const & a_) const override;
-#line 420 "/root/p4c/build/ir/ir-generated.h"
+#line 421 "/root/p4c/build/ir/ir-generated.h"
  private:
     static long nextId;
  public:
 #line 160 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 426 "/root/p4c/build/ir/ir-generated.h"
+#line 427 "/root/p4c/build/ir/ir-generated.h"
 #line 161 "/root/p4c/ir/base.def"
     IR::Type const * getP4Type() const override;
-#line 429 "/root/p4c/build/ir/ir-generated.h"
+#line 430 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Declaration const & a) const override;
     cstring node_type_name() const override { return "Type_Declaration"_cs; }
     static cstring static_type_name() { return "Type_Declaration"_cs; }
@@ -458,7 +459,7 @@ class Expression : public Node {
 #line 172 "/root/p4c/ir/base.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 462 "/root/p4c/build/ir/ir-generated.h"
+#line 463 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(Expression)
     bool operator==(IR::Expression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -489,18 +490,18 @@ class Operation : public Expression {
  public:
 #line 177 "/root/p4c/ir/base.def"
     virtual int getPrecedence() const = 0;
-#line 493 "/root/p4c/build/ir/ir-generated.h"
+#line 494 "/root/p4c/build/ir/ir-generated.h"
 #line 178 "/root/p4c/ir/base.def"
     virtual cstring getStringOp() const = 0;
-#line 496 "/root/p4c/build/ir/ir-generated.h"
+#line 497 "/root/p4c/build/ir/ir-generated.h"
 #line 180 "/root/p4c/ir/base.def"
     typedef Operation_Unary Unary;
     typedef Operation_Binary Binary;
     typedef Operation_Relation Relation;
-#line 501 "/root/p4c/build/ir/ir-generated.h"
+#line 502 "/root/p4c/build/ir/ir-generated.h"
 #line 184 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 504 "/root/p4c/build/ir/ir-generated.h"
+#line 505 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Operation const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Operation"_cs; }
@@ -535,22 +536,22 @@ class Path : public Node {
     bool absolute = false;
 #line 194 "/root/p4c/ir/base.def"
     bool isDontCare() const { return name.isDontCare(); }
-#line 539 "/root/p4c/build/ir/ir-generated.h"
+#line 540 "/root/p4c/build/ir/ir-generated.h"
 #line 195 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 542 "/root/p4c/build/ir/ir-generated.h"
+#line 543 "/root/p4c/build/ir/ir-generated.h"
 #line 199 "/root/p4c/ir/base.def"
     cstring asString() const {
         // The CURRENT internal name
         return absl::StrCat(absolute ? "." : "", name);
     }
-#line 548 "/root/p4c/build/ir/ir-generated.h"
+#line 549 "/root/p4c/build/ir/ir-generated.h"
 #line 203 "/root/p4c/ir/base.def"
     void dbprint(std::ostream & out) const override;
-#line 551 "/root/p4c/build/ir/ir-generated.h"
+#line 552 "/root/p4c/build/ir/ir-generated.h"
 #line 204 "/root/p4c/ir/base.def"
     void validate() const override;
-#line 554 "/root/p4c/build/ir/ir-generated.h"
+#line 555 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Path const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Path"_cs; }
@@ -565,28 +566,28 @@ class Path : public Node {
     {
 #line 193 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 569 "/root/p4c/build/ir/ir-generated.h"
+#line 570 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Path(IR::ID name, bool absolute) :
     name(name), absolute(absolute)
     {
 #line 193 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 576 "/root/p4c/build/ir/ir-generated.h"
+#line 577 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Path(Util::SourceInfo srcInfo, IR::ID name) :
     Node(srcInfo), name(name)
     {
 #line 193 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 583 "/root/p4c/build/ir/ir-generated.h"
+#line 584 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Path(IR::ID name) :
     name(name)
     {
 #line 193 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 590 "/root/p4c/build/ir/ir-generated.h"
+#line 591 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Path)
     DECLARE_TYPEINFO_WITH_TYPEID(Path, NodeKind::Path, Node);
@@ -633,7 +634,7 @@ class AnnotationToken : public Node {
     UnparsedConstant * constInfo = nullptr;
 #line 219 "/root/p4c/ir/base.def"
     void dbprint(std::ostream & out) const override;
-#line 637 "/root/p4c/build/ir/ir-generated.h"
+#line 638 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AnnotationToken const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "AnnotationToken"_cs; }
@@ -669,49 +670,49 @@ class Annotation : public Node {
     using UnparsedAnnotation = IR::Vector<IR::AnnotationToken>;
     using ExpressionAnnotation = IR::Vector<IR::Expression>;
     using KVAnnotation = IR::IndexedVector<IR::NamedExpression>;
-#line 673 "/root/p4c/build/ir/ir-generated.h"
+#line 674 "/root/p4c/build/ir/ir-generated.h"
 /// For annotations parsed from P4-16 source.
 #line 235 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, IR::Vector<IR::AnnotationToken> const & a) : Node(si), name(n), body(a), structured(false) {}
-#line 677 "/root/p4c/build/ir/ir-generated.h"
+#line 678 "/root/p4c/build/ir/ir-generated.h"
 
 #line 238 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, IR::Vector<IR::AnnotationToken> const & a, bool structured) : Node(si), name(n), body(a), structured(structured) {}
-#line 681 "/root/p4c/build/ir/ir-generated.h"
+#line 682 "/root/p4c/build/ir/ir-generated.h"
 
 #line 242 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, std::initializer_list<IR::Expression const *> a, bool structured = false) : Node(si), name(n), body(a), structured(structured) {}
-#line 685 "/root/p4c/build/ir/ir-generated.h"
+#line 686 "/root/p4c/build/ir/ir-generated.h"
 #line 245 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, IR::Expression const * a, bool structured = false) : Node(si), name(n), body(), structured(structured) {
         body.emplace<ExpressionAnnotation>(a);
     }
-#line 690 "/root/p4c/build/ir/ir-generated.h"
+#line 691 "/root/p4c/build/ir/ir-generated.h"
 #line 250 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, IR::Vector<IR::Expression> const & a, bool structured = false) : Node(si), name(n), body(a), structured(structured) {}
-#line 693 "/root/p4c/build/ir/ir-generated.h"
+#line 694 "/root/p4c/build/ir/ir-generated.h"
 #line 252 "/root/p4c/ir/base.def"
     Annotation(Util::SourceInfo si, IR::ID n, IR::IndexedVector<IR::NamedExpression> const & kv, bool structured = false) : Node(si), name(n), body(kv), structured(structured) {}
-#line 696 "/root/p4c/build/ir/ir-generated.h"
+#line 697 "/root/p4c/build/ir/ir-generated.h"
 #line 255 "/root/p4c/ir/base.def"
     Annotation(IR::ID n, IR::Expression const * a, bool structured = false) : name(n), body(), structured(structured) {
         body.emplace<ExpressionAnnotation>(a);
     }
-#line 701 "/root/p4c/build/ir/ir-generated.h"
+#line 702 "/root/p4c/build/ir/ir-generated.h"
 #line 259 "/root/p4c/ir/base.def"
     Annotation(IR::ID n, std::initializer_list<IR::Expression const *> a, bool structured = false) : name(n), body(a), structured(structured) {}
-#line 704 "/root/p4c/build/ir/ir-generated.h"
+#line 705 "/root/p4c/build/ir/ir-generated.h"
 #line 261 "/root/p4c/ir/base.def"
     Annotation(IR::ID n, IR::Vector<IR::Expression> const & a, bool structured = false) : name(n), body(a), structured(structured) {}
-#line 707 "/root/p4c/build/ir/ir-generated.h"
+#line 708 "/root/p4c/build/ir/ir-generated.h"
 #line 263 "/root/p4c/ir/base.def"
     Annotation(IR::ID n, intmax_t v, bool structured = false);
-#line 710 "/root/p4c/build/ir/ir-generated.h"
+#line 711 "/root/p4c/build/ir/ir-generated.h"
 
 
 #line 269 "/root/p4c/ir/base.def"
     Annotation(IR::ID n, cstring v, bool structured = false);
-#line 715 "/root/p4c/build/ir/ir-generated.h"
+#line 716 "/root/p4c/build/ir/ir-generated.h"
 
     static const cstring nameAnnotation;
 /// Indicates the control-plane name.
@@ -757,24 +758,24 @@ class Annotation : public Node {
 /// annotation for likely not taken blocks/branchs
 #line 296 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 761 "/root/p4c/build/ir/ir-generated.h"
+#line 762 "/root/p4c/build/ir/ir-generated.h"
 #line 297 "/root/p4c/ir/base.def"
     void validate() const override;
-#line 764 "/root/p4c/build/ir/ir-generated.h"
+#line 765 "/root/p4c/build/ir/ir-generated.h"
 /// Extracts name value from a name annotation
 #line 302 "/root/p4c/ir/base.def"
     cstring getName() const;
-#line 768 "/root/p4c/build/ir/ir-generated.h"
+#line 769 "/root/p4c/build/ir/ir-generated.h"
 /// Extracts a single string argument; error if the argument is not a string
 #line 304 "/root/p4c/ir/base.def"
     cstring getSingleString() const;
-#line 772 "/root/p4c/build/ir/ir-generated.h"
+#line 773 "/root/p4c/build/ir/ir-generated.h"
 /// Whether the annotation body needs to be parsed.
 #line 306 "/root/p4c/ir/base.def"
     bool needsParsing() const {
         return std::holds_alternative<UnparsedAnnotation>(body);
     }
-#line 778 "/root/p4c/build/ir/ir-generated.h"
+#line 779 "/root/p4c/build/ir/ir-generated.h"
 enum class Kind
 #line 311 "/root/p4c/ir/base.def"
 {
@@ -783,7 +784,7 @@ enum class Kind
         StructuredKVList,
         StructuredExpressionList
     };
-#line 787 "/root/p4c/build/ir/ir-generated.h"
+#line 788 "/root/p4c/build/ir/ir-generated.h"
 #line 317 "/root/p4c/ir/base.def"
     IR::Annotation::Kind annotationKind() const {
         if (needsParsing())
@@ -797,7 +798,7 @@ enum class Kind
 
         BUG("Invalid annotation kind");
     }
-#line 801 "/root/p4c/build/ir/ir-generated.h"
+#line 802 "/root/p4c/build/ir/ir-generated.h"
 
 
 
@@ -811,7 +812,7 @@ enum class Kind
             BUG("Annotation has been parsed already.");
         }
     }
-#line 815 "/root/p4c/build/ir/ir-generated.h"
+#line 816 "/root/p4c/build/ir/ir-generated.h"
 #line 344 "/root/p4c/ir/base.def"
     auto const & getUnparsed() const {
         try {
@@ -820,7 +821,7 @@ enum class Kind
             BUG("Annotation has been parsed already.");
         }
     }
-#line 824 "/root/p4c/build/ir/ir-generated.h"
+#line 825 "/root/p4c/build/ir/ir-generated.h"
 #line 351 "/root/p4c/ir/base.def"
     auto & getExpr() {
         try {
@@ -829,7 +830,7 @@ enum class Kind
             BUG("Annotation does not contain an expression list.");
         }
      }
-#line 833 "/root/p4c/build/ir/ir-generated.h"
+#line 834 "/root/p4c/build/ir/ir-generated.h"
 #line 358 "/root/p4c/ir/base.def"
     auto const & getExpr() const {
         try {
@@ -838,7 +839,7 @@ enum class Kind
             BUG("Annotation does not contain an expression list.");
         }
     }
-#line 842 "/root/p4c/build/ir/ir-generated.h"
+#line 843 "/root/p4c/build/ir/ir-generated.h"
 #line 365 "/root/p4c/ir/base.def"
     const IR::Expression *getExpr(size_t idx) const {
         try {
@@ -850,7 +851,7 @@ enum class Kind
             BUG("Annotation does not contain an expression list.");
         }
     }
-#line 854 "/root/p4c/build/ir/ir-generated.h"
+#line 855 "/root/p4c/build/ir/ir-generated.h"
 #line 375 "/root/p4c/ir/base.def"
     auto & getKV() {
         try {
@@ -859,7 +860,7 @@ enum class Kind
             BUG("Annotation does not contain a key-value list.");
         }
     }
-#line 863 "/root/p4c/build/ir/ir-generated.h"
+#line 864 "/root/p4c/build/ir/ir-generated.h"
 #line 382 "/root/p4c/ir/base.def"
     auto const & getKV() const {
         try {
@@ -868,7 +869,7 @@ enum class Kind
             BUG("Annotation does not contain a key-value list.");
         }
     }
-#line 872 "/root/p4c/build/ir/ir-generated.h"
+#line 873 "/root/p4c/build/ir/ir-generated.h"
 /// If this is true this is a structured annotation, and there are some
 /// constraints on its contents.
     bool structured;
@@ -889,14 +890,14 @@ enum class Kind
     {
 #line 232 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 893 "/root/p4c/build/ir/ir-generated.h"
+#line 894 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Annotation(IR::ID name, body_variant body, bool structured) :
     name(name), body(body), structured(structured)
     {
 #line 232 "/root/p4c/ir/base.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 900 "/root/p4c/build/ir/ir-generated.h"
+#line 901 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Annotation)
     DECLARE_TYPEINFO_WITH_TYPEID(Annotation, NodeKind::Annotation, Node);
@@ -909,23 +910,23 @@ class IAnnotated : public virtual INode {
  public:
 #line 398 "/root/p4c/ir/base.def"
     virtual IR::Vector<IR::Annotation> const & getAnnotations() const = 0;
-#line 913 "/root/p4c/build/ir/ir-generated.h"
+#line 914 "/root/p4c/build/ir/ir-generated.h"
 #line 399 "/root/p4c/ir/base.def"
     virtual IR::Vector<IR::Annotation> & getAnnotations() = 0;
-#line 916 "/root/p4c/build/ir/ir-generated.h"
+#line 917 "/root/p4c/build/ir/ir-generated.h"
 #line 401 "/root/p4c/ir/base.def"
     const IR::Annotation *getAnnotation(cstring name) const {
         const auto &annotations = getAnnotations();
         return get(annotations, name);
     }
-#line 922 "/root/p4c/build/ir/ir-generated.h"
+#line 923 "/root/p4c/build/ir/ir-generated.h"
 /// Checks if there is annotation @name
 #line 406 "/root/p4c/ir/base.def"
     bool hasAnnotation(cstring name) const {
         const auto &annotations = getAnnotations();
         return get(annotations, name) != nullptr;
     }
-#line 929 "/root/p4c/build/ir/ir-generated.h"
+#line 930 "/root/p4c/build/ir/ir-generated.h"
 /// Checks if there is annotation @name and it is the only annotation on the
 /// node
 #line 412 "/root/p4c/ir/base.def"
@@ -933,49 +934,49 @@ class IAnnotated : public virtual INode {
         const auto &annotations = getAnnotations();
         return annotations.size() == 1 && get(annotations, name) != nullptr;
     }
-#line 937 "/root/p4c/build/ir/ir-generated.h"
+#line 938 "/root/p4c/build/ir/ir-generated.h"
 /// Check if there are any annotations
 #line 417 "/root/p4c/ir/base.def"
     bool hasAnnotations() const {
         const auto &annotations = getAnnotations();
         return !annotations.empty();
     }
-#line 944 "/root/p4c/build/ir/ir-generated.h"
+#line 945 "/root/p4c/build/ir/ir-generated.h"
 #line 421 "/root/p4c/ir/base.def"
     void addAnnotation(const IR::Annotation* annot) {
         auto &annotations = getAnnotations();
         annotations.push_back(annot);
     }
-#line 950 "/root/p4c/build/ir/ir-generated.h"
+#line 951 "/root/p4c/build/ir/ir-generated.h"
 #line 425 "/root/p4c/ir/base.def"
     void addAnnotation(cstring name, const IR::Expression* expr, bool structured = false) {
         addAnnotation(new Annotation(name, { expr }, structured));
     }
-#line 955 "/root/p4c/build/ir/ir-generated.h"
+#line 956 "/root/p4c/build/ir/ir-generated.h"
 /// Add annotation if another annotation with the same name is not
 /// already present.
 #line 431 "/root/p4c/ir/base.def"
     void addAnnotationIfNew(cstring name, const IR::Expression* expr, bool structured = false) {
         Annotations::addIfNew(getAnnotations(), name, expr, structured);
     }
-#line 962 "/root/p4c/build/ir/ir-generated.h"
+#line 963 "/root/p4c/build/ir/ir-generated.h"
 #line 435 "/root/p4c/ir/base.def"
     void addAnnotationIfNew(const IR::Annotation* ann) {
         Annotations::addIfNew(getAnnotations(), ann);
     }
-#line 967 "/root/p4c/build/ir/ir-generated.h"
+#line 968 "/root/p4c/build/ir/ir-generated.h"
 /// If annotations with the same name are already present, remove them;
 /// add this annotation.
 #line 441 "/root/p4c/ir/base.def"
     void addOrReplaceAnnotation(cstring name, const IR::Expression* expr, bool structured = false) {
         Annotations::addOrReplace(getAnnotations(), name, expr, structured);
     }
-#line 974 "/root/p4c/build/ir/ir-generated.h"
+#line 975 "/root/p4c/build/ir/ir-generated.h"
 #line 445 "/root/p4c/ir/base.def"
     void addOrReplaceAnnotation(const IR::Annotation* ann) {
         Annotations::addOrReplace(getAnnotations(), ann);
     }
-#line 979 "/root/p4c/build/ir/ir-generated.h"
+#line 980 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IAnnotated, NodeKind::IAnnotated, INode);
 };
 }  // namespace P4::IR
@@ -984,10 +985,10 @@ class IInstance : public virtual INode {
  public:
 #line 451 "/root/p4c/ir/base.def"
     virtual IR::ID Name() const = 0;
-#line 988 "/root/p4c/build/ir/ir-generated.h"
+#line 989 "/root/p4c/build/ir/ir-generated.h"
 #line 452 "/root/p4c/ir/base.def"
     virtual const IR::Type *getType() const = 0;
-#line 991 "/root/p4c/build/ir/ir-generated.h"
+#line 992 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IInstance, NodeKind::IInstance, INode);
 };
 }  // namespace P4::IR
@@ -1001,13 +1002,13 @@ class Argument : public Node {
     const IR::Expression* expression = nullptr;
 #line 462 "/root/p4c/ir/base.def"
     void dbprint(std::ostream & out) const override;
-#line 1005 "/root/p4c/build/ir/ir-generated.h"
+#line 1006 "/root/p4c/build/ir/ir-generated.h"
 #line 463 "/root/p4c/ir/base.def"
     void validate() const override;
-#line 1008 "/root/p4c/build/ir/ir-generated.h"
+#line 1009 "/root/p4c/build/ir/ir-generated.h"
 #line 464 "/root/p4c/ir/base.def"
     cstring toString() const override;
-#line 1011 "/root/p4c/build/ir/ir-generated.h"
+#line 1012 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Argument const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1024,28 +1025,28 @@ class Argument : public Node {
     {
 #line 461 "/root/p4c/ir/base.def"
 { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
-#line 1028 "/root/p4c/build/ir/ir-generated.h"
+#line 1029 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Argument(IR::ID name, const IR::Expression* expression) :
     name(name), expression(expression)
     {
 #line 461 "/root/p4c/ir/base.def"
 { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
-#line 1035 "/root/p4c/build/ir/ir-generated.h"
+#line 1036 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Argument(Util::SourceInfo srcInfo, const IR::Expression* expression) :
     Node(srcInfo), expression(expression)
     {
 #line 461 "/root/p4c/ir/base.def"
 { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
-#line 1042 "/root/p4c/build/ir/ir-generated.h"
+#line 1043 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Argument(const IR::Expression* expression) :
     expression(expression)
     {
 #line 461 "/root/p4c/ir/base.def"
 { if (!srcInfo && expression) srcInfo = expression->srcInfo; }
-#line 1049 "/root/p4c/build/ir/ir-generated.h"
+#line 1050 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Argument)
     DECLARE_TYPEINFO_WITH_TYPEID(Argument, NodeKind::Argument, Node);
@@ -1119,7 +1120,7 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 
 }  // namespace P4
 
-#line 1123 "/root/p4c/build/ir/ir-generated.h"
+#line 1124 "/root/p4c/build/ir/ir-generated.h"
 namespace P4::IR {
 /// This represents a type that can unify with any other type.
 /// It is the original type of Dots (...) expressions.
@@ -1135,37 +1136,37 @@ class Type_Any : public Type, public virtual ITypeVar {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1139 "/root/p4c/build/ir/ir-generated.h"
+#line 1140 "/root/p4c/build/ir/ir-generated.h"
     static long nextId;
  public:
     long declid = nextId++;
 #line 88 "/root/p4c/ir/type.def"
     cstring getVarName() const override;
-#line 1145 "/root/p4c/build/ir/ir-generated.h"
+#line 1146 "/root/p4c/build/ir/ir-generated.h"
 #line 89 "/root/p4c/ir/type.def"
     int getDeclId() const override;
-#line 1148 "/root/p4c/build/ir/ir-generated.h"
+#line 1149 "/root/p4c/build/ir/ir-generated.h"
 #line 90 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1151 "/root/p4c/build/ir/ir-generated.h"
+#line 1152 "/root/p4c/build/ir/ir-generated.h"
 #line 91 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1154 "/root/p4c/build/ir/ir-generated.h"
+#line 1155 "/root/p4c/build/ir/ir-generated.h"
 #line 92 "/root/p4c/ir/type.def"
     bool operator==(IR::Type_Any const & a) const override;
-#line 1157 "/root/p4c/build/ir/ir-generated.h"
+#line 1158 "/root/p4c/build/ir/ir-generated.h"
 #line 93 "/root/p4c/ir/type.def"
     static const IR::Type_Any *get();
-#line 1160 "/root/p4c/build/ir/ir-generated.h"
+#line 1161 "/root/p4c/build/ir/ir-generated.h"
 #line 94 "/root/p4c/ir/type.def"
     static const IR::Type_Any *get(Util::SourceInfo const & si);
-#line 1163 "/root/p4c/build/ir/ir-generated.h"
+#line 1164 "/root/p4c/build/ir/ir-generated.h"
 #line 95 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 1166 "/root/p4c/build/ir/ir-generated.h"
+#line 1167 "/root/p4c/build/ir/ir-generated.h"
 #line 96 "/root/p4c/ir/type.def"
     bool equiv(IR::Node const & a_) const override;
-#line 1169 "/root/p4c/build/ir/ir-generated.h"
+#line 1170 "/root/p4c/build/ir/ir-generated.h"
     cstring node_type_name() const override { return "Type_Any"_cs; }
     static cstring static_type_name() { return "Type_Any"_cs; }
     void dump_fields(std::ostream & out) const override;
@@ -1200,13 +1201,13 @@ class Type_Fragment : public Type {
     const IR::Type* type = nullptr;
 #line 115 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1204 "/root/p4c/build/ir/ir-generated.h"
+#line 1205 "/root/p4c/build/ir/ir-generated.h"
 #line 116 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1207 "/root/p4c/build/ir/ir-generated.h"
+#line 1208 "/root/p4c/build/ir/ir-generated.h"
 #line 117 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 1210 "/root/p4c/build/ir/ir-generated.h"
+#line 1211 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Fragment const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1242,16 +1243,16 @@ class Type_Type : public Type {
     const IR::Type* type = nullptr;
 #line 129 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1246 "/root/p4c/build/ir/ir-generated.h"
+#line 1247 "/root/p4c/build/ir/ir-generated.h"
 #line 130 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1249 "/root/p4c/build/ir/ir-generated.h"
+#line 1250 "/root/p4c/build/ir/ir-generated.h"
 #line 131 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 1252 "/root/p4c/build/ir/ir-generated.h"
+#line 1253 "/root/p4c/build/ir/ir-generated.h"
 #line 132 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 1255 "/root/p4c/build/ir/ir-generated.h"
+#line 1256 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Type const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1284,23 +1285,23 @@ class Type_Boolean : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1288 "/root/p4c/build/ir/ir-generated.h"
+#line 1289 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 147 "/root/p4c/ir/type.def"
     static const IR::Type_Boolean *get();
-#line 1292 "/root/p4c/build/ir/ir-generated.h"
+#line 1293 "/root/p4c/build/ir/ir-generated.h"
 #line 148 "/root/p4c/ir/type.def"
     static const IR::Type_Boolean *get(Util::SourceInfo const & si);
-#line 1295 "/root/p4c/build/ir/ir-generated.h"
+#line 1296 "/root/p4c/build/ir/ir-generated.h"
 #line 149 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 1298 "/root/p4c/build/ir/ir-generated.h"
+#line 1299 "/root/p4c/build/ir/ir-generated.h"
 #line 150 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1301 "/root/p4c/build/ir/ir-generated.h"
+#line 1302 "/root/p4c/build/ir/ir-generated.h"
 #line 151 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1304 "/root/p4c/build/ir/ir-generated.h"
+#line 1305 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Boolean const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Boolean"_cs; }
@@ -1332,20 +1333,20 @@ class Type_State : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1336 "/root/p4c/build/ir/ir-generated.h"
+#line 1337 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 167 "/root/p4c/ir/type.def"
     static const IR::Type_State *get();
-#line 1340 "/root/p4c/build/ir/ir-generated.h"
+#line 1341 "/root/p4c/build/ir/ir-generated.h"
 #line 168 "/root/p4c/ir/type.def"
     static const IR::Type_State *get(Util::SourceInfo const & si);
-#line 1343 "/root/p4c/build/ir/ir-generated.h"
+#line 1344 "/root/p4c/build/ir/ir-generated.h"
 #line 169 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1346 "/root/p4c/build/ir/ir-generated.h"
+#line 1347 "/root/p4c/build/ir/ir-generated.h"
 #line 170 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1349 "/root/p4c/build/ir/ir-generated.h"
+#line 1350 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_State const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_State"_cs; }
@@ -1377,7 +1378,7 @@ class Type_Bits : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1381 "/root/p4c/build/ir/ir-generated.h"
+#line 1382 "/root/p4c/build/ir/ir-generated.h"
  public:
     int size = 0;
 
@@ -1386,25 +1387,25 @@ class Type_Bits : public Type_Base {
     bool isSigned;
 #line 189 "/root/p4c/ir/type.def"
     static const IR::Type_Bits *get(Util::SourceInfo const & si, const IR::Expression* expression, bool isSigned = false);
-#line 1390 "/root/p4c/build/ir/ir-generated.h"
+#line 1391 "/root/p4c/build/ir/ir-generated.h"
 #line 190 "/root/p4c/ir/type.def"
     static const IR::Type_Bits *get(Util::SourceInfo const & si, int sz, bool isSigned = false);
-#line 1393 "/root/p4c/build/ir/ir-generated.h"
+#line 1394 "/root/p4c/build/ir/ir-generated.h"
 #line 191 "/root/p4c/ir/type.def"
     static const IR::Type_Bits *get(int sz, bool isSigned = false);
-#line 1396 "/root/p4c/build/ir/ir-generated.h"
+#line 1397 "/root/p4c/build/ir/ir-generated.h"
 #line 192 "/root/p4c/ir/type.def"
     cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
-#line 1399 "/root/p4c/build/ir/ir-generated.h"
+#line 1400 "/root/p4c/build/ir/ir-generated.h"
 #line 193 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 1402 "/root/p4c/build/ir/ir-generated.h"
+#line 1403 "/root/p4c/build/ir/ir-generated.h"
 #line 195 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1405 "/root/p4c/build/ir/ir-generated.h"
+#line 1406 "/root/p4c/build/ir/ir-generated.h"
 #line 196 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1408 "/root/p4c/build/ir/ir-generated.h"
+#line 1409 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Bits const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1457,7 +1458,7 @@ class Type_Varbits : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1461 "/root/p4c/build/ir/ir-generated.h"
+#line 1462 "/root/p4c/build/ir/ir-generated.h"
  public:
     int size = 0;
 
@@ -1465,25 +1466,25 @@ class Type_Varbits : public Type_Base {
 
 #line 213 "/root/p4c/ir/type.def"
     static const IR::Type_Varbits *get(Util::SourceInfo const & si, const IR::Expression* expr);
-#line 1469 "/root/p4c/build/ir/ir-generated.h"
+#line 1470 "/root/p4c/build/ir/ir-generated.h"
 #line 214 "/root/p4c/ir/type.def"
     static const IR::Type_Varbits *get(Util::SourceInfo const & si, int size);
-#line 1472 "/root/p4c/build/ir/ir-generated.h"
+#line 1473 "/root/p4c/build/ir/ir-generated.h"
 #line 215 "/root/p4c/ir/type.def"
     static const IR::Type_Varbits *get(int size);
-#line 1475 "/root/p4c/build/ir/ir-generated.h"
+#line 1476 "/root/p4c/build/ir/ir-generated.h"
 #line 216 "/root/p4c/ir/type.def"
     static const IR::Type_Varbits *get();
-#line 1478 "/root/p4c/build/ir/ir-generated.h"
+#line 1479 "/root/p4c/build/ir/ir-generated.h"
 #line 217 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1481 "/root/p4c/build/ir/ir-generated.h"
+#line 1482 "/root/p4c/build/ir/ir-generated.h"
 #line 218 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1484 "/root/p4c/build/ir/ir-generated.h"
+#line 1485 "/root/p4c/build/ir/ir-generated.h"
 #line 219 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 1487 "/root/p4c/build/ir/ir-generated.h"
+#line 1488 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Varbits const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1533,20 +1534,20 @@ class Parameter : public Declaration, public virtual IAnnotated {
     const IR::Expression* defaultValue = nullptr;
 #line 227 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 1537 "/root/p4c/build/ir/ir-generated.h"
+#line 1538 "/root/p4c/build/ir/ir-generated.h"
 #line 228 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 1540 "/root/p4c/build/ir/ir-generated.h"
+#line 1541 "/root/p4c/build/ir/ir-generated.h"
 #line 229 "/root/p4c/ir/type.def"
     bool hasOut() const { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
-#line 1543 "/root/p4c/build/ir/ir-generated.h"
+#line 1544 "/root/p4c/build/ir/ir-generated.h"
 #line 231 "/root/p4c/ir/type.def"
     bool isOptional() const {
         return getAnnotation(Annotation::optionalAnnotation) != nullptr; }
-#line 1547 "/root/p4c/build/ir/ir-generated.h"
+#line 1548 "/root/p4c/build/ir/ir-generated.h"
 #line 233 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1550 "/root/p4c/build/ir/ir-generated.h"
+#line 1551 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Parameter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1595,50 +1596,50 @@ class ParameterList : public Node, public virtual ISimpleNamespace {
     IR::IndexedVector<IR::Parameter> parameters;
 #line 239 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 1599 "/root/p4c/build/ir/ir-generated.h"
+#line 1600 "/root/p4c/build/ir/ir-generated.h"
 #line 240 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::Parameter *> * getEnumerator() const {
         return parameters.getEnumerator(); }
-#line 1603 "/root/p4c/build/ir/ir-generated.h"
+#line 1604 "/root/p4c/build/ir/ir-generated.h"
 #line 242 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 1606 "/root/p4c/build/ir/ir-generated.h"
+#line 1607 "/root/p4c/build/ir/ir-generated.h"
 #line 244 "/root/p4c/ir/type.def"
     size_t size() const { return parameters.size(); }
-#line 1609 "/root/p4c/build/ir/ir-generated.h"
+#line 1610 "/root/p4c/build/ir/ir-generated.h"
 #line 245 "/root/p4c/ir/type.def"
     bool empty() const { return size() == 0; }
-#line 1612 "/root/p4c/build/ir/ir-generated.h"
+#line 1613 "/root/p4c/build/ir/ir-generated.h"
 #line 246 "/root/p4c/ir/type.def"
     const IR::Parameter *getParameter(cstring name) const {
         return parameters.getDeclaration<Parameter>(name); }
-#line 1616 "/root/p4c/build/ir/ir-generated.h"
+#line 1617 "/root/p4c/build/ir/ir-generated.h"
 #line 248 "/root/p4c/ir/type.def"
     const IR::Parameter *getParameter(std::string_view name) const {
         return parameters.getDeclaration<Parameter>(name); }
-#line 1620 "/root/p4c/build/ir/ir-generated.h"
+#line 1621 "/root/p4c/build/ir/ir-generated.h"
 #line 250 "/root/p4c/ir/type.def"
     const IR::Parameter *getParameter(unsigned index) const {
         for (auto &param : parameters)
             if (0 == index--) return param;
         BUG("Only %1% parameters; index #%2% requested", size(), size()+index); }
-#line 1626 "/root/p4c/build/ir/ir-generated.h"
+#line 1627 "/root/p4c/build/ir/ir-generated.h"
 #line 254 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 1629 "/root/p4c/build/ir/ir-generated.h"
+#line 1630 "/root/p4c/build/ir/ir-generated.h"
 #line 255 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 1632 "/root/p4c/build/ir/ir-generated.h"
+#line 1633 "/root/p4c/build/ir/ir-generated.h"
 #line 256 "/root/p4c/ir/type.def"
     void push_back(IR::Parameter const * p) { parameters.push_back(p); }
-#line 1635 "/root/p4c/build/ir/ir-generated.h"
+#line 1636 "/root/p4c/build/ir/ir-generated.h"
 #line 257 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1638 "/root/p4c/build/ir/ir-generated.h"
+#line 1639 "/root/p4c/build/ir/ir-generated.h"
 #line 264 "/root/p4c/ir/type.def"
     auto begin() const -> decltype(parameters.begin()) { return parameters.begin(); }
     auto end() const -> decltype(parameters.end()) { return parameters.end(); }
-#line 1642 "/root/p4c/build/ir/ir-generated.h"
+#line 1643 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ParameterList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1671,16 +1672,16 @@ class Type_Var : public Type_Declaration, public virtual ITypeVar {
  public:
 #line 271 "/root/p4c/ir/type.def"
     cstring getVarName() const override;
-#line 1675 "/root/p4c/build/ir/ir-generated.h"
+#line 1676 "/root/p4c/build/ir/ir-generated.h"
 #line 272 "/root/p4c/ir/type.def"
     int getDeclId() const override;
-#line 1678 "/root/p4c/build/ir/ir-generated.h"
+#line 1679 "/root/p4c/build/ir/ir-generated.h"
 #line 273 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1681 "/root/p4c/build/ir/ir-generated.h"
+#line 1682 "/root/p4c/build/ir/ir-generated.h"
 #line 274 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1684 "/root/p4c/build/ir/ir-generated.h"
+#line 1685 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Var const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Var"_cs; }
@@ -1716,41 +1717,41 @@ class Type_InfInt : public Type, public virtual ITypeVar {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1720 "/root/p4c/build/ir/ir-generated.h"
+#line 1721 "/root/p4c/build/ir/ir-generated.h"
     long declid = nextId++;
  private:
     static long nextId;
  public:
 #line 296 "/root/p4c/ir/type.def"
     cstring getVarName() const override;
-#line 1727 "/root/p4c/build/ir/ir-generated.h"
+#line 1728 "/root/p4c/build/ir/ir-generated.h"
 #line 297 "/root/p4c/ir/type.def"
     int getDeclId() const override;
-#line 1730 "/root/p4c/build/ir/ir-generated.h"
+#line 1731 "/root/p4c/build/ir/ir-generated.h"
 #line 298 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1733 "/root/p4c/build/ir/ir-generated.h"
+#line 1734 "/root/p4c/build/ir/ir-generated.h"
 #line 299 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1736 "/root/p4c/build/ir/ir-generated.h"
+#line 1737 "/root/p4c/build/ir/ir-generated.h"
 #line 300 "/root/p4c/ir/type.def"
     bool operator==(IR::Type_InfInt const & a) const override;
-#line 1739 "/root/p4c/build/ir/ir-generated.h"
+#line 1740 "/root/p4c/build/ir/ir-generated.h"
 #line 301 "/root/p4c/ir/type.def"
     static const IR::Type_InfInt *get();
-#line 1742 "/root/p4c/build/ir/ir-generated.h"
+#line 1743 "/root/p4c/build/ir/ir-generated.h"
 #line 302 "/root/p4c/ir/type.def"
     static const IR::Type_InfInt *get(Util::SourceInfo const & si);
-#line 1745 "/root/p4c/build/ir/ir-generated.h"
+#line 1746 "/root/p4c/build/ir/ir-generated.h"
 #line 303 "/root/p4c/ir/type.def"
     bool equiv(IR::Node const & a_) const override;
-#line 1748 "/root/p4c/build/ir/ir-generated.h"
+#line 1749 "/root/p4c/build/ir/ir-generated.h"
 #line 307 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 1751 "/root/p4c/build/ir/ir-generated.h"
+#line 1752 "/root/p4c/build/ir/ir-generated.h"
 #line 308 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 1754 "/root/p4c/build/ir/ir-generated.h"
+#line 1755 "/root/p4c/build/ir/ir-generated.h"
     cstring node_type_name() const override { return "Type_InfInt"_cs; }
     static cstring static_type_name() { return "Type_InfInt"_cs; }
     void dump_fields(std::ostream & out) const override;
@@ -1779,20 +1780,20 @@ class Type_Dontcare : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1783 "/root/p4c/build/ir/ir-generated.h"
+#line 1784 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 323 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1787 "/root/p4c/build/ir/ir-generated.h"
+#line 1788 "/root/p4c/build/ir/ir-generated.h"
 #line 324 "/root/p4c/ir/type.def"
     static const IR::Type_Dontcare *get();
-#line 1790 "/root/p4c/build/ir/ir-generated.h"
+#line 1791 "/root/p4c/build/ir/ir-generated.h"
 #line 325 "/root/p4c/ir/type.def"
     static const IR::Type_Dontcare *get(Util::SourceInfo const & si);
-#line 1793 "/root/p4c/build/ir/ir-generated.h"
+#line 1794 "/root/p4c/build/ir/ir-generated.h"
 #line 326 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1796 "/root/p4c/build/ir/ir-generated.h"
+#line 1797 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Dontcare const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Dontcare"_cs; }
@@ -1823,20 +1824,20 @@ class Type_Void : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1827 "/root/p4c/build/ir/ir-generated.h"
+#line 1828 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 341 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1831 "/root/p4c/build/ir/ir-generated.h"
+#line 1832 "/root/p4c/build/ir/ir-generated.h"
 #line 342 "/root/p4c/ir/type.def"
     static const IR::Type_Void *get();
-#line 1834 "/root/p4c/build/ir/ir-generated.h"
+#line 1835 "/root/p4c/build/ir/ir-generated.h"
 #line 343 "/root/p4c/ir/type.def"
     static const IR::Type_Void *get(Util::SourceInfo const & si);
-#line 1837 "/root/p4c/build/ir/ir-generated.h"
+#line 1838 "/root/p4c/build/ir/ir-generated.h"
 #line 344 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1840 "/root/p4c/build/ir/ir-generated.h"
+#line 1841 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Void const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Void"_cs; }
@@ -1867,20 +1868,20 @@ class Type_MatchKind : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 1871 "/root/p4c/build/ir/ir-generated.h"
+#line 1872 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 359 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1875 "/root/p4c/build/ir/ir-generated.h"
+#line 1876 "/root/p4c/build/ir/ir-generated.h"
 #line 360 "/root/p4c/ir/type.def"
     static const IR::Type_MatchKind *get();
-#line 1878 "/root/p4c/build/ir/ir-generated.h"
+#line 1879 "/root/p4c/build/ir/ir-generated.h"
 #line 361 "/root/p4c/ir/type.def"
     static const IR::Type_MatchKind *get(Util::SourceInfo const & si);
-#line 1881 "/root/p4c/build/ir/ir-generated.h"
+#line 1882 "/root/p4c/build/ir/ir-generated.h"
 #line 362 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 1884 "/root/p4c/build/ir/ir-generated.h"
+#line 1885 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_MatchKind const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_MatchKind"_cs; }
@@ -1906,28 +1907,28 @@ class TypeParameters : public Node, public virtual ISimpleNamespace {
     IR::IndexedVector<IR::Type_Var> parameters;
 #line 367 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 1910 "/root/p4c/build/ir/ir-generated.h"
+#line 1911 "/root/p4c/build/ir/ir-generated.h"
 #line 369 "/root/p4c/ir/type.def"
     bool empty() const { return parameters.empty(); }
-#line 1913 "/root/p4c/build/ir/ir-generated.h"
+#line 1914 "/root/p4c/build/ir/ir-generated.h"
 #line 370 "/root/p4c/ir/type.def"
     size_t size() const { return parameters.size(); }
-#line 1916 "/root/p4c/build/ir/ir-generated.h"
+#line 1917 "/root/p4c/build/ir/ir-generated.h"
 #line 371 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 1919 "/root/p4c/build/ir/ir-generated.h"
+#line 1920 "/root/p4c/build/ir/ir-generated.h"
 #line 373 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 1922 "/root/p4c/build/ir/ir-generated.h"
+#line 1923 "/root/p4c/build/ir/ir-generated.h"
 #line 375 "/root/p4c/ir/type.def"
     void push_back(const IR::Type_Var* tv) { parameters.push_back(tv); }
-#line 1925 "/root/p4c/build/ir/ir-generated.h"
+#line 1926 "/root/p4c/build/ir/ir-generated.h"
 #line 376 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 1928 "/root/p4c/build/ir/ir-generated.h"
+#line 1929 "/root/p4c/build/ir/ir-generated.h"
 #line 377 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 1931 "/root/p4c/build/ir/ir-generated.h"
+#line 1932 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TypeParameters const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -1961,10 +1962,10 @@ class StructField : public Declaration, public virtual IAnnotated {
     const IR::Type* type = nullptr;
 #line 392 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 1965 "/root/p4c/build/ir/ir-generated.h"
+#line 1966 "/root/p4c/build/ir/ir-generated.h"
 #line 393 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 1968 "/root/p4c/build/ir/ir-generated.h"
+#line 1969 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::StructField const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2003,23 +2004,23 @@ class Type_StructLike : public Type_Declaration, public virtual INestedNamespace
     IR::IndexedVector<IR::StructField> fields;
 #line 400 "/root/p4c/ir/type.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 2007 "/root/p4c/build/ir/ir-generated.h"
+#line 2008 "/root/p4c/build/ir/ir-generated.h"
 #line 401 "/root/p4c/ir/type.def"
     std::vector<const IR::INamespace *> getNestedNamespaces() const override;
-#line 2010 "/root/p4c/build/ir/ir-generated.h"
+#line 2011 "/root/p4c/build/ir/ir-generated.h"
 #line 402 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 2013 "/root/p4c/build/ir/ir-generated.h"
+#line 2014 "/root/p4c/build/ir/ir-generated.h"
 #line 403 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 2016 "/root/p4c/build/ir/ir-generated.h"
+#line 2017 "/root/p4c/build/ir/ir-generated.h"
 #line 404 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 2019 "/root/p4c/build/ir/ir-generated.h"
+#line 2020 "/root/p4c/build/ir/ir-generated.h"
 #line 406 "/root/p4c/ir/type.def"
     const IR::StructField *getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
-#line 2023 "/root/p4c/build/ir/ir-generated.h"
+#line 2024 "/root/p4c/build/ir/ir-generated.h"
 #line 408 "/root/p4c/ir/type.def"
     int getFieldIndex(cstring name) const {
         int index_pos = 0;
@@ -2030,7 +2031,7 @@ class Type_StructLike : public Type_Declaration, public virtual INestedNamespace
         }
         return -1;
     }
-#line 2034 "/root/p4c/build/ir/ir-generated.h"
+#line 2035 "/root/p4c/build/ir/ir-generated.h"
 /// This function returns start offset of the given field name in bits.
 /// If the given name is not a valid field name, -1 is returned.
 /// The given offset may not be correct if varbit field(s) present in between.
@@ -2048,22 +2049,22 @@ class Type_StructLike : public Type_Declaration, public virtual INestedNamespace
         }
         return -1;
     }
-#line 2052 "/root/p4c/build/ir/ir-generated.h"
+#line 2053 "/root/p4c/build/ir/ir-generated.h"
 #line 433 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2055 "/root/p4c/build/ir/ir-generated.h"
+#line 2056 "/root/p4c/build/ir/ir-generated.h"
 #line 439 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 2058 "/root/p4c/build/ir/ir-generated.h"
+#line 2059 "/root/p4c/build/ir/ir-generated.h"
 #line 441 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 2061 "/root/p4c/build/ir/ir-generated.h"
+#line 2062 "/root/p4c/build/ir/ir-generated.h"
 #line 443 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 2064 "/root/p4c/build/ir/ir-generated.h"
+#line 2065 "/root/p4c/build/ir/ir-generated.h"
 #line 444 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 2067 "/root/p4c/build/ir/ir-generated.h"
+#line 2068 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(Type_StructLike)
     bool operator==(IR::Type_StructLike const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -2134,7 +2135,7 @@ class Type_Struct : public Type_StructLike {
  public:
 #line 450 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2138 "/root/p4c/build/ir/ir-generated.h"
+#line 2139 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Struct const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Struct"_cs; }
@@ -2272,11 +2273,11 @@ class Type_HeaderUnion : public Type_StructLike {
  public:
 #line 462 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2276 "/root/p4c/build/ir/ir-generated.h"
+#line 2277 "/root/p4c/build/ir/ir-generated.h"
 
 #line 464 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2280 "/root/p4c/build/ir/ir-generated.h"
+#line 2281 "/root/p4c/build/ir/ir-generated.h"
 /// start offset of any field in a union is 0
 #line 470 "/root/p4c/ir/type.def"
     int getFieldBitOffset(cstring name) const {
@@ -2286,7 +2287,7 @@ class Type_HeaderUnion : public Type_StructLike {
             }
         }
         return -1; }
-#line 2290 "/root/p4c/build/ir/ir-generated.h"
+#line 2291 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_HeaderUnion const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_HeaderUnion"_cs; }
@@ -2358,7 +2359,7 @@ class Type_Header : public Type_StructLike {
     static const cstring isValid;
 #line 484 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2362 "/root/p4c/build/ir/ir-generated.h"
+#line 2363 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Header const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Header"_cs; }
@@ -2428,16 +2429,16 @@ class Type_Set : public Type {
     const IR::Type* elementType = nullptr;
 #line 489 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 2432 "/root/p4c/build/ir/ir-generated.h"
+#line 2433 "/root/p4c/build/ir/ir-generated.h"
 #line 490 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2435 "/root/p4c/build/ir/ir-generated.h"
+#line 2436 "/root/p4c/build/ir/ir-generated.h"
 #line 491 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2438 "/root/p4c/build/ir/ir-generated.h"
+#line 2439 "/root/p4c/build/ir/ir-generated.h"
 #line 492 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2441 "/root/p4c/build/ir/ir-generated.h"
+#line 2442 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Set const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2467,10 +2468,10 @@ class Type_Indexed : public virtual INode {
 
 #line 501 "/root/p4c/ir/type.def"
     virtual size_t getSize() const = 0;
-#line 2471 "/root/p4c/build/ir/ir-generated.h"
+#line 2472 "/root/p4c/build/ir/ir-generated.h"
 #line 502 "/root/p4c/ir/type.def"
     virtual const IR::Type *at(size_t index) const = 0;
-#line 2474 "/root/p4c/build/ir/ir-generated.h"
+#line 2475 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(Type_Indexed, NodeKind::Type_Indexed, INode);
 };
 }  // namespace P4::IR
@@ -2481,22 +2482,22 @@ class Type_BaseList : public Type, public virtual Type_Indexed {
     IR::Vector<IR::Type> components;
 #line 508 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 2485 "/root/p4c/build/ir/ir-generated.h"
+#line 2486 "/root/p4c/build/ir/ir-generated.h"
 #line 509 "/root/p4c/ir/type.def"
     size_t getSize() const override;
-#line 2488 "/root/p4c/build/ir/ir-generated.h"
+#line 2489 "/root/p4c/build/ir/ir-generated.h"
 #line 510 "/root/p4c/ir/type.def"
     const IR::Type *at(size_t index) const override;
-#line 2491 "/root/p4c/build/ir/ir-generated.h"
+#line 2492 "/root/p4c/build/ir/ir-generated.h"
 #line 511 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2494 "/root/p4c/build/ir/ir-generated.h"
+#line 2495 "/root/p4c/build/ir/ir-generated.h"
 #line 518 "/root/p4c/ir/type.def"
     cstring asString(char const * name) const;
-#line 2497 "/root/p4c/build/ir/ir-generated.h"
+#line 2498 "/root/p4c/build/ir/ir-generated.h"
 #line 528 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2500 "/root/p4c/build/ir/ir-generated.h"
+#line 2501 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_BaseList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2529,11 +2530,11 @@ class Type_List : public Type_BaseList {
  public:
 #line 535 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2533 "/root/p4c/build/ir/ir-generated.h"
+#line 2534 "/root/p4c/build/ir/ir-generated.h"
 
 #line 537 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2537 "/root/p4c/build/ir/ir-generated.h"
+#line 2538 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_List const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_List"_cs; }
@@ -2566,10 +2567,10 @@ class Type_Tuple : public Type_BaseList {
  public:
 #line 544 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2570 "/root/p4c/build/ir/ir-generated.h"
+#line 2571 "/root/p4c/build/ir/ir-generated.h"
 #line 545 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2573 "/root/p4c/build/ir/ir-generated.h"
+#line 2574 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Tuple const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Tuple"_cs; }
@@ -2603,10 +2604,10 @@ class Type_P4List : public Type {
     const IR::Type* elementType = nullptr;
 #line 553 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2607 "/root/p4c/build/ir/ir-generated.h"
+#line 2608 "/root/p4c/build/ir/ir-generated.h"
 #line 554 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2610 "/root/p4c/build/ir/ir-generated.h"
+#line 2611 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_P4List const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2639,22 +2640,22 @@ class Type_ArchBlock : public Type_Declaration, public virtual IMayBeGenericType
     const IR::TypeParameters* typeParameters = new TypeParameters;
 #line 564 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 2643 "/root/p4c/build/ir/ir-generated.h"
+#line 2644 "/root/p4c/build/ir/ir-generated.h"
 #line 565 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 2646 "/root/p4c/build/ir/ir-generated.h"
+#line 2647 "/root/p4c/build/ir/ir-generated.h"
 #line 566 "/root/p4c/ir/type.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 2649 "/root/p4c/build/ir/ir-generated.h"
+#line 2650 "/root/p4c/build/ir/ir-generated.h"
 #line 567 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 2652 "/root/p4c/build/ir/ir-generated.h"
+#line 2653 "/root/p4c/build/ir/ir-generated.h"
 #line 569 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 2655 "/root/p4c/build/ir/ir-generated.h"
+#line 2656 "/root/p4c/build/ir/ir-generated.h"
 #line 571 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 2658 "/root/p4c/build/ir/ir-generated.h"
+#line 2659 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_ArchBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2701,26 +2702,26 @@ class Type_Package : public Type_ArchBlock, public virtual IContainer, public vi
  public:
 #line 576 "/root/p4c/ir/type.def"
     const IR::Type *getType() const override;
-#line 2705 "/root/p4c/build/ir/ir-generated.h"
+#line 2706 "/root/p4c/build/ir/ir-generated.h"
     const IR::ParameterList* constructorParams = nullptr;
 #line 578 "/root/p4c/ir/type.def"
     const IR::Type_Method *getConstructorMethodType() const override;
-#line 2709 "/root/p4c/build/ir/ir-generated.h"
+#line 2710 "/root/p4c/build/ir/ir-generated.h"
 #line 579 "/root/p4c/ir/type.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 2712 "/root/p4c/build/ir/ir-generated.h"
+#line 2713 "/root/p4c/build/ir/ir-generated.h"
 #line 580 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2715 "/root/p4c/build/ir/ir-generated.h"
+#line 2716 "/root/p4c/build/ir/ir-generated.h"
 #line 581 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 2718 "/root/p4c/build/ir/ir-generated.h"
+#line 2719 "/root/p4c/build/ir/ir-generated.h"
 #line 583 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 2721 "/root/p4c/build/ir/ir-generated.h"
+#line 2722 "/root/p4c/build/ir/ir-generated.h"
 #line 587 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 2724 "/root/p4c/build/ir/ir-generated.h"
+#line 2725 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Package const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2770,13 +2771,13 @@ class Type_Parser : public Type_ArchBlock, public virtual IApply {
     const IR::ParameterList* applyParams = nullptr;
 #line 595 "/root/p4c/ir/type.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 2774 "/root/p4c/build/ir/ir-generated.h"
+#line 2775 "/root/p4c/build/ir/ir-generated.h"
 #line 596 "/root/p4c/ir/type.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 2777 "/root/p4c/build/ir/ir-generated.h"
+#line 2778 "/root/p4c/build/ir/ir-generated.h"
 #line 597 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2780 "/root/p4c/build/ir/ir-generated.h"
+#line 2781 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Parser const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2826,13 +2827,13 @@ class Type_Control : public Type_ArchBlock, public virtual IApply {
     const IR::ParameterList* applyParams = nullptr;
 #line 602 "/root/p4c/ir/type.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 2830 "/root/p4c/build/ir/ir-generated.h"
+#line 2831 "/root/p4c/build/ir/ir-generated.h"
 #line 603 "/root/p4c/ir/type.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 2833 "/root/p4c/build/ir/ir-generated.h"
+#line 2834 "/root/p4c/build/ir/ir-generated.h"
 #line 604 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2836 "/root/p4c/build/ir/ir-generated.h"
+#line 2837 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Control const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2883,19 +2884,19 @@ class Type_Name : public Type {
     const IR::Path* path = nullptr;
 #line 610 "/root/p4c/ir/type.def"
     Type_Name(IR::ID id);
-#line 2887 "/root/p4c/build/ir/ir-generated.h"
+#line 2888 "/root/p4c/build/ir/ir-generated.h"
 #line 611 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2890 "/root/p4c/build/ir/ir-generated.h"
+#line 2891 "/root/p4c/build/ir/ir-generated.h"
 #line 612 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 2893 "/root/p4c/build/ir/ir-generated.h"
+#line 2894 "/root/p4c/build/ir/ir-generated.h"
 #line 613 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2896 "/root/p4c/build/ir/ir-generated.h"
+#line 2897 "/root/p4c/build/ir/ir-generated.h"
 #line 614 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2899 "/root/p4c/build/ir/ir-generated.h"
+#line 2900 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Name const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2925,19 +2926,19 @@ class Type_Stack : public virtual Type_Indexed, public Type {
     const IR::Expression* size = nullptr;
 #line 623 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2929 "/root/p4c/build/ir/ir-generated.h"
+#line 2930 "/root/p4c/build/ir/ir-generated.h"
 #line 629 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 2932 "/root/p4c/build/ir/ir-generated.h"
+#line 2933 "/root/p4c/build/ir/ir-generated.h"
 #line 630 "/root/p4c/ir/type.def"
     bool sizeKnown() const;
-#line 2935 "/root/p4c/build/ir/ir-generated.h"
+#line 2936 "/root/p4c/build/ir/ir-generated.h"
 #line 631 "/root/p4c/ir/type.def"
     size_t getSize() const override;
-#line 2938 "/root/p4c/build/ir/ir-generated.h"
+#line 2939 "/root/p4c/build/ir/ir-generated.h"
 #line 632 "/root/p4c/ir/type.def"
     const IR::Type *at(size_t index) const override;
-#line 2941 "/root/p4c/build/ir/ir-generated.h"
+#line 2942 "/root/p4c/build/ir/ir-generated.h"
     static const cstring next;
     static const cstring last;
     static const cstring arraySize;
@@ -2946,10 +2947,10 @@ class Type_Stack : public virtual Type_Indexed, public Type {
     static const cstring pop_front;
 #line 639 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2950 "/root/p4c/build/ir/ir-generated.h"
+#line 2951 "/root/p4c/build/ir/ir-generated.h"
 #line 641 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 2953 "/root/p4c/build/ir/ir-generated.h"
+#line 2954 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Stack const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -2984,16 +2985,16 @@ class Type_Specialized : public Type {
     const IR::Vector<IR::Type>* arguments = nullptr;
 #line 652 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 2988 "/root/p4c/build/ir/ir-generated.h"
+#line 2989 "/root/p4c/build/ir/ir-generated.h"
 #line 653 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 2991 "/root/p4c/build/ir/ir-generated.h"
+#line 2992 "/root/p4c/build/ir/ir-generated.h"
 #line 654 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 2994 "/root/p4c/build/ir/ir-generated.h"
+#line 2995 "/root/p4c/build/ir/ir-generated.h"
 #line 664 "/root/p4c/ir/type.def"
     Type_Specialized(cstring bt, std::initializer_list<const IR::Type *> args);
-#line 2997 "/root/p4c/build/ir/ir-generated.h"
+#line 2998 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Specialized const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3031,13 +3032,13 @@ class Type_SpecializedCanonical : public Type {
 
 #line 677 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3035 "/root/p4c/build/ir/ir-generated.h"
+#line 3036 "/root/p4c/build/ir/ir-generated.h"
 #line 682 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 3038 "/root/p4c/build/ir/ir-generated.h"
+#line 3039 "/root/p4c/build/ir/ir-generated.h"
 #line 683 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3041 "/root/p4c/build/ir/ir-generated.h"
+#line 3042 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_SpecializedCanonical const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3096,17 +3097,17 @@ class Type_String : public Type_Base {
 #else
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
-#line 3100 "/root/p4c/build/ir/ir-generated.h"
+#line 3101 "/root/p4c/build/ir/ir-generated.h"
  public:
 #line 705 "/root/p4c/ir/type.def"
     static const IR::Type_String *get();
-#line 3104 "/root/p4c/build/ir/ir-generated.h"
+#line 3105 "/root/p4c/build/ir/ir-generated.h"
 #line 706 "/root/p4c/ir/type.def"
     static const IR::Type_String *get(Util::SourceInfo const & si);
-#line 3107 "/root/p4c/build/ir/ir-generated.h"
+#line 3108 "/root/p4c/build/ir/ir-generated.h"
 #line 707 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3110 "/root/p4c/build/ir/ir-generated.h"
+#line 3111 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_String const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_String"_cs; }
@@ -3133,22 +3134,22 @@ class Type_Enum : public Type_Declaration, public virtual ISimpleNamespace, publ
     IR::IndexedVector<IR::Declaration_ID> members;
 #line 713 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3137 "/root/p4c/build/ir/ir-generated.h"
+#line 3138 "/root/p4c/build/ir/ir-generated.h"
 #line 714 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3140 "/root/p4c/build/ir/ir-generated.h"
+#line 3141 "/root/p4c/build/ir/ir-generated.h"
 #line 715 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 3143 "/root/p4c/build/ir/ir-generated.h"
+#line 3144 "/root/p4c/build/ir/ir-generated.h"
 #line 717 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 3146 "/root/p4c/build/ir/ir-generated.h"
+#line 3147 "/root/p4c/build/ir/ir-generated.h"
 #line 719 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 3149 "/root/p4c/build/ir/ir-generated.h"
+#line 3150 "/root/p4c/build/ir/ir-generated.h"
 #line 722 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3152 "/root/p4c/build/ir/ir-generated.h"
+#line 3153 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Enum const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3184,7 +3185,7 @@ class SerEnumMember : public Declaration, public virtual CompileTimeValue {
     const IR::Expression* value = nullptr;
 #line 728 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3188 "/root/p4c/build/ir/ir-generated.h"
+#line 3189 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SerEnumMember const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3216,25 +3217,25 @@ class Type_SerEnum : public Type_Declaration, public virtual ISimpleNamespace, p
     IR::IndexedVector<IR::SerEnumMember> members;
 #line 737 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3220 "/root/p4c/build/ir/ir-generated.h"
+#line 3221 "/root/p4c/build/ir/ir-generated.h"
 #line 738 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3223 "/root/p4c/build/ir/ir-generated.h"
+#line 3224 "/root/p4c/build/ir/ir-generated.h"
 #line 739 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 3226 "/root/p4c/build/ir/ir-generated.h"
+#line 3227 "/root/p4c/build/ir/ir-generated.h"
 #line 741 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 3229 "/root/p4c/build/ir/ir-generated.h"
+#line 3230 "/root/p4c/build/ir/ir-generated.h"
 #line 743 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 3232 "/root/p4c/build/ir/ir-generated.h"
+#line 3233 "/root/p4c/build/ir/ir-generated.h"
 #line 746 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3235 "/root/p4c/build/ir/ir-generated.h"
+#line 3236 "/root/p4c/build/ir/ir-generated.h"
 #line 747 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 3238 "/root/p4c/build/ir/ir-generated.h"
+#line 3239 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_SerEnum const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3269,10 +3270,10 @@ class Type_Table : public Type, public virtual IApply {
     const IR::P4Table* table = nullptr;
 #line 752 "/root/p4c/ir/type.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 3273 "/root/p4c/build/ir/ir-generated.h"
+#line 3274 "/root/p4c/build/ir/ir-generated.h"
 #line 753 "/root/p4c/ir/type.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 3276 "/root/p4c/build/ir/ir-generated.h"
+#line 3277 "/root/p4c/build/ir/ir-generated.h"
 /// names for the fields of the struct returned
 /// by applying a table
     static const IR::ID hit;
@@ -3280,10 +3281,10 @@ class Type_Table : public Type, public virtual IApply {
     static const IR::ID action_run;
 #line 759 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 3284 "/root/p4c/build/ir/ir-generated.h"
+#line 3285 "/root/p4c/build/ir/ir-generated.h"
 #line 760 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 3287 "/root/p4c/build/ir/ir-generated.h"
+#line 3288 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Table const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3315,10 +3316,10 @@ class Type_ActionEnum : public Type {
     const IR::ActionList* actionList = nullptr;
 #line 768 "/root/p4c/ir/type.def"
     bool contains(cstring name) const;
-#line 3319 "/root/p4c/build/ir/ir-generated.h"
+#line 3320 "/root/p4c/build/ir/ir-generated.h"
 #line 769 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 3322 "/root/p4c/build/ir/ir-generated.h"
+#line 3323 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_ActionEnum const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3352,7 +3353,7 @@ class Type_MethodBase : public Type, public virtual IMayBeGenericType, public vi
     const IR::ParameterList* parameters = nullptr;
 #line 779 "/root/p4c/ir/type.def"
     size_t maxParameterCount() const { return parameters->size(); }
-#line 3356 "/root/p4c/build/ir/ir-generated.h"
+#line 3357 "/root/p4c/build/ir/ir-generated.h"
 #line 780 "/root/p4c/ir/type.def"
     size_t minParameterCount() const {
         size_t rv = 0;
@@ -3360,28 +3361,28 @@ class Type_MethodBase : public Type, public virtual IMayBeGenericType, public vi
             if (!p->isOptional()) ++rv;
         return rv;
     }
-#line 3364 "/root/p4c/build/ir/ir-generated.h"
+#line 3365 "/root/p4c/build/ir/ir-generated.h"
 #line 786 "/root/p4c/ir/type.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 3367 "/root/p4c/build/ir/ir-generated.h"
+#line 3368 "/root/p4c/build/ir/ir-generated.h"
 #line 787 "/root/p4c/ir/type.def"
     void dbprint(std::ostream & out) const override;
-#line 3370 "/root/p4c/build/ir/ir-generated.h"
+#line 3371 "/root/p4c/build/ir/ir-generated.h"
 #line 788 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3373 "/root/p4c/build/ir/ir-generated.h"
+#line 3374 "/root/p4c/build/ir/ir-generated.h"
 #line 789 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 3376 "/root/p4c/build/ir/ir-generated.h"
+#line 3377 "/root/p4c/build/ir/ir-generated.h"
 #line 790 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 3379 "/root/p4c/build/ir/ir-generated.h"
+#line 3380 "/root/p4c/build/ir/ir-generated.h"
 #line 792 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 3382 "/root/p4c/build/ir/ir-generated.h"
+#line 3383 "/root/p4c/build/ir/ir-generated.h"
 #line 796 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 3385 "/root/p4c/build/ir/ir-generated.h"
+#line 3386 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_MethodBase const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3430,7 +3431,7 @@ class Type_Method : public Type_MethodBase {
     cstring name;
 #line 807 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3434 "/root/p4c/build/ir/ir-generated.h"
+#line 3435 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Method const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Method"_cs; }
@@ -3481,7 +3482,7 @@ class ArgumentInfo : public Node {
     const IR::Argument* argument = nullptr;
 #line 817 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3485 "/root/p4c/build/ir/ir-generated.h"
+#line 3486 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ArgumentInfo const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3515,13 +3516,13 @@ class Type_MethodCall : public Type {
     const IR::Vector<IR::ArgumentInfo>* arguments = nullptr;
 #line 828 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3519 "/root/p4c/build/ir/ir-generated.h"
+#line 3520 "/root/p4c/build/ir/ir-generated.h"
 #line 829 "/root/p4c/ir/type.def"
     IR::Type const * getP4Type() const override;
-#line 3522 "/root/p4c/build/ir/ir-generated.h"
+#line 3523 "/root/p4c/build/ir/ir-generated.h"
 #line 830 "/root/p4c/ir/type.def"
     cstring toString() const override;
-#line 3525 "/root/p4c/build/ir/ir-generated.h"
+#line 3526 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_MethodCall const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3596,32 +3597,32 @@ class Method : public Declaration, public virtual IAnnotated, public virtual IFu
     IR::Vector<IR::Annotation> annotations;
 #line 844 "/root/p4c/ir/type.def"
     size_t maxParameterCount() const { return type->maxParameterCount(); }
-#line 3600 "/root/p4c/build/ir/ir-generated.h"
+#line 3601 "/root/p4c/build/ir/ir-generated.h"
 #line 845 "/root/p4c/ir/type.def"
     size_t minParameterCount() const { return type->minParameterCount(); }
-#line 3603 "/root/p4c/build/ir/ir-generated.h"
+#line 3604 "/root/p4c/build/ir/ir-generated.h"
 #line 846 "/root/p4c/ir/type.def"
     void setAbstract() { isAbstract = true; }
-#line 3606 "/root/p4c/build/ir/ir-generated.h"
+#line 3607 "/root/p4c/build/ir/ir-generated.h"
 #line 847 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3609 "/root/p4c/build/ir/ir-generated.h"
+#line 3610 "/root/p4c/build/ir/ir-generated.h"
 #line 848 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3612 "/root/p4c/build/ir/ir-generated.h"
+#line 3613 "/root/p4c/build/ir/ir-generated.h"
 #line 849 "/root/p4c/ir/type.def"
     const IR::ParameterList *getParameters() const override;
-#line 3615 "/root/p4c/build/ir/ir-generated.h"
+#line 3616 "/root/p4c/build/ir/ir-generated.h"
 
 #line 851 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 3619 "/root/p4c/build/ir/ir-generated.h"
+#line 3620 "/root/p4c/build/ir/ir-generated.h"
 #line 853 "/root/p4c/ir/type.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 3622 "/root/p4c/build/ir/ir-generated.h"
+#line 3623 "/root/p4c/build/ir/ir-generated.h"
 #line 855 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 3625 "/root/p4c/build/ir/ir-generated.h"
+#line 3626 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Method const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3672,13 +3673,13 @@ class Type_Typedef : public Type_Declaration, public virtual IAnnotated {
     const IR::Type* type = nullptr;
 #line 862 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 3676 "/root/p4c/build/ir/ir-generated.h"
+#line 3677 "/root/p4c/build/ir/ir-generated.h"
 #line 863 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3679 "/root/p4c/build/ir/ir-generated.h"
+#line 3680 "/root/p4c/build/ir/ir-generated.h"
 #line 864 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3682 "/root/p4c/build/ir/ir-generated.h"
+#line 3683 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Typedef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3720,13 +3721,13 @@ class Type_Newtype : public Type_Declaration, public virtual IAnnotated {
     const IR::Type* type = nullptr;
 #line 876 "/root/p4c/ir/type.def"
     int width_bits() const override;
-#line 3724 "/root/p4c/build/ir/ir-generated.h"
+#line 3725 "/root/p4c/build/ir/ir-generated.h"
 #line 877 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3727 "/root/p4c/build/ir/ir-generated.h"
+#line 3728 "/root/p4c/build/ir/ir-generated.h"
 #line 878 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3730 "/root/p4c/build/ir/ir-generated.h"
+#line 3731 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Newtype const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3768,34 +3769,34 @@ class Type_Extern : public Type_Declaration, public virtual INestedNamespace, pu
     IR::Vector<IR::Annotation> annotations;
 #line 890 "/root/p4c/ir/type.def"
     std::vector<const IR::INamespace *> getNestedNamespaces() const override;
-#line 3772 "/root/p4c/build/ir/ir-generated.h"
+#line 3773 "/root/p4c/build/ir/ir-generated.h"
 #line 891 "/root/p4c/ir/type.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 3775 "/root/p4c/build/ir/ir-generated.h"
+#line 3776 "/root/p4c/build/ir/ir-generated.h"
 #line 894 "/root/p4c/ir/type.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 3778 "/root/p4c/build/ir/ir-generated.h"
+#line 3779 "/root/p4c/build/ir/ir-generated.h"
 #line 895 "/root/p4c/ir/type.def"
     void validate() const override;
-#line 3781 "/root/p4c/build/ir/ir-generated.h"
+#line 3782 "/root/p4c/build/ir/ir-generated.h"
 #line 896 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 3784 "/root/p4c/build/ir/ir-generated.h"
+#line 3785 "/root/p4c/build/ir/ir-generated.h"
 #line 897 "/root/p4c/ir/type.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 3787 "/root/p4c/build/ir/ir-generated.h"
+#line 3788 "/root/p4c/build/ir/ir-generated.h"
 /// Returns the method that matches the specified arguments.
 /// Returns nullptr if no method or more than one method match.
 /// In the latter case it also reports an error.
 #line 901 "/root/p4c/ir/type.def"
     const IR::Method *lookupMethod(IR::ID name, const IR::Vector<IR::Argument>* arguments) const;
-#line 3793 "/root/p4c/build/ir/ir-generated.h"
+#line 3794 "/root/p4c/build/ir/ir-generated.h"
 /// Returns the constructor that matches the specified arguments.
 /// Returns nullptr if no constructor or more than one constructor matches.
 /// In the latter case it also reports an error.
 #line 905 "/root/p4c/ir/type.def"
     const IR::Method *lookupConstructor(const IR::Vector<IR::Argument>* arguments) const;
-#line 3799 "/root/p4c/build/ir/ir-generated.h"
+#line 3800 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Extern const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3924,7 +3925,7 @@ class Operation_Unary : public Operation {
     int getPrecedence() const override { return DBPrint::Prec_Prefix; }
 #line 15 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 3928 "/root/p4c/build/ir/ir-generated.h"
+#line 3929 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Operation_Unary const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -3945,7 +3946,7 @@ class Operation_Unary : public Operation {
 {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
-#line 3949 "/root/p4c/build/ir/ir-generated.h"
+#line 3950 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Unary(const IR::Type* type, const IR::Expression* expr) :
     Operation(type), expr(expr)
@@ -3954,7 +3955,7 @@ class Operation_Unary : public Operation {
 {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
-#line 3958 "/root/p4c/build/ir/ir-generated.h"
+#line 3959 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Unary(Util::SourceInfo srcInfo, const IR::Expression* expr) :
     Operation(srcInfo), expr(expr)
@@ -3963,7 +3964,7 @@ class Operation_Unary : public Operation {
 {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
-#line 3967 "/root/p4c/build/ir/ir-generated.h"
+#line 3968 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Unary(const IR::Expression* expr) :
     expr(expr)
@@ -3972,7 +3973,7 @@ class Operation_Unary : public Operation {
 {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
-#line 3976 "/root/p4c/build/ir/ir-generated.h"
+#line 3977 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_ABSTRACT_SUBCLASS(Operation_Unary)
     DECLARE_TYPEINFO_WITH_TYPEID(Operation_Unary, NodeKind::Operation_Unary, Operation);
@@ -4100,7 +4101,7 @@ class LNot : public Operation_Unary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4104 "/root/p4c/build/ir/ir-generated.h"
+#line 4105 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LNot(const IR::Type* type, const IR::Expression* expr) :
     Operation_Unary(type, expr)
@@ -4112,7 +4113,7 @@ class LNot : public Operation_Unary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4116 "/root/p4c/build/ir/ir-generated.h"
+#line 4117 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LNot(Util::SourceInfo srcInfo, const IR::Expression* expr) :
     Operation_Unary(srcInfo, expr)
@@ -4124,7 +4125,7 @@ class LNot : public Operation_Unary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4128 "/root/p4c/build/ir/ir-generated.h"
+#line 4129 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LNot(const IR::Expression* expr) :
     Operation_Unary(expr)
@@ -4136,7 +4137,7 @@ class LNot : public Operation_Unary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4140 "/root/p4c/build/ir/ir-generated.h"
+#line 4141 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(LNot)
     DECLARE_TYPEINFO_WITH_TYPEID(LNot, NodeKind::LNot, Operation_Unary);
@@ -4149,7 +4150,7 @@ class Operation_Binary : public Operation {
     const IR::Expression* right = nullptr;
 #line 47 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 4153 "/root/p4c/build/ir/ir-generated.h"
+#line 4154 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Operation_Binary const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -4171,7 +4172,7 @@ class Operation_Binary : public Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
-#line 4175 "/root/p4c/build/ir/ir-generated.h"
+#line 4176 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Binary(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation(type), left(left), right(right)
@@ -4181,7 +4182,7 @@ class Operation_Binary : public Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
-#line 4185 "/root/p4c/build/ir/ir-generated.h"
+#line 4186 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Binary(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation(srcInfo), left(left), right(right)
@@ -4191,7 +4192,7 @@ class Operation_Binary : public Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
-#line 4195 "/root/p4c/build/ir/ir-generated.h"
+#line 4196 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Binary(const IR::Expression* left, const IR::Expression* right) :
     left(left), right(right)
@@ -4201,7 +4202,7 @@ class Operation_Binary : public Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
-#line 4205 "/root/p4c/build/ir/ir-generated.h"
+#line 4206 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_ABSTRACT_SUBCLASS(Operation_Binary)
     DECLARE_TYPEINFO_WITH_TYPEID(Operation_Binary, NodeKind::Operation_Binary, Operation);
@@ -4231,28 +4232,28 @@ class Operation_Ternary : public Operation {
     {
 #line 60 "/root/p4c/ir/expression.def"
 { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
-#line 4235 "/root/p4c/build/ir/ir-generated.h"
+#line 4236 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Ternary(const IR::Type* type, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     Operation(type), e0(e0), e1(e1), e2(e2)
     {
 #line 60 "/root/p4c/ir/expression.def"
 { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
-#line 4242 "/root/p4c/build/ir/ir-generated.h"
+#line 4243 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Ternary(Util::SourceInfo srcInfo, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     Operation(srcInfo), e0(e0), e1(e1), e2(e2)
     {
 #line 60 "/root/p4c/ir/expression.def"
 { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
-#line 4249 "/root/p4c/build/ir/ir-generated.h"
+#line 4250 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Ternary(const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     e0(e0), e1(e1), e2(e2)
     {
 #line 60 "/root/p4c/ir/expression.def"
 { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
-#line 4256 "/root/p4c/build/ir/ir-generated.h"
+#line 4257 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_ABSTRACT_SUBCLASS(Operation_Ternary)
     DECLARE_TYPEINFO_WITH_TYPEID(Operation_Ternary, NodeKind::Operation_Ternary, Operation);
@@ -4282,7 +4283,7 @@ class Operation_Relation : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4286 "/root/p4c/build/ir/ir-generated.h"
+#line 4287 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Relation(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -4294,7 +4295,7 @@ class Operation_Relation : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4298 "/root/p4c/build/ir/ir-generated.h"
+#line 4299 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Relation(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -4306,7 +4307,7 @@ class Operation_Relation : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4310 "/root/p4c/build/ir/ir-generated.h"
+#line 4311 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Operation_Relation(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -4318,7 +4319,7 @@ class Operation_Relation : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 4322 "/root/p4c/build/ir/ir-generated.h"
+#line 4323 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_ABSTRACT_SUBCLASS(Operation_Relation)
     DECLARE_TYPEINFO_WITH_TYPEID(Operation_Relation, NodeKind::Operation_Relation, Operation_Binary);
@@ -4413,13 +4414,13 @@ class OpAssignmentStatement : public BaseAssignmentStatement {
  public:
 #line 481 "/root/p4c/ir/ir.def"
     virtual cstring getStringOp() const = 0;
-#line 4417 "/root/p4c/build/ir/ir-generated.h"
+#line 4418 "/root/p4c/build/ir/ir-generated.h"
 #line 482 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 4420 "/root/p4c/build/ir/ir-generated.h"
+#line 4421 "/root/p4c/build/ir/ir-generated.h"
 #line 483 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 4423 "/root/p4c/build/ir/ir-generated.h"
+#line 4424 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::OpAssignmentStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "OpAssignmentStatement"_cs; }
@@ -4446,7 +4447,7 @@ class MulAssign : public OpAssignmentStatement {
  public:
 #line 78 "/root/p4c/ir/expression.def"
     typedef Mul BinOp;
-#line 4450 "/root/p4c/build/ir/ir-generated.h"
+#line 4451 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("*"); }
     bool operator==(IR::MulAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4508,7 +4509,7 @@ class DivAssign : public OpAssignmentStatement {
  public:
 #line 90 "/root/p4c/ir/expression.def"
     typedef Div BinOp;
-#line 4512 "/root/p4c/build/ir/ir-generated.h"
+#line 4513 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("/"); }
     bool operator==(IR::DivAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4570,7 +4571,7 @@ class ModAssign : public OpAssignmentStatement {
  public:
 #line 101 "/root/p4c/ir/expression.def"
     typedef Mod BinOp;
-#line 4574 "/root/p4c/build/ir/ir-generated.h"
+#line 4575 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("%"); }
     bool operator==(IR::ModAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4632,7 +4633,7 @@ class AddAssign : public OpAssignmentStatement {
  public:
 #line 112 "/root/p4c/ir/expression.def"
     typedef Add BinOp;
-#line 4636 "/root/p4c/build/ir/ir-generated.h"
+#line 4637 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("+"); }
     bool operator==(IR::AddAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4694,7 +4695,7 @@ class SubAssign : public OpAssignmentStatement {
  public:
 #line 123 "/root/p4c/ir/expression.def"
     typedef Sub BinOp;
-#line 4698 "/root/p4c/build/ir/ir-generated.h"
+#line 4699 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("-"); }
     bool operator==(IR::SubAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4756,7 +4757,7 @@ class AddSatAssign : public OpAssignmentStatement {
  public:
 #line 134 "/root/p4c/ir/expression.def"
     typedef AddSat BinOp;
-#line 4760 "/root/p4c/build/ir/ir-generated.h"
+#line 4761 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("|+|"); }
     bool operator==(IR::AddSatAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4818,7 +4819,7 @@ class SubSatAssign : public OpAssignmentStatement {
  public:
 #line 145 "/root/p4c/ir/expression.def"
     typedef SubSat BinOp;
-#line 4822 "/root/p4c/build/ir/ir-generated.h"
+#line 4823 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("|-|"); }
     bool operator==(IR::SubSatAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4864,28 +4865,28 @@ class Shl : public Operation_Binary {
     {
 #line 153 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4868 "/root/p4c/build/ir/ir-generated.h"
+#line 4869 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shl(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
     {
 #line 153 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4875 "/root/p4c/build/ir/ir-generated.h"
+#line 4876 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shl(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
     {
 #line 153 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4882 "/root/p4c/build/ir/ir-generated.h"
+#line 4883 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shl(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
     {
 #line 153 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4889 "/root/p4c/build/ir/ir-generated.h"
+#line 4890 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Shl)
     DECLARE_TYPEINFO_WITH_TYPEID(Shl, NodeKind::Shl, Operation_Binary);
@@ -4896,7 +4897,7 @@ class ShlAssign : public OpAssignmentStatement {
  public:
 #line 157 "/root/p4c/ir/expression.def"
     typedef Shl BinOp;
-#line 4900 "/root/p4c/build/ir/ir-generated.h"
+#line 4901 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("<<"); }
     bool operator==(IR::ShlAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -4942,28 +4943,28 @@ class Shr : public Operation_Binary {
     {
 #line 165 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4946 "/root/p4c/build/ir/ir-generated.h"
+#line 4947 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shr(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
     {
 #line 165 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4953 "/root/p4c/build/ir/ir-generated.h"
+#line 4954 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shr(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
     {
 #line 165 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4960 "/root/p4c/build/ir/ir-generated.h"
+#line 4961 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Shr(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
     {
 #line 165 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && left) type = left->type; }
-#line 4967 "/root/p4c/build/ir/ir-generated.h"
+#line 4968 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Shr)
     DECLARE_TYPEINFO_WITH_TYPEID(Shr, NodeKind::Shr, Operation_Binary);
@@ -4974,7 +4975,7 @@ class ShrAssign : public OpAssignmentStatement {
  public:
 #line 169 "/root/p4c/ir/expression.def"
     typedef Shr BinOp;
-#line 4978 "/root/p4c/build/ir/ir-generated.h"
+#line 4979 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring(">>"); }
     bool operator==(IR::ShrAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -5240,7 +5241,7 @@ class BAndAssign : public OpAssignmentStatement {
  public:
 #line 204 "/root/p4c/ir/expression.def"
     typedef BAnd BinOp;
-#line 5244 "/root/p4c/build/ir/ir-generated.h"
+#line 5245 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("&"); }
     bool operator==(IR::BAndAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -5302,7 +5303,7 @@ class BOrAssign : public OpAssignmentStatement {
  public:
 #line 215 "/root/p4c/ir/expression.def"
     typedef BOr BinOp;
-#line 5306 "/root/p4c/build/ir/ir-generated.h"
+#line 5307 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("|"); }
     bool operator==(IR::BOrAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -5364,7 +5365,7 @@ class BXorAssign : public OpAssignmentStatement {
  public:
 #line 226 "/root/p4c/ir/expression.def"
     typedef BXor BinOp;
-#line 5368 "/root/p4c/build/ir/ir-generated.h"
+#line 5369 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("^"); }
     bool operator==(IR::BXorAssign const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -5415,7 +5416,7 @@ class LAnd : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5419 "/root/p4c/build/ir/ir-generated.h"
+#line 5420 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LAnd(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -5427,7 +5428,7 @@ class LAnd : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5431 "/root/p4c/build/ir/ir-generated.h"
+#line 5432 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LAnd(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -5439,7 +5440,7 @@ class LAnd : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5443 "/root/p4c/build/ir/ir-generated.h"
+#line 5444 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LAnd(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -5451,7 +5452,7 @@ class LAnd : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5455 "/root/p4c/build/ir/ir-generated.h"
+#line 5456 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(LAnd)
     DECLARE_TYPEINFO_WITH_TYPEID(LAnd, NodeKind::LAnd, Operation_Binary);
@@ -5484,7 +5485,7 @@ class LOr : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5488 "/root/p4c/build/ir/ir-generated.h"
+#line 5489 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LOr(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -5496,7 +5497,7 @@ class LOr : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5500 "/root/p4c/build/ir/ir-generated.h"
+#line 5501 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LOr(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -5508,7 +5509,7 @@ class LOr : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5512 "/root/p4c/build/ir/ir-generated.h"
+#line 5513 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     LOr(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -5520,7 +5521,7 @@ class LOr : public Operation_Binary {
         // because the type member is shadowed by the type parameter.
         type = Type::Boolean::get();
     }
-#line 5524 "/root/p4c/build/ir/ir-generated.h"
+#line 5525 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(LOr)
     DECLARE_TYPEINFO_WITH_TYPEID(LOr, NodeKind::LOr, Operation_Binary);
@@ -5532,10 +5533,10 @@ class Dots : public Expression {
  public:
 #line 253 "/root/p4c/ir/expression.def"
     void dbprint(std::ostream & out) const override;
-#line 5536 "/root/p4c/build/ir/ir-generated.h"
+#line 5537 "/root/p4c/build/ir/ir-generated.h"
 #line 254 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5539 "/root/p4c/build/ir/ir-generated.h"
+#line 5540 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Dots const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Dots"_cs; }
@@ -5567,19 +5568,19 @@ class NamedDots : public NamedExpression {
  public:
 #line 260 "/root/p4c/ir/expression.def"
     NamedDots() : NamedExpression("...", new Dots()) {}
-#line 5571 "/root/p4c/build/ir/ir-generated.h"
+#line 5572 "/root/p4c/build/ir/ir-generated.h"
 #line 261 "/root/p4c/ir/expression.def"
     NamedDots(Util::SourceInfo srcInfo, const IR::Dots* dots) : NamedExpression(srcInfo, "..."_cs, dots) { CHECK_NULL(dots); }
-#line 5574 "/root/p4c/build/ir/ir-generated.h"
+#line 5575 "/root/p4c/build/ir/ir-generated.h"
 #line 262 "/root/p4c/ir/expression.def"
     NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
-#line 5577 "/root/p4c/build/ir/ir-generated.h"
+#line 5578 "/root/p4c/build/ir/ir-generated.h"
 #line 263 "/root/p4c/ir/expression.def"
     void dbprint(std::ostream & out) const override;
-#line 5580 "/root/p4c/build/ir/ir-generated.h"
+#line 5581 "/root/p4c/build/ir/ir-generated.h"
 #line 264 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5583 "/root/p4c/build/ir/ir-generated.h"
+#line 5584 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::NamedDots const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "NamedDots"_cs; }
@@ -5638,18 +5639,18 @@ class Constant : public Literal {
 /// if noWarning is true, no warning is emitted
 #line 275 "/root/p4c/ir/expression.def"
     void handleOverflow(bool noWarning);
-#line 5642 "/root/p4c/build/ir/ir-generated.h"
+#line 5643 "/root/p4c/build/ir/ir-generated.h"
 
 
 
 #line 279 "/root/p4c/ir/expression.def"
     Constant(int v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-#line 5649 "/root/p4c/build/ir/ir-generated.h"
+#line 5650 "/root/p4c/build/ir/ir-generated.h"
 #line 281 "/root/p4c/ir/expression.def"
     Constant(unsigned v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-#line 5653 "/root/p4c/build/ir/ir-generated.h"
+#line 5654 "/root/p4c/build/ir/ir-generated.h"
 #line 284 "/root/p4c/ir/expression.def"
 #if __WORDSIZE == 64
     Constant(intmax_t v, unsigned base = 10) :
@@ -5662,82 +5663,82 @@ class Constant : public Literal {
     Constant(intmax_t v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
 #endif
-#line 5666 "/root/p4c/build/ir/ir-generated.h"
+#line 5667 "/root/p4c/build/ir/ir-generated.h"
 #line 296 "/root/p4c/ir/expression.def"
     Constant(uint64_t v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-#line 5670 "/root/p4c/build/ir/ir-generated.h"
+#line 5671 "/root/p4c/build/ir/ir-generated.h"
 #line 298 "/root/p4c/ir/expression.def"
     Constant(big_int v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-#line 5674 "/root/p4c/build/ir/ir-generated.h"
+#line 5675 "/root/p4c/build/ir/ir-generated.h"
 #line 300 "/root/p4c/ir/expression.def"
     Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
         Literal(si, Type_InfInt::get()), value(v), base(base) {}
-#line 5678 "/root/p4c/build/ir/ir-generated.h"
+#line 5679 "/root/p4c/build/ir/ir-generated.h"
 #line 302 "/root/p4c/ir/expression.def"
     Constant(IR::Type const * t, big_int v, unsigned base = 10, bool noWarning = false) :
         Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
-#line 5682 "/root/p4c/build/ir/ir-generated.h"
+#line 5683 "/root/p4c/build/ir/ir-generated.h"
 #line 304 "/root/p4c/ir/expression.def"
     Constant(Util::SourceInfo si, IR::Type const * t, big_int v, unsigned base = 10, bool noWarning = false) :
         Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
-#line 5686 "/root/p4c/build/ir/ir-generated.h"
+#line 5687 "/root/p4c/build/ir/ir-generated.h"
 #line 308 "/root/p4c/ir/expression.def"
     static Constant GetMask(unsigned width);
-#line 5689 "/root/p4c/build/ir/ir-generated.h"
+#line 5690 "/root/p4c/build/ir/ir-generated.h"
 /// @return a constant. Any constant returned here is interned. Base is always 10.
 #line 312 "/root/p4c/ir/expression.def"
     static IR::Constant const * get(IR::Type const * t, big_int v, Util::SourceInfo si = {});
-#line 5693 "/root/p4c/build/ir/ir-generated.h"
+#line 5694 "/root/p4c/build/ir/ir-generated.h"
 #line 314 "/root/p4c/ir/expression.def"
     bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
-#line 5696 "/root/p4c/build/ir/ir-generated.h"
+#line 5697 "/root/p4c/build/ir/ir-generated.h"
 #line 315 "/root/p4c/ir/expression.def"
     bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
-#line 5699 "/root/p4c/build/ir/ir-generated.h"
+#line 5700 "/root/p4c/build/ir/ir-generated.h"
 #line 316 "/root/p4c/ir/expression.def"
     bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
-#line 5702 "/root/p4c/build/ir/ir-generated.h"
+#line 5703 "/root/p4c/build/ir/ir-generated.h"
 #line 317 "/root/p4c/ir/expression.def"
     bool fitsUint64() const { return value >= 0 && value <= UINT64_MAX; }
-#line 5705 "/root/p4c/build/ir/ir-generated.h"
+#line 5706 "/root/p4c/build/ir/ir-generated.h"
 #line 318 "/root/p4c/ir/expression.def"
     bool fitsInt64() const { return value >= INT64_MIN && value <= INT64_MAX; }
-#line 5708 "/root/p4c/build/ir/ir-generated.h"
+#line 5709 "/root/p4c/build/ir/ir-generated.h"
 #line 319 "/root/p4c/ir/expression.def"
     long asLong() const {
         if (!fitsLong())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
         return static_cast<long>(value); }
-#line 5714 "/root/p4c/build/ir/ir-generated.h"
+#line 5715 "/root/p4c/build/ir/ir-generated.h"
 #line 323 "/root/p4c/ir/expression.def"
     int asInt() const {
         if (!fitsInt())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int", this);
         return static_cast<int>(value); }
-#line 5720 "/root/p4c/build/ir/ir-generated.h"
+#line 5721 "/root/p4c/build/ir/ir-generated.h"
 #line 327 "/root/p4c/ir/expression.def"
     unsigned asUnsigned() const {
         if (!fitsUint())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for unsigned int", this);
         return static_cast<unsigned>(value);
     }
-#line 5727 "/root/p4c/build/ir/ir-generated.h"
+#line 5728 "/root/p4c/build/ir/ir-generated.h"
 #line 332 "/root/p4c/ir/expression.def"
     uint64_t asUint64() const {
         if (!fitsUint64())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
         return static_cast<uint64_t>(value);
     }
-#line 5734 "/root/p4c/build/ir/ir-generated.h"
+#line 5735 "/root/p4c/build/ir/ir-generated.h"
 #line 337 "/root/p4c/ir/expression.def"
     int64_t asInt64() const {
         if (!fitsInt64())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int64", this);
         return static_cast<int64_t>(value);
     }
-#line 5741 "/root/p4c/build/ir/ir-generated.h"
+#line 5742 "/root/p4c/build/ir/ir-generated.h"
 
 
 
@@ -5749,14 +5750,14 @@ class Constant : public Literal {
     Constant operator^(const Constant &c) const;
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
-#line 5753 "/root/p4c/build/ir/ir-generated.h"
+#line 5754 "/root/p4c/build/ir/ir-generated.h"
 #line 354 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5756 "/root/p4c/build/ir/ir-generated.h"
+#line 5757 "/root/p4c/build/ir/ir-generated.h"
 #line 366 "/root/p4c/ir/expression.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 5760 "/root/p4c/build/ir/ir-generated.h"
+#line 5761 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Constant const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Constant"_cs; }
@@ -5779,11 +5780,11 @@ class BoolLiteral : public Literal {
     bool value;
 #line 371 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5783 "/root/p4c/build/ir/ir-generated.h"
+#line 5784 "/root/p4c/build/ir/ir-generated.h"
 /// @return a bool literal. Both booleans are interned.
 #line 374 "/root/p4c/ir/expression.def"
     static IR::BoolLiteral const * get(bool value, Util::SourceInfo const & si = {});
-#line 5787 "/root/p4c/build/ir/ir-generated.h"
+#line 5788 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::BoolLiteral const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "BoolLiteral"_cs; }
@@ -5818,20 +5819,20 @@ class StringLiteral : public Literal {
     cstring value;
 #line 379 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 5822 "/root/p4c/build/ir/ir-generated.h"
+#line 5823 "/root/p4c/build/ir/ir-generated.h"
 #line 380 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5825 "/root/p4c/build/ir/ir-generated.h"
+#line 5826 "/root/p4c/build/ir/ir-generated.h"
 #line 381 "/root/p4c/ir/expression.def"
     StringLiteral(IR::ID v) : Literal(v.srcInfo), value(v.name) {}
-#line 5828 "/root/p4c/build/ir/ir-generated.h"
+#line 5829 "/root/p4c/build/ir/ir-generated.h"
 #line 383 "/root/p4c/ir/expression.def"
     operator IR::ID() const { return IR::ID(srcInfo, value); }
-#line 5831 "/root/p4c/build/ir/ir-generated.h"
+#line 5832 "/root/p4c/build/ir/ir-generated.h"
 /// @returns a string literal. The value is cached.
 #line 387 "/root/p4c/ir/expression.def"
     static IR::StringLiteral const * get(cstring value, IR::Type const * t = Type_String::get(), Util::SourceInfo const & si = {});
-#line 5835 "/root/p4c/build/ir/ir-generated.h"
+#line 5836 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::StringLiteral const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "StringLiteral"_cs; }
@@ -5866,13 +5867,13 @@ class PathExpression : public Expression {
     const IR::Path* path = nullptr;
 #line 393 "/root/p4c/ir/expression.def"
     PathExpression(const IR::Type* t, IR::ID id) : Expression(id.srcInfo, t), path(new IR::Path(id)) {}
-#line 5870 "/root/p4c/build/ir/ir-generated.h"
+#line 5871 "/root/p4c/build/ir/ir-generated.h"
 #line 394 "/root/p4c/ir/expression.def"
     PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
-#line 5873 "/root/p4c/build/ir/ir-generated.h"
+#line 5874 "/root/p4c/build/ir/ir-generated.h"
 #line 395 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5876 "/root/p4c/build/ir/ir-generated.h"
+#line 5877 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::PathExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -5891,28 +5892,28 @@ class PathExpression : public Expression {
     {
 #line 392 "/root/p4c/ir/expression.def"
 { if (!srcInfo && path) srcInfo = path->srcInfo; }
-#line 5895 "/root/p4c/build/ir/ir-generated.h"
+#line 5896 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PathExpression(const IR::Type* type, const IR::Path* path) :
     Expression(type), path(path)
     {
 #line 392 "/root/p4c/ir/expression.def"
 { if (!srcInfo && path) srcInfo = path->srcInfo; }
-#line 5902 "/root/p4c/build/ir/ir-generated.h"
+#line 5903 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PathExpression(Util::SourceInfo srcInfo, const IR::Path* path) :
     Expression(srcInfo), path(path)
     {
 #line 392 "/root/p4c/ir/expression.def"
 { if (!srcInfo && path) srcInfo = path->srcInfo; }
-#line 5909 "/root/p4c/build/ir/ir-generated.h"
+#line 5910 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PathExpression(const IR::Path* path) :
     path(path)
     {
 #line 392 "/root/p4c/ir/expression.def"
 { if (!srcInfo && path) srcInfo = path->srcInfo; }
-#line 5916 "/root/p4c/build/ir/ir-generated.h"
+#line 5917 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(PathExpression)
     DECLARE_TYPEINFO_WITH_TYPEID(PathExpression, NodeKind::PathExpression, Expression);
@@ -5926,16 +5927,16 @@ class TypeNameExpression : public Expression {
 #line 404 "/root/p4c/ir/expression.def"
     TypeNameExpression(IR::ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
-#line 5930 "/root/p4c/build/ir/ir-generated.h"
+#line 5931 "/root/p4c/build/ir/ir-generated.h"
 #line 406 "/root/p4c/ir/expression.def"
     void dbprint(std::ostream & out) const override;
-#line 5933 "/root/p4c/build/ir/ir-generated.h"
+#line 5934 "/root/p4c/build/ir/ir-generated.h"
 #line 407 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 5936 "/root/p4c/build/ir/ir-generated.h"
+#line 5937 "/root/p4c/build/ir/ir-generated.h"
 #line 408 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 5939 "/root/p4c/build/ir/ir-generated.h"
+#line 5940 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TypeNameExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -5952,28 +5953,28 @@ class TypeNameExpression : public Expression {
     {
 #line 403 "/root/p4c/ir/expression.def"
 { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-#line 5956 "/root/p4c/build/ir/ir-generated.h"
+#line 5957 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     TypeNameExpression(const IR::Type* type, const IR::Type* typeName) :
     Expression(type), typeName(typeName)
     {
 #line 403 "/root/p4c/ir/expression.def"
 { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-#line 5963 "/root/p4c/build/ir/ir-generated.h"
+#line 5964 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     TypeNameExpression(Util::SourceInfo srcInfo, const IR::Type* typeName) :
     Expression(srcInfo), typeName(typeName)
     {
 #line 403 "/root/p4c/ir/expression.def"
 { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-#line 5970 "/root/p4c/build/ir/ir-generated.h"
+#line 5971 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     TypeNameExpression(const IR::Type* typeName) :
     typeName(typeName)
     {
 #line 403 "/root/p4c/ir/expression.def"
 { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-#line 5977 "/root/p4c/build/ir/ir-generated.h"
+#line 5978 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(TypeNameExpression)
     DECLARE_TYPEINFO_WITH_TYPEID(TypeNameExpression, NodeKind::TypeNameExpression, Expression);
@@ -5984,10 +5985,10 @@ class AbstractSlice : public Operation_Ternary {
  public:
 #line 413 "/root/p4c/ir/expression.def"
     virtual unsigned getH() const = 0;
-#line 5988 "/root/p4c/build/ir/ir-generated.h"
+#line 5989 "/root/p4c/build/ir/ir-generated.h"
 #line 414 "/root/p4c/ir/expression.def"
     virtual unsigned getL() const = 0;
-#line 5991 "/root/p4c/build/ir/ir-generated.h"
+#line 5992 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AbstractSlice const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "AbstractSlice"_cs; }
@@ -6022,24 +6023,24 @@ class Slice : public AbstractSlice {
     cstring getStringOp() const override { return cstring("[:]"); }
 #line 420 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6026 "/root/p4c/build/ir/ir-generated.h"
+#line 6027 "/root/p4c/build/ir/ir-generated.h"
 
 #line 422 "/root/p4c/ir/expression.def"
     unsigned getH() const override;
-#line 6030 "/root/p4c/build/ir/ir-generated.h"
+#line 6031 "/root/p4c/build/ir/ir-generated.h"
 #line 423 "/root/p4c/ir/expression.def"
     unsigned getL() const override;
-#line 6033 "/root/p4c/build/ir/ir-generated.h"
+#line 6034 "/root/p4c/build/ir/ir-generated.h"
 #line 424 "/root/p4c/ir/expression.def"
     Slice(const IR::Expression* a, int hi, int lo) : AbstractSlice(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
-#line 6036 "/root/p4c/build/ir/ir-generated.h"
+#line 6037 "/root/p4c/build/ir/ir-generated.h"
 #line 426 "/root/p4c/ir/expression.def"
     Slice(Util::SourceInfo si, const IR::Expression* a, int hi, int lo) : AbstractSlice(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
-#line 6039 "/root/p4c/build/ir/ir-generated.h"
+#line 6040 "/root/p4c/build/ir/ir-generated.h"
 
 #line 432 "/root/p4c/ir/expression.def"
     static const IR::Expression *make(const IR::Expression* a, unsigned hi, unsigned lo);
-#line 6043 "/root/p4c/build/ir/ir-generated.h"
+#line 6044 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Slice const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Slice"_cs; }
@@ -6060,7 +6061,7 @@ class Slice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
-#line 6064 "/root/p4c/build/ir/ir-generated.h"
+#line 6065 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Slice(const IR::Type* type, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(type, e0, e1, e2)
@@ -6069,7 +6070,7 @@ class Slice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
-#line 6073 "/root/p4c/build/ir/ir-generated.h"
+#line 6074 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Slice(Util::SourceInfo srcInfo, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(srcInfo, e0, e1, e2)
@@ -6078,7 +6079,7 @@ class Slice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
-#line 6082 "/root/p4c/build/ir/ir-generated.h"
+#line 6083 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Slice(const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(e0, e1, e2)
@@ -6087,7 +6088,7 @@ class Slice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
-#line 6091 "/root/p4c/build/ir/ir-generated.h"
+#line 6092 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Slice)
     DECLARE_TYPEINFO_WITH_TYPEID(Slice, NodeKind::Slice, AbstractSlice);
@@ -6100,16 +6101,16 @@ class PlusSlice : public AbstractSlice {
     cstring getStringOp() const override { return cstring("[+:]"); }
 #line 438 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6104 "/root/p4c/build/ir/ir-generated.h"
+#line 6105 "/root/p4c/build/ir/ir-generated.h"
 #line 439 "/root/p4c/ir/expression.def"
     unsigned getH() const override;
-#line 6107 "/root/p4c/build/ir/ir-generated.h"
+#line 6108 "/root/p4c/build/ir/ir-generated.h"
 #line 442 "/root/p4c/ir/expression.def"
     unsigned getL() const override;
-#line 6110 "/root/p4c/build/ir/ir-generated.h"
+#line 6111 "/root/p4c/build/ir/ir-generated.h"
 #line 445 "/root/p4c/ir/expression.def"
     PlusSlice(const IR::Expression* a, const IR::Expression* lo, int width) : AbstractSlice(IR::Type::Bits::get(width), a, lo, new Constant(width)) {}
-#line 6113 "/root/p4c/build/ir/ir-generated.h"
+#line 6114 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::PlusSlice const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "PlusSlice"_cs; }
@@ -6130,7 +6131,7 @@ class PlusSlice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
-#line 6134 "/root/p4c/build/ir/ir-generated.h"
+#line 6135 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PlusSlice(const IR::Type* type, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(type, e0, e1, e2)
@@ -6139,7 +6140,7 @@ class PlusSlice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
-#line 6143 "/root/p4c/build/ir/ir-generated.h"
+#line 6144 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PlusSlice(Util::SourceInfo srcInfo, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(srcInfo, e0, e1, e2)
@@ -6148,7 +6149,7 @@ class PlusSlice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
-#line 6152 "/root/p4c/build/ir/ir-generated.h"
+#line 6153 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     PlusSlice(const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     AbstractSlice(e0, e1, e2)
@@ -6157,7 +6158,7 @@ class PlusSlice : public AbstractSlice {
 {
         if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
-#line 6161 "/root/p4c/build/ir/ir-generated.h"
+#line 6162 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(PlusSlice)
     DECLARE_TYPEINFO_WITH_TYPEID(PlusSlice, NodeKind::PlusSlice, AbstractSlice);
@@ -6170,17 +6171,17 @@ class Member : public Operation_Unary {
     IR::ID member;
 #line 455 "/root/p4c/ir/expression.def"
     virtual int offset_bits() const;
-#line 6174 "/root/p4c/build/ir/ir-generated.h"
+#line 6175 "/root/p4c/build/ir/ir-generated.h"
 #line 456 "/root/p4c/ir/expression.def"
     int lsb() const;
-#line 6177 "/root/p4c/build/ir/ir-generated.h"
+#line 6178 "/root/p4c/build/ir/ir-generated.h"
 #line 457 "/root/p4c/ir/expression.def"
     int msb() const;
-#line 6180 "/root/p4c/build/ir/ir-generated.h"
+#line 6181 "/root/p4c/build/ir/ir-generated.h"
     cstring getStringOp() const override { return cstring("."); }
 #line 459 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6184 "/root/p4c/build/ir/ir-generated.h"
+#line 6185 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Member const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Member"_cs; }
@@ -6237,7 +6238,7 @@ class Concat : public Operation_Binary {
             auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
-#line 6241 "/root/p4c/build/ir/ir-generated.h"
+#line 6242 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Concat(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -6249,7 +6250,7 @@ class Concat : public Operation_Binary {
             auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
-#line 6253 "/root/p4c/build/ir/ir-generated.h"
+#line 6254 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Concat(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -6261,7 +6262,7 @@ class Concat : public Operation_Binary {
             auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
-#line 6265 "/root/p4c/build/ir/ir-generated.h"
+#line 6266 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Concat(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -6273,7 +6274,7 @@ class Concat : public Operation_Binary {
             auto rt = right->type->to<IR::Type::Bits>();
             if (lt && rt)
                 type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
-#line 6277 "/root/p4c/build/ir/ir-generated.h"
+#line 6278 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Concat)
     DECLARE_TYPEINFO_WITH_TYPEID(Concat, NodeKind::Concat, Operation_Binary);
@@ -6286,7 +6287,7 @@ class ArrayIndex : public Operation_Binary {
     int getPrecedence() const override { return DBPrint::Prec_Postfix; }
 #line 479 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6290 "/root/p4c/build/ir/ir-generated.h"
+#line 6291 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ArrayIndex const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "ArrayIndex"_cs; }
@@ -6306,7 +6307,7 @@ class ArrayIndex : public Operation_Binary {
 {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-#line 6310 "/root/p4c/build/ir/ir-generated.h"
+#line 6311 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ArrayIndex(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -6315,7 +6316,7 @@ class ArrayIndex : public Operation_Binary {
 {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-#line 6319 "/root/p4c/build/ir/ir-generated.h"
+#line 6320 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ArrayIndex(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -6324,7 +6325,7 @@ class ArrayIndex : public Operation_Binary {
 {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-#line 6328 "/root/p4c/build/ir/ir-generated.h"
+#line 6329 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ArrayIndex(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -6333,7 +6334,7 @@ class ArrayIndex : public Operation_Binary {
 {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
-#line 6337 "/root/p4c/build/ir/ir-generated.h"
+#line 6338 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(ArrayIndex)
     DECLARE_TYPEINFO_WITH_TYPEID(ArrayIndex, NodeKind::ArrayIndex, Operation_Binary);
@@ -6362,7 +6363,7 @@ class Range : public Operation_Binary {
 #line 485 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6366 "/root/p4c/build/ir/ir-generated.h"
+#line 6367 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Range(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -6370,7 +6371,7 @@ class Range : public Operation_Binary {
 #line 485 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6374 "/root/p4c/build/ir/ir-generated.h"
+#line 6375 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Range(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -6378,7 +6379,7 @@ class Range : public Operation_Binary {
 #line 485 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6382 "/root/p4c/build/ir/ir-generated.h"
+#line 6383 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Range(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -6386,7 +6387,7 @@ class Range : public Operation_Binary {
 #line 485 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6390 "/root/p4c/build/ir/ir-generated.h"
+#line 6391 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Range)
     DECLARE_TYPEINFO_WITH_TYPEID(Range, NodeKind::Range, Operation_Binary);
@@ -6415,7 +6416,7 @@ class Mask : public Operation_Binary {
 #line 492 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6419 "/root/p4c/build/ir/ir-generated.h"
+#line 6420 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mask(const IR::Type* type, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(type, left, right)
@@ -6423,7 +6424,7 @@ class Mask : public Operation_Binary {
 #line 492 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6427 "/root/p4c/build/ir/ir-generated.h"
+#line 6428 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mask(Util::SourceInfo srcInfo, const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(srcInfo, left, right)
@@ -6431,7 +6432,7 @@ class Mask : public Operation_Binary {
 #line 492 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6435 "/root/p4c/build/ir/ir-generated.h"
+#line 6436 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mask(const IR::Expression* left, const IR::Expression* right) :
     Operation_Binary(left, right)
@@ -6439,7 +6440,7 @@ class Mask : public Operation_Binary {
 #line 492 "/root/p4c/ir/expression.def"
 { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
-#line 6443 "/root/p4c/build/ir/ir-generated.h"
+#line 6444 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Mask)
     DECLARE_TYPEINFO_WITH_TYPEID(Mask, NodeKind::Mask, Operation_Binary);
@@ -6453,7 +6454,7 @@ class Mux : public Operation_Ternary {
 #line 499 "/root/p4c/ir/expression.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 6457 "/root/p4c/build/ir/ir-generated.h"
+#line 6458 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Mux const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Mux"_cs; }
@@ -6471,28 +6472,28 @@ class Mux : public Operation_Ternary {
     {
 #line 503 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
-#line 6475 "/root/p4c/build/ir/ir-generated.h"
+#line 6476 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mux(const IR::Type* type, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     Operation_Ternary(type, e0, e1, e2)
     {
 #line 503 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
-#line 6482 "/root/p4c/build/ir/ir-generated.h"
+#line 6483 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mux(Util::SourceInfo srcInfo, const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     Operation_Ternary(srcInfo, e0, e1, e2)
     {
 #line 503 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
-#line 6489 "/root/p4c/build/ir/ir-generated.h"
+#line 6490 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     Mux(const IR::Expression* e0, const IR::Expression* e1, const IR::Expression* e2) :
     Operation_Ternary(e0, e1, e2)
     {
 #line 503 "/root/p4c/ir/expression.def"
 { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
-#line 6496 "/root/p4c/build/ir/ir-generated.h"
+#line 6497 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(Mux)
     DECLARE_TYPEINFO_WITH_TYPEID(Mux, NodeKind::Mux, Operation_Ternary);
@@ -6533,7 +6534,7 @@ class This : public Expression {
     long id = nextId++;
 #line 512 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6537 "/root/p4c/build/ir/ir-generated.h"
+#line 6538 "/root/p4c/build/ir/ir-generated.h"
  private:
     static long nextId;
  public:
@@ -6574,10 +6575,10 @@ class Cast : public Operation_Unary {
     cstring getStringOp() const override { return cstring("(cast)"); }
 #line 524 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6578 "/root/p4c/build/ir/ir-generated.h"
+#line 6579 "/root/p4c/build/ir/ir-generated.h"
 #line 525 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 6581 "/root/p4c/build/ir/ir-generated.h"
+#line 6582 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Cast const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -6615,7 +6616,7 @@ class SelectCase : public Node {
     const IR::PathExpression* state = nullptr;
 #line 531 "/root/p4c/ir/expression.def"
     void dbprint(std::ostream & out) const override;
-#line 6619 "/root/p4c/build/ir/ir-generated.h"
+#line 6620 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SelectCase const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -6645,7 +6646,7 @@ class SelectExpression : public Expression {
 #line 537 "/root/p4c/ir/expression.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 6649 "/root/p4c/build/ir/ir-generated.h"
+#line 6650 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SelectExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -6681,19 +6682,19 @@ class MethodCallExpression : public Expression {
     const IR::Vector<IR::Argument>* arguments = new Vector<Argument>;
 #line 547 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6685 "/root/p4c/build/ir/ir-generated.h"
+#line 6686 "/root/p4c/build/ir/ir-generated.h"
 #line 556 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 6688 "/root/p4c/build/ir/ir-generated.h"
+#line 6689 "/root/p4c/build/ir/ir-generated.h"
 #line 557 "/root/p4c/ir/expression.def"
     MethodCallExpression(Util::SourceInfo si, IR::ID m, std::initializer_list<const IR::Argument *> a) : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}
-#line 6691 "/root/p4c/build/ir/ir-generated.h"
+#line 6692 "/root/p4c/build/ir/ir-generated.h"
 #line 559 "/root/p4c/ir/expression.def"
     MethodCallExpression(Util::SourceInfo si, const IR::Expression* m, std::initializer_list<const IR::Argument *> const & a) : Expression(si), method(m), arguments(new Vector<Argument>(a)) {}
-#line 6694 "/root/p4c/build/ir/ir-generated.h"
+#line 6695 "/root/p4c/build/ir/ir-generated.h"
 #line 562 "/root/p4c/ir/expression.def"
     MethodCallExpression(const IR::Expression* m, std::initializer_list<IR::Expression const *> const & a);
-#line 6697 "/root/p4c/build/ir/ir-generated.h"
+#line 6698 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::MethodCallExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -6766,10 +6767,10 @@ class ConstructorCallExpression : public Expression {
     const IR::Vector<IR::Argument>* arguments = nullptr;
 #line 572 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6770 "/root/p4c/build/ir/ir-generated.h"
+#line 6771 "/root/p4c/build/ir/ir-generated.h"
 #line 573 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 6773 "/root/p4c/build/ir/ir-generated.h"
+#line 6774 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ConstructorCallExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -6804,13 +6805,13 @@ class BaseListExpression : public Expression {
     IR::Vector<IR::Expression> components;
 #line 581 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 6808 "/root/p4c/build/ir/ir-generated.h"
+#line 6809 "/root/p4c/build/ir/ir-generated.h"
 #line 582 "/root/p4c/ir/expression.def"
     size_t size() const { return components.size(); }
-#line 6811 "/root/p4c/build/ir/ir-generated.h"
+#line 6812 "/root/p4c/build/ir/ir-generated.h"
 #line 583 "/root/p4c/ir/expression.def"
     void push_back(const IR::Expression* e) { components.push_back(e); }
-#line 6814 "/root/p4c/build/ir/ir-generated.h"
+#line 6815 "/root/p4c/build/ir/ir-generated.h"
 #line 584 "/root/p4c/ir/expression.def"
     bool containsDots() const {
         if (components.empty())
@@ -6818,10 +6819,10 @@ class BaseListExpression : public Expression {
         size_t size = components.size();
         return components.at(size - 1)->is<IR::Dots>();
     }
-#line 6822 "/root/p4c/build/ir/ir-generated.h"
+#line 6823 "/root/p4c/build/ir/ir-generated.h"
 #line 590 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 6825 "/root/p4c/build/ir/ir-generated.h"
+#line 6826 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::BaseListExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -6875,7 +6876,7 @@ class ListExpression : public BaseListExpression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-#line 6879 "/root/p4c/build/ir/ir-generated.h"
+#line 6880 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ListExpression(const IR::Type* type, IR::Vector<IR::Expression> components) :
     BaseListExpression(type, components)
@@ -6888,7 +6889,7 @@ class ListExpression : public BaseListExpression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-#line 6892 "/root/p4c/build/ir/ir-generated.h"
+#line 6893 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression> components) :
     BaseListExpression(srcInfo, components)
@@ -6901,7 +6902,7 @@ class ListExpression : public BaseListExpression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-#line 6905 "/root/p4c/build/ir/ir-generated.h"
+#line 6906 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ListExpression(IR::Vector<IR::Expression> components) :
     BaseListExpression(components)
@@ -6914,7 +6915,7 @@ class ListExpression : public BaseListExpression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-#line 6918 "/root/p4c/build/ir/ir-generated.h"
+#line 6919 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(ListExpression)
     DECLARE_TYPEINFO_WITH_TYPEID(ListExpression, NodeKind::ListExpression, BaseListExpression);
@@ -6948,7 +6949,7 @@ class P4ListExpression : public BaseListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             type = new Type_P4List(elementType); } }
-#line 6952 "/root/p4c/build/ir/ir-generated.h"
+#line 6953 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     P4ListExpression(const IR::Type* type, IR::Vector<IR::Expression> components, const IR::Type* elementType) :
     BaseListExpression(type, components), elementType(elementType)
@@ -6958,7 +6959,7 @@ class P4ListExpression : public BaseListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             type = new Type_P4List(elementType); } }
-#line 6962 "/root/p4c/build/ir/ir-generated.h"
+#line 6963 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     P4ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression> components, const IR::Type* elementType) :
     BaseListExpression(srcInfo, components), elementType(elementType)
@@ -6968,7 +6969,7 @@ class P4ListExpression : public BaseListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             type = new Type_P4List(elementType); } }
-#line 6972 "/root/p4c/build/ir/ir-generated.h"
+#line 6973 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     P4ListExpression(IR::Vector<IR::Expression> components, const IR::Type* elementType) :
     BaseListExpression(components), elementType(elementType)
@@ -6978,7 +6979,7 @@ class P4ListExpression : public BaseListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             type = new Type_P4List(elementType); } }
-#line 6982 "/root/p4c/build/ir/ir-generated.h"
+#line 6983 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(P4ListExpression)
     DECLARE_TYPEINFO_WITH_TYPEID(P4ListExpression, NodeKind::P4ListExpression, BaseListExpression);
@@ -6994,14 +6995,14 @@ class StructExpression : public Expression {
     IR::IndexedVector<IR::NamedExpression> components;
 #line 629 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 6998 "/root/p4c/build/ir/ir-generated.h"
+#line 6999 "/root/p4c/build/ir/ir-generated.h"
 #line 635 "/root/p4c/ir/expression.def"
     size_t size() const { return components.size(); }
-#line 7001 "/root/p4c/build/ir/ir-generated.h"
+#line 7002 "/root/p4c/build/ir/ir-generated.h"
 #line 636 "/root/p4c/ir/expression.def"
     const IR::NamedExpression *getField(cstring name) const {
         return components.getDeclaration<NamedExpression>(name); }
-#line 7005 "/root/p4c/build/ir/ir-generated.h"
+#line 7006 "/root/p4c/build/ir/ir-generated.h"
 #line 638 "/root/p4c/ir/expression.def"
     bool containsDots() const {
         if (components.empty())
@@ -7009,10 +7010,10 @@ class StructExpression : public Expression {
         size_t size = components.size();
         return components.at(size - 1)->is<IR::NamedDots>();
     }
-#line 7013 "/root/p4c/build/ir/ir-generated.h"
+#line 7014 "/root/p4c/build/ir/ir-generated.h"
 #line 644 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 7016 "/root/p4c/build/ir/ir-generated.h"
+#line 7017 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::StructExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7146,7 +7147,7 @@ class HeaderStackExpression : public BaseListExpression {
     const IR::Type* headerStackType = nullptr;
 #line 673 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 7150 "/root/p4c/build/ir/ir-generated.h"
+#line 7151 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::HeaderStackExpression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7184,7 +7185,7 @@ class ListCompileTimeValue : public Node, public virtual CompileTimeValue {
     IR::Vector<IR::Node> components;
 #line 682 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 7188 "/root/p4c/build/ir/ir-generated.h"
+#line 7189 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ListCompileTimeValue const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7213,7 +7214,7 @@ class P4ListCompileTimeValue : public Node, public virtual CompileTimeValue {
     IR::Vector<IR::Node> components;
 #line 692 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 7217 "/root/p4c/build/ir/ir-generated.h"
+#line 7218 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4ListCompileTimeValue const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7242,7 +7243,7 @@ class StructCompileTimeValue : public Node, public virtual CompileTimeValue {
     IR::Vector<IR::Node> components;
 #line 702 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 7246 "/root/p4c/build/ir/ir-generated.h"
+#line 7247 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::StructCompileTimeValue const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7270,10 +7271,10 @@ class CompileTimeMethodCall : public MethodCallExpression, public virtual Compil
  public:
 #line 711 "/root/p4c/ir/expression.def"
     CompileTimeMethodCall(const IR::MethodCallExpression* e) : MethodCallExpression(*e) {}
-#line 7274 "/root/p4c/build/ir/ir-generated.h"
+#line 7275 "/root/p4c/build/ir/ir-generated.h"
 #line 712 "/root/p4c/ir/expression.def"
     void validate() const override;
-#line 7277 "/root/p4c/build/ir/ir-generated.h"
+#line 7278 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::CompileTimeMethodCall const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "CompileTimeMethodCall"_cs; }
@@ -7346,19 +7347,19 @@ class SymbolicVariable : public Expression {
 /// A symbolic variable always has a type and no source info.
 #line 727 "/root/p4c/ir/expression.def"
     SymbolicVariable(const IR::Type* type, cstring label) : Expression(type), label(label) {}
-#line 7350 "/root/p4c/build/ir/ir-generated.h"
+#line 7351 "/root/p4c/build/ir/ir-generated.h"
 /// Implements comparisons so that SymbolicVariables can be used as map keys.
 #line 730 "/root/p4c/ir/expression.def"
     bool operator<(IR::SymbolicVariable const & other) const {
         return label < other.label;
     }
-#line 7356 "/root/p4c/build/ir/ir-generated.h"
+#line 7357 "/root/p4c/build/ir/ir-generated.h"
 #line 734 "/root/p4c/ir/expression.def"
     cstring toString() const override;
-#line 7359 "/root/p4c/build/ir/ir-generated.h"
+#line 7360 "/root/p4c/build/ir/ir-generated.h"
 #line 736 "/root/p4c/ir/expression.def"
     void dbprint(std::ostream & out) const override;
-#line 7362 "/root/p4c/build/ir/ir-generated.h"
+#line 7363 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SymbolicVariable const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "SymbolicVariable"_cs; }
@@ -7436,29 +7437,29 @@ class ParserState : public virtual ISimpleNamespace, public Declaration, public 
     const IR::Expression* selectExpression = nullptr;
 #line 63 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 7440 "/root/p4c/build/ir/ir-generated.h"
+#line 7441 "/root/p4c/build/ir/ir-generated.h"
 #line 64 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 7443 "/root/p4c/build/ir/ir-generated.h"
+#line 7444 "/root/p4c/build/ir/ir-generated.h"
 #line 65 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7446 "/root/p4c/build/ir/ir-generated.h"
+#line 7447 "/root/p4c/build/ir/ir-generated.h"
 #line 67 "/root/p4c/ir/ir.def"
     IR::IDeclaration const * getDeclByName(cstring name) const override;
-#line 7449 "/root/p4c/build/ir/ir-generated.h"
+#line 7450 "/root/p4c/build/ir/ir-generated.h"
 #line 69 "/root/p4c/ir/ir.def"
     IR::IDeclaration const * getDeclByName(std::string_view name) const override;
-#line 7452 "/root/p4c/build/ir/ir-generated.h"
+#line 7453 "/root/p4c/build/ir/ir-generated.h"
     static const cstring accept;
     static const cstring reject;
     static const cstring start;
     static const cstring verify;
 #line 76 "/root/p4c/ir/ir.def"
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
-#line 7459 "/root/p4c/build/ir/ir-generated.h"
+#line 7460 "/root/p4c/build/ir/ir-generated.h"
 #line 77 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7462 "/root/p4c/build/ir/ir-generated.h"
+#line 7463 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ParserState const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7510,50 +7511,50 @@ class P4Parser : public Type_Declaration, public virtual INestedNamespace, publi
     IR::IndexedVector<IR::ParserState> states;
 #line 92 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 7514 "/root/p4c/build/ir/ir-generated.h"
+#line 7515 "/root/p4c/build/ir/ir-generated.h"
 #line 93 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 7517 "/root/p4c/build/ir/ir-generated.h"
+#line 7518 "/root/p4c/build/ir/ir-generated.h"
 #line 94 "/root/p4c/ir/ir.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 7520 "/root/p4c/build/ir/ir-generated.h"
+#line 7521 "/root/p4c/build/ir/ir-generated.h"
 #line 95 "/root/p4c/ir/ir.def"
     std::vector<const IR::INamespace *> getNestedNamespaces() const override;
-#line 7523 "/root/p4c/build/ir/ir-generated.h"
+#line 7524 "/root/p4c/build/ir/ir-generated.h"
 #line 97 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7526 "/root/p4c/build/ir/ir-generated.h"
+#line 7527 "/root/p4c/build/ir/ir-generated.h"
 #line 99 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 7529 "/root/p4c/build/ir/ir-generated.h"
+#line 7530 "/root/p4c/build/ir/ir-generated.h"
 #line 103 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 7532 "/root/p4c/build/ir/ir-generated.h"
+#line 7533 "/root/p4c/build/ir/ir-generated.h"
 #line 108 "/root/p4c/ir/ir.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 7535 "/root/p4c/build/ir/ir-generated.h"
+#line 7536 "/root/p4c/build/ir/ir-generated.h"
 #line 109 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 7538 "/root/p4c/build/ir/ir-generated.h"
+#line 7539 "/root/p4c/build/ir/ir-generated.h"
 #line 110 "/root/p4c/ir/ir.def"
     const IR::Type_Method *getConstructorMethodType() const override;
-#line 7541 "/root/p4c/build/ir/ir-generated.h"
+#line 7542 "/root/p4c/build/ir/ir-generated.h"
 #line 111 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 7544 "/root/p4c/build/ir/ir-generated.h"
+#line 7545 "/root/p4c/build/ir/ir-generated.h"
 #line 112 "/root/p4c/ir/ir.def"
     void checkDuplicates() const;
-#line 7547 "/root/p4c/build/ir/ir-generated.h"
+#line 7548 "/root/p4c/build/ir/ir-generated.h"
 #line 113 "/root/p4c/ir/ir.def"
     const IR::Type *getType() const override;
-#line 7550 "/root/p4c/build/ir/ir-generated.h"
+#line 7551 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(P4Parser)
 #line 115 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7554 "/root/p4c/build/ir/ir-generated.h"
+#line 7555 "/root/p4c/build/ir/ir-generated.h"
 #line 124 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 7557 "/root/p4c/build/ir/ir-generated.h"
+#line 7558 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4Parser const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7628,47 +7629,47 @@ class P4Control : public Type_Declaration, public virtual INestedNamespace, publ
     const IR::BlockStatement* body = nullptr;
 #line 133 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 7632 "/root/p4c/build/ir/ir-generated.h"
+#line 7633 "/root/p4c/build/ir/ir-generated.h"
 #line 134 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 7635 "/root/p4c/build/ir/ir-generated.h"
+#line 7636 "/root/p4c/build/ir/ir-generated.h"
 #line 135 "/root/p4c/ir/ir.def"
     const IR::TypeParameters *getTypeParameters() const override;
-#line 7638 "/root/p4c/build/ir/ir-generated.h"
+#line 7639 "/root/p4c/build/ir/ir-generated.h"
 #line 136 "/root/p4c/ir/ir.def"
     std::vector<const IR::INamespace *> getNestedNamespaces() const override;
-#line 7641 "/root/p4c/build/ir/ir-generated.h"
+#line 7642 "/root/p4c/build/ir/ir-generated.h"
 #line 138 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7644 "/root/p4c/build/ir/ir-generated.h"
+#line 7645 "/root/p4c/build/ir/ir-generated.h"
 #line 140 "/root/p4c/ir/ir.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 7647 "/root/p4c/build/ir/ir-generated.h"
+#line 7648 "/root/p4c/build/ir/ir-generated.h"
 #line 141 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 7650 "/root/p4c/build/ir/ir-generated.h"
+#line 7651 "/root/p4c/build/ir/ir-generated.h"
 #line 142 "/root/p4c/ir/ir.def"
     const IR::Type_Method *getConstructorMethodType() const override;
-#line 7653 "/root/p4c/build/ir/ir-generated.h"
+#line 7654 "/root/p4c/build/ir/ir-generated.h"
 #line 143 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 7656 "/root/p4c/build/ir/ir-generated.h"
+#line 7657 "/root/p4c/build/ir/ir-generated.h"
 #line 145 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 7659 "/root/p4c/build/ir/ir-generated.h"
+#line 7660 "/root/p4c/build/ir/ir-generated.h"
 #line 147 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 7662 "/root/p4c/build/ir/ir-generated.h"
+#line 7663 "/root/p4c/build/ir/ir-generated.h"
 #line 148 "/root/p4c/ir/ir.def"
     const IR::Type *getType() const override;
-#line 7665 "/root/p4c/build/ir/ir-generated.h"
+#line 7666 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(P4Control)
 #line 150 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7669 "/root/p4c/build/ir/ir-generated.h"
+#line 7670 "/root/p4c/build/ir/ir-generated.h"
 #line 155 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 7672 "/root/p4c/build/ir/ir-generated.h"
+#line 7673 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4Control const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7719,22 +7720,22 @@ class P4Action : public Declaration, public virtual ISimpleNamespace, public vir
     const IR::BlockStatement* body = nullptr;
 #line 163 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7723 "/root/p4c/build/ir/ir-generated.h"
+#line 7724 "/root/p4c/build/ir/ir-generated.h"
 #line 165 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 7726 "/root/p4c/build/ir/ir-generated.h"
+#line 7727 "/root/p4c/build/ir/ir-generated.h"
 #line 167 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 7729 "/root/p4c/build/ir/ir-generated.h"
+#line 7730 "/root/p4c/build/ir/ir-generated.h"
 #line 169 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 7732 "/root/p4c/build/ir/ir-generated.h"
+#line 7733 "/root/p4c/build/ir/ir-generated.h"
 #line 170 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 7735 "/root/p4c/build/ir/ir-generated.h"
+#line 7736 "/root/p4c/build/ir/ir-generated.h"
 #line 171 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getParameters() const override;
-#line 7738 "/root/p4c/build/ir/ir-generated.h"
+#line 7739 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4Action const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7772,16 +7773,16 @@ class Type_Error : public virtual ISimpleNamespace, public Type_Declaration {
     IR::IndexedVector<IR::Declaration_ID> members;
 #line 177 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7776 "/root/p4c/build/ir/ir-generated.h"
+#line 7777 "/root/p4c/build/ir/ir-generated.h"
 #line 179 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 7779 "/root/p4c/build/ir/ir-generated.h"
+#line 7780 "/root/p4c/build/ir/ir-generated.h"
 #line 181 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 7782 "/root/p4c/build/ir/ir-generated.h"
+#line 7783 "/root/p4c/build/ir/ir-generated.h"
 #line 183 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7785 "/root/p4c/build/ir/ir-generated.h"
+#line 7786 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Error const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7818,16 +7819,16 @@ class Declaration_MatchKind : public Node, public virtual ISimpleNamespace {
     IR::IndexedVector<IR::Declaration_ID> members;
 #line 189 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 7822 "/root/p4c/build/ir/ir-generated.h"
+#line 7823 "/root/p4c/build/ir/ir-generated.h"
 #line 191 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 7825 "/root/p4c/build/ir/ir-generated.h"
+#line 7826 "/root/p4c/build/ir/ir-generated.h"
 #line 193 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 7828 "/root/p4c/build/ir/ir-generated.h"
+#line 7829 "/root/p4c/build/ir/ir-generated.h"
 #line 195 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7831 "/root/p4c/build/ir/ir-generated.h"
+#line 7832 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Declaration_MatchKind const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7882,7 +7883,7 @@ class ExpressionValue : public PropertyValue {
     const IR::Expression* expression = nullptr;
 #line 204 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 7886 "/root/p4c/build/ir/ir-generated.h"
+#line 7887 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ExpressionValue const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7911,7 +7912,7 @@ class ExpressionListValue : public PropertyValue {
     IR::Vector<IR::Expression> expressions;
 #line 209 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 7915 "/root/p4c/build/ir/ir-generated.h"
+#line 7916 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ExpressionListValue const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7943,25 +7944,25 @@ class ActionListElement : public Node, public virtual IAnnotated, public virtual
 
 #line 216 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 7947 "/root/p4c/build/ir/ir-generated.h"
+#line 7948 "/root/p4c/build/ir/ir-generated.h"
 #line 217 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 7950 "/root/p4c/build/ir/ir-generated.h"
+#line 7951 "/root/p4c/build/ir/ir-generated.h"
 #line 218 "/root/p4c/ir/ir.def"
     const IR::Path *getPath() const;
-#line 7953 "/root/p4c/build/ir/ir-generated.h"
+#line 7954 "/root/p4c/build/ir/ir-generated.h"
 #line 219 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 7956 "/root/p4c/build/ir/ir-generated.h"
+#line 7957 "/root/p4c/build/ir/ir-generated.h"
 #line 220 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 7959 "/root/p4c/build/ir/ir-generated.h"
+#line 7960 "/root/p4c/build/ir/ir-generated.h"
 #line 221 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7962 "/root/p4c/build/ir/ir-generated.h"
+#line 7963 "/root/p4c/build/ir/ir-generated.h"
 #line 226 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 7965 "/root/p4c/build/ir/ir-generated.h"
+#line 7966 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionListElement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -7995,17 +7996,17 @@ class ActionList : public PropertyValue {
     IR::IndexedVector<IR::ActionListElement> actionList;
 #line 232 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 7999 "/root/p4c/build/ir/ir-generated.h"
+#line 8000 "/root/p4c/build/ir/ir-generated.h"
 #line 233 "/root/p4c/ir/ir.def"
     size_t size() const { return actionList.size(); }
-#line 8002 "/root/p4c/build/ir/ir-generated.h"
+#line 8003 "/root/p4c/build/ir/ir-generated.h"
 #line 234 "/root/p4c/ir/ir.def"
     void push_back(const IR::ActionListElement* e) { actionList.push_back(e); }
-#line 8005 "/root/p4c/build/ir/ir-generated.h"
+#line 8006 "/root/p4c/build/ir/ir-generated.h"
 #line 235 "/root/p4c/ir/ir.def"
     const IR::ActionListElement *getDeclaration(cstring n) const {
         return actionList.getDeclaration<ActionListElement>(n); }
-#line 8009 "/root/p4c/build/ir/ir-generated.h"
+#line 8010 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8036,13 +8037,13 @@ class KeyElement : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 244 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8040 "/root/p4c/build/ir/ir-generated.h"
+#line 8041 "/root/p4c/build/ir/ir-generated.h"
 #line 245 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8043 "/root/p4c/build/ir/ir-generated.h"
+#line 8044 "/root/p4c/build/ir/ir-generated.h"
 #line 246 "/root/p4c/ir/ir.def"
     IR::Node const * transform_visit(Transform & v);
-#line 8046 "/root/p4c/build/ir/ir-generated.h"
+#line 8047 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::KeyElement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8078,10 +8079,10 @@ class Key : public PropertyValue {
     IR::Vector<IR::KeyElement> keyElements;
 #line 269 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 8082 "/root/p4c/build/ir/ir-generated.h"
+#line 8083 "/root/p4c/build/ir/ir-generated.h"
 #line 270 "/root/p4c/ir/ir.def"
     void push_back(const IR::KeyElement* ke) { keyElements.push_back(ke); }
-#line 8085 "/root/p4c/build/ir/ir-generated.h"
+#line 8086 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Key const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8123,19 +8124,19 @@ class Entry : public Node, public virtual IAnnotated {
 /// True if the entry is not a list.
 #line 284 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8127 "/root/p4c/build/ir/ir-generated.h"
+#line 8128 "/root/p4c/build/ir/ir-generated.h"
 #line 285 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8130 "/root/p4c/build/ir/ir-generated.h"
+#line 8131 "/root/p4c/build/ir/ir-generated.h"
 #line 286 "/root/p4c/ir/ir.def"
     const IR::ListExpression *getKeys() const { return keys; }
-#line 8133 "/root/p4c/build/ir/ir-generated.h"
+#line 8134 "/root/p4c/build/ir/ir-generated.h"
 #line 287 "/root/p4c/ir/ir.def"
     const IR::Expression *getAction() const { return action; }
-#line 8136 "/root/p4c/build/ir/ir-generated.h"
+#line 8137 "/root/p4c/build/ir/ir-generated.h"
 #line 288 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8139 "/root/p4c/build/ir/ir-generated.h"
+#line 8140 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Entry const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8171,10 +8172,10 @@ class EntriesList : public PropertyValue {
     IR::Vector<IR::Entry> entries;
 #line 294 "/root/p4c/ir/ir.def"
     size_t size() const { return entries.size(); }
-#line 8175 "/root/p4c/build/ir/ir-generated.h"
+#line 8176 "/root/p4c/build/ir/ir-generated.h"
 #line 295 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8178 "/root/p4c/build/ir/ir-generated.h"
+#line 8179 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::EntriesList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8205,13 +8206,13 @@ class Property : public Declaration, public virtual IAnnotated {
     bool isConstant;
 #line 302 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8209 "/root/p4c/build/ir/ir-generated.h"
+#line 8210 "/root/p4c/build/ir/ir-generated.h"
 #line 303 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8212 "/root/p4c/build/ir/ir-generated.h"
+#line 8213 "/root/p4c/build/ir/ir-generated.h"
 #line 304 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8215 "/root/p4c/build/ir/ir-generated.h"
+#line 8216 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Property const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8248,27 +8249,27 @@ class TableProperties : public Node, public virtual ISimpleNamespace {
     IR::IndexedVector<IR::Property> properties;
 #line 309 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8252 "/root/p4c/build/ir/ir-generated.h"
+#line 8253 "/root/p4c/build/ir/ir-generated.h"
 #line 310 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 8255 "/root/p4c/build/ir/ir-generated.h"
+#line 8256 "/root/p4c/build/ir/ir-generated.h"
 #line 312 "/root/p4c/ir/ir.def"
     const IR::Property *getProperty(cstring name) const {
         return properties.getDeclaration<Property>(name); }
-#line 8259 "/root/p4c/build/ir/ir-generated.h"
+#line 8260 "/root/p4c/build/ir/ir-generated.h"
 #line 314 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 8262 "/root/p4c/build/ir/ir-generated.h"
+#line 8263 "/root/p4c/build/ir/ir-generated.h"
 #line 316 "/root/p4c/ir/ir.def"
     const IR::Property *getProperty(std::string_view name) const {
         return properties.getDeclaration<Property>(name); }
-#line 8266 "/root/p4c/build/ir/ir-generated.h"
+#line 8267 "/root/p4c/build/ir/ir-generated.h"
 #line 318 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 8269 "/root/p4c/build/ir/ir-generated.h"
+#line 8270 "/root/p4c/build/ir/ir-generated.h"
 #line 320 "/root/p4c/ir/ir.def"
     void push_back(const IR::Property* prop) { properties.push_back(prop); }
-#line 8272 "/root/p4c/build/ir/ir-generated.h"
+#line 8273 "/root/p4c/build/ir/ir-generated.h"
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
@@ -8276,7 +8277,7 @@ class TableProperties : public Node, public virtual ISimpleNamespace {
     static const cstring sizePropertyName;
 #line 328 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 8280 "/root/p4c/build/ir/ir-generated.h"
+#line 8281 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TableProperties const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8309,16 +8310,16 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
     const IR::TableProperties* properties = nullptr;
 #line 335 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8313 "/root/p4c/build/ir/ir-generated.h"
+#line 8314 "/root/p4c/build/ir/ir-generated.h"
 #line 336 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8316 "/root/p4c/build/ir/ir-generated.h"
+#line 8317 "/root/p4c/build/ir/ir-generated.h"
 #line 337 "/root/p4c/ir/ir.def"
     const IR::Type_Method *getApplyMethodType() const override;
-#line 8319 "/root/p4c/build/ir/ir-generated.h"
+#line 8320 "/root/p4c/build/ir/ir-generated.h"
 #line 338 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getApplyParameters() const override;
-#line 8322 "/root/p4c/build/ir/ir-generated.h"
+#line 8323 "/root/p4c/build/ir/ir-generated.h"
 #line 339 "/root/p4c/ir/ir.def"
     const IR::ActionList *getActionList() const {
         if (auto ap = properties->getProperty(TableProperties::actionsPropertyName)) {
@@ -8327,7 +8328,7 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
         }
         return nullptr;
     }
-#line 8331 "/root/p4c/build/ir/ir-generated.h"
+#line 8332 "/root/p4c/build/ir/ir-generated.h"
 #line 346 "/root/p4c/ir/ir.def"
     const IR::Key *getKey() const {
         if (auto kp = properties->getProperty(TableProperties::keyPropertyName)) {
@@ -8336,7 +8337,7 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
         }
         return nullptr;
     }
-#line 8340 "/root/p4c/build/ir/ir-generated.h"
+#line 8341 "/root/p4c/build/ir/ir-generated.h"
 #line 353 "/root/p4c/ir/ir.def"
     const IR::Expression *getDefaultAction() const {
         if (auto d = properties->getProperty(TableProperties::defaultActionPropertyName)) {
@@ -8345,7 +8346,7 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
         }
         return nullptr;
     }
-#line 8349 "/root/p4c/build/ir/ir-generated.h"
+#line 8350 "/root/p4c/build/ir/ir-generated.h"
 #line 360 "/root/p4c/ir/ir.def"
     const IR::Constant *getConstantProperty(cstring name) const {
         if (auto d = properties->getProperty(name)) {
@@ -8354,7 +8355,7 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
         return nullptr; }
-#line 8358 "/root/p4c/build/ir/ir-generated.h"
+#line 8359 "/root/p4c/build/ir/ir-generated.h"
 #line 367 "/root/p4c/ir/ir.def"
     const IR::BoolLiteral *getBooleanProperty(cstring name) const {
         if (auto d = properties->getProperty(name)) {
@@ -8363,12 +8364,12 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
         return nullptr; }
-#line 8367 "/root/p4c/build/ir/ir-generated.h"
+#line 8368 "/root/p4c/build/ir/ir-generated.h"
 #line 374 "/root/p4c/ir/ir.def"
     const IR::Constant *getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
     }
-#line 8372 "/root/p4c/build/ir/ir-generated.h"
+#line 8373 "/root/p4c/build/ir/ir-generated.h"
 #line 377 "/root/p4c/ir/ir.def"
     const IR::EntriesList *getEntries() const {
         if (auto ep = properties->getProperty(TableProperties::entriesPropertyName)) {
@@ -8377,7 +8378,7 @@ class P4Table : public Declaration, public virtual IAnnotated, public virtual IA
         }
         return nullptr;
     }
-#line 8381 "/root/p4c/build/ir/ir-generated.h"
+#line 8382 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4Table const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8417,10 +8418,10 @@ class P4ValueSet : public Declaration, public virtual IAnnotated {
 
 #line 390 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8421 "/root/p4c/build/ir/ir-generated.h"
+#line 8422 "/root/p4c/build/ir/ir-generated.h"
 #line 391 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8424 "/root/p4c/build/ir/ir-generated.h"
+#line 8425 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P4ValueSet const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8459,13 +8460,13 @@ class Declaration_Variable : public Declaration, public virtual IAnnotated {
     const IR::Expression* initializer = nullptr;
 #line 399 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8463 "/root/p4c/build/ir/ir-generated.h"
+#line 8464 "/root/p4c/build/ir/ir-generated.h"
 #line 400 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8466 "/root/p4c/build/ir/ir-generated.h"
+#line 8467 "/root/p4c/build/ir/ir-generated.h"
 #line 401 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8469 "/root/p4c/build/ir/ir-generated.h"
+#line 8470 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Declaration_Variable const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8515,16 +8516,16 @@ class Declaration_Constant : public Declaration, public virtual IAnnotated {
     const IR::Expression* initializer = nullptr;
 #line 411 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8519 "/root/p4c/build/ir/ir-generated.h"
+#line 8520 "/root/p4c/build/ir/ir-generated.h"
 #line 412 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8522 "/root/p4c/build/ir/ir-generated.h"
+#line 8523 "/root/p4c/build/ir/ir-generated.h"
 #line 413 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8525 "/root/p4c/build/ir/ir-generated.h"
+#line 8526 "/root/p4c/build/ir/ir-generated.h"
 #line 414 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8528 "/root/p4c/build/ir/ir-generated.h"
+#line 8529 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Declaration_Constant const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8571,19 +8572,19 @@ class Declaration_Instance : public Declaration, public virtual IAnnotated, publ
 
 #line 429 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8575 "/root/p4c/build/ir/ir-generated.h"
+#line 8576 "/root/p4c/build/ir/ir-generated.h"
 #line 430 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8578 "/root/p4c/build/ir/ir-generated.h"
+#line 8579 "/root/p4c/build/ir/ir-generated.h"
 #line 431 "/root/p4c/ir/ir.def"
     const IR::Type *getType() const override;
-#line 8581 "/root/p4c/build/ir/ir-generated.h"
+#line 8582 "/root/p4c/build/ir/ir-generated.h"
 #line 432 "/root/p4c/ir/ir.def"
     IR::ID Name() const override;
-#line 8584 "/root/p4c/build/ir/ir-generated.h"
+#line 8585 "/root/p4c/build/ir/ir-generated.h"
 #line 433 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 8587 "/root/p4c/build/ir/ir-generated.h"
+#line 8588 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Declaration_Instance const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8636,10 +8637,10 @@ class P4Program : public Node, public virtual IGeneralNamespace {
     IR::Vector<IR::Node> objects;
 #line 443 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 8640 "/root/p4c/build/ir/ir-generated.h"
+#line 8641 "/root/p4c/build/ir/ir-generated.h"
 #line 444 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 8643 "/root/p4c/build/ir/ir-generated.h"
+#line 8644 "/root/p4c/build/ir/ir-generated.h"
     static const cstring main;
     IRNODE_DECLARE_APPLY_OVERLOAD(P4Program)
     bool operator==(IR::P4Program const & a) const override;
@@ -8673,10 +8674,10 @@ class ExitStatement : public Statement {
  public:
 #line 456 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8677 "/root/p4c/build/ir/ir-generated.h"
+#line 8678 "/root/p4c/build/ir/ir-generated.h"
 #line 457 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8680 "/root/p4c/build/ir/ir-generated.h"
+#line 8681 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ExitStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "ExitStatement"_cs; }
@@ -8702,7 +8703,7 @@ class ReturnStatement : public Statement {
     const IR::Expression* expression = nullptr;
 #line 462 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8706 "/root/p4c/build/ir/ir-generated.h"
+#line 8707 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ReturnStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8731,7 +8732,7 @@ class EmptyStatement : public Statement {
  public:
 #line 468 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8735 "/root/p4c/build/ir/ir-generated.h"
+#line 8736 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::EmptyStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "EmptyStatement"_cs; }
@@ -8756,7 +8757,7 @@ class AssignmentStatement : public BaseAssignmentStatement {
  public:
 #line 477 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8760 "/root/p4c/build/ir/ir-generated.h"
+#line 8761 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AssignmentStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "AssignmentStatement"_cs; }
@@ -8788,7 +8789,7 @@ class IfStatement : public Statement {
 #line 490 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 8792 "/root/p4c/build/ir/ir-generated.h"
+#line 8793 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::IfStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -8816,14 +8817,14 @@ class BreakStatement : public Statement {
  public:
 #line 497 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8820 "/root/p4c/build/ir/ir-generated.h"
+#line 8821 "/root/p4c/build/ir/ir-generated.h"
 #line 498 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8823 "/root/p4c/build/ir/ir-generated.h"
+#line 8824 "/root/p4c/build/ir/ir-generated.h"
 #line 499 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 8827 "/root/p4c/build/ir/ir-generated.h"
+#line 8828 "/root/p4c/build/ir/ir-generated.h"
 
     bool operator==(IR::BreakStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -8849,14 +8850,14 @@ class ContinueStatement : public Statement {
  public:
 #line 503 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8853 "/root/p4c/build/ir/ir-generated.h"
+#line 8854 "/root/p4c/build/ir/ir-generated.h"
 #line 504 "/root/p4c/ir/ir.def"
     void dbprint(std::ostream & out) const override;
-#line 8856 "/root/p4c/build/ir/ir-generated.h"
+#line 8857 "/root/p4c/build/ir/ir-generated.h"
 #line 505 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 8860 "/root/p4c/build/ir/ir-generated.h"
+#line 8861 "/root/p4c/build/ir/ir-generated.h"
 
     bool operator==(IR::ContinueStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -8884,31 +8885,31 @@ class BlockStatement : public Statement, public virtual ISimpleNamespace, public
     IR::IndexedVector<IR::StatOrDecl> components;
 #line 511 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 8888 "/root/p4c/build/ir/ir-generated.h"
+#line 8889 "/root/p4c/build/ir/ir-generated.h"
 #line 513 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 8891 "/root/p4c/build/ir/ir-generated.h"
+#line 8892 "/root/p4c/build/ir/ir-generated.h"
 #line 515 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 8894 "/root/p4c/build/ir/ir-generated.h"
+#line 8895 "/root/p4c/build/ir/ir-generated.h"
 #line 517 "/root/p4c/ir/ir.def"
     void push_back(const IR::StatOrDecl* st);
-#line 8897 "/root/p4c/build/ir/ir-generated.h"
+#line 8898 "/root/p4c/build/ir/ir-generated.h"
 #line 518 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 8900 "/root/p4c/build/ir/ir-generated.h"
+#line 8901 "/root/p4c/build/ir/ir-generated.h"
 #line 519 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 8903 "/root/p4c/build/ir/ir-generated.h"
+#line 8904 "/root/p4c/build/ir/ir-generated.h"
 #line 520 "/root/p4c/ir/ir.def"
     bool empty() const { return components.empty(); }
-#line 8906 "/root/p4c/build/ir/ir-generated.h"
+#line 8907 "/root/p4c/build/ir/ir-generated.h"
 #line 521 "/root/p4c/ir/ir.def"
     void append(const IR::StatOrDecl* stmt);
-#line 8909 "/root/p4c/build/ir/ir-generated.h"
+#line 8910 "/root/p4c/build/ir/ir-generated.h"
 #line 522 "/root/p4c/ir/ir.def"
     BlockStatement(std::initializer_list<const IR::StatOrDecl *> il) { for (auto el : il) append(el); }
-#line 8912 "/root/p4c/build/ir/ir-generated.h"
+#line 8913 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::BlockStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8956,13 +8957,13 @@ class MethodCallStatement : public Statement {
     const IR::MethodCallExpression* methodCall = nullptr;
 #line 528 "/root/p4c/ir/ir.def"
     MethodCallStatement(Util::SourceInfo si, IR::ID m, std::initializer_list<const IR::Argument *> const & a) : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
-#line 8960 "/root/p4c/build/ir/ir-generated.h"
+#line 8961 "/root/p4c/build/ir/ir-generated.h"
 #line 530 "/root/p4c/ir/ir.def"
     MethodCallStatement(Util::SourceInfo si, const IR::Expression* m, std::initializer_list<const IR::Argument *> const & a) : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
-#line 8963 "/root/p4c/build/ir/ir-generated.h"
+#line 8964 "/root/p4c/build/ir/ir-generated.h"
 #line 533 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 8966 "/root/p4c/build/ir/ir-generated.h"
+#line 8967 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::MethodCallStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -8982,14 +8983,14 @@ class MethodCallStatement : public Statement {
     {
 #line 527 "/root/p4c/ir/ir.def"
 { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-#line 8986 "/root/p4c/build/ir/ir-generated.h"
+#line 8987 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     MethodCallStatement(const IR::MethodCallExpression* methodCall) :
     methodCall(methodCall)
     {
 #line 527 "/root/p4c/ir/ir.def"
 { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-#line 8993 "/root/p4c/build/ir/ir-generated.h"
+#line 8994 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(MethodCallStatement)
     DECLARE_TYPEINFO_WITH_TYPEID(MethodCallStatement, NodeKind::MethodCallStatement, Statement);
@@ -9003,7 +9004,7 @@ class SwitchCase : public Node {
 
 #line 540 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 9007 "/root/p4c/build/ir/ir-generated.h"
+#line 9008 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SwitchCase const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9033,7 +9034,7 @@ class SwitchStatement : public Statement {
 #line 552 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 9037 "/root/p4c/build/ir/ir-generated.h"
+#line 9038 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::SwitchStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -9063,10 +9064,10 @@ class LoopStatement : public Statement, public virtual ISimpleNamespace, public 
     IR::Vector<IR::Annotation> annotations;
 #line 563 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 9067 "/root/p4c/build/ir/ir-generated.h"
+#line 9068 "/root/p4c/build/ir/ir-generated.h"
 #line 564 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 9070 "/root/p4c/build/ir/ir-generated.h"
+#line 9071 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::LoopStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9104,21 +9105,21 @@ class ForStatement : public LoopStatement {
     const IR::Statement* body = nullptr;
 #line 572 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 9108 "/root/p4c/build/ir/ir-generated.h"
+#line 9109 "/root/p4c/build/ir/ir-generated.h"
 #line 574 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 9111 "/root/p4c/build/ir/ir-generated.h"
+#line 9112 "/root/p4c/build/ir/ir-generated.h"
 #line 576 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 9114 "/root/p4c/build/ir/ir-generated.h"
+#line 9115 "/root/p4c/build/ir/ir-generated.h"
 #line 578 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 9118 "/root/p4c/build/ir/ir-generated.h"
+#line 9119 "/root/p4c/build/ir/ir-generated.h"
 #line 580 "/root/p4c/ir/ir.def"
     // template single implementation of const vs non-const ForStatement
     template<class THIS> static void visit_children(THIS *, Visitor &v);
-#line 9122 "/root/p4c/build/ir/ir-generated.h"
+#line 9123 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ForStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -9160,24 +9161,24 @@ class ForInStatement : public LoopStatement {
     const IR::Statement* body = nullptr;
 #line 594 "/root/p4c/ir/ir.def"
     ForInStatement(Util::SourceInfo si, const IR::Vector<IR::Annotation>* a, const IR::PathExpression* pe, const IR::Expression* c, const IR::Statement* b);
-#line 9164 "/root/p4c/build/ir/ir-generated.h"
+#line 9165 "/root/p4c/build/ir/ir-generated.h"
 #line 596 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 9167 "/root/p4c/build/ir/ir-generated.h"
+#line 9168 "/root/p4c/build/ir/ir-generated.h"
 #line 598 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 9170 "/root/p4c/build/ir/ir-generated.h"
+#line 9171 "/root/p4c/build/ir/ir-generated.h"
 #line 600 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 9173 "/root/p4c/build/ir/ir-generated.h"
+#line 9174 "/root/p4c/build/ir/ir-generated.h"
 #line 603 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 9177 "/root/p4c/build/ir/ir-generated.h"
+#line 9178 "/root/p4c/build/ir/ir-generated.h"
 #line 605 "/root/p4c/ir/ir.def"
     // template single implementation of const vs non-const ForInStatement
     template<class THIS> static void visit_children(THIS *, Visitor &v);
-#line 9181 "/root/p4c/build/ir/ir-generated.h"
+#line 9182 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ForInStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -9196,28 +9197,28 @@ class ForInStatement : public LoopStatement {
     {
 #line 593 "/root/p4c/ir/ir.def"
 { ref = new PathExpression(decl->name); }
-#line 9200 "/root/p4c/build/ir/ir-generated.h"
+#line 9201 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ForInStatement(IR::Vector<IR::Annotation> annotations, const IR::Declaration_Variable* decl, const IR::Expression* collection, const IR::Statement* body) :
     LoopStatement(annotations), decl(decl), collection(collection), body(body)
     {
 #line 593 "/root/p4c/ir/ir.def"
 { ref = new PathExpression(decl->name); }
-#line 9207 "/root/p4c/build/ir/ir-generated.h"
+#line 9208 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ForInStatement(Util::SourceInfo srcInfo, const IR::Declaration_Variable* decl, const IR::Expression* collection, const IR::Statement* body) :
     LoopStatement(srcInfo), decl(decl), collection(collection), body(body)
     {
 #line 593 "/root/p4c/ir/ir.def"
 { ref = new PathExpression(decl->name); }
-#line 9214 "/root/p4c/build/ir/ir-generated.h"
+#line 9215 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ForInStatement(const IR::Declaration_Variable* decl, const IR::Expression* collection, const IR::Statement* body) :
     decl(decl), collection(collection), body(body)
     {
 #line 593 "/root/p4c/ir/ir.def"
 { ref = new PathExpression(decl->name); }
-#line 9221 "/root/p4c/build/ir/ir-generated.h"
+#line 9222 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(ForInStatement)
     DECLARE_TYPEINFO_WITH_TYPEID(ForInStatement, NodeKind::ForInStatement, LoopStatement);
@@ -9232,25 +9233,25 @@ class Function : public Declaration, public virtual IFunctional, public virtual 
     const IR::BlockStatement* body = nullptr;
 #line 616 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getParameters() const override;
-#line 9236 "/root/p4c/build/ir/ir-generated.h"
+#line 9237 "/root/p4c/build/ir/ir-generated.h"
 #line 619 "/root/p4c/ir/ir.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 9239 "/root/p4c/build/ir/ir-generated.h"
+#line 9240 "/root/p4c/build/ir/ir-generated.h"
 #line 621 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 9242 "/root/p4c/build/ir/ir-generated.h"
+#line 9243 "/root/p4c/build/ir/ir-generated.h"
 #line 623 "/root/p4c/ir/ir.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 9245 "/root/p4c/build/ir/ir-generated.h"
+#line 9246 "/root/p4c/build/ir/ir-generated.h"
 #line 625 "/root/p4c/ir/ir.def"
     std::vector<const IR::INamespace *> getNestedNamespaces() const override;
-#line 9248 "/root/p4c/build/ir/ir-generated.h"
+#line 9249 "/root/p4c/build/ir/ir-generated.h"
 #line 627 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 9251 "/root/p4c/build/ir/ir-generated.h"
+#line 9252 "/root/p4c/build/ir/ir-generated.h"
 #line 628 "/root/p4c/ir/ir.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 9254 "/root/p4c/build/ir/ir-generated.h"
+#line 9255 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Function const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9300,33 +9301,33 @@ class Block : public Node, public virtual CompileTimeValue {
     ordered_map<const IR::Node *, const IR::CompileTimeValue *> constantValue = {};
 #line 648 "/root/p4c/ir/ir.def"
     virtual void dbprint(std::ostream & out) const override;
-#line 9304 "/root/p4c/build/ir/ir-generated.h"
+#line 9305 "/root/p4c/build/ir/ir-generated.h"
 #line 649 "/root/p4c/ir/ir.def"
     virtual void dbprint_recursive(std::ostream & out) const;
-#line 9307 "/root/p4c/build/ir/ir-generated.h"
+#line 9308 "/root/p4c/build/ir/ir-generated.h"
 /// value can be null for parameters which are optional
 #line 651 "/root/p4c/ir/ir.def"
     void setValue(const IR::Node* node, const IR::CompileTimeValue* value);
-#line 9311 "/root/p4c/build/ir/ir-generated.h"
+#line 9312 "/root/p4c/build/ir/ir-generated.h"
 #line 652 "/root/p4c/ir/ir.def"
     bool hasValue(const IR::Node* node) const {
         return constantValue.find(node) != constantValue.end();
     }
-#line 9316 "/root/p4c/build/ir/ir-generated.h"
+#line 9317 "/root/p4c/build/ir/ir-generated.h"
 #line 655 "/root/p4c/ir/ir.def"
     const IR::CompileTimeValue *getValue(const IR::Node* node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
-#line 9323 "/root/p4c/build/ir/ir-generated.h"
+#line 9324 "/root/p4c/build/ir/ir-generated.h"
 #line 660 "/root/p4c/ir/ir.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 9327 "/root/p4c/build/ir/ir-generated.h"
+#line 9328 "/root/p4c/build/ir/ir-generated.h"
 #line 661 "/root/p4c/ir/ir.def"
     virtual IR::IDeclaration const * getContainer() const;
-#line 9330 "/root/p4c/build/ir/ir-generated.h"
+#line 9331 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Block const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -9352,7 +9353,7 @@ class TableBlock : public Block {
     const IR::P4Table* container = nullptr;
 #line 666 "/root/p4c/ir/ir.def"
     IR::IDeclaration const * getContainer() const override;
-#line 9356 "/root/p4c/build/ir/ir-generated.h"
+#line 9357 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TableBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9383,23 +9384,23 @@ class InstantiatedBlock : public Block, public virtual IDeclaration {
 
 #line 674 "/root/p4c/ir/ir.def"
     virtual const IR::ParameterList *getConstructorParameters() const = 0;
-#line 9387 "/root/p4c/build/ir/ir-generated.h"
+#line 9388 "/root/p4c/build/ir/ir-generated.h"
 #line 675 "/root/p4c/ir/ir.def"
     void instantiate(std::vector<const IR::CompileTimeValue *> * args);
-#line 9390 "/root/p4c/build/ir/ir-generated.h"
+#line 9391 "/root/p4c/build/ir/ir-generated.h"
 /// @return the argument that the given parameter was instantiated with.
 /// It's a fatal error if no such parameter exists.
 #line 679 "/root/p4c/ir/ir.def"
     const IR::CompileTimeValue *getParameterValue(cstring paramName) const;
-#line 9395 "/root/p4c/build/ir/ir-generated.h"
+#line 9396 "/root/p4c/build/ir/ir-generated.h"
 /// @return the argument that the given parameter was instantiated with, or
 /// null if no such parameter exists.
 #line 683 "/root/p4c/ir/ir.def"
     const IR::CompileTimeValue *findParameterValue(cstring paramName) const;
-#line 9400 "/root/p4c/build/ir/ir-generated.h"
+#line 9401 "/root/p4c/build/ir/ir-generated.h"
 #line 685 "/root/p4c/ir/ir.def"
     virtual void dbprint(std::ostream & out) const override;
-#line 9403 "/root/p4c/build/ir/ir-generated.h"
+#line 9404 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::InstantiatedBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9428,16 +9429,16 @@ class ParserBlock : public InstantiatedBlock {
     const IR::P4Parser* container = nullptr;
 #line 690 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 9432 "/root/p4c/build/ir/ir-generated.h"
+#line 9433 "/root/p4c/build/ir/ir-generated.h"
 #line 692 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 9435 "/root/p4c/build/ir/ir-generated.h"
+#line 9436 "/root/p4c/build/ir/ir-generated.h"
 #line 693 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 9438 "/root/p4c/build/ir/ir-generated.h"
+#line 9439 "/root/p4c/build/ir/ir-generated.h"
 #line 694 "/root/p4c/ir/ir.def"
     IR::IDeclaration const * getContainer() const override;
-#line 9441 "/root/p4c/build/ir/ir-generated.h"
+#line 9442 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ParserBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9467,16 +9468,16 @@ class ControlBlock : public InstantiatedBlock {
     const IR::P4Control* container = nullptr;
 #line 700 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 9471 "/root/p4c/build/ir/ir-generated.h"
+#line 9472 "/root/p4c/build/ir/ir-generated.h"
 #line 702 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 9474 "/root/p4c/build/ir/ir-generated.h"
+#line 9475 "/root/p4c/build/ir/ir-generated.h"
 #line 703 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 9477 "/root/p4c/build/ir/ir-generated.h"
+#line 9478 "/root/p4c/build/ir/ir-generated.h"
 #line 704 "/root/p4c/ir/ir.def"
     IR::IDeclaration const * getContainer() const override;
-#line 9480 "/root/p4c/build/ir/ir-generated.h"
+#line 9481 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ControlBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9506,13 +9507,13 @@ class PackageBlock : public InstantiatedBlock {
     const IR::Type_Package* type = nullptr;
 #line 710 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 9510 "/root/p4c/build/ir/ir-generated.h"
+#line 9511 "/root/p4c/build/ir/ir-generated.h"
 #line 711 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 9513 "/root/p4c/build/ir/ir-generated.h"
+#line 9514 "/root/p4c/build/ir/ir-generated.h"
 #line 712 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 9516 "/root/p4c/build/ir/ir-generated.h"
+#line 9517 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::PackageBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9544,13 +9545,13 @@ class ExternBlock : public InstantiatedBlock {
 
 #line 719 "/root/p4c/ir/ir.def"
     const IR::ParameterList *getConstructorParameters() const override;
-#line 9548 "/root/p4c/build/ir/ir-generated.h"
+#line 9549 "/root/p4c/build/ir/ir-generated.h"
 #line 721 "/root/p4c/ir/ir.def"
     cstring toString() const override;
-#line 9551 "/root/p4c/build/ir/ir-generated.h"
+#line 9552 "/root/p4c/build/ir/ir-generated.h"
 #line 722 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 9554 "/root/p4c/build/ir/ir-generated.h"
+#line 9555 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ExternBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9580,16 +9581,16 @@ class ToplevelBlock : public Block, public virtual IDeclaration {
  public:
 #line 728 "/root/p4c/ir/ir.def"
     const IR::P4Program *getProgram() const;
-#line 9584 "/root/p4c/build/ir/ir-generated.h"
+#line 9585 "/root/p4c/build/ir/ir-generated.h"
 #line 729 "/root/p4c/ir/ir.def"
     const IR::PackageBlock *getMain() const;
-#line 9587 "/root/p4c/build/ir/ir-generated.h"
+#line 9588 "/root/p4c/build/ir/ir-generated.h"
 #line 730 "/root/p4c/ir/ir.def"
     IR::ID getName() const override;
-#line 9590 "/root/p4c/build/ir/ir-generated.h"
+#line 9591 "/root/p4c/build/ir/ir-generated.h"
 #line 732 "/root/p4c/ir/ir.def"
     void validate() const override;
-#line 9593 "/root/p4c/build/ir/ir-generated.h"
+#line 9594 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ToplevelBlock const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "ToplevelBlock"_cs; }
@@ -9656,19 +9657,19 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
 
 }  // namespace P4
 
-#line 9660 "/root/p4c/build/ir/ir-generated.h"
+#line 9661 "/root/p4c/build/ir/ir-generated.h"
 namespace P4::IR {
 class Type_Block : public Type_Base {
  public:
 #line 51 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9666 "/root/p4c/build/ir/ir-generated.h"
+#line 9667 "/root/p4c/build/ir/ir-generated.h"
 #line 52 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_Block *get();
-#line 9669 "/root/p4c/build/ir/ir-generated.h"
+#line 9670 "/root/p4c/build/ir/ir-generated.h"
 #line 53 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9672 "/root/p4c/build/ir/ir-generated.h"
+#line 9673 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Block const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Block"_cs; }
@@ -9693,13 +9694,13 @@ class Type_Counter : public Type_Base {
  public:
 #line 56 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9697 "/root/p4c/build/ir/ir-generated.h"
+#line 9698 "/root/p4c/build/ir/ir-generated.h"
 #line 57 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_Counter *get();
-#line 9700 "/root/p4c/build/ir/ir-generated.h"
+#line 9701 "/root/p4c/build/ir/ir-generated.h"
 #line 58 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9703 "/root/p4c/build/ir/ir-generated.h"
+#line 9704 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Counter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Counter"_cs; }
@@ -9724,13 +9725,13 @@ class Type_Expression : public Type_Base {
  public:
 #line 61 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9728 "/root/p4c/build/ir/ir-generated.h"
+#line 9729 "/root/p4c/build/ir/ir-generated.h"
 #line 62 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_Expression *get();
-#line 9731 "/root/p4c/build/ir/ir-generated.h"
+#line 9732 "/root/p4c/build/ir/ir-generated.h"
 #line 63 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9734 "/root/p4c/build/ir/ir-generated.h"
+#line 9735 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Expression const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Expression"_cs; }
@@ -9755,13 +9756,13 @@ class Type_FieldListCalculation : public Type_Base {
  public:
 #line 66 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9759 "/root/p4c/build/ir/ir-generated.h"
+#line 9760 "/root/p4c/build/ir/ir-generated.h"
 #line 67 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_FieldListCalculation *get();
-#line 9762 "/root/p4c/build/ir/ir-generated.h"
+#line 9763 "/root/p4c/build/ir/ir-generated.h"
 #line 68 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9765 "/root/p4c/build/ir/ir-generated.h"
+#line 9766 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_FieldListCalculation const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_FieldListCalculation"_cs; }
@@ -9786,13 +9787,13 @@ class Type_Meter : public Type_Base {
  public:
 #line 71 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9790 "/root/p4c/build/ir/ir-generated.h"
+#line 9791 "/root/p4c/build/ir/ir-generated.h"
 #line 72 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_Meter *get();
-#line 9793 "/root/p4c/build/ir/ir-generated.h"
+#line 9794 "/root/p4c/build/ir/ir-generated.h"
 #line 73 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9796 "/root/p4c/build/ir/ir-generated.h"
+#line 9797 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Meter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Meter"_cs; }
@@ -9817,13 +9818,13 @@ class Type_Register : public Type_Base {
  public:
 #line 76 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9821 "/root/p4c/build/ir/ir-generated.h"
+#line 9822 "/root/p4c/build/ir/ir-generated.h"
 #line 77 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_Register *get();
-#line 9824 "/root/p4c/build/ir/ir-generated.h"
+#line 9825 "/root/p4c/build/ir/ir-generated.h"
 #line 78 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9827 "/root/p4c/build/ir/ir-generated.h"
+#line 9828 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_Register const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_Register"_cs; }
@@ -9848,13 +9849,13 @@ class Type_AnyTable : public Type_Base {
  public:
 #line 81 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 9852 "/root/p4c/build/ir/ir-generated.h"
+#line 9853 "/root/p4c/build/ir/ir-generated.h"
 #line 82 "/root/p4c/frontends/p4-14/ir-v1.def"
     static const IR::Type_AnyTable *get();
-#line 9855 "/root/p4c/build/ir/ir-generated.h"
+#line 9856 "/root/p4c/build/ir/ir-generated.h"
 #line 83 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9858 "/root/p4c/build/ir/ir-generated.h"
+#line 9859 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Type_AnyTable const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Type_AnyTable"_cs; }
@@ -9883,16 +9884,16 @@ class HeaderOrMetadata : public Node, public virtual IAnnotated {
     const IR::Type_StructLike* type = nullptr;
 #line 92 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 9887 "/root/p4c/build/ir/ir-generated.h"
+#line 9888 "/root/p4c/build/ir/ir-generated.h"
 #line 93 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 9890 "/root/p4c/build/ir/ir-generated.h"
+#line 9891 "/root/p4c/build/ir/ir-generated.h"
 #line 94 "/root/p4c/frontends/p4-14/ir-v1.def"
     HeaderOrMetadata(IR::ID n, const IR::Type_StructLike* t);
-#line 9893 "/root/p4c/build/ir/ir-generated.h"
+#line 9894 "/root/p4c/build/ir/ir-generated.h"
 #line 96 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 9896 "/root/p4c/build/ir/ir-generated.h"
+#line 9897 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::HeaderOrMetadata const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -9926,7 +9927,7 @@ class Header : public HeaderOrMetadata {
  public:
 #line 100 "/root/p4c/frontends/p4-14/ir-v1.def"
     Header(IR::ID n, const IR::Type_Header* t);
-#line 9930 "/root/p4c/build/ir/ir-generated.h"
+#line 9931 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Header const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Header"_cs; }
@@ -9958,7 +9959,7 @@ class HeaderStack : public HeaderOrMetadata {
     int size;
 #line 106 "/root/p4c/frontends/p4-14/ir-v1.def"
     HeaderStack(IR::ID n, const IR::Type_Header* t, int sz);
-#line 9962 "/root/p4c/build/ir/ir-generated.h"
+#line 9963 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::HeaderStack const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "HeaderStack"_cs; }
@@ -9993,10 +9994,10 @@ class v1HeaderType : public Node {
     const IR::Type_Header* as_header = nullptr;
 #line 115 "/root/p4c/frontends/p4-14/ir-v1.def"
     v1HeaderType(IR::Type_Struct const * m, IR::Type_Header const * h = nullptr);
-#line 9997 "/root/p4c/build/ir/ir-generated.h"
+#line 9998 "/root/p4c/build/ir/ir-generated.h"
 #line 117 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 10000 "/root/p4c/build/ir/ir-generated.h"
+#line 10001 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::v1HeaderType const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10024,7 +10025,7 @@ class Metadata : public HeaderOrMetadata {
  public:
 #line 121 "/root/p4c/frontends/p4-14/ir-v1.def"
     Metadata(IR::ID n, const IR::Type_StructLike* t);
-#line 10028 "/root/p4c/build/ir/ir-generated.h"
+#line 10029 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Metadata const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Metadata"_cs; }
@@ -10055,7 +10056,7 @@ class HeaderRef : public Expression {
  public:
 #line 126 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual const IR::HeaderOrMetadata *baseRef() const = 0;
-#line 10059 "/root/p4c/build/ir/ir-generated.h"
+#line 10060 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::HeaderRef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "HeaderRef"_cs; }
@@ -10086,13 +10087,13 @@ class ConcreteHeaderRef : public HeaderRef {
     const IR::HeaderOrMetadata* ref = nullptr;
 #line 132 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::HeaderOrMetadata *baseRef() const override;
-#line 10090 "/root/p4c/build/ir/ir-generated.h"
+#line 10091 "/root/p4c/build/ir/ir-generated.h"
 #line 133 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 10093 "/root/p4c/build/ir/ir-generated.h"
+#line 10094 "/root/p4c/build/ir/ir-generated.h"
 #line 134 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 10096 "/root/p4c/build/ir/ir-generated.h"
+#line 10097 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ConcreteHeaderRef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10111,28 +10112,28 @@ class ConcreteHeaderRef : public HeaderRef {
     {
 #line 131 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (type->is<Type::Unknown>() && ref) type = ref->type; }
-#line 10115 "/root/p4c/build/ir/ir-generated.h"
+#line 10116 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ConcreteHeaderRef(const IR::Type* type, const IR::HeaderOrMetadata* ref) :
     HeaderRef(type), ref(ref)
     {
 #line 131 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (type->is<Type::Unknown>() && ref) type = ref->type; }
-#line 10122 "/root/p4c/build/ir/ir-generated.h"
+#line 10123 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ConcreteHeaderRef(Util::SourceInfo srcInfo, const IR::HeaderOrMetadata* ref) :
     HeaderRef(srcInfo), ref(ref)
     {
 #line 131 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (type->is<Type::Unknown>() && ref) type = ref->type; }
-#line 10129 "/root/p4c/build/ir/ir-generated.h"
+#line 10130 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ConcreteHeaderRef(const IR::HeaderOrMetadata* ref) :
     ref(ref)
     {
 #line 131 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (type->is<Type::Unknown>() && ref) type = ref->type; }
-#line 10136 "/root/p4c/build/ir/ir-generated.h"
+#line 10137 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(ConcreteHeaderRef)
     DECLARE_TYPEINFO_WITH_TYPEID(ConcreteHeaderRef, NodeKind::ConcreteHeaderRef, HeaderRef);
@@ -10145,21 +10146,21 @@ class HeaderStackItemRef : public HeaderRef {
     const IR::Expression* index_ = nullptr;
 #line 144 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Expression *base() const;
-#line 10149 "/root/p4c/build/ir/ir-generated.h"
+#line 10150 "/root/p4c/build/ir/ir-generated.h"
 /// Returns `nullptr` if the base is not `HeaderOrMetadata` (e.g. when this
 /// is stack ref of an expression such as `lookahead`).
 #line 147 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::HeaderOrMetadata *baseRef() const override;
-#line 10154 "/root/p4c/build/ir/ir-generated.h"
+#line 10155 "/root/p4c/build/ir/ir-generated.h"
 #line 151 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Expression *index() const;
-#line 10157 "/root/p4c/build/ir/ir-generated.h"
+#line 10158 "/root/p4c/build/ir/ir-generated.h"
 #line 152 "/root/p4c/frontends/p4-14/ir-v1.def"
     void set_base(const IR::Expression* b);
-#line 10160 "/root/p4c/build/ir/ir-generated.h"
+#line 10161 "/root/p4c/build/ir/ir-generated.h"
 #line 153 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 10163 "/root/p4c/build/ir/ir-generated.h"
+#line 10164 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::HeaderStackItemRef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10182,7 +10183,7 @@ class HeaderStackItemRef : public HeaderRef {
         if (type->is<Type::Unknown>() && base_)
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
-#line 10186 "/root/p4c/build/ir/ir-generated.h"
+#line 10187 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     HeaderStackItemRef(const IR::Type* type, const IR::Expression* base_, const IR::Expression* index_) :
     HeaderRef(type), base_(base_), index_(index_)
@@ -10192,7 +10193,7 @@ class HeaderStackItemRef : public HeaderRef {
         if (type->is<Type::Unknown>() && base_)
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
-#line 10196 "/root/p4c/build/ir/ir-generated.h"
+#line 10197 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     HeaderStackItemRef(Util::SourceInfo srcInfo, const IR::Expression* base_, const IR::Expression* index_) :
     HeaderRef(srcInfo), base_(base_), index_(index_)
@@ -10202,7 +10203,7 @@ class HeaderStackItemRef : public HeaderRef {
         if (type->is<Type::Unknown>() && base_)
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
-#line 10206 "/root/p4c/build/ir/ir-generated.h"
+#line 10207 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     HeaderStackItemRef(const IR::Expression* base_, const IR::Expression* index_) :
     base_(base_), index_(index_)
@@ -10212,7 +10213,7 @@ class HeaderStackItemRef : public HeaderRef {
         if (type->is<Type::Unknown>() && base_)
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
-#line 10216 "/root/p4c/build/ir/ir-generated.h"
+#line 10217 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(HeaderStackItemRef)
     DECLARE_TYPEINFO_WITH_TYPEID(HeaderStackItemRef, NodeKind::HeaderStackItemRef, HeaderRef);
@@ -10227,7 +10228,7 @@ class If : public Expression {
 #line 160 "/root/p4c/frontends/p4-14/ir-v1.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 10231 "/root/p4c/build/ir/ir-generated.h"
+#line 10232 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::If const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -10262,13 +10263,13 @@ class NamedCond : public If {
     cstring name = unique_name();
 #line 171 "/root/p4c/frontends/p4-14/ir-v1.def"
     static cstring unique_name();
-#line 10266 "/root/p4c/build/ir/ir-generated.h"
+#line 10267 "/root/p4c/build/ir/ir-generated.h"
 #line 172 "/root/p4c/frontends/p4-14/ir-v1.def"
     NamedCond(IR::If const & i);
-#line 10269 "/root/p4c/build/ir/ir-generated.h"
+#line 10270 "/root/p4c/build/ir/ir-generated.h"
 #line 173 "/root/p4c/frontends/p4-14/ir-v1.def"
     bool operator==(IR::NamedCond const & a) const override;
-#line 10272 "/root/p4c/build/ir/ir-generated.h"
+#line 10273 "/root/p4c/build/ir/ir-generated.h"
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "NamedCond"_cs; }
     static cstring static_type_name() { return "NamedCond"_cs; }
@@ -10339,46 +10340,46 @@ class Primitive : public Operation {
     IR::Vector<IR::Expression> operands = {};
 #line 190 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(cstring n, const IR::Vector<IR::Expression>* l);
-#line 10343 "/root/p4c/build/ir/ir-generated.h"
+#line 10344 "/root/p4c/build/ir/ir-generated.h"
 #line 192 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(Util::SourceInfo si, cstring n, const IR::Vector<IR::Expression>* l);
-#line 10346 "/root/p4c/build/ir/ir-generated.h"
+#line 10347 "/root/p4c/build/ir/ir-generated.h"
 #line 194 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(cstring n, const IR::Expression* a1);
-#line 10349 "/root/p4c/build/ir/ir-generated.h"
+#line 10350 "/root/p4c/build/ir/ir-generated.h"
 #line 196 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(Util::SourceInfo si, cstring n, const IR::Expression* a1);
-#line 10352 "/root/p4c/build/ir/ir-generated.h"
+#line 10353 "/root/p4c/build/ir/ir-generated.h"
 #line 198 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(cstring n, const IR::Expression* a1, const IR::Expression* a2);
-#line 10355 "/root/p4c/build/ir/ir-generated.h"
+#line 10356 "/root/p4c/build/ir/ir-generated.h"
 #line 200 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(Util::SourceInfo si, cstring n, const IR::Expression* a1, const IR::Expression* a2);
-#line 10358 "/root/p4c/build/ir/ir-generated.h"
+#line 10359 "/root/p4c/build/ir/ir-generated.h"
 #line 203 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(cstring n, const IR::Expression* a1, const IR::Vector<IR::Expression>* a2);
-#line 10361 "/root/p4c/build/ir/ir-generated.h"
+#line 10362 "/root/p4c/build/ir/ir-generated.h"
 #line 206 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(Util::SourceInfo si, cstring n, const IR::Expression* a1, const IR::Vector<IR::Expression>* a2);
-#line 10364 "/root/p4c/build/ir/ir-generated.h"
+#line 10365 "/root/p4c/build/ir/ir-generated.h"
 #line 210 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(cstring n, const IR::Expression* a1, const IR::Expression* a2, const IR::Expression* a3);
-#line 10367 "/root/p4c/build/ir/ir-generated.h"
+#line 10368 "/root/p4c/build/ir/ir-generated.h"
 #line 212 "/root/p4c/frontends/p4-14/ir-v1.def"
     Primitive(Util::SourceInfo si, cstring n, const IR::Expression* a1, const IR::Expression* a2, const IR::Expression* a3);
-#line 10370 "/root/p4c/build/ir/ir-generated.h"
+#line 10371 "/root/p4c/build/ir/ir-generated.h"
 #line 215 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual bool isOutput(int operand_index) const;
-#line 10373 "/root/p4c/build/ir/ir-generated.h"
+#line 10374 "/root/p4c/build/ir/ir-generated.h"
 #line 216 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual unsigned inferOperandTypes() const;
-#line 10376 "/root/p4c/build/ir/ir-generated.h"
+#line 10377 "/root/p4c/build/ir/ir-generated.h"
 #line 217 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual const IR::Type *inferOperandType(int operand) const;
-#line 10379 "/root/p4c/build/ir/ir-generated.h"
+#line 10380 "/root/p4c/build/ir/ir-generated.h"
 #line 218 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual void typecheck() const;
-#line 10382 "/root/p4c/build/ir/ir-generated.h"
+#line 10383 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(Primitive)
     cstring getStringOp() const override { return cstring(name); }
     int getPrecedence() const override { return DBPrint::Prec_Postfix; }
@@ -10422,10 +10423,10 @@ class FieldList : public Node, public virtual IAnnotated {
     IR::Vector<IR::Expression> fields = {};
 #line 229 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10426 "/root/p4c/build/ir/ir-generated.h"
+#line 10427 "/root/p4c/build/ir/ir-generated.h"
 #line 230 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10429 "/root/p4c/build/ir/ir-generated.h"
+#line 10430 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::FieldList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10477,10 +10478,10 @@ class FieldListCalculation : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 240 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10481 "/root/p4c/build/ir/ir-generated.h"
+#line 10482 "/root/p4c/build/ir/ir-generated.h"
 #line 241 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10484 "/root/p4c/build/ir/ir-generated.h"
+#line 10485 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::FieldListCalculation const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10533,7 +10534,7 @@ class update_or_verify {
     const IR::Expression* cond = nullptr;
 #line 251 "/root/p4c/frontends/p4-14/ir-v1.def"
     update_or_verify();
-#line 10537 "/root/p4c/build/ir/ir-generated.h"
+#line 10538 "/root/p4c/build/ir/ir-generated.h"
 
     bool operator==(IR::CalculatedField::update_or_verify const & a) const;
     void toJSON(JSONGenerator & json) const;
@@ -10550,14 +10551,14 @@ class update_or_verify {
     IR::Vector<IR::Annotation> annotations;
 #line 255 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10554 "/root/p4c/build/ir/ir-generated.h"
+#line 10555 "/root/p4c/build/ir/ir-generated.h"
 #line 256 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10557 "/root/p4c/build/ir/ir-generated.h"
+#line 10558 "/root/p4c/build/ir/ir-generated.h"
 #line 257 "/root/p4c/frontends/p4-14/ir-v1.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 10561 "/root/p4c/build/ir/ir-generated.h"
+#line 10562 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::CalculatedField const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -10602,16 +10603,16 @@ class ParserValueSet : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 267 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10606 "/root/p4c/build/ir/ir-generated.h"
+#line 10607 "/root/p4c/build/ir/ir-generated.h"
 #line 268 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10609 "/root/p4c/build/ir/ir-generated.h"
+#line 10610 "/root/p4c/build/ir/ir-generated.h"
 #line 269 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 10612 "/root/p4c/build/ir/ir-generated.h"
+#line 10613 "/root/p4c/build/ir/ir-generated.h"
 #line 270 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 10615 "/root/p4c/build/ir/ir-generated.h"
+#line 10616 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ParserValueSet const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10683,13 +10684,13 @@ class V1Parser : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 287 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10687 "/root/p4c/build/ir/ir-generated.h"
+#line 10688 "/root/p4c/build/ir/ir-generated.h"
 #line 288 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10690 "/root/p4c/build/ir/ir-generated.h"
+#line 10691 "/root/p4c/build/ir/ir-generated.h"
 #line 289 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 10693 "/root/p4c/build/ir/ir-generated.h"
+#line 10694 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::V1Parser const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10758,31 +10759,31 @@ class Attached : public Node, public virtual IInstance, public virtual IAnnotate
     IR::Vector<IR::Annotation> annotations;
 #line 297 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::ID Name() const override;
-#line 10762 "/root/p4c/build/ir/ir-generated.h"
+#line 10763 "/root/p4c/build/ir/ir-generated.h"
 #line 298 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual char const * kind() const = 0;
-#line 10765 "/root/p4c/build/ir/ir-generated.h"
+#line 10766 "/root/p4c/build/ir/ir-generated.h"
 #line 299 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Type *getType() const override;
-#line 10768 "/root/p4c/build/ir/ir-generated.h"
+#line 10769 "/root/p4c/build/ir/ir-generated.h"
 #line 300 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 10771 "/root/p4c/build/ir/ir-generated.h"
+#line 10772 "/root/p4c/build/ir/ir-generated.h"
 #line 301 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 10774 "/root/p4c/build/ir/ir-generated.h"
+#line 10775 "/root/p4c/build/ir/ir-generated.h"
 #line 302 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual bool indexed() const;
-#line 10777 "/root/p4c/build/ir/ir-generated.h"
+#line 10778 "/root/p4c/build/ir/ir-generated.h"
 #line 303 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Attached * clone_rename(char const * ext) const;
-#line 10780 "/root/p4c/build/ir/ir-generated.h"
+#line 10781 "/root/p4c/build/ir/ir-generated.h"
 #line 307 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 10783 "/root/p4c/build/ir/ir-generated.h"
+#line 10784 "/root/p4c/build/ir/ir-generated.h"
 #line 308 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 10786 "/root/p4c/build/ir/ir-generated.h"
+#line 10787 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Attached const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -10831,10 +10832,10 @@ class Stateful : public Attached {
     int instance_count = -1;
 #line 316 "/root/p4c/frontends/p4-14/ir-v1.def"
     virtual bool indexed() const override;
-#line 10835 "/root/p4c/build/ir/ir-generated.h"
+#line 10836 "/root/p4c/build/ir/ir-generated.h"
 #line 317 "/root/p4c/frontends/p4-14/ir-v1.def"
     int index_width() const;
-#line 10838 "/root/p4c/build/ir/ir-generated.h"
+#line 10839 "/root/p4c/build/ir/ir-generated.h"
 
     bool operator==(IR::Stateful const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -10879,7 +10880,7 @@ class CounterOrMeter : public Stateful {
     CounterType type = CounterType::NONE;
 #line 322 "/root/p4c/frontends/p4-14/ir-v1.def"
     void settype(cstring t);
-#line 10883 "/root/p4c/build/ir/ir-generated.h"
+#line 10884 "/root/p4c/build/ir/ir-generated.h"
 
     bool operator==(IR::CounterOrMeter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -10926,10 +10927,10 @@ class Counter : public CounterOrMeter {
     int min_width = -1;
 #line 333 "/root/p4c/frontends/p4-14/ir-v1.def"
     char const * kind() const override;
-#line 10930 "/root/p4c/build/ir/ir-generated.h"
+#line 10931 "/root/p4c/build/ir/ir-generated.h"
 #line 334 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Type const * getType() const override;
-#line 10933 "/root/p4c/build/ir/ir-generated.h"
+#line 10934 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Counter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Counter"_cs; }
@@ -10978,10 +10979,10 @@ class Meter : public CounterOrMeter {
     IR::ID implementation = {};
 #line 341 "/root/p4c/frontends/p4-14/ir-v1.def"
     char const * kind() const override;
-#line 10982 "/root/p4c/build/ir/ir-generated.h"
+#line 10983 "/root/p4c/build/ir/ir-generated.h"
 #line 342 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Type *getType() const override;
-#line 10985 "/root/p4c/build/ir/ir-generated.h"
+#line 10986 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Meter const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11033,10 +11034,10 @@ class Register : public Stateful {
 
 #line 350 "/root/p4c/frontends/p4-14/ir-v1.def"
     char const * kind() const override;
-#line 11037 "/root/p4c/build/ir/ir-generated.h"
+#line 11038 "/root/p4c/build/ir/ir-generated.h"
 #line 351 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Type *getType() const override;
-#line 11040 "/root/p4c/build/ir/ir-generated.h"
+#line 11041 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Register const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "Register"_cs; }
@@ -11103,13 +11104,13 @@ class NameList : public Node {
     safe_vector<IR::ID> names = {};
 #line 358 "/root/p4c/frontends/p4-14/ir-v1.def"
     NameList(Util::SourceInfo si, cstring n);
-#line 11107 "/root/p4c/build/ir/ir-generated.h"
+#line 11108 "/root/p4c/build/ir/ir-generated.h"
 #line 359 "/root/p4c/frontends/p4-14/ir-v1.def"
     NameList(Util::SourceInfo si, IR::ID n);
-#line 11110 "/root/p4c/build/ir/ir-generated.h"
+#line 11111 "/root/p4c/build/ir/ir-generated.h"
 #line 360 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dump_fields(std::ostream & out) const override;
-#line 11113 "/root/p4c/build/ir/ir-generated.h"
+#line 11114 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::NameList const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "NameList"_cs; }
@@ -11137,10 +11138,10 @@ class ActionArg : public Expression {
     bool write = false;
 #line 369 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 11141 "/root/p4c/build/ir/ir-generated.h"
+#line 11142 "/root/p4c/build/ir/ir-generated.h"
 #line 370 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11144 "/root/p4c/build/ir/ir-generated.h"
+#line 11145 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionArg const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "ActionArg"_cs; }
@@ -11156,28 +11157,28 @@ class ActionArg : public Expression {
     {
 #line 368 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 11160 "/root/p4c/build/ir/ir-generated.h"
+#line 11161 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ActionArg(const IR::Type* type, cstring action_name, IR::ID name) :
     Expression(type), action_name(action_name), name(name)
     {
 #line 368 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 11167 "/root/p4c/build/ir/ir-generated.h"
+#line 11168 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ActionArg(Util::SourceInfo srcInfo, cstring action_name, IR::ID name) :
     Expression(srcInfo), action_name(action_name), name(name)
     {
 #line 368 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 11174 "/root/p4c/build/ir/ir-generated.h"
+#line 11175 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     ActionArg(cstring action_name, IR::ID name) :
     action_name(action_name), name(name)
     {
 #line 368 "/root/p4c/frontends/p4-14/ir-v1.def"
 { if (!srcInfo) srcInfo = name.srcInfo; }
-#line 11181 "/root/p4c/build/ir/ir-generated.h"
+#line 11182 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(ActionArg)
     DECLARE_TYPEINFO_WITH_TYPEID(ActionArg, NodeKind::ActionArg, Expression);
@@ -11193,20 +11194,20 @@ class ActionFunction : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 380 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11197 "/root/p4c/build/ir/ir-generated.h"
+#line 11198 "/root/p4c/build/ir/ir-generated.h"
 #line 381 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11200 "/root/p4c/build/ir/ir-generated.h"
+#line 11201 "/root/p4c/build/ir/ir-generated.h"
 #line 382 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::ActionArg *arg(cstring n) const;
-#line 11203 "/root/p4c/build/ir/ir-generated.h"
+#line 11204 "/root/p4c/build/ir/ir-generated.h"
 #line 387 "/root/p4c/frontends/p4-14/ir-v1.def"
     void visit_children(Visitor & v, char const * n) override;
     void visit_children(Visitor & v, char const * n) const override;
-#line 11207 "/root/p4c/build/ir/ir-generated.h"
+#line 11208 "/root/p4c/build/ir/ir-generated.h"
 #line 395 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11210 "/root/p4c/build/ir/ir-generated.h"
+#line 11211 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionFunction const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void validate() const override;
@@ -11253,10 +11254,10 @@ class ActionProfile : public Attached {
     int size = 0;
 #line 405 "/root/p4c/frontends/p4-14/ir-v1.def"
     char const * kind() const override;
-#line 11257 "/root/p4c/build/ir/ir-generated.h"
+#line 11258 "/root/p4c/build/ir/ir-generated.h"
 #line 406 "/root/p4c/frontends/p4-14/ir-v1.def"
     bool indexed() const override;
-#line 11260 "/root/p4c/build/ir/ir-generated.h"
+#line 11261 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionProfile const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "ActionProfile"_cs; }
@@ -11304,7 +11305,7 @@ class ActionSelector : public Attached {
     IR::ID type = {};
 #line 414 "/root/p4c/frontends/p4-14/ir-v1.def"
     char const * kind() const override;
-#line 11308 "/root/p4c/build/ir/ir-generated.h"
+#line 11309 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::ActionSelector const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11364,22 +11365,22 @@ class V1Table : public Node, public virtual IInstance, public virtual IAnnotated
     IR::Vector<IR::Annotation> annotations;
 #line 432 "/root/p4c/frontends/p4-14/ir-v1.def"
     void addProperty(const IR::Property* prop);
-#line 11368 "/root/p4c/build/ir/ir-generated.h"
+#line 11369 "/root/p4c/build/ir/ir-generated.h"
 #line 433 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11371 "/root/p4c/build/ir/ir-generated.h"
+#line 11372 "/root/p4c/build/ir/ir-generated.h"
 #line 434 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11374 "/root/p4c/build/ir/ir-generated.h"
+#line 11375 "/root/p4c/build/ir/ir-generated.h"
 #line 435 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11377 "/root/p4c/build/ir/ir-generated.h"
+#line 11378 "/root/p4c/build/ir/ir-generated.h"
 #line 436 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::ID Name() const override;
-#line 11380 "/root/p4c/build/ir/ir-generated.h"
+#line 11381 "/root/p4c/build/ir/ir-generated.h"
 #line 437 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::Type *getType() const override;
-#line 11383 "/root/p4c/build/ir/ir-generated.h"
+#line 11384 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::V1Table const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11428,20 +11429,20 @@ class V1Control : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
 #line 445 "/root/p4c/frontends/p4-14/ir-v1.def"
     V1Control(IR::ID n);
-#line 11432 "/root/p4c/build/ir/ir-generated.h"
+#line 11433 "/root/p4c/build/ir/ir-generated.h"
 #line 446 "/root/p4c/frontends/p4-14/ir-v1.def"
     V1Control(Util::SourceInfo si, IR::ID n);
-#line 11435 "/root/p4c/build/ir/ir-generated.h"
+#line 11436 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(V1Control)
 #line 448 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11439 "/root/p4c/build/ir/ir-generated.h"
+#line 11440 "/root/p4c/build/ir/ir-generated.h"
 #line 449 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11442 "/root/p4c/build/ir/ir-generated.h"
+#line 11443 "/root/p4c/build/ir/ir-generated.h"
 #line 450 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11445 "/root/p4c/build/ir/ir-generated.h"
+#line 11446 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::V1Control const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11477,10 +11478,10 @@ class AttribLocal : public Expression, public virtual IDeclaration {
     IR::ID name;
 #line 455 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::ID getName() const override;
-#line 11481 "/root/p4c/build/ir/ir-generated.h"
+#line 11482 "/root/p4c/build/ir/ir-generated.h"
 #line 456 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 11484 "/root/p4c/build/ir/ir-generated.h"
+#line 11485 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AttribLocal const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "AttribLocal"_cs; }
@@ -11513,13 +11514,13 @@ class AttribLocals : public Node, public virtual ISimpleNamespace {
     IR::NameMap<IR::AttribLocal> locals = {};
 #line 462 "/root/p4c/frontends/p4-14/ir-v1.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 11517 "/root/p4c/build/ir/ir-generated.h"
+#line 11518 "/root/p4c/build/ir/ir-generated.h"
 #line 464 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 11520 "/root/p4c/build/ir/ir-generated.h"
+#line 11521 "/root/p4c/build/ir/ir-generated.h"
 #line 465 "/root/p4c/frontends/p4-14/ir-v1.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 11523 "/root/p4c/build/ir/ir-generated.h"
+#line 11524 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AttribLocals const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11548,7 +11549,7 @@ class Attribute : public Declaration {
     bool optional = false;
 #line 472 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 11552 "/root/p4c/build/ir/ir-generated.h"
+#line 11553 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::Attribute const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11580,16 +11581,16 @@ class GlobalRef : public Expression {
 
 #line 479 "/root/p4c/frontends/p4-14/ir-v1.def"
     void validate() const override;
-#line 11584 "/root/p4c/build/ir/ir-generated.h"
+#line 11585 "/root/p4c/build/ir/ir-generated.h"
 #line 480 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11587 "/root/p4c/build/ir/ir-generated.h"
+#line 11588 "/root/p4c/build/ir/ir-generated.h"
 #line 481 "/root/p4c/frontends/p4-14/ir-v1.def"
     IR::ID Name() const;
-#line 11590 "/root/p4c/build/ir/ir-generated.h"
+#line 11591 "/root/p4c/build/ir/ir-generated.h"
 #line 482 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 11593 "/root/p4c/build/ir/ir-generated.h"
+#line 11594 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::GlobalRef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11606,28 +11607,28 @@ class GlobalRef : public Expression {
     {
 #line 478 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = obj->to<IInstance>()->getType(); }
-#line 11610 "/root/p4c/build/ir/ir-generated.h"
+#line 11611 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     GlobalRef(const IR::Type* type, const IR::Node* obj) :
     Expression(type), obj(obj)
     {
 #line 478 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = obj->to<IInstance>()->getType(); }
-#line 11617 "/root/p4c/build/ir/ir-generated.h"
+#line 11618 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     GlobalRef(Util::SourceInfo srcInfo, const IR::Node* obj) :
     Expression(srcInfo), obj(obj)
     {
 #line 478 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = obj->to<IInstance>()->getType(); }
-#line 11624 "/root/p4c/build/ir/ir-generated.h"
+#line 11625 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     GlobalRef(const IR::Node* obj) :
     obj(obj)
     {
 #line 478 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = obj->to<IInstance>()->getType(); }
-#line 11631 "/root/p4c/build/ir/ir-generated.h"
+#line 11632 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(GlobalRef)
     DECLARE_TYPEINFO_WITH_TYPEID(GlobalRef, NodeKind::GlobalRef, Expression);
@@ -11641,10 +11642,10 @@ class AttributeRef : public Expression {
     const IR::Attribute* attrib = nullptr;
 #line 490 "/root/p4c/frontends/p4-14/ir-v1.def"
     cstring toString() const override;
-#line 11645 "/root/p4c/build/ir/ir-generated.h"
+#line 11646 "/root/p4c/build/ir/ir-generated.h"
 #line 491 "/root/p4c/frontends/p4-14/ir-v1.def"
     void dbprint(std::ostream & out) const override;
-#line 11648 "/root/p4c/build/ir/ir-generated.h"
+#line 11649 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::AttributeRef const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11663,28 +11664,28 @@ class AttributeRef : public Expression {
     {
 #line 489 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = attrib->type; }
-#line 11667 "/root/p4c/build/ir/ir-generated.h"
+#line 11668 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     AttributeRef(const IR::Type* type, cstring extern_name, const IR::Type_Extern* extern_type, const IR::Attribute* attrib) :
     Expression(type), extern_name(extern_name), extern_type(extern_type), attrib(attrib)
     {
 #line 489 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = attrib->type; }
-#line 11674 "/root/p4c/build/ir/ir-generated.h"
+#line 11675 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     AttributeRef(Util::SourceInfo srcInfo, cstring extern_name, const IR::Type_Extern* extern_type, const IR::Attribute* attrib) :
     Expression(srcInfo), extern_name(extern_name), extern_type(extern_type), attrib(attrib)
     {
 #line 489 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = attrib->type; }
-#line 11681 "/root/p4c/build/ir/ir-generated.h"
+#line 11682 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     AttributeRef(cstring extern_name, const IR::Type_Extern* extern_type, const IR::Attribute* attrib) :
     extern_name(extern_name), extern_type(extern_type), attrib(attrib)
     {
 #line 489 "/root/p4c/frontends/p4-14/ir-v1.def"
 { type = attrib->type; }
-#line 11688 "/root/p4c/build/ir/ir-generated.h"
+#line 11689 "/root/p4c/build/ir/ir-generated.h"
      validate(); }
     IRNODE_SUBCLASS(AttributeRef)
     DECLARE_TYPEINFO_WITH_TYPEID(AttributeRef, NodeKind::AttributeRef, Expression);
@@ -11696,13 +11697,13 @@ class V1Program : public Node {
     IR::NameMap<IR::Node, std::multimap> scope;
 #line 498 "/root/p4c/frontends/p4-14/ir-v1.def"
     explicit V1Program();
-#line 11700 "/root/p4c/build/ir/ir-generated.h"
+#line 11701 "/root/p4c/build/ir/ir-generated.h"
 #line 500 "/root/p4c/frontends/p4-14/ir-v1.def"
     template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
-#line 11703 "/root/p4c/build/ir/ir-generated.h"
+#line 11704 "/root/p4c/build/ir/ir-generated.h"
 #line 502 "/root/p4c/frontends/p4-14/ir-v1.def"
     void add(cstring name, IR::Node const * n);
-#line 11706 "/root/p4c/build/ir/ir-generated.h"
+#line 11707 "/root/p4c/build/ir/ir-generated.h"
     IRNODE_DECLARE_APPLY_OVERLOAD(V1Program)
     bool operator==(IR::V1Program const & a) const override;
     bool equiv(IR::Node const & a_) const override;
@@ -11730,22 +11731,22 @@ class P5Table : public Declaration, public virtual IAnnotated, public virtual IS
     const IR::BlockStatement* body = nullptr;
 #line 6 "/root/p4c/frontends/p5/ir-p5.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11734 "/root/p4c/build/ir/ir-generated.h"
+#line 11735 "/root/p4c/build/ir/ir-generated.h"
 #line 7 "/root/p4c/frontends/p5/ir-p5.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11737 "/root/p4c/build/ir/ir-generated.h"
+#line 11738 "/root/p4c/build/ir/ir-generated.h"
 #line 9 "/root/p4c/frontends/p5/ir-p5.def"
     Util::Enumerator<const IR::IDeclaration *> * getDeclarations() const override;
-#line 11740 "/root/p4c/build/ir/ir-generated.h"
+#line 11741 "/root/p4c/build/ir/ir-generated.h"
 #line 11 "/root/p4c/frontends/p5/ir-p5.def"
     const IR::IDeclaration *getDeclByName(cstring name) const override;
-#line 11743 "/root/p4c/build/ir/ir-generated.h"
+#line 11744 "/root/p4c/build/ir/ir-generated.h"
 #line 13 "/root/p4c/frontends/p5/ir-p5.def"
     const IR::IDeclaration *getDeclByName(std::string_view name) const override;
-#line 11746 "/root/p4c/build/ir/ir-generated.h"
+#line 11747 "/root/p4c/build/ir/ir-generated.h"
 #line 16 "/root/p4c/frontends/p5/ir-p5.def"
     void dbprint(std::ostream & out) const override;
-#line 11749 "/root/p4c/build/ir/ir-generated.h"
+#line 11750 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P5Table const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11784,13 +11785,13 @@ class P5KeyElement : public Node, public virtual IAnnotated {
     IR::BlockStatement control;
 #line 24 "/root/p4c/frontends/p5/ir-p5.def"
     void dbprint(std::ostream & out) const override;
-#line 11788 "/root/p4c/build/ir/ir-generated.h"
+#line 11789 "/root/p4c/build/ir/ir-generated.h"
 #line 26 "/root/p4c/frontends/p5/ir-p5.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11791 "/root/p4c/build/ir/ir-generated.h"
+#line 11792 "/root/p4c/build/ir/ir-generated.h"
 #line 27 "/root/p4c/frontends/p5/ir-p5.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11794 "/root/p4c/build/ir/ir-generated.h"
+#line 11795 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P5KeyElement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11908,15 +11909,18 @@ class P5KeyCase : public Node, public virtual IAnnotated {
     IR::Vector<IR::Annotation> annotations;
     const IR::Expression* label = nullptr;
     IR::Vector<IR::P5KeyElement> elements;
-#line 34 "/root/p4c/frontends/p5/ir-p5.def"
-    void dbprint(std::ostream & out) const override;
-#line 11914 "/root/p4c/build/ir/ir-generated.h"
-#line 36 "/root/p4c/frontends/p5/ir-p5.def"
-    IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 11917 "/root/p4c/build/ir/ir-generated.h"
+
+
+    bool fallthrough;
 #line 37 "/root/p4c/frontends/p5/ir-p5.def"
+    void dbprint(std::ostream & out) const override;
+#line 11918 "/root/p4c/build/ir/ir-generated.h"
+#line 39 "/root/p4c/frontends/p5/ir-p5.def"
+    IR::Vector<IR::Annotation> const & getAnnotations() const override;
+#line 11921 "/root/p4c/build/ir/ir-generated.h"
+#line 40 "/root/p4c/frontends/p5/ir-p5.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 11920 "/root/p4c/build/ir/ir-generated.h"
+#line 11924 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P5KeyCase const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -11924,10 +11928,59 @@ class P5KeyCase : public Node, public virtual IAnnotated {
     void validate() const override;
     cstring node_type_name() const override { return "P5KeyCase"_cs; }
     static cstring static_type_name() { return "P5KeyCase"_cs; }
+    void dump_fields(std::ostream & out) const override;
     void toJSON(JSONGenerator & json) const override;
     P5KeyCase(JSONLoader & json);
     static IR::Node * fromJSON(JSONLoader & json);
     bool operator==(IR::Node const & a) const override;
+    P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, const IR::Expression* label, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    Node(srcInfo), annotations(annotations), label(label), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(IR::Vector<IR::Annotation> annotations, const IR::Expression* label, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    annotations(annotations), label(label), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, const IR::Expression* label, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    Node(srcInfo), label(label), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(const IR::Expression* label, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    label(label), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    Node(srcInfo), annotations(annotations), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(IR::Vector<IR::Annotation> annotations, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    annotations(annotations), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    Node(srcInfo), elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(IR::Vector<IR::P5KeyElement> elements, bool fallthrough) :
+    elements(elements), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, const IR::Expression* label, bool fallthrough) :
+    Node(srcInfo), annotations(annotations), label(label), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(IR::Vector<IR::Annotation> annotations, const IR::Expression* label, bool fallthrough) :
+    annotations(annotations), label(label), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, const IR::Expression* label, bool fallthrough) :
+    Node(srcInfo), label(label), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(const IR::Expression* label, bool fallthrough) :
+    label(label), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, bool fallthrough) :
+    Node(srcInfo), annotations(annotations), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(IR::Vector<IR::Annotation> annotations, bool fallthrough) :
+    annotations(annotations), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(Util::SourceInfo srcInfo, bool fallthrough) :
+    Node(srcInfo), fallthrough(fallthrough)
+    { validate(); }
+    P5KeyCase(bool fallthrough) :
+    fallthrough(fallthrough)
+    { validate(); }
     P5KeyCase(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, const IR::Expression* label, IR::Vector<IR::P5KeyElement> elements) :
     Node(srcInfo), annotations(annotations), label(label), elements(elements)
     { validate(); }
@@ -11980,17 +12033,69 @@ class P5KeyCase : public Node, public virtual IAnnotated {
 };
 }  // namespace P4::IR
 namespace P4::IR {
+class P5KeySwitch : public Node, public virtual IAnnotated {
+ public:
+    IR::Vector<IR::Annotation> annotations;
+    const IR::Expression* select = nullptr;
+    IR::Vector<IR::P5KeyCase> cases;
+#line 47 "/root/p4c/frontends/p5/ir-p5.def"
+    void dbprint(std::ostream & out) const override;
+#line 12044 "/root/p4c/build/ir/ir-generated.h"
+#line 49 "/root/p4c/frontends/p5/ir-p5.def"
+    IR::Vector<IR::Annotation> const & getAnnotations() const override;
+#line 12047 "/root/p4c/build/ir/ir-generated.h"
+#line 50 "/root/p4c/frontends/p5/ir-p5.def"
+    IR::Vector<IR::Annotation> & getAnnotations() override;
+#line 12050 "/root/p4c/build/ir/ir-generated.h"
+    bool operator==(IR::P5KeySwitch const & a) const override;
+    bool equiv(IR::Node const & a_) const override;
+    void visit_children(Visitor & v, char const * n) override;
+    void visit_children(Visitor & v, char const * n) const override;
+    void validate() const override;
+    cstring node_type_name() const override { return "P5KeySwitch"_cs; }
+    static cstring static_type_name() { return "P5KeySwitch"_cs; }
+    void toJSON(JSONGenerator & json) const override;
+    P5KeySwitch(JSONLoader & json);
+    static IR::Node * fromJSON(JSONLoader & json);
+    bool operator==(IR::Node const & a) const override;
+    P5KeySwitch(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
+    Node(srcInfo), annotations(annotations), select(select), cases(cases)
+    { validate(); }
+    P5KeySwitch(IR::Vector<IR::Annotation> annotations, const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
+    annotations(annotations), select(select), cases(cases)
+    { validate(); }
+    P5KeySwitch(Util::SourceInfo srcInfo, const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
+    Node(srcInfo), select(select), cases(cases)
+    { validate(); }
+    P5KeySwitch(const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
+    select(select), cases(cases)
+    { validate(); }
+    P5KeySwitch(Util::SourceInfo srcInfo, IR::Vector<IR::Annotation> annotations, const IR::Expression* select) :
+    Node(srcInfo), annotations(annotations), select(select)
+    { validate(); }
+    P5KeySwitch(IR::Vector<IR::Annotation> annotations, const IR::Expression* select) :
+    annotations(annotations), select(select)
+    { validate(); }
+    P5KeySwitch(Util::SourceInfo srcInfo, const IR::Expression* select) :
+    Node(srcInfo), select(select)
+    { validate(); }
+    P5KeySwitch(const IR::Expression* select) :
+    select(select)
+    { validate(); }
+    IRNODE_SUBCLASS(P5KeySwitch)
+    DECLARE_TYPEINFO_WITH_TYPEID(P5KeySwitch, NodeKind::P5KeySwitch, Node, IAnnotated);
+};
+}  // namespace P4::IR
+namespace P4::IR {
 class P5Key : public Statement {
  public:
-    const IR::Expression* select = nullptr;
-
-    IR::Vector<IR::P5KeyCase> cases;
-
     IR::Vector<IR::P5KeyElement> elements;
 
-#line 44 "/root/p4c/frontends/p5/ir-p5.def"
+
+    IR::Vector<IR::P5KeySwitch> switches;
+#line 57 "/root/p4c/frontends/p5/ir-p5.def"
     void dbprint(std::ostream & out) const override;
-#line 11994 "/root/p4c/build/ir/ir-generated.h"
+#line 12099 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::P5Key const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12004,47 +12109,23 @@ class P5Key : public Statement {
     bool operator==(IR::Statement const & a) const override;
     bool operator==(IR::StatOrDecl const & a) const override;
     bool operator==(IR::Node const & a) const override;
-    P5Key(Util::SourceInfo srcInfo, const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases, IR::Vector<IR::P5KeyElement> elements) :
-    Statement(srcInfo), select(select), cases(cases), elements(elements)
+    P5Key(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeyElement> elements, IR::Vector<IR::P5KeySwitch> switches) :
+    Statement(srcInfo), elements(elements), switches(switches)
     { validate(); }
-    P5Key(const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases, IR::Vector<IR::P5KeyElement> elements) :
-    select(select), cases(cases), elements(elements)
+    P5Key(IR::Vector<IR::P5KeyElement> elements, IR::Vector<IR::P5KeySwitch> switches) :
+    elements(elements), switches(switches)
     { validate(); }
-    P5Key(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeyCase> cases, IR::Vector<IR::P5KeyElement> elements) :
-    Statement(srcInfo), cases(cases), elements(elements)
+    P5Key(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeySwitch> switches) :
+    Statement(srcInfo), switches(switches)
     { validate(); }
-    P5Key(IR::Vector<IR::P5KeyCase> cases, IR::Vector<IR::P5KeyElement> elements) :
-    cases(cases), elements(elements)
-    { validate(); }
-    P5Key(Util::SourceInfo srcInfo, const IR::Expression* select, IR::Vector<IR::P5KeyElement> elements) :
-    Statement(srcInfo), select(select), elements(elements)
-    { validate(); }
-    P5Key(const IR::Expression* select, IR::Vector<IR::P5KeyElement> elements) :
-    select(select), elements(elements)
+    P5Key(IR::Vector<IR::P5KeySwitch> switches) :
+    switches(switches)
     { validate(); }
     P5Key(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeyElement> elements) :
     Statement(srcInfo), elements(elements)
     { validate(); }
     P5Key(IR::Vector<IR::P5KeyElement> elements) :
     elements(elements)
-    { validate(); }
-    P5Key(Util::SourceInfo srcInfo, const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
-    Statement(srcInfo), select(select), cases(cases)
-    { validate(); }
-    P5Key(const IR::Expression* select, IR::Vector<IR::P5KeyCase> cases) :
-    select(select), cases(cases)
-    { validate(); }
-    P5Key(Util::SourceInfo srcInfo, IR::Vector<IR::P5KeyCase> cases) :
-    Statement(srcInfo), cases(cases)
-    { validate(); }
-    P5Key(IR::Vector<IR::P5KeyCase> cases) :
-    cases(cases)
-    { validate(); }
-    P5Key(Util::SourceInfo srcInfo, const IR::Expression* select) :
-    Statement(srcInfo), select(select)
-    { validate(); }
-    P5Key(const IR::Expression* select) :
-    select(select)
     { validate(); }
     P5Key(Util::SourceInfo srcInfo) :
     Statement(srcInfo)
@@ -12053,6 +12134,83 @@ class P5Key : public Statement {
     { validate(); }
     IRNODE_SUBCLASS(P5Key)
     DECLARE_TYPEINFO_WITH_TYPEID(P5Key, NodeKind::P5Key, Statement);
+};
+}  // namespace P4::IR
+namespace P4::IR {
+
+class P5DesignatedInitializer : public Expression {
+ public:
+
+
+    bool isMember;
+    const IR::Expression* designator = nullptr;
+    const IR::Expression* value = nullptr;
+#line 67 "/root/p4c/frontends/p5/ir-p5.def"
+    void dbprint(std::ostream & out) const override;
+#line 12151 "/root/p4c/build/ir/ir-generated.h"
+    bool operator==(IR::P5DesignatedInitializer const & a) const override;
+    bool equiv(IR::Node const & a_) const override;
+    void visit_children(Visitor & v, char const * n) override;
+    void visit_children(Visitor & v, char const * n) const override;
+    void validate() const override;
+    cstring node_type_name() const override { return "P5DesignatedInitializer"_cs; }
+    static cstring static_type_name() { return "P5DesignatedInitializer"_cs; }
+    void dump_fields(std::ostream & out) const override;
+    void toJSON(JSONGenerator & json) const override;
+    P5DesignatedInitializer(JSONLoader & json);
+    static IR::Node * fromJSON(JSONLoader & json);
+    bool operator==(IR::Expression const & a) const override;
+    bool operator==(IR::Node const & a) const override;
+    P5DesignatedInitializer(Util::SourceInfo srcInfo, const IR::Type* type, bool isMember, const IR::Expression* designator, const IR::Expression* value) :
+    Expression(srcInfo, type), isMember(isMember), designator(designator), value(value)
+    { validate(); }
+    P5DesignatedInitializer(const IR::Type* type, bool isMember, const IR::Expression* designator, const IR::Expression* value) :
+    Expression(type), isMember(isMember), designator(designator), value(value)
+    { validate(); }
+    P5DesignatedInitializer(Util::SourceInfo srcInfo, bool isMember, const IR::Expression* designator, const IR::Expression* value) :
+    Expression(srcInfo), isMember(isMember), designator(designator), value(value)
+    { validate(); }
+    P5DesignatedInitializer(bool isMember, const IR::Expression* designator, const IR::Expression* value) :
+    isMember(isMember), designator(designator), value(value)
+    { validate(); }
+    IRNODE_SUBCLASS(P5DesignatedInitializer)
+    DECLARE_TYPEINFO_WITH_TYPEID(P5DesignatedInitializer, NodeKind::P5DesignatedInitializer, Expression);
+};
+}  // namespace P4::IR
+namespace P4::IR {
+
+class P5PostIncrement : public Expression {
+ public:
+    const IR::Expression* expr = nullptr;
+#line 74 "/root/p4c/frontends/p5/ir-p5.def"
+    void dbprint(std::ostream & out) const override;
+#line 12188 "/root/p4c/build/ir/ir-generated.h"
+    bool operator==(IR::P5PostIncrement const & a) const override;
+    bool equiv(IR::Node const & a_) const override;
+    void visit_children(Visitor & v, char const * n) override;
+    void visit_children(Visitor & v, char const * n) const override;
+    void validate() const override;
+    cstring node_type_name() const override { return "P5PostIncrement"_cs; }
+    static cstring static_type_name() { return "P5PostIncrement"_cs; }
+    void toJSON(JSONGenerator & json) const override;
+    P5PostIncrement(JSONLoader & json);
+    static IR::Node * fromJSON(JSONLoader & json);
+    bool operator==(IR::Expression const & a) const override;
+    bool operator==(IR::Node const & a) const override;
+    P5PostIncrement(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Expression* expr) :
+    Expression(srcInfo, type), expr(expr)
+    { validate(); }
+    P5PostIncrement(const IR::Type* type, const IR::Expression* expr) :
+    Expression(type), expr(expr)
+    { validate(); }
+    P5PostIncrement(Util::SourceInfo srcInfo, const IR::Expression* expr) :
+    Expression(srcInfo), expr(expr)
+    { validate(); }
+    P5PostIncrement(const IR::Expression* expr) :
+    expr(expr)
+    { validate(); }
+    IRNODE_SUBCLASS(P5PostIncrement)
+    DECLARE_TYPEINFO_WITH_TYPEID(P5PostIncrement, NodeKind::P5PostIncrement, Expression);
 };
 }  // namespace P4::IR
 namespace P4::IR {
@@ -12095,7 +12253,7 @@ class IDPDKNode : public virtual INode {
  public:
 #line 2 "/root/p4c/backends/dpdk/dpdk.def"
     virtual std::ostream & toSpec(std::ostream & out) const = 0;
-#line 12099 "/root/p4c/build/ir/ir-generated.h"
+#line 12257 "/root/p4c/build/ir/ir-generated.h"
     DECLARE_TYPEINFO_WITH_TYPEID(IDPDKNode, NodeKind::IDPDKNode, INode);
 };
 }  // namespace P4::IR
@@ -12105,7 +12263,7 @@ class DpdkDeclaration : public Node, public virtual IDPDKNode {
     const IR::Declaration* global = nullptr;
 #line 7 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12109 "/root/p4c/build/ir/ir-generated.h"
+#line 12267 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkDeclaration const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12132,7 +12290,7 @@ class DpdkExternDeclaration : public Declaration_Instance, public virtual IDPDKN
  public:
 #line 12 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12136 "/root/p4c/build/ir/ir-generated.h"
+#line 12294 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkExternDeclaration const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkExternDeclaration"_cs; }
@@ -12177,7 +12335,7 @@ class DpdkHeaderType : public Type_Header, public virtual IDPDKNode {
  public:
 #line 17 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12181 "/root/p4c/build/ir/ir-generated.h"
+#line 12339 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkHeaderType const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkHeaderType"_cs; }
@@ -12249,7 +12407,7 @@ class DpdkHeaderInstance : public Node, public virtual IDPDKNode {
     const IR::Type_Header* headerType = nullptr;
 #line 24 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12253 "/root/p4c/build/ir/ir-generated.h"
+#line 12411 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkHeaderInstance const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12276,7 +12434,7 @@ class DpdkStructType : public Type_Struct, public virtual IDPDKNode {
  public:
 #line 29 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12280 "/root/p4c/build/ir/ir-generated.h"
+#line 12438 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkStructType const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkStructType"_cs; }
@@ -12346,7 +12504,7 @@ class DpdkAsmStatement : public Node, public virtual IDPDKNode {
  public:
 #line 34 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12350 "/root/p4c/build/ir/ir-generated.h"
+#line 12508 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAsmStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkAsmStatement"_cs; }
@@ -12373,13 +12531,13 @@ class DpdkAction : public Node, public virtual IAnnotated {
     IR::ParameterList para;
 #line 42 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const;
-#line 12377 "/root/p4c/build/ir/ir-generated.h"
+#line 12535 "/root/p4c/build/ir/ir-generated.h"
 #line 43 "/root/p4c/backends/dpdk/dpdk.def"
     IR::Vector<IR::Annotation> const & getAnnotations() const override;
-#line 12380 "/root/p4c/build/ir/ir-generated.h"
+#line 12538 "/root/p4c/build/ir/ir-generated.h"
 #line 44 "/root/p4c/backends/dpdk/dpdk.def"
     IR::Vector<IR::Annotation> & getAnnotations() override;
-#line 12383 "/root/p4c/build/ir/ir-generated.h"
+#line 12541 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAction const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12419,13 +12577,13 @@ class DpdkTable : public Node {
     IR::ParameterList default_action_paraList;
 #line 55 "/root/p4c/backends/dpdk/dpdk.def"
     const IR::Key *getKey() const;
-#line 12423 "/root/p4c/build/ir/ir-generated.h"
+#line 12581 "/root/p4c/build/ir/ir-generated.h"
 #line 63 "/root/p4c/backends/dpdk/dpdk.def"
     const IR::EntriesList *getEntries() const;
-#line 12426 "/root/p4c/build/ir/ir-generated.h"
+#line 12584 "/root/p4c/build/ir/ir-generated.h"
 #line 73 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const;
-#line 12429 "/root/p4c/build/ir/ir-generated.h"
+#line 12587 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkTable const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12458,7 +12616,7 @@ class DpdkSelector : public Node {
     int n_members_per_group_max;
 #line 86 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const;
-#line 12462 "/root/p4c/build/ir/ir-generated.h"
+#line 12620 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkSelector const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12491,7 +12649,7 @@ class DpdkLearner : public Node {
     const IR::TableProperties* properties = nullptr;
 #line 102 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const;
-#line 12495 "/root/p4c/build/ir/ir-generated.h"
+#line 12653 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkLearner const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12529,7 +12687,7 @@ class DpdkAsmProgram : public Node {
     IR::IndexedVector<IR::DpdkDeclaration> globals;
 #line 119 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const;
-#line 12533 "/root/p4c/build/ir/ir-generated.h"
+#line 12691 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAsmProgram const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12558,7 +12716,7 @@ class DpdkListStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
 #line 124 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12562 "/root/p4c/build/ir/ir-generated.h"
+#line 12720 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkListStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12593,7 +12751,7 @@ class DpdkApplyStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     cstring table;
 #line 129 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12597 "/root/p4c/build/ir/ir-generated.h"
+#line 12755 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkApplyStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkApplyStatement"_cs; }
@@ -12623,7 +12781,7 @@ class DpdkLearnStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* argument = nullptr;
 #line 136 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12627 "/root/p4c/build/ir/ir-generated.h"
+#line 12785 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkLearnStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12661,7 +12819,7 @@ class DpdkMirrorStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* sessionId = nullptr;
 #line 142 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12665 "/root/p4c/build/ir/ir-generated.h"
+#line 12823 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkMirrorStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12691,7 +12849,7 @@ class DpdkEmitStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* header = nullptr;
 #line 147 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12695 "/root/p4c/build/ir/ir-generated.h"
+#line 12853 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkEmitStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12722,7 +12880,7 @@ class DpdkExtractStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* length = nullptr;
 #line 153 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12726 "/root/p4c/build/ir/ir-generated.h"
+#line 12884 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkExtractStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12758,7 +12916,7 @@ class DpdkLookaheadStatement : public DpdkAsmStatement, public virtual IDPDKNode
     const IR::Expression* header = nullptr;
 #line 158 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12762 "/root/p4c/build/ir/ir-generated.h"
+#line 12920 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkLookaheadStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12789,10 +12947,10 @@ class DpdkJmpStatement : public DpdkAsmStatement {
     cstring label;
 #line 164 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12793 "/root/p4c/build/ir/ir-generated.h"
+#line 12951 "/root/p4c/build/ir/ir-generated.h"
 #line 166 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpStatement(cstring instruction, cstring l);
-#line 12796 "/root/p4c/build/ir/ir-generated.h"
+#line 12954 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpStatement"_cs; }
@@ -12811,7 +12969,7 @@ class DpdkJmpLabelStatement : public DpdkJmpStatement {
  public:
 #line 172 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpLabelStatement(cstring label);
-#line 12815 "/root/p4c/build/ir/ir-generated.h"
+#line 12973 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpLabelStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpLabelStatement"_cs; }
@@ -12832,7 +12990,7 @@ class DpdkJmpHitStatement : public DpdkJmpStatement {
  public:
 #line 179 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpHitStatement(cstring label);
-#line 12836 "/root/p4c/build/ir/ir-generated.h"
+#line 12994 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpHitStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpHitStatement"_cs; }
@@ -12852,7 +13010,7 @@ class DpdkJmpMissStatement : public DpdkJmpStatement {
  public:
 #line 186 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpMissStatement(cstring label);
-#line 12856 "/root/p4c/build/ir/ir-generated.h"
+#line 13014 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpMissStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpMissStatement"_cs; }
@@ -12873,10 +13031,10 @@ class DpdkJmpActionStatement : public DpdkJmpStatement {
     IR::ID action;
 #line 192 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12877 "/root/p4c/build/ir/ir-generated.h"
+#line 13035 "/root/p4c/build/ir/ir-generated.h"
 #line 195 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpActionStatement(cstring instruction, cstring label, IR::ID action);
-#line 12880 "/root/p4c/build/ir/ir-generated.h"
+#line 13038 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpActionStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpActionStatement"_cs; }
@@ -12896,7 +13054,7 @@ class DpdkJmpIfActionRunStatement : public DpdkJmpActionStatement {
  public:
 #line 202 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpIfActionRunStatement(cstring label, cstring act);
-#line 12900 "/root/p4c/build/ir/ir-generated.h"
+#line 13058 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpIfActionRunStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpIfActionRunStatement"_cs; }
@@ -12917,7 +13075,7 @@ class DpdkJmpIfActionNotRunStatement : public DpdkJmpActionStatement {
  public:
 #line 209 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpIfActionNotRunStatement(cstring label, cstring act);
-#line 12921 "/root/p4c/build/ir/ir-generated.h"
+#line 13079 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpIfActionNotRunStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpIfActionNotRunStatement"_cs; }
@@ -12939,10 +13097,10 @@ class DpdkJmpHeaderStatement : public DpdkJmpStatement {
     const IR::Expression* header = nullptr;
 #line 215 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 12943 "/root/p4c/build/ir/ir-generated.h"
+#line 13101 "/root/p4c/build/ir/ir-generated.h"
 #line 217 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpHeaderStatement(cstring instruction, cstring label, const IR::Expression* hdr);
-#line 12946 "/root/p4c/build/ir/ir-generated.h"
+#line 13104 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpHeaderStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -12964,7 +13122,7 @@ class DpdkJmpIfInvalidStatement : public DpdkJmpHeaderStatement {
  public:
 #line 223 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpIfInvalidStatement(cstring label, const IR::Expression* hdr);
-#line 12968 "/root/p4c/build/ir/ir-generated.h"
+#line 13126 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpIfInvalidStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpIfInvalidStatement"_cs; }
@@ -12986,7 +13144,7 @@ class DpdkJmpIfValidStatement : public DpdkJmpHeaderStatement {
  public:
 #line 230 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpIfValidStatement(cstring label, const IR::Expression* hdr);
-#line 12990 "/root/p4c/build/ir/ir-generated.h"
+#line 13148 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpIfValidStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpIfValidStatement"_cs; }
@@ -13009,10 +13167,10 @@ class DpdkJmpCondStatement : public DpdkJmpStatement {
     const IR::Expression* src2 = nullptr;
 #line 237 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13013 "/root/p4c/build/ir/ir-generated.h"
+#line 13171 "/root/p4c/build/ir/ir-generated.h"
 #line 239 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpCondStatement(cstring instruction, cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13016 "/root/p4c/build/ir/ir-generated.h"
+#line 13174 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpCondStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13034,7 +13192,7 @@ class DpdkJmpEqualStatement : public DpdkJmpCondStatement, public virtual IDPDKN
  public:
 #line 244 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13038 "/root/p4c/build/ir/ir-generated.h"
+#line 13196 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpEqualStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpEqualStatement"_cs; }
@@ -13056,7 +13214,7 @@ class DpdkJmpNotEqualStatement : public DpdkJmpCondStatement, public virtual IDP
  public:
 #line 251 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpNotEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13060 "/root/p4c/build/ir/ir-generated.h"
+#line 13218 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpNotEqualStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpNotEqualStatement"_cs; }
@@ -13078,7 +13236,7 @@ class DpdkJmpGreaterEqualStatement : public DpdkJmpCondStatement, public virtual
  public:
 #line 258 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpGreaterEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13082 "/root/p4c/build/ir/ir-generated.h"
+#line 13240 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpGreaterEqualStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpGreaterEqualStatement"_cs; }
@@ -13099,7 +13257,7 @@ class DpdkJmpGreaterStatement : public DpdkJmpCondStatement, public virtual IDPD
  public:
 #line 265 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpGreaterStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13103 "/root/p4c/build/ir/ir-generated.h"
+#line 13261 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpGreaterStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpGreaterStatement"_cs; }
@@ -13120,7 +13278,7 @@ class DpdkJmpLessOrEqualStatement : public DpdkJmpCondStatement, public virtual 
  public:
 #line 272 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpLessOrEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13124 "/root/p4c/build/ir/ir-generated.h"
+#line 13282 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpLessOrEqualStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpLessOrEqualStatement"_cs; }
@@ -13141,7 +13299,7 @@ class DpdkJmpLessStatement : public DpdkJmpCondStatement, public virtual IDPDKNo
  public:
 #line 279 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkJmpLessStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2);
-#line 13145 "/root/p4c/build/ir/ir-generated.h"
+#line 13303 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkJmpLessStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkJmpLessStatement"_cs; }
@@ -13163,7 +13321,7 @@ class DpdkRxStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* port = nullptr;
 #line 285 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13167 "/root/p4c/build/ir/ir-generated.h"
+#line 13325 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRxStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13192,7 +13350,7 @@ class DpdkTxStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* port = nullptr;
 #line 291 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13196 "/root/p4c/build/ir/ir-generated.h"
+#line 13354 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkTxStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13222,7 +13380,7 @@ class DpdkAssignmentStatement : public DpdkAsmStatement {
     const IR::Expression* dst = nullptr;
 #line 299 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkAssignmentStatement(cstring instruction, const IR::Expression* dst);
-#line 13226 "/root/p4c/build/ir/ir-generated.h"
+#line 13384 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAssignmentStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13245,10 +13403,10 @@ class DpdkUnaryStatement : public DpdkAssignmentStatement {
     const IR::Expression* src = nullptr;
 #line 305 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13249 "/root/p4c/build/ir/ir-generated.h"
+#line 13407 "/root/p4c/build/ir/ir-generated.h"
 #line 307 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkUnaryStatement(cstring instruction, const IR::Expression* dst, const IR::Expression* src);
-#line 13252 "/root/p4c/build/ir/ir-generated.h"
+#line 13410 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkUnaryStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13270,7 +13428,7 @@ class DpdkMovStatement : public DpdkUnaryStatement {
  public:
 #line 312 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkMovStatement(const IR::Expression* dst, const IR::Expression* src);
-#line 13274 "/root/p4c/build/ir/ir-generated.h"
+#line 13432 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkMovStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkMovStatement"_cs; }
@@ -13292,7 +13450,7 @@ class DpdkMovhStatement : public DpdkUnaryStatement {
  public:
 #line 318 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkMovhStatement(const IR::Expression* dst, const IR::Expression* src);
-#line 13296 "/root/p4c/build/ir/ir-generated.h"
+#line 13454 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkMovhStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkMovhStatement"_cs; }
@@ -13316,10 +13474,10 @@ class DpdkBinaryStatement : public DpdkAssignmentStatement {
     const IR::Expression* src2 = nullptr;
 #line 326 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13320 "/root/p4c/build/ir/ir-generated.h"
+#line 13478 "/root/p4c/build/ir/ir-generated.h"
 #line 328 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkBinaryStatement(cstring instruction, const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13323 "/root/p4c/build/ir/ir-generated.h"
+#line 13481 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkBinaryStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13341,7 +13499,7 @@ class DpdkAddStatement : public DpdkBinaryStatement {
  public:
 #line 335 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkAddStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13345 "/root/p4c/build/ir/ir-generated.h"
+#line 13503 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAddStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkAddStatement"_cs; }
@@ -13362,7 +13520,7 @@ class DpdkAndStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 342 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkAndStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13366 "/root/p4c/build/ir/ir-generated.h"
+#line 13524 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkAndStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkAndStatement"_cs; }
@@ -13383,7 +13541,7 @@ class DpdkShlStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 349 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkShlStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13387 "/root/p4c/build/ir/ir-generated.h"
+#line 13545 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkShlStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkShlStatement"_cs; }
@@ -13404,7 +13562,7 @@ class DpdkShrStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 356 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkShrStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13408 "/root/p4c/build/ir/ir-generated.h"
+#line 13566 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkShrStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkShrStatement"_cs; }
@@ -13425,7 +13583,7 @@ class DpdkSubStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 363 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkSubStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13429 "/root/p4c/build/ir/ir-generated.h"
+#line 13587 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkSubStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkSubStatement"_cs; }
@@ -13446,7 +13604,7 @@ class DpdkOrStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 370 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkOrStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13450 "/root/p4c/build/ir/ir-generated.h"
+#line 13608 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkOrStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkOrStatement"_cs; }
@@ -13467,7 +13625,7 @@ class DpdkXorStatement : public DpdkBinaryStatement, public virtual IDPDKNode {
  public:
 #line 377 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkXorStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2);
-#line 13471 "/root/p4c/build/ir/ir-generated.h"
+#line 13629 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkXorStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkXorStatement"_cs; }
@@ -13489,7 +13647,7 @@ class DpdkRecircidStatement : public DpdkAsmStatement, public virtual IDPDKNode 
     const IR::Expression* pass = nullptr;
 #line 383 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13493 "/root/p4c/build/ir/ir-generated.h"
+#line 13651 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRecircidStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13517,7 +13675,7 @@ class DpdkReturnStatement : public DpdkAsmStatement, public virtual IDPDKNode {
  public:
 #line 388 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13521 "/root/p4c/build/ir/ir-generated.h"
+#line 13679 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkReturnStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkReturnStatement"_cs; }
@@ -13542,7 +13700,7 @@ class DpdkRearmStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* timeout = nullptr;
 #line 394 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13546 "/root/p4c/build/ir/ir-generated.h"
+#line 13704 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRearmStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13574,7 +13732,7 @@ class DpdkRecirculateStatement : public DpdkAsmStatement, public virtual IDPDKNo
  public:
 #line 399 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13578 "/root/p4c/build/ir/ir-generated.h"
+#line 13736 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRecirculateStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkRecirculateStatement"_cs; }
@@ -13599,10 +13757,10 @@ class DpdkLabelStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     cstring label;
 #line 405 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13603 "/root/p4c/build/ir/ir-generated.h"
+#line 13761 "/root/p4c/build/ir/ir-generated.h"
 #line 407 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkLabelStatement(cstring l);
-#line 13606 "/root/p4c/build/ir/ir-generated.h"
+#line 13764 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkLabelStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkLabelStatement"_cs; }
@@ -13626,7 +13784,7 @@ class DpdkChecksumAddStatement : public DpdkAsmStatement, public virtual IDPDKNo
     const IR::Expression* field = nullptr;
 #line 414 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13630 "/root/p4c/build/ir/ir-generated.h"
+#line 13788 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkChecksumAddStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13658,7 +13816,7 @@ class DpdkChecksumSubStatement : public DpdkAsmStatement, public virtual IDPDKNo
     const IR::Expression* field = nullptr;
 #line 422 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13662 "/root/p4c/build/ir/ir-generated.h"
+#line 13820 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkChecksumSubStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13689,7 +13847,7 @@ class DpdkChecksumClearStatement : public DpdkAsmStatement, public virtual IDPDK
     cstring intermediate_value;
 #line 429 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13693 "/root/p4c/build/ir/ir-generated.h"
+#line 13851 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkChecksumClearStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkChecksumClearStatement"_cs; }
@@ -13716,7 +13874,7 @@ class DpdkHashDeclStatement : public DpdkAsmStatement {
     cstring hash;
 #line 435 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13720 "/root/p4c/build/ir/ir-generated.h"
+#line 13878 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkHashDeclStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkHashDeclStatement"_cs; }
@@ -13746,7 +13904,7 @@ class DpdkGetHashStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* dst = nullptr;
 #line 445 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13750 "/root/p4c/build/ir/ir-generated.h"
+#line 13908 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkGetHashStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13778,7 +13936,7 @@ class DpdkGetChecksumStatement : public DpdkAsmStatement, public virtual IDPDKNo
     cstring intermediate_value;
 #line 453 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13782 "/root/p4c/build/ir/ir-generated.h"
+#line 13940 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkGetChecksumStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13810,7 +13968,7 @@ class DpdkCastStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Type* type = nullptr;
 #line 461 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13814 "/root/p4c/build/ir/ir-generated.h"
+#line 13972 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkCastStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13840,7 +13998,7 @@ class DpdkVerifyStatement : public DpdkAsmStatement, public virtual IDPDKNode {
     const IR::Expression* error = nullptr;
 #line 468 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13844 "/root/p4c/build/ir/ir-generated.h"
+#line 14002 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkVerifyStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13870,7 +14028,7 @@ class DpdkMeterDeclStatement : public DpdkAsmStatement {
     const IR::Expression* size = nullptr;
 #line 475 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13874 "/root/p4c/build/ir/ir-generated.h"
+#line 14032 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkMeterDeclStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13904,7 +14062,7 @@ class DpdkMeterExecuteStatement : public DpdkAsmStatement, public virtual IDPDKN
     const IR::Expression* color_out = nullptr;
 #line 485 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13908 "/root/p4c/build/ir/ir-generated.h"
+#line 14066 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkMeterExecuteStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13934,7 +14092,7 @@ class DpdkGetTableEntryIndex : public DpdkAsmStatement, public virtual IDPDKNode
     const IR::Expression* index = nullptr;
 #line 491 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13938 "/root/p4c/build/ir/ir-generated.h"
+#line 14096 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkGetTableEntryIndex const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -13965,7 +14123,7 @@ class DpdkCounterCountStatement : public DpdkAsmStatement, public virtual IDPDKN
     const IR::Expression* incr = nullptr;
 #line 499 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 13969 "/root/p4c/build/ir/ir-generated.h"
+#line 14127 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkCounterCountStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14003,7 +14161,7 @@ class DpdkRegisterDeclStatement : public DpdkAsmStatement {
     const IR::Expression* init_val = nullptr;
 #line 507 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14007 "/root/p4c/build/ir/ir-generated.h"
+#line 14165 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRegisterDeclStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14040,10 +14198,10 @@ class DpdkRegisterReadStatement : public DpdkAssignmentStatement {
     const IR::Expression* index = nullptr;
 #line 514 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14044 "/root/p4c/build/ir/ir-generated.h"
+#line 14202 "/root/p4c/build/ir/ir-generated.h"
 #line 517 "/root/p4c/backends/dpdk/dpdk.def"
     DpdkRegisterReadStatement(const IR::Expression* dst, cstring reg, const IR::Expression* index);
-#line 14047 "/root/p4c/build/ir/ir-generated.h"
+#line 14205 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRegisterReadStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14070,7 +14228,7 @@ class DpdkRegisterWriteStatement : public DpdkAsmStatement, public virtual IDPDK
     const IR::Expression* src = nullptr;
 #line 525 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14074 "/root/p4c/build/ir/ir-generated.h"
+#line 14232 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkRegisterWriteStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14100,7 +14258,7 @@ class DpdkValidateStatement : public DpdkAsmStatement, public virtual IDPDKNode 
     const IR::Expression* header = nullptr;
 #line 531 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14104 "/root/p4c/build/ir/ir-generated.h"
+#line 14262 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkValidateStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14130,7 +14288,7 @@ class DpdkInvalidateStatement : public DpdkAsmStatement, public virtual IDPDKNod
     const IR::Expression* header = nullptr;
 #line 536 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14134 "/root/p4c/build/ir/ir-generated.h"
+#line 14292 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkInvalidateStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14159,7 +14317,7 @@ class DpdkDropStatement : public DpdkAsmStatement, public virtual IDPDKNode {
  public:
 #line 540 "/root/p4c/backends/dpdk/dpdk.def"
     std::ostream & toSpec(std::ostream & out) const override;
-#line 14163 "/root/p4c/build/ir/ir-generated.h"
+#line 14321 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::DpdkDropStatement const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "DpdkDropStatement"_cs; }
@@ -14184,17 +14342,17 @@ class DpdkDropStatement : public DpdkAsmStatement, public virtual IDPDKNode {
 #include "backends/tc/tc_defines.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#line 14188 "/root/p4c/build/ir/ir-generated.h"
+#line 14346 "/root/p4c/build/ir/ir-generated.h"
 namespace P4::IR {
 class TCKernelMetadata : public Node {
  public:
     unsigned metaField;
 #line 25 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14195 "/root/p4c/build/ir/ir-generated.h"
+#line 14353 "/root/p4c/build/ir/ir-generated.h"
 #line 47 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14198 "/root/p4c/build/ir/ir-generated.h"
+#line 14356 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCKernelMetadata const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCKernelMetadata"_cs; }
@@ -14223,37 +14381,37 @@ class TCActionParam : public Node {
     unsigned direction;
 #line 55 "/root/p4c/backends/tc/tc.def"
     void setParamName(cstring pN);
-#line 14227 "/root/p4c/build/ir/ir-generated.h"
+#line 14385 "/root/p4c/build/ir/ir-generated.h"
 #line 58 "/root/p4c/backends/tc/tc.def"
     void setBitSize(unsigned bS);
-#line 14230 "/root/p4c/build/ir/ir-generated.h"
+#line 14388 "/root/p4c/build/ir/ir-generated.h"
 #line 61 "/root/p4c/backends/tc/tc.def"
     void setDataType(unsigned d);
-#line 14233 "/root/p4c/build/ir/ir-generated.h"
+#line 14391 "/root/p4c/build/ir/ir-generated.h"
 #line 64 "/root/p4c/backends/tc/tc.def"
     void setDirection(unsigned d);
-#line 14236 "/root/p4c/build/ir/ir-generated.h"
+#line 14394 "/root/p4c/build/ir/ir-generated.h"
 #line 67 "/root/p4c/backends/tc/tc.def"
     TCActionParam();
-#line 14239 "/root/p4c/build/ir/ir-generated.h"
+#line 14397 "/root/p4c/build/ir/ir-generated.h"
 #line 71 "/root/p4c/backends/tc/tc.def"
     cstring getParamName() const;
-#line 14242 "/root/p4c/build/ir/ir-generated.h"
+#line 14400 "/root/p4c/build/ir/ir-generated.h"
 #line 74 "/root/p4c/backends/tc/tc.def"
     cstring getName() const;
-#line 14245 "/root/p4c/build/ir/ir-generated.h"
+#line 14403 "/root/p4c/build/ir/ir-generated.h"
 #line 77 "/root/p4c/backends/tc/tc.def"
     unsigned getDirection() const;
-#line 14248 "/root/p4c/build/ir/ir-generated.h"
+#line 14406 "/root/p4c/build/ir/ir-generated.h"
 #line 80 "/root/p4c/backends/tc/tc.def"
     cstring getParamDecl(cstring placeholderName) const;
-#line 14251 "/root/p4c/build/ir/ir-generated.h"
+#line 14409 "/root/p4c/build/ir/ir-generated.h"
 #line 116 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14254 "/root/p4c/build/ir/ir-generated.h"
+#line 14412 "/root/p4c/build/ir/ir-generated.h"
 #line 146 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14257 "/root/p4c/build/ir/ir-generated.h"
+#line 14415 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCActionParam const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCActionParam"_cs; }
@@ -14280,19 +14438,19 @@ class TCDefaultActionParam : public Node {
     cstring defaultValue;
 #line 152 "/root/p4c/backends/tc/tc.def"
     void setParamDetail(const IR::TCActionParam* pN);
-#line 14284 "/root/p4c/build/ir/ir-generated.h"
+#line 14442 "/root/p4c/build/ir/ir-generated.h"
 #line 155 "/root/p4c/backends/tc/tc.def"
     void setDefaultValue(cstring dV);
-#line 14287 "/root/p4c/build/ir/ir-generated.h"
+#line 14445 "/root/p4c/build/ir/ir-generated.h"
 #line 158 "/root/p4c/backends/tc/tc.def"
     TCDefaultActionParam();
-#line 14290 "/root/p4c/build/ir/ir-generated.h"
+#line 14448 "/root/p4c/build/ir/ir-generated.h"
 #line 162 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14293 "/root/p4c/build/ir/ir-generated.h"
+#line 14451 "/root/p4c/build/ir/ir-generated.h"
 #line 168 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14296 "/root/p4c/build/ir/ir-generated.h"
+#line 14454 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCDefaultActionParam const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14324,28 +14482,28 @@ class TCAction : public Node {
     safe_vector<const IR::TCActionParam *> actionParams;
 #line 176 "/root/p4c/backends/tc/tc.def"
     cstring getName() const;
-#line 14328 "/root/p4c/build/ir/ir-generated.h"
+#line 14486 "/root/p4c/build/ir/ir-generated.h"
 #line 182 "/root/p4c/backends/tc/tc.def"
     cstring getActionName() const;
-#line 14331 "/root/p4c/build/ir/ir-generated.h"
+#line 14489 "/root/p4c/build/ir/ir-generated.h"
 #line 185 "/root/p4c/backends/tc/tc.def"
     void setPipelineName(cstring pN);
-#line 14334 "/root/p4c/build/ir/ir-generated.h"
+#line 14492 "/root/p4c/build/ir/ir-generated.h"
 #line 188 "/root/p4c/backends/tc/tc.def"
     void addActionParams(const IR::TCActionParam* tca);
-#line 14337 "/root/p4c/build/ir/ir-generated.h"
+#line 14495 "/root/p4c/build/ir/ir-generated.h"
 #line 191 "/root/p4c/backends/tc/tc.def"
     void setActionId(unsigned id);
-#line 14340 "/root/p4c/build/ir/ir-generated.h"
+#line 14498 "/root/p4c/build/ir/ir-generated.h"
 #line 194 "/root/p4c/backends/tc/tc.def"
     TCAction(cstring aN);
-#line 14343 "/root/p4c/build/ir/ir-generated.h"
+#line 14501 "/root/p4c/build/ir/ir-generated.h"
 #line 199 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14346 "/root/p4c/build/ir/ir-generated.h"
+#line 14504 "/root/p4c/build/ir/ir-generated.h"
 #line 213 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14349 "/root/p4c/build/ir/ir-generated.h"
+#line 14507 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCAction const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCAction"_cs; }
@@ -14378,13 +14536,13 @@ class TCEntry : public Node {
     ordered_map<cstring, cstring> keys;
 #line 219 "/root/p4c/backends/tc/tc.def"
     cstring getActionName() const;
-#line 14382 "/root/p4c/build/ir/ir-generated.h"
+#line 14540 "/root/p4c/build/ir/ir-generated.h"
 #line 222 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14385 "/root/p4c/build/ir/ir-generated.h"
+#line 14543 "/root/p4c/build/ir/ir-generated.h"
 #line 229 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14388 "/root/p4c/build/ir/ir-generated.h"
+#line 14546 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCEntry const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCEntry"_cs; }
@@ -14436,70 +14594,70 @@ class TCTable : public Node {
     safe_vector<const IR::TCEntry *> const_entries;
 #line 261 "/root/p4c/backends/tc/tc.def"
     void setTablePermission(cstring p);
-#line 14440 "/root/p4c/build/ir/ir-generated.h"
+#line 14598 "/root/p4c/build/ir/ir-generated.h"
 #line 264 "/root/p4c/backends/tc/tc.def"
     void setDirectCounter(cstring counter);
-#line 14443 "/root/p4c/build/ir/ir-generated.h"
+#line 14601 "/root/p4c/build/ir/ir-generated.h"
 #line 268 "/root/p4c/backends/tc/tc.def"
     void setDirectMeter(cstring meter);
-#line 14446 "/root/p4c/build/ir/ir-generated.h"
+#line 14604 "/root/p4c/build/ir/ir-generated.h"
 #line 272 "/root/p4c/backends/tc/tc.def"
     void setKeySize(unsigned k);
-#line 14449 "/root/p4c/build/ir/ir-generated.h"
+#line 14607 "/root/p4c/build/ir/ir-generated.h"
 #line 275 "/root/p4c/backends/tc/tc.def"
     void setTableEntriesCount(unsigned t);
-#line 14452 "/root/p4c/build/ir/ir-generated.h"
+#line 14610 "/root/p4c/build/ir/ir-generated.h"
 #line 278 "/root/p4c/backends/tc/tc.def"
     void setNumMask(unsigned n);
-#line 14455 "/root/p4c/build/ir/ir-generated.h"
+#line 14613 "/root/p4c/build/ir/ir-generated.h"
 #line 281 "/root/p4c/backends/tc/tc.def"
     void setMatchType(unsigned m);
-#line 14458 "/root/p4c/build/ir/ir-generated.h"
+#line 14616 "/root/p4c/build/ir/ir-generated.h"
 #line 284 "/root/p4c/backends/tc/tc.def"
     void setDefaultHitAction(const IR::TCAction* d);
-#line 14461 "/root/p4c/build/ir/ir-generated.h"
+#line 14619 "/root/p4c/build/ir/ir-generated.h"
 #line 287 "/root/p4c/backends/tc/tc.def"
     void setDefaultMissAction(const IR::TCAction* d);
-#line 14464 "/root/p4c/build/ir/ir-generated.h"
+#line 14622 "/root/p4c/build/ir/ir-generated.h"
 #line 290 "/root/p4c/backends/tc/tc.def"
     void setDefaultHitConst(bool i);
-#line 14467 "/root/p4c/build/ir/ir-generated.h"
+#line 14625 "/root/p4c/build/ir/ir-generated.h"
 #line 293 "/root/p4c/backends/tc/tc.def"
     void setDefaultMissConst(bool i);
-#line 14470 "/root/p4c/build/ir/ir-generated.h"
+#line 14628 "/root/p4c/build/ir/ir-generated.h"
 #line 296 "/root/p4c/backends/tc/tc.def"
     void setTcMayOverrideHit();
-#line 14473 "/root/p4c/build/ir/ir-generated.h"
+#line 14631 "/root/p4c/build/ir/ir-generated.h"
 #line 299 "/root/p4c/backends/tc/tc.def"
     void setTcMayOverrideMiss();
-#line 14476 "/root/p4c/build/ir/ir-generated.h"
+#line 14634 "/root/p4c/build/ir/ir-generated.h"
 #line 302 "/root/p4c/backends/tc/tc.def"
     void setTableAddOnMiss();
-#line 14479 "/root/p4c/build/ir/ir-generated.h"
+#line 14637 "/root/p4c/build/ir/ir-generated.h"
 #line 305 "/root/p4c/backends/tc/tc.def"
     void addAction(const IR::TCAction* action, unsigned flag);
-#line 14482 "/root/p4c/build/ir/ir-generated.h"
+#line 14640 "/root/p4c/build/ir/ir-generated.h"
 #line 308 "/root/p4c/backends/tc/tc.def"
     void addConstEntries(const IR::TCEntry* entry);
-#line 14485 "/root/p4c/build/ir/ir-generated.h"
+#line 14643 "/root/p4c/build/ir/ir-generated.h"
 #line 311 "/root/p4c/backends/tc/tc.def"
     void addTimerProfiles(unsigned tp);
-#line 14488 "/root/p4c/build/ir/ir-generated.h"
+#line 14646 "/root/p4c/build/ir/ir-generated.h"
 #line 314 "/root/p4c/backends/tc/tc.def"
     cstring getTableName() const;
-#line 14491 "/root/p4c/build/ir/ir-generated.h"
+#line 14649 "/root/p4c/build/ir/ir-generated.h"
 #line 317 "/root/p4c/backends/tc/tc.def"
     cstring printMatchType(unsigned matchType) const;
-#line 14494 "/root/p4c/build/ir/ir-generated.h"
+#line 14652 "/root/p4c/build/ir/ir-generated.h"
 #line 332 "/root/p4c/backends/tc/tc.def"
     TCTable(unsigned tId, cstring tN, cstring cN, cstring pN);
-#line 14497 "/root/p4c/build/ir/ir-generated.h"
+#line 14655 "/root/p4c/build/ir/ir-generated.h"
 #line 353 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14500 "/root/p4c/build/ir/ir-generated.h"
+#line 14658 "/root/p4c/build/ir/ir-generated.h"
 #line 433 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14503 "/root/p4c/build/ir/ir-generated.h"
+#line 14661 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCTable const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
@@ -14553,16 +14711,16 @@ class TCKey : public Node {
     unsigned value;
 #line 445 "/root/p4c/backends/tc/tc.def"
     TCKey(unsigned id, unsigned width, cstring ptype, cstring name, cstring attr, bool isID);
-#line 14557 "/root/p4c/build/ir/ir-generated.h"
+#line 14715 "/root/p4c/build/ir/ir-generated.h"
 #line 454 "/root/p4c/backends/tc/tc.def"
     void setValue(unsigned v);
-#line 14560 "/root/p4c/build/ir/ir-generated.h"
+#line 14718 "/root/p4c/build/ir/ir-generated.h"
 #line 458 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14563 "/root/p4c/build/ir/ir-generated.h"
+#line 14721 "/root/p4c/build/ir/ir-generated.h"
 #line 468 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14566 "/root/p4c/build/ir/ir-generated.h"
+#line 14724 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCKey const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCKey"_cs; }
@@ -14598,28 +14756,28 @@ class TCExternInstance : public Node {
     safe_vector<const IR::TCKey *> constructorKeys;
 #line 484 "/root/p4c/backends/tc/tc.def"
     TCExternInstance(unsigned id, cstring name, bool isNe, unsigned ne);
-#line 14602 "/root/p4c/build/ir/ir-generated.h"
+#line 14760 "/root/p4c/build/ir/ir-generated.h"
 #line 494 "/root/p4c/backends/tc/tc.def"
     void addControlPathKeys(safe_vector<const IR::TCKey *> k);
-#line 14605 "/root/p4c/build/ir/ir-generated.h"
+#line 14763 "/root/p4c/build/ir/ir-generated.h"
 #line 500 "/root/p4c/backends/tc/tc.def"
     void addConstructorKeys(safe_vector<const IR::TCKey *> k);
-#line 14608 "/root/p4c/build/ir/ir-generated.h"
+#line 14766 "/root/p4c/build/ir/ir-generated.h"
 #line 506 "/root/p4c/backends/tc/tc.def"
     void setExternTypeInstance(cstring type);
-#line 14611 "/root/p4c/build/ir/ir-generated.h"
+#line 14769 "/root/p4c/build/ir/ir-generated.h"
 #line 510 "/root/p4c/backends/tc/tc.def"
     void setExternTableBindable(bool flag);
-#line 14614 "/root/p4c/build/ir/ir-generated.h"
+#line 14772 "/root/p4c/build/ir/ir-generated.h"
 #line 513 "/root/p4c/backends/tc/tc.def"
     void setNumElements(unsigned ne);
-#line 14617 "/root/p4c/build/ir/ir-generated.h"
+#line 14775 "/root/p4c/build/ir/ir-generated.h"
 #line 517 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14620 "/root/p4c/build/ir/ir-generated.h"
+#line 14778 "/root/p4c/build/ir/ir-generated.h"
 #line 540 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14623 "/root/p4c/build/ir/ir-generated.h"
+#line 14781 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCExternInstance const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCExternInstance"_cs; }
@@ -14651,19 +14809,19 @@ class TCExtern : public Node {
     bool has_exec_method;
 #line 551 "/root/p4c/backends/tc/tc.def"
     TCExtern(cstring eId, cstring eN, cstring pN, unsigned inst, cstring p, bool exec_method);
-#line 14655 "/root/p4c/build/ir/ir-generated.h"
+#line 14813 "/root/p4c/build/ir/ir-generated.h"
 #line 559 "/root/p4c/backends/tc/tc.def"
     void addExternInstance(const IR::TCExternInstance* tei);
-#line 14658 "/root/p4c/build/ir/ir-generated.h"
+#line 14816 "/root/p4c/build/ir/ir-generated.h"
 #line 562 "/root/p4c/backends/tc/tc.def"
     const IR::TCExternInstance *getExternInstance(cstring inst_name) const;
-#line 14661 "/root/p4c/build/ir/ir-generated.h"
+#line 14819 "/root/p4c/build/ir/ir-generated.h"
 #line 570 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14664 "/root/p4c/build/ir/ir-generated.h"
+#line 14822 "/root/p4c/build/ir/ir-generated.h"
 #line 584 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14667 "/root/p4c/build/ir/ir-generated.h"
+#line 14825 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCExtern const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     cstring node_type_name() const override { return "TCExtern"_cs; }
@@ -14696,40 +14854,40 @@ class TCPipeline : public Node {
     const IR::TCAction* postaction = nullptr;
 #line 596 "/root/p4c/backends/tc/tc.def"
     void setPipelineName(cstring pName);
-#line 14700 "/root/p4c/build/ir/ir-generated.h"
+#line 14858 "/root/p4c/build/ir/ir-generated.h"
 #line 599 "/root/p4c/backends/tc/tc.def"
     void setNumTables(unsigned n);
-#line 14703 "/root/p4c/build/ir/ir-generated.h"
+#line 14861 "/root/p4c/build/ir/ir-generated.h"
 #line 602 "/root/p4c/backends/tc/tc.def"
     void addNoActionDefinition(const IR::TCAction* actionDef);
-#line 14706 "/root/p4c/build/ir/ir-generated.h"
+#line 14864 "/root/p4c/build/ir/ir-generated.h"
 #line 605 "/root/p4c/backends/tc/tc.def"
     void addActionDefinition(const IR::TCAction* actionDef);
-#line 14709 "/root/p4c/build/ir/ir-generated.h"
+#line 14867 "/root/p4c/build/ir/ir-generated.h"
 #line 608 "/root/p4c/backends/tc/tc.def"
     void addTableDefinition(const IR::TCTable* tableDef);
-#line 14712 "/root/p4c/build/ir/ir-generated.h"
+#line 14870 "/root/p4c/build/ir/ir-generated.h"
 #line 611 "/root/p4c/backends/tc/tc.def"
     void setPipelinePreAction(const IR::TCAction* action);
-#line 14715 "/root/p4c/build/ir/ir-generated.h"
+#line 14873 "/root/p4c/build/ir/ir-generated.h"
 #line 614 "/root/p4c/backends/tc/tc.def"
     void setPipelinePostAction(const IR::TCAction* action);
-#line 14718 "/root/p4c/build/ir/ir-generated.h"
+#line 14876 "/root/p4c/build/ir/ir-generated.h"
 #line 617 "/root/p4c/backends/tc/tc.def"
     void addExternDefinition(const IR::TCExtern* externDef);
-#line 14721 "/root/p4c/build/ir/ir-generated.h"
+#line 14879 "/root/p4c/build/ir/ir-generated.h"
 #line 620 "/root/p4c/backends/tc/tc.def"
     const IR::TCExtern *getExternDefinition(cstring eName) const;
-#line 14724 "/root/p4c/build/ir/ir-generated.h"
+#line 14882 "/root/p4c/build/ir/ir-generated.h"
 #line 628 "/root/p4c/backends/tc/tc.def"
     TCPipeline();
-#line 14727 "/root/p4c/build/ir/ir-generated.h"
+#line 14885 "/root/p4c/build/ir/ir-generated.h"
 #line 633 "/root/p4c/backends/tc/tc.def"
     cstring toString() const override;
-#line 14730 "/root/p4c/build/ir/ir-generated.h"
+#line 14888 "/root/p4c/build/ir/ir-generated.h"
 #line 666 "/root/p4c/backends/tc/tc.def"
     void dbprint(std::ostream & out) const override;
-#line 14733 "/root/p4c/build/ir/ir-generated.h"
+#line 14891 "/root/p4c/build/ir/ir-generated.h"
     bool operator==(IR::TCPipeline const & a) const override;
     bool equiv(IR::Node const & a_) const override;
     void visit_children(Visitor & v, char const * n) override;
