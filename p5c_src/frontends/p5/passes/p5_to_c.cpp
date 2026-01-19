@@ -1332,7 +1332,7 @@ void P5ToC::emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, Emit
     bool isUnionType = isUnion(st);
     if (isUnionType) {
         // Top-level union
-        *outputStream << "union " << st->name << " {\n";
+        *outputStream << "struct _Layout_" << st->name << " {\n";
         emitStructMembers(st, EmitMode::Memberized, anon_counter);
         *outputStream << indent << "}";
     } else {
@@ -1346,7 +1346,15 @@ void P5ToC::emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, Emit
     }
 
     if (!isNested) {
-        *outputStream << ";\n\n";
+        *outputStream << ";\n";
+    }
+
+    if (isUnionType) {
+        *outputStream << "using " << st->name << " = p5::Union<_Layout_" << st->name << ">;\n";
+    }
+
+    if (!isNested) {
+        *outputStream << "\n";
     }
 }
 
