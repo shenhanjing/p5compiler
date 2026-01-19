@@ -50,9 +50,9 @@ using Parser = P5::P5Parser;
 <COMMENT>.              ;
 <COMMENT>[\n]           ;
 
-<INITIAL>"#line"      { BEGIN(LINE1); }
-<INITIAL>"# "         { BEGIN(LINE1); }
-<INITIAL>[ \t]*"#"    { BEGIN(LINE3); }
+<INITIAL,NORMAL>"#line"      { BEGIN(LINE1); }
+<INITIAL,NORMAL>"# "         { BEGIN(LINE1); }
+<INITIAL,NORMAL>[ \t]*"#"    { BEGIN(LINE3); }
 <LINE1>[0-9]+         { BEGIN(LINE2); driver.onReadLineNumber(yytext); }
 <LINE2>\"[^"]*        { BEGIN(LINE3); driver.onReadFileName(yytext+1); }
 <LINE1,LINE2>[ \t]      ;
@@ -187,6 +187,7 @@ using Parser = P5::P5Parser;
 "<="            { BEGIN(driver.saveState); return Parser::make_LE(driver.yylloc); }
 "&"             { BEGIN(driver.saveState); return Parser::make_BIT_AND(driver.yylloc); }
 "&&"            { BEGIN(driver.saveState); return Parser::make_AND_OP(driver.yylloc); }
+"&&&"           { BEGIN(driver.saveState); return Parser::make_MASK(driver.yylloc); }
 "&="            { BEGIN(driver.saveState); return Parser::make_ASSIGN_BIT_AND(driver.yylloc); }
 "|"             { BEGIN(driver.saveState); return Parser::make_BIT_OR(driver.yylloc); }
 "||"            { BEGIN(driver.saveState); return Parser::make_OR_OP(driver.yylloc); }
