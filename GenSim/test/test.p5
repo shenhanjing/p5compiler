@@ -874,3 +874,14 @@ void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> &list1[]){
   uint<0> TempVAR= var0;
   uint<0> TempLIST= _list_alloc(list0);
 }
+
+union UN {
+  uint<4> member0;
+  uint<4> member1;
+  struct {
+    uint<4> st_a;
+  };
+  union {
+    uint<4> un_a;
+  };
+};
