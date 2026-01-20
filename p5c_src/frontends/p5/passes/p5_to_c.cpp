@@ -405,8 +405,10 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
     // - uint<0> var        -> Tn var
     // - uint<0> list[]     -> std::vector<Tn> list
     // Each occurrence gets its own distinct typename.
+    curUint0InitListParams.clear();
     std::vector<std::string> genericTypenames;
     std::unordered_map<const IR::Parameter *, std::string> paramTypeOverride;
+    std::unordered_map<const IR::Parameter *, std::string> paramNameOverride;
 
     auto isUnsizedArrayParam = [](const IR::Parameter *p) -> bool {
         if (p == nullptr) return false;
@@ -433,7 +435,17 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                         auto t = nextT();
                         genericTypenames.push_back(t);
                         if (isUnsizedArrayParam(param)) {
-                            paramTypeOverride.emplace(param, "std::vector<" + t + ">");
+                            if (param->direction == IR::Direction::InOut) {
+                                // Keep old behavior for inout uint<0>[]: treat as vector reference.
+                                paramTypeOverride.emplace(param, "std::vector<" + t + ">");
+                            } else {
+                                // uint<0> list0[] -> std::initializer_list<T0> _InitList_list0
+                                const std::string initName = "_InitList_" + param->name.toString();
+                                paramTypeOverride.emplace(param, "std::initializer_list<" + t + ">");
+                                paramNameOverride.emplace(param, initName);
+                                curUint0InitListParams.push_back(
+                                    Uint0InitListParam{t, param->name, initName});
+                            }
                         } else {
                             paramTypeOverride.emplace(param, t);
                         }
@@ -485,10 +497,13 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                 // Override uint<0> (scalar/array) to generic types.
                 if (auto it = paramTypeOverride.find(param); it != paramTypeOverride.end()) {
                     *outputStream << it->second;
+                    const auto nameIt = paramNameOverride.find(param);
+                    const auto &emitName =
+                        (nameIt != paramNameOverride.end()) ? nameIt->second : param->name.toString();
                     if (param->direction == IR::Direction::InOut) {
-                        *outputStream << " &" << param->name;
+                        *outputStream << " &" << emitName;
                     } else {
-                        *outputStream << " " << param->name;
+                        *outputStream << " " << emitName;
                     }
                     handled = true;
                 }
@@ -543,6 +558,15 @@ void P5ToC::emitFunctionBody(const IR::BlockStatement *body) {
 
     {
         IndentGuard ig(this);
+
+        // Prologue for uint<0> non-ref array params:
+        //   std::initializer_list<T0> _InitList_list0
+        // becomes:
+        //   std::vector<T0> list0(_InitList_list0);
+        for (const auto &p : curUint0InitListParams) {
+            *outputStream << indent << "std::vector<" << p.tname << "> " << p.origName << "("
+                          << p.initName << ");\n";
+        }
 
         for (const auto *comp : body->components) {
             emitComponent(comp);
@@ -1272,7 +1296,6 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
 
 void P5ToC::emitFunctionDeclaration(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
-    *outputStream << indent;
     emitFunctionSignature(func, class_name);
     *outputStream << ";\n";
 }
@@ -1813,6 +1836,7 @@ void P5ToC::emitSwitch(const IR::P4Program *program) {
     *outputStream << "#ifndef GENERATED_SWITCH_HPP\n"
                   << "#define GENERATED_SWITCH_HPP\n"
                   << "\n"
+                  << "#include <initializer_list>\n"
                   << "#include <string>\n"
                   << "#include <vector>\n"
                   << "\n"

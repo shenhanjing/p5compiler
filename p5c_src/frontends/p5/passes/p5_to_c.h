@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -52,6 +53,15 @@ class P5ToC {
     std::unordered_map<std::string, std::unique_ptr<std::ostream>> streams;
     friend struct IndentGuard;
     bool inSwitchMethod = false;
+
+    struct Uint0InitListParam {
+        std::string tname;     // e.g. "T0"
+        cstring origName;      // e.g. "list0"
+        std::string initName;  // e.g. "_InitList_list0"
+    };
+    // For the currently emitted function signature/body: uint<0> list[] (non-ref)
+    // becomes an initializer_list parameter plus a vector constructed in the prologue.
+    std::vector<Uint0InitListParam> curUint0InitListParams;
 
     std::unordered_set<cstring> switchMembers;
 
