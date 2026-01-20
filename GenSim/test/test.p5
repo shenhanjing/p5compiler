@@ -870,7 +870,8 @@ void dot_ex(){
 
 }
 
-void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> &list1[], uint<0> list2[], uint<0> list3[]){
+//void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> &list1[], uint<0> list2[], uint<0> list3[]){
+void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> list2[], uint<0> list3[]){
   uint<0> TempVAR= var0;
   uint<0> TempLIST= _list_alloc(list0);
 }
@@ -885,3 +886,17 @@ union UN {
     uint<4> un_a;
   };
 };
+
+void _CmpErrs () {
+
+  uint<4> _var_A = 3;
+  uint<1> _var_B = 1;
+  uint0_list(1 + 1 + 1 + 1 + 1, {(uint<4>)3, (uint<4>)4, (uint<4>)5}, _var_A, {(uint<5>)3, (uint<5>)4, (uint<5>)5}, {(uint<6>)3, (uint<6>)4, (uint<6>)5});
+//  if( (_var_A == 3) && (_var_B) ){
+//    _var_B = 0;
+//  }
+}
+
+table _ano_tb() {
+  @lookup uint<4> A;
+}
