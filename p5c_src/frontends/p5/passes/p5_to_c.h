@@ -64,11 +64,20 @@ class P5ToC {
     std::vector<Uint0InitListParam> curUint0InitListParams;
 
     std::unordered_set<cstring> switchMembers;
+    
+    // Type resolution maps
+    using LocalsMap = std::unordered_map<cstring, const IR::Type *>;
+    std::unordered_map<cstring, const IR::Type *> globalVariables;
+    std::unordered_map<cstring, const IR::Type_Struct *> structMap;
 
     std::ostream *getStream(const std::string &filename);
     void flushCFile();
 
     enum class EmitMode { Standard, Memberized };
+    
+    // Helper functions for member resolution
+    const IR::Type* resolveType(const IR::Expression* expr, const LocalsMap &locals);
+    std::string resolveMemberPath(const IR::Type_Struct* st, cstring memberName);
 
     bool isUnion(const IR::Type_Struct *st);
     bool isAnonymous(const IR::Type_Struct *st);
@@ -78,13 +87,13 @@ class P5ToC {
     void emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitFieldType(const IR::Type *type, EmitMode mode = EmitMode::Standard);
     void emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
-    void emitVariableDecl(const IR::Declaration_Variable *var, const std::unordered_set<cstring> &locals = {});
+    void emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMap &locals = {});
     void emitHeaderDecl(const IR::Declaration_Instance *inst);
     void emitTypedef(const IR::Type_Typedef *td);
     void emitTable(const IR::P5Table *tbl);
-    void emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstring> &locals = {});
-    bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os, const std::unordered_set<cstring> &locals = {});
-    bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const std::unordered_set<cstring> &locals = {});
+    void emitIfStat(const IR::IfStatement *ifs, const LocalsMap &locals = {});
+    bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os, const LocalsMap &locals = {});
+    bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const LocalsMap &locals = {});
     void emitGtvHpp(const IR::P4Program *program);
     void emitEnumsHpp(const IR::P4Program *program);
     void emitStructHpp(const IR::P4Program *program);
@@ -101,18 +110,18 @@ class P5ToC {
     void emitFunction(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionSignature(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionDeclaration(const IR::Function *func, const std::string &class_name = "");
-    void emitFunctionBody(const IR::BlockStatement *body);
-    void emitComponent(const IR::StatOrDecl *comp, const std::unordered_set<cstring> &locals = {});
+    void emitFunctionBody(const IR::BlockStatement *body, LocalsMap locals = {});
+    void emitComponent(const IR::StatOrDecl *comp, const LocalsMap &locals = {});
     void emitExpressionWithCtx(const IR::Expression *expr,
-                               const std::unordered_set<cstring> &locals);
-    void emitSwitchStatement(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
-    void emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
-    void emitSwitchDispatch(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals = {});
+                               const LocalsMap &locals);
+    void emitSwitchStatement(const IR::SwitchStatement *swStmt, const LocalsMap &locals = {});
+    void emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const LocalsMap &locals = {});
+    void emitSwitchDispatch(const IR::SwitchStatement *swStmt, const LocalsMap &locals = {});
     void emitSwitchRuntimeImpl();
     void emitTableConstructor(const IR::P5Table *tbl);
-    void emitTableKeyMatching(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
-    void emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
-    void emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals);
+    void emitTableKeyMatching(const IR::P5Key *keyNode, const LocalsMap &locals);
+    void emitTableKeySelect(const IR::P5Key *keyNode, const LocalsMap &locals);
+    void emitTableKeyElements(const IR::P5Key *keyNode, const LocalsMap &locals);
     bool isInlineInit(const IR::Declaration_Variable *var);
 };
 

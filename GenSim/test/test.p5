@@ -876,7 +876,7 @@ void uint0_list(uint<0> var0, uint<0> list0[], uint<0> &var1, uint<0> list2[], u
   uint<0> TempLIST= _list_alloc(list0);
 }
 
-union UN {
+union _UN {
   uint<4> member0;
   uint<4> member1;
   struct {
@@ -900,3 +900,64 @@ void _CmpErrs () {
 table _ano_tb() {
   @lookup uint<4> A;
 }
+
+
+struct _DI_ST0 {
+  uint<1> a;
+  uint<1> b;
+  uint<1> c;
+  uint<1> d;
+};
+
+struct _DI_ST1 {
+  _DI_ST0 a;
+  uint<4> b;
+  uint<4> c;
+  uint<4> d;
+};
+
+struct _DI_ST2 {
+  _DI_ST1 a;
+  uint<4> b;
+  uint<4> c;
+  uint<4> d;
+};
+
+void _DI_func0(_DI_ST2 IN0){
+  uint<0> TEM = IN0;
+}
+
+void _DI_func1(){
+  _DI_func0({.a.a.a = 1, .a.a.b = 1, .a.d = 0, .b = 2, .c = 3});
+}
+
+//void typeref(){
+//  uint<4> a = 5;
+//  uint<4> c = 5;
+//
+//  a = (uint<4>) (test::b);
+//
+//  if (a == 5){
+//    c = 4;
+//  };
+//
+//  switch(a){
+//    default:;
+//  }
+//
+//  uint<16> b = (uint<4>) (a | c);
+//  uint<16> b = (uint<4>) (a);
+//}
+//
+//struct A {
+//    uint<4> a;
+//    union {
+//        uint<16> b;
+//        struct B {
+//            uint<8> c;
+//            uint<8> d;
+//        };
+//    };
+//};
+//
+//@u_version("v1.1.2");

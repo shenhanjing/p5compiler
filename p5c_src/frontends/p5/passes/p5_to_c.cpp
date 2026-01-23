@@ -26,6 +26,16 @@ struct IndentGuard {
 void P5ToC::emitP5Program(const IR::P4Program *program) {
     // Collect Switch members
     switchMembers.clear();
+    globalVariables.clear();
+    structMap.clear();
+
+    // Populate structMap first
+    for (const auto *obj : program->objects) {
+        if (auto *st = obj->to<IR::Type_Struct>()) {
+            structMap.emplace(st->name, st);
+        }
+    }
+
     // Add predefined members
     switchMembers.insert(cstring("_status"));
     // Built-in control parameters / accessors (GenSim BuiltInContext)
@@ -43,8 +53,10 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
     for (const auto *obj : program->objects) {
         if (auto *var = obj->to<IR::Declaration_Variable>()) {
             switchMembers.insert(var->name);
+            globalVariables.emplace(var->name, var->type);
         } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
             switchMembers.insert(inst->name);
+            globalVariables.emplace(inst->name, inst->type);
         } else if (auto *func = obj->to<IR::Function>()) {
             switchMembers.insert(func->name);
         }
@@ -56,6 +68,68 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
     emitSwitch(program);
 
     flushCFile();
+}
+
+std::string P5ToC::resolveMemberPath(const IR::Type_Struct *st, cstring memberName) {
+    if (!st) return "";
+    for (const auto *field : st->fields) {
+        if (field->name == memberName) {
+            return "." + std::string(memberName.c_str());
+        }
+        if (auto *nestedSt = field->type->to<IR::Type_Struct>()) {
+            if (isAnonymous(nestedSt)) {
+                auto sub = resolveMemberPath(nestedSt, memberName);
+                if (!sub.empty()) {
+                    return "." + std::string(field->name.name.c_str()) + sub;
+                }
+            }
+        }
+    }
+    return "";
+}
+
+const IR::Type *P5ToC::resolveType(const IR::Expression *expr, const LocalsMap &locals) {
+    if (expr == nullptr) return nullptr;
+    if (auto *pe = expr->to<IR::PathExpression>()) {
+        if (locals.count(pe->path->name)) return locals.at(pe->path->name);
+        if (globalVariables.count(pe->path->name)) return globalVariables.at(pe->path->name);
+        return nullptr;
+    }
+    if (auto *mem = expr->to<IR::Member>()) {
+        auto *baseType = resolveType(mem->expr, locals);
+        if (!baseType) return nullptr;
+
+        if (auto *tn = baseType->to<IR::Type_Name>()) {
+            if (structMap.count(tn->path->name)) {
+                baseType = structMap.at(tn->path->name);
+            }
+        }
+
+        if (auto *st = baseType->to<IR::Type_Struct>()) {
+            std::function<const IR::Type *(const IR::Type_Struct *, cstring)> findField =
+                [&](const IR::Type_Struct *s, cstring name) -> const IR::Type * {
+                for (auto *f : s->fields) {
+                    if (f->name == name) return f->type;
+                    if (auto *nested = f->type->to<IR::Type_Struct>()) {
+                        if (isAnonymous(nested)) {
+                            auto *t = findField(nested, name);
+                            if (t) return t;
+                        }
+                    }
+                }
+                return nullptr;
+            };
+            return findField(st, mem->member);
+        }
+    }
+    if (auto *ai = expr->to<IR::ArrayIndex>()) {
+        auto *baseType = resolveType(ai->left, locals);
+        if (!baseType) return nullptr;
+        if (auto *stk = baseType->to<IR::Type_Stack>()) {
+            return stk->elementType;
+        }
+    }
+    return nullptr;
 }
 
 std::ostream *P5ToC::getStream(const std::string &filename) {
@@ -153,7 +227,7 @@ void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
     *outputStream << type->toString();
 }
 
-void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMap &locals) {
     if (var == nullptr) return;
 
     const IR::Type *baseType = var->type;
@@ -177,7 +251,8 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const std::uno
     if (isUint0Scalar && var->initializer) {
         if (auto *mc = var->initializer->to<IR::MethodCallExpression>()) {
             if (auto *pe = mc->method->to<IR::PathExpression>()) {
-                if (pe->path->name == "_list_alloc" && mc->arguments && mc->arguments->size() == 1) {
+                if (pe->path->name == "_list_alloc" && mc->arguments &&
+                    mc->arguments->size() == 1) {
                     // Render the argument expression with the same context rules (ctx./locals).
                     std::ostringstream argOs;
                     auto *old = outputStream;
@@ -296,8 +371,8 @@ void P5ToC::emitHeaderDecl(const IR::Declaration_Instance *inst) {
     *outputStream << ";\n";
 }
 
-bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs,
-                           std::ostream &os, const std::unordered_set<cstring> &locals) {
+bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os,
+                           const LocalsMap &locals) {
     if (mc == nullptr || mc->method == nullptr) return false;
     auto *pe = mc->method->to<IR::PathExpression>();
     if (!pe) return false;
@@ -337,7 +412,8 @@ bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lh
     return false;
 }
 
-bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const std::unordered_set<cstring> &locals) {
+bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os,
+                           const LocalsMap &locals) {
     if (mc == nullptr || mc->method == nullptr) return false;
     auto *pe = mc->method->to<IR::PathExpression>();
     if (!pe) return false;
@@ -423,9 +499,7 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
     if (auto *mt = func->type->to<IR::Type_Method>()) {
         if (mt->parameters) {
             int tIndex = 0;
-            auto nextT = [&]() {
-                return std::string("T") + std::to_string(tIndex++);
-            };
+            auto nextT = [&]() { return std::string("T") + std::to_string(tIndex++); };
 
             for (const auto *param : mt->parameters->parameters) {
                 if (!param || !param->type) continue;
@@ -441,7 +515,8 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                             } else {
                                 // uint<0> list0[] -> std::initializer_list<T0> _InitList_list0
                                 const std::string initName = "_InitList_" + param->name.toString();
-                                paramTypeOverride.emplace(param, "std::initializer_list<" + t + ">");
+                                paramTypeOverride.emplace(param,
+                                                          "std::initializer_list<" + t + ">");
                                 paramNameOverride.emplace(param, initName);
                                 curUint0InitListParams.push_back(
                                     Uint0InitListParam{t, param->name, initName});
@@ -498,8 +573,9 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                 if (auto it = paramTypeOverride.find(param); it != paramTypeOverride.end()) {
                     *outputStream << it->second;
                     const auto nameIt = paramNameOverride.find(param);
-                    const auto &emitName =
-                        (nameIt != paramNameOverride.end()) ? nameIt->second : param->name.toString();
+                    const auto &emitName = (nameIt != paramNameOverride.end())
+                                               ? nameIt->second
+                                               : param->name.toString();
                     if (param->direction == IR::Direction::InOut) {
                         *outputStream << " &" << emitName;
                     } else {
@@ -548,7 +624,7 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
     *outputStream << ")";
 }
 
-void P5ToC::emitFunctionBody(const IR::BlockStatement *body) {
+void P5ToC::emitFunctionBody(const IR::BlockStatement *body, LocalsMap locals) {
     if (body == nullptr) {
         *outputStream << ";\n\n";
         return;
@@ -569,13 +645,16 @@ void P5ToC::emitFunctionBody(const IR::BlockStatement *body) {
         }
 
         for (const auto *comp : body->components) {
-            emitComponent(comp);
+            if (auto *var = comp->to<IR::Declaration_Variable>()) {
+                locals.emplace(var->name, var->type);
+            }
+            emitComponent(comp, locals);
         }
     }
     *outputStream << indent << "}\n\n";
 }
 
-void P5ToC::emitComponent(const IR::StatOrDecl *comp, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitComponent(const IR::StatOrDecl *comp, const LocalsMap &locals) {
     // *outputStream << indent;
     if (auto *ifs = comp->to<IR::IfStatement>()) {
         emitIfStat(ifs, locals);
@@ -628,9 +707,7 @@ void P5ToC::emitComponent(const IR::StatOrDecl *comp, const std::unordered_set<c
     return;
 }
 
-
-
-void P5ToC::emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const LocalsMap &locals) {
     // 2. Emit tie
     *outputStream << indent << "auto _msw = p5::mswitch::tie(";
     const IR::Expression *expr = swStmt->expression;
@@ -690,7 +767,7 @@ void P5ToC::emitSwitchTagMatching(const IR::SwitchStatement *swStmt, const std::
     }
 }
 
-void P5ToC::emitSwitchDispatch(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitSwitchDispatch(const IR::SwitchStatement *swStmt, const LocalsMap &locals) {
     // 5. Emit switch
     *outputStream << indent << "switch (_tag) {\n";
     {
@@ -742,7 +819,7 @@ void P5ToC::emitSwitchDispatch(const IR::SwitchStatement *swStmt, const std::uno
     *outputStream << indent << "}\n";
 }
 
-void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt, const LocalsMap &locals) {
     // 1. Emit block start
     *outputStream << indent << "{\n";
     IndentGuard ig(this);
@@ -754,7 +831,7 @@ void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt, const std::un
     *outputStream << indent << "}\n";
 }
 
-void P5ToC::emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitIfStat(const IR::IfStatement *ifs, const LocalsMap &locals) {
     if (ifs == nullptr) return;
 
     // Emit condition with an extra rule:
@@ -765,53 +842,53 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstr
     //
     // Only applies to boolean-context operators (top-level, &&, ||, !) and does not
     // change non-boolean operators (comparisons, arithmetic, etc.).
-    std::function<void(const IR::Expression *, bool)> emitIfCond =
-        [&](const IR::Expression *expr, bool boolContext) {
-            if (expr == nullptr) return;
+    std::function<void(const IR::Expression *, bool)> emitIfCond = [&](const IR::Expression *expr,
+                                                                       bool boolContext) {
+        if (expr == nullptr) return;
 
-            // Unwrap single-element list expression (common artifact in this frontend).
-            if (auto *list = expr->to<IR::ListExpression>()) {
-                if (list->components.size() == 1) {
-                    emitIfCond(list->components.at(0), boolContext);
-                    return;
-                }
-            }
-
-            if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
-                emitExpressionWithCtx(expr, locals);
-                if (boolContext) *outputStream << ".to_ullong()";
+        // Unwrap single-element list expression (common artifact in this frontend).
+        if (auto *list = expr->to<IR::ListExpression>()) {
+            if (list->components.size() == 1) {
+                emitIfCond(list->components.at(0), boolContext);
                 return;
             }
+        }
 
-            if (auto *un = expr->to<IR::Operation_Unary>()) {
-                // Only treat logical NOT as boolean-context; other unary ops fall back.
-                if (un->getStringOp() == "!") {
-                    *outputStream << "!";
-                    emitIfCond(un->expr, true);
-                    return;
-                }
-                emitExpressionWithCtx(expr, locals);
-                return;
-            }
-
-            if (auto *bin = expr->to<IR::Operation_Binary>()) {
-                const auto op = bin->getStringOp();
-                if (op == "&&" || op == "||") {
-                    *outputStream << "(";
-                    emitIfCond(bin->left, true);
-                    *outputStream << " " << op << " ";
-                    emitIfCond(bin->right, true);
-                    *outputStream << ")";
-                    return;
-                }
-                // Comparisons/arithmetic/etc: keep existing emission.
-                emitExpressionWithCtx(expr, locals);
-                return;
-            }
-
-            // Default: keep existing emission.
+        if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
             emitExpressionWithCtx(expr, locals);
-        };
+            if (boolContext) *outputStream << ".to_ullong()";
+            return;
+        }
+
+        if (auto *un = expr->to<IR::Operation_Unary>()) {
+            // Only treat logical NOT as boolean-context; other unary ops fall back.
+            if (un->getStringOp() == "!") {
+                *outputStream << "!";
+                emitIfCond(un->expr, true);
+                return;
+            }
+            emitExpressionWithCtx(expr, locals);
+            return;
+        }
+
+        if (auto *bin = expr->to<IR::Operation_Binary>()) {
+            const auto op = bin->getStringOp();
+            if (op == "&&" || op == "||") {
+                *outputStream << "(";
+                emitIfCond(bin->left, true);
+                *outputStream << " " << op << " ";
+                emitIfCond(bin->right, true);
+                *outputStream << ")";
+                return;
+            }
+            // Comparisons/arithmetic/etc: keep existing emission.
+            emitExpressionWithCtx(expr, locals);
+            return;
+        }
+
+        // Default: keep existing emission.
+        emitExpressionWithCtx(expr, locals);
+    };
 
     *outputStream << indent << "if (";
     emitIfCond(ifs->condition, true);
@@ -836,8 +913,7 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs, const std::unordered_set<cstr
     *outputStream << "\n";
 }
 
-void P5ToC::emitExpressionWithCtx(const IR::Expression *expr,
-                                  const std::unordered_set<cstring> &locals) {
+void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &locals) {
     if (expr == nullptr) return;
 
     if (auto *di = expr->to<IR::P5DesignatedInitializer>()) {
@@ -877,7 +953,36 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr,
 
     if (auto *mem = expr->to<IR::Member>()) {
         emitExpressionWithCtx(mem->expr, locals);
-        *outputStream << "." << mem->member;
+
+        bool handled = false;
+        auto *baseType = resolveType(mem->expr, locals);
+        if (baseType) {
+            if (auto *tn = baseType->to<IR::Type_Name>()) {
+                if (structMap.count(tn->path->name)) {
+                    baseType = structMap.at(tn->path->name);
+                }
+            }
+            if (auto *st = baseType->to<IR::Type_Struct>()) {
+                bool directMatch = false;
+                for (auto *f : st->fields) {
+                    if (f->name == mem->member) {
+                        directMatch = true;
+                        break;
+                    }
+                }
+                if (!directMatch) {
+                    std::string path = resolveMemberPath(st, mem->member);
+                    if (!path.empty()) {
+                        *outputStream << path;
+                        handled = true;
+                    }
+                }
+            }
+        }
+
+        if (!handled) {
+            *outputStream << "." << mem->member;
+        }
         return;
     }
 
@@ -936,6 +1041,155 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr,
     }
 
     if (auto *list = expr->to<IR::ListExpression>()) {
+        // If this is a designated-initializer list of the form:
+        //   { .a.a = 1, .c = 3, .b = 2, .a.d = 0 }
+        // rewrite it into nested designated initializers:
+        //   { .a = { .a = 1, .d = 0 }, .c = 3, .b = 2 }
+        //
+        // This is purely a codegen-time formatting/rewriting pass. It assumes all elements are
+        // member-designators (start with '.') and only supports Member/PathExpression chains.
+        // If we encounter anything else, we fall back to the original emission.
+        struct DiItem {
+            std::vector<cstring> path;  // ["a","b","c"] means .a.b.c = value
+            const IR::Expression *value = nullptr;
+        };
+
+        auto collectMemberPath = [&](const IR::Expression *d, std::vector<cstring> &out,
+                                     const auto &self) -> bool {
+            if (d == nullptr) return false;
+            if (auto *pe = d->to<IR::PathExpression>()) {
+                out.push_back(pe->path->name);
+                return true;
+            }
+            if (auto *mem = d->to<IR::Member>()) {
+                if (!self(mem->expr, out, self)) return false;
+                out.push_back(mem->member);
+                return true;
+            }
+            // Unsupported designator shape (e.g., ArrayIndex/Slice). Caller will fall back.
+            return false;
+        };
+
+        auto isAllDotDesignators = [&]() -> bool {
+            if (list->components.empty()) return false;
+            // If the first is a member-designator, assume the whole list is the designated form.
+            auto *first = list->components.at(0);
+            auto *di0 = first ? first->to<IR::P5DesignatedInitializer>() : nullptr;
+            if (!di0 || !di0->isMember) return false;
+            for (auto *c : list->components) {
+                auto *di = c ? c->to<IR::P5DesignatedInitializer>() : nullptr;
+                if (!di || !di->isMember) return false;
+            }
+            return true;
+        };
+
+        auto emitPathDesignator = [&](const std::vector<cstring> &p) {
+            for (size_t i = 0; i < p.size(); ++i) {
+                if (i == 0)
+                    *outputStream << "." << p[i];
+                else
+                    *outputStream << "." << p[i];
+            }
+        };
+
+        std::function<bool(const std::vector<DiItem> &, bool)> emitGrouped;
+        emitGrouped = [&](const std::vector<DiItem> &items, bool topLevel) -> bool {
+            if (items.empty()) return true;
+
+            // Preserve first-seen order of outer keys.
+            std::vector<cstring> order;
+            std::unordered_map<cstring, std::vector<DiItem>> groups;
+            order.reserve(items.size());
+
+            for (const auto &it : items) {
+                if (it.path.empty()) return false;
+                const auto key = it.path.front();
+                if (!groups.count(key)) order.push_back(key);
+                groups[key].push_back(it);
+            }
+
+            bool firstOut = true;
+            for (const auto &key : order) {
+                const auto &g = groups.at(key);
+                if (g.empty()) continue;
+
+                // Split into direct (depth=1) and nested (depth>1).
+                bool hasDirect = false;
+                bool hasNested = false;
+                for (const auto &it : g) {
+                    if (it.path.size() == 1) hasDirect = true;
+                    else hasNested = true;
+                }
+
+                // If we have both direct and nested initializers for the same key, do NOT rewrite
+                // (ambiguous/likely invalid). Let original emission handle it.
+                if (hasDirect && hasNested) return false;
+
+                if (!firstOut) *outputStream << ", ";
+                firstOut = false;
+
+                if (hasNested) {
+                    // Group: .key = { ... }
+                    *outputStream << "." << key << " = { ";
+                    std::vector<DiItem> inner;
+                    inner.reserve(g.size());
+                    for (const auto &it : g) {
+                        DiItem sub;
+                        sub.value = it.value;
+                        sub.path.assign(it.path.begin() + 1, it.path.end());
+                        inner.push_back(std::move(sub));
+                    }
+                    if (!emitGrouped(inner, /*topLevel=*/false)) return false;
+                    *outputStream << " }";
+                } else {
+                    // Direct: .key = value
+                    // (There can be multiple direct entries for the same key; keep them in-order.)
+                    // Since we grouped, we need to emit all entries in this group.
+                    // Use comma separation local to this group.
+                    bool firstInGroup = true;
+                    for (const auto &it : g) {
+                        if (!firstInGroup) *outputStream << ", ";
+                        firstInGroup = false;
+                        emitPathDesignator(it.path);
+                        *outputStream << " = ";
+                        emitExpressionWithCtx(it.value, locals);
+                    }
+                }
+            }
+
+            (void)topLevel;
+            return true;
+        };
+
+        if (isAllDotDesignators()) {
+            std::vector<DiItem> items;
+            items.reserve(list->components.size());
+            bool ok = true;
+            for (auto *c : list->components) {
+                auto *di = c->to<IR::P5DesignatedInitializer>();
+                std::vector<cstring> p;
+                if (!collectMemberPath(di->designator, p, collectMemberPath) || p.empty()) {
+                    ok = false;
+                    break;
+                }
+                items.push_back(DiItem{std::move(p), di->value});
+            }
+
+            if (ok) {
+                std::ostringstream buf;
+                auto *old = outputStream;
+                outputStream = &buf;
+                bool rewrote = emitGrouped(items, /*topLevel=*/true);
+                outputStream = old;
+
+                if (rewrote) {
+                    *outputStream << "{ " << buf.str() << " }";
+                    return;
+                }
+            }
+        }
+
+        // Fallback: original emission.
         *outputStream << "{ ";
         bool first = true;
         for (auto *comp : list->components) {
@@ -1041,8 +1295,9 @@ void P5ToC::emitTableConstructor(const IR::P5Table *tbl) {
     *outputStream << " {}\n\n";
 }
 
-void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
-    auto emitOneKeySwitch = [&](const IR::Expression *expr, const IR::Vector<IR::P5KeyCase> &cases) {
+void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const LocalsMap &locals) {
+    auto emitOneKeySwitch = [&](const IR::Expression *expr,
+                                const IR::Vector<IR::P5KeyCase> &cases) {
         *outputStream << indent << "{\n";
         {
             IndentGuard igSwitch(this);
@@ -1109,7 +1364,8 @@ void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_se
                     for (const auto *cse : cases) {
                         caseId++;
                         *outputStream << indent;
-                        const bool isDefault = (!cse->label || cse->label->is<IR::DefaultExpression>());
+                        const bool isDefault =
+                            (!cse->label || cse->label->is<IR::DefaultExpression>());
                         const bool isFallthroughOnly = cse->fallthrough;
 
                         if (isDefault) {
@@ -1162,7 +1418,7 @@ void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const std::unordered_se
     }
 }
 
-void P5ToC::emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitTableKeyElements(const IR::P5Key *keyNode, const LocalsMap &locals) {
     bool hasExpr = false;
     for (const auto *elem : keyNode->elements) {
         if (elem->expr) {
@@ -1182,7 +1438,7 @@ void P5ToC::emitTableKeyElements(const IR::P5Key *keyNode, const std::unordered_
     }
 }
 
-void P5ToC::emitTableKeyMatching(const IR::P5Key *keyNode, const std::unordered_set<cstring> &locals) {
+void P5ToC::emitTableKeyMatching(const IR::P5Key *keyNode, const LocalsMap &locals) {
     // Emit key-building code in the same order as it appears in the body.
     // Scope the builder variables so multiple key blocks do not collide.
     *outputStream << indent << "{\n";
@@ -1216,11 +1472,11 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
         *outputStream << ig.old << "private:\n";
         *outputStream << indent << "Switch &ctx;\n";
 
-        std::unordered_set<cstring> locals;
+        LocalsMap locals;
 
         if (tbl->parameters) {
             for (const auto *param : tbl->parameters->parameters) {
-                locals.insert(param->name);
+                locals.emplace(param->name, param->type);
                 *outputStream << indent;
                 emitFieldType(param->type);
                 *outputStream << " &" << param->name << ";\n";
@@ -1234,17 +1490,17 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
         if (tbl->body) {
             for (const auto *comp : tbl->body->components) {
                 if (auto *var = comp->to<IR::Declaration_Variable>()) {
-                        locals.insert(var->name);
-                        *outputStream << indent;
-                        emitFieldType(var->type);
-                        *outputStream << " " << var->name;
+                    locals.emplace(var->name, var->type);
+                    *outputStream << indent;
+                    emitFieldType(var->type);
+                    *outputStream << " " << var->name;
 
-                        if (isInlineInit(var)) {
-                            *outputStream << " = ";
-                            emitExpressionWithCtx(var->initializer, locals);
-                        }
-                        *outputStream << ";\n";
+                    if (isInlineInit(var)) {
+                        *outputStream << " = ";
+                        emitExpressionWithCtx(var->initializer, locals);
                     }
+                    *outputStream << ";\n";
+                }
             }
         }
 
@@ -1278,8 +1534,6 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
     *outputStream << indent << "};\n\n";
 }
 
-
-
 void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
 
@@ -1289,7 +1543,17 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
     }
 
     emitFunctionSignature(func, class_name);
-    emitFunctionBody(func->body);
+
+    LocalsMap locals;
+    if (auto *mt = func->type->to<IR::Type_Method>()) {
+        if (mt->parameters) {
+            for (const auto *param : mt->parameters->parameters) {
+                locals.emplace(param->name, param->type);
+            }
+        }
+    }
+
+    emitFunctionBody(func->body, locals);
 
     inSwitchMethod = oldInSwitch;
 }
