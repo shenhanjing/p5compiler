@@ -1,0 +1,69 @@
+[sizeof test] start
+p5::uint<1> (global): 1 bits ✓
+p5::uint<4> (global): 4 bits ✓
+p5::uint<8> (global): 8 bits ✓
+p5::uint<16> (global): 16 bits ✓
+p5::uint<32> (global): 32 bits ✓
+p5::uint<48> (global): 48 bits ✓
+p5::uint<64> (global): 64 bits ✓
+p5::uint<128> (global): 128 bits ✓
+p5::uint<160> (global): 160 bits ✓
+p5::uint<256> (global): 256 bits ✓
+p5::uint<1> (member): 1 bits ✓
+p5::uint<4> (member): 4 bits ✓
+p5::uint<8> (member): 8 bits ✓
+p5::uint<16> (member): 16 bits ✓
+p5::uint<32> (member): 32 bits ✓
+p5::member<p5::uint<8>> (global): 8 bits ✓
+p5::member<p5::uint<16>> (global): 16 bits ✓
+p5::member<p5::uint<32>> (global): 32 bits ✓
+p5::member<p5::uint<64>> (global): 64 bits ✓
+p5::member<p5::uint<8>> (member): 8 bits ✓
+p5::member<p5::uint<16>> (member): 16 bits ✓
+SimpleStruct1 (global): 8 bits ✓
+SimpleStruct2 (global): 24 bits ✓
+SimpleStruct3 (global): 15 bits ✓
+NestedStruct (global): 24 bits ✓
+SimpleStruct1 (member): 8 bits ✓
+SimpleStruct2 (member): 24 bits ✓
+PHI_S (member): 18 bits ✓
+PHI_S: 18 bits ✓
+ETHER_TYPE_S: 16 bits ✓
+ETHER_S: 112 bits ✓
+VlanInfo_S: 16 bits ✓
+VLAN_TAG_S: 48 bits ✓
+IPv4_S: 160 bits ✓
+IPv6_S: 320 bits ✓
+UDP_S: 64 bits ✓
+FlagCtrl_S: 6 bits ✓
+DataCtrl_S: 16 bits ✓
+TCP_S: 160 bits ✓
+IpatCtrlInfo_S: 1 bits ✓
+IPATRSP_S: 27 bits ✓
+FIBRSP_S: 18 bits ✓
+FIBKEY_S: 136 bits ✓
+ENCAP_LOCAL_ADDR_S: 48 bits ✓
+EPATRSP_S: 80 bits ✓
+ENCAP_ARP_S: 48 bits ✓
+ENCAPRSP_S: 80 bits ✓
+_inU_PHI_S: 18 bits ✓
+_inU_ETHER_TYPE_S: 16 bits ✓
+_inU_ETHER_S: 112 bits ✓
+_inU_VlanInfo_S: 16 bits ✓
+_inU_VLAN_TAG_S: 48 bits ✓
+_inU_IPv4_S: 160 bits ✓
+_inU_IPv6_S: 320 bits ✓
+_inU_UDP_S: 64 bits ✓
+_inU_FlagCtrl_S: 6 bits ✓
+_inU_DataCtrl_S: 16 bits ✓
+_inU_TCP_S: 160 bits ✓
+_inU_IpatCtrlInfo_S: 1 bits ✓
+_inU_IPATRSP_S: 27 bits ✓
+_inU_FIBRSP_S: 18 bits ✓
+_inU_FIBKEY_S: 136 bits ✓
+_inU_ENCAP_LOCAL_ADDR_S: 48 bits ✓
+_inU_EPATRSP_S: 80 bits ✓
+_inU_ENCAP_ARP_S: 48 bits ✓
+_inU_ENCAPRSP_S: 80 bits ✓
+
+[sizeof test] ALL PASS

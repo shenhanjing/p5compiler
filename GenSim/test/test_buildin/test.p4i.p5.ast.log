@@ -1,0 +1,3534 @@
+[5280] P4Program
+  objects: [21] Type_SerEnum name=RSP_STATUS_E declid=0
+    type: [3] Type_Bits size=32 isSigned=0
+    members: [10] SerEnumMember name=RSP_STATUS_MATCH declid=0
+      value: [8] Constant value=0 base=10
+        type: [7] Type_InfInt declid=1
+    members: [13] SerEnumMember name=RSP_STATUS_NO_MATCH declid=1
+      value: [12] Constant value=1 base=10
+        type: [11] Type_InfInt declid=2
+    members: [16] SerEnumMember name=RSP_STATUS_LOOKUP_SKIPPED declid=2
+      value: [15] Constant value=2 base=10
+        type: [14] Type_InfInt declid=3
+    members: [19] SerEnumMember name=RSP_STATUS_ERROR declid=3
+      value: [18] Constant value=3 base=10
+        type: [17] Type_InfInt declid=4
+  objects: [39] Type_SerEnum name=TLB_LKUP_TYPE_E declid=1
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [28] SerEnumMember name=TBL_LKUP_TYPE_INDEX declid=4
+      value: [26] Constant value=0 base=10
+        type: [25] Type_InfInt declid=5
+    members: [31] SerEnumMember name=TBL_LKUP_TYPE_EM declid=5
+      value: [30] Constant value=1 base=10
+        type: [29] Type_InfInt declid=6
+    members: [34] SerEnumMember name=TBL_LKUP_TYPE_LPM declid=6
+      value: [33] Constant value=3 base=10
+        type: [32] Type_InfInt declid=7
+    members: [37] SerEnumMember name=TBL_LKUP_TYPE_TCAM declid=7
+      value: [36] Constant value=4 base=10
+        type: [35] Type_InfInt declid=8
+  objects: [57] Type_SerEnum name=SE_TID_E declid=2
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [46] SerEnumMember name=SE_TID_IPAT declid=8
+      value: [44] Constant value=0 base=10
+        type: [43] Type_InfInt declid=9
+    members: [49] SerEnumMember name=SE_TID_FIB declid=9
+      value: [48] Constant value=1 base=10
+        type: [47] Type_InfInt declid=10
+    members: [52] SerEnumMember name=SE_TID_EPAT declid=10
+      value: [51] Constant value=2 base=10
+        type: [50] Type_InfInt declid=11
+    members: [55] SerEnumMember name=SE_TID_ENCAP declid=11
+      value: [54] Constant value=3 base=10
+        type: [53] Type_InfInt declid=12
+  objects: [72] Type_SerEnum name=PORT_TYPE_E declid=3
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [64] SerEnumMember name=PORT_TYPE_ETH declid=12
+      value: [62] Constant value=0 base=10
+        type: [61] Type_InfInt declid=13
+    members: [67] SerEnumMember name=PORT_TYPE_CPU declid=13
+      value: [66] Constant value=1 base=10
+        type: [65] Type_InfInt declid=14
+    members: [70] SerEnumMember name=PORT_TYPE_STACK declid=14
+      value: [69] Constant value=2 base=10
+        type: [68] Type_InfInt declid=15
+  objects: [90] Type_SerEnum name=PHO_OFFSETS_E declid=4
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [79] SerEnumMember name=PHO_OUTER_L2_START declid=15
+      value: [77] Constant value=0 base=10
+        type: [76] Type_InfInt declid=16
+    members: [82] SerEnumMember name=PHO_OUTER_VLANS_START declid=16
+      value: [81] Constant value=1 base=10
+        type: [80] Type_InfInt declid=17
+    members: [85] SerEnumMember name=PHO_OUTER_L3_START declid=17
+      value: [84] Constant value=2 base=10
+        type: [83] Type_InfInt declid=18
+    members: [88] SerEnumMember name=PHO_OUTER_L4_START declid=18
+      value: [87] Constant value=3 base=10
+        type: [86] Type_InfInt declid=19
+  objects: [105] Type_SerEnum name=L4_PROTOCOL_E declid=5
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [97] SerEnumMember name=L4_PROTOCOL_NONE declid=19
+      value: [95] Constant value=0 base=10
+        type: [94] Type_InfInt declid=20
+    members: [100] SerEnumMember name=L4_PROTOCOL_TCP declid=20
+      value: [99] Constant value=10 base=10
+        type: [98] Type_InfInt declid=21
+    members: [103] SerEnumMember name=L4_PROTOCOL_UDP declid=21
+      value: [102] Constant value=32 base=10
+        type: [101] Type_InfInt declid=22
+  objects: [123] Type_SerEnum name=L2_TYPE_E declid=6
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [112] SerEnumMember name=L2_TYPE_INVALID declid=22
+      value: [110] Constant value=0 base=10
+        type: [109] Type_InfInt declid=23
+    members: [115] SerEnumMember name=L2_TYPE_ETHERNET declid=23
+      value: [114] Constant value=1 base=10
+        type: [113] Type_InfInt declid=24
+    members: [118] SerEnumMember name=L2_TYPE_OTHER declid=24
+      value: [117] Constant value=2 base=10
+        type: [116] Type_InfInt declid=25
+    members: [121] SerEnumMember name=L2_TYPE_RES declid=25
+      value: [120] Constant value=3 base=10
+        type: [119] Type_InfInt declid=26
+  objects: [141] Type_SerEnum name=VLAN_TYPE_E declid=7
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [130] SerEnumMember name=VLAN_UNTAGGED declid=26
+      value: [128] Constant value=0 base=10
+        type: [127] Type_InfInt declid=27
+    members: [133] SerEnumMember name=VLAN_SINGLE_TAGGED declid=27
+      value: [132] Constant value=1 base=10
+        type: [131] Type_InfInt declid=28
+    members: [136] SerEnumMember name=VLAN_DOUBLE_TAGGED declid=28
+      value: [135] Constant value=2 base=10
+        type: [134] Type_InfInt declid=29
+    members: [139] SerEnumMember name=VLAN_TRIPLE_TAGGED declid=29
+      value: [138] Constant value=3 base=10
+        type: [137] Type_InfInt declid=30
+  objects: [159] Type_SerEnum name=L3_TYPE_E declid=8
+    type: [3] Type_Bits size=32 isSigned=0...
+    members: [148] SerEnumMember name=L3_TYPE_INVALID declid=30
+      value: [146] Constant value=0 base=10
+        type: [145] Type_InfInt declid=31
+    members: [151] SerEnumMember name=L3_TYPE_NON_IP declid=31
+      value: [150] Constant value=1 base=10
+        type: [149] Type_InfInt declid=32
+    members: [154] SerEnumMember name=L3_TYPE_IPv4 declid=32
+      value: [153] Constant value=2 base=10
+        type: [152] Type_InfInt declid=33
+    members: [157] SerEnumMember name=L3_TYPE_IPv6 declid=33
+      value: [156] Constant value=3 base=10
+        type: [155] Type_InfInt declid=34
+  objects: [194] Type_Struct name=PHI_S declid=9
+    typeParameters: [196] TypeParameters
+    fields: [167] StructField name=PortType declid=34
+      type: [166] Type_Bits size=4 isSigned=0
+    fields: [174] StructField name=L2Type declid=35
+      type: [173] Type_Bits size=2 isSigned=0
+    fields: [179] StructField name=TagType declid=36
+      type: [173] Type_Bits size=2 isSigned=0...
+    fields: [184] StructField name=L3Type declid=37
+      type: [173] Type_Bits size=2 isSigned=0...
+    fields: [190] StructField name=L4Type declid=38
+      type: [189] Type_Bits size=8 isSigned=0
+  objects: [209] Type_Struct name=ETHER_TYPE_S declid=10
+    typeParameters: [211] TypeParameters
+    fields: [204] StructField name=Type declid=39
+      type: [203] Type_Bits size=16 isSigned=0
+  objects: [234] Type_Struct name=ETHER_S declid=11
+    typeParameters: [236] TypeParameters
+    fields: [219] StructField name=Dmac declid=40
+      type: [218] Type_Bits size=48 isSigned=0
+    fields: [225] StructField name=Smac declid=41
+      type: [218] Type_Bits size=48 isSigned=0...
+    fields: [230] StructField name=ETHER_TYPE declid=42
+      type: [229] Type_Name
+        path: [228] Path name=ETHER_TYPE_S absolute=0
+  objects: [294] Type_Struct name=VlanInfo_S declid=14
+    typeParameters: [296] TypeParameters
+    fields: [283] StructField name=_anon_1 declid=47
+      type: [276] Type_Struct name=_anon_1 declid=13
+        annotations: [281] Annotation name=union structured=0
+        typeParameters: [278] TypeParameters
+        fields: [244] StructField name=PriCfi declid=43
+          type: [166] Type_Bits size=4 isSigned=0...
+        fields: [270] StructField name=_anon_0 declid=46
+          type: [265] Type_Struct name=_anon_0 declid=12
+            typeParameters: [267] TypeParameters
+            fields: [252] StructField name=Pri declid=44
+              type: [251] Type_Bits size=3 isSigned=0
+            fields: [259] StructField name=Dei declid=45
+              type: [258] Type_Bits size=1 isSigned=0
+    fields: [290] StructField name=VlanID declid=48
+      type: [289] Type_Bits size=12 isSigned=0
+  objects: [318] Type_Struct name=VLAN_TAG_S declid=15
+    typeParameters: [320] TypeParameters
+    fields: [303] StructField name=Tpid declid=49
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [309] StructField name=VlanInfo declid=50
+      type: [308] Type_Name
+        path: [307] Path name=VlanInfo_S absolute=0
+    fields: [314] StructField name=ETHER_TYPE declid=51
+      type: [313] Type_Name
+        path: [312] Path name=ETHER_TYPE_S absolute=0
+  objects: [424] Type_Struct name=IPv4_S declid=17
+    typeParameters: [426] TypeParameters
+    fields: [327] StructField name=Version declid=52
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [333] StructField name=Ihl declid=53
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [364] StructField name=u_0 declid=57
+      type: [357] Type_Struct name=_anon_2 declid=16
+        annotations: [362] Annotation name=union structured=0
+        typeParameters: [359] TypeParameters
+        fields: [339] StructField name=TOS declid=54
+          type: [189] Type_Bits size=8 isSigned=0...
+        fields: [346] StructField name=DSCP declid=55
+          type: [345] Type_Bits size=6 isSigned=0
+        fields: [351] StructField name=Precedence declid=56
+          type: [251] Type_Bits size=3 isSigned=0...
+    fields: [369] StructField name=TotalLen declid=58
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [374] StructField name=Iden declid=59
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [379] StructField name=R declid=60
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [384] StructField name=DF declid=61
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [389] StructField name=MF declid=62
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [395] StructField name=FragOffset declid=63
+      type: [394] Type_Bits size=13 isSigned=0
+    fields: [400] StructField name=TTL declid=64
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [405] StructField name=Protocol declid=65
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [410] StructField name=Checksum declid=66
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [415] StructField name=SIP declid=67
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [420] StructField name=DIP declid=68
+      type: [3] Type_Bits size=32 isSigned=0...
+  objects: [500] Type_Struct name=IPv6_S declid=19
+    typeParameters: [502] TypeParameters
+    fields: [433] StructField name=Version declid=69
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [464] StructField name=_anon_3 declid=73
+      type: [457] Type_Struct name=_anon_3 declid=18
+        annotations: [462] Annotation name=union structured=0
+        typeParameters: [459] TypeParameters
+        fields: [440] StructField name=TC declid=70
+          type: [189] Type_Bits size=8 isSigned=0...
+        fields: [446] StructField name=DSCP declid=71
+          type: [345] Type_Bits size=6 isSigned=0...
+        fields: [451] StructField name=Precedence declid=72
+          type: [251] Type_Bits size=3 isSigned=0...
+    fields: [470] StructField name=FlowLabel declid=74
+      type: [469] Type_Bits size=20 isSigned=0
+    fields: [475] StructField name=PayloadLen declid=75
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [480] StructField name=NextProtocol declid=76
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [485] StructField name=HopLmt declid=77
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [491] StructField name=SIP declid=78
+      type: [490] Type_Bits size=128 isSigned=0
+    fields: [496] StructField name=DIP declid=79
+      type: [490] Type_Bits size=128 isSigned=0...
+  objects: [529] Type_Struct name=UDP_S declid=20
+    typeParameters: [531] TypeParameters
+    fields: [509] StructField name=SrcPort declid=80
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [515] StructField name=DstPort declid=81
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [520] StructField name=Length declid=82
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [525] StructField name=Checksum declid=83
+      type: [203] Type_Bits size=16 isSigned=0...
+  objects: [568] Type_Struct name=FlagCtrl_S declid=21
+    typeParameters: [570] TypeParameters
+    fields: [538] StructField name=Urg declid=84
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [544] StructField name=Ack declid=85
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [549] StructField name=Psh declid=86
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [554] StructField name=Rst declid=87
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [559] StructField name=Syn declid=88
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [564] StructField name=Fin declid=89
+      type: [258] Type_Bits size=1 isSigned=0...
+  objects: [648] Type_Struct name=DataCtrl_S declid=25
+    typeParameters: [650] TypeParameters
+    fields: [577] StructField name=DataOffset declid=90
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [639] StructField name=_anon_6 declid=97
+      type: [632] Type_Struct name=_anon_6 declid=24
+        annotations: [637] Annotation name=union structured=0
+        typeParameters: [634] TypeParameters
+        fields: [602] StructField name=_anon_4 declid=93
+          type: [597] Type_Struct name=_anon_4 declid=22
+            typeParameters: [599] TypeParameters
+            fields: [585] StructField name=Res declid=91
+              type: [251] Type_Bits size=3 isSigned=0...
+            fields: [591] StructField name=Ecn declid=92
+              type: [251] Type_Bits size=3 isSigned=0...
+        fields: [626] StructField name=_anon_5 declid=96
+          type: [621] Type_Struct name=_anon_5 declid=23
+            typeParameters: [623] TypeParameters
+            fields: [609] StructField name=Hr2n declid=94
+              type: [166] Type_Bits size=4 isSigned=0...
+            fields: [615] StructField name=Ecn1 declid=95
+              type: [173] Type_Bits size=2 isSigned=0...
+    fields: [644] StructField name=Ctrl declid=98
+      type: [643] Type_Name
+        path: [642] Path name=FlagCtrl_S absolute=0
+  objects: [697] Type_Struct name=TCP_S declid=26
+    typeParameters: [699] TypeParameters
+    fields: [657] StructField name=SrcPort declid=99
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [663] StructField name=DstPort declid=100
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [668] StructField name=SeqNo declid=101
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [673] StructField name=AckNo declid=102
+      type: [3] Type_Bits size=32 isSigned=0...
+    fields: [678] StructField name=DataCtrl declid=103
+      type: [677] Type_Name
+        path: [676] Path name=DataCtrl_S absolute=0
+    fields: [683] StructField name=Window declid=104
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [688] StructField name=Checksum declid=105
+      type: [203] Type_Bits size=16 isSigned=0...
+    fields: [693] StructField name=UrgentPtr declid=106
+      type: [203] Type_Bits size=16 isSigned=0...
+  objects: [706] Declaration_Instance name=ETHER declid=107
+    type: [704] Type_Name
+      path: [703] Path name=ETHER_S absolute=0
+    arguments: [705] Vector<Argument>
+  objects: [713] Declaration_Instance name=VLAN_TAG0 declid=108
+    type: [711] Type_Name
+      path: [710] Path name=VLAN_TAG_S absolute=0
+    arguments: [712] Vector<Argument>
+  objects: [720] Declaration_Instance name=ETHER_TYPE declid=109
+    type: [718] Type_Name
+      path: [717] Path name=ETHER_TYPE_S absolute=0
+    arguments: [719] Vector<Argument>
+  objects: [727] Declaration_Instance name=IPv4 declid=110
+    type: [725] Type_Name
+      path: [724] Path name=IPv4_S absolute=0
+    arguments: [726] Vector<Argument>
+  objects: [734] Declaration_Instance name=IPv6 declid=111
+    type: [732] Type_Name
+      path: [731] Path name=IPv6_S absolute=0
+    arguments: [733] Vector<Argument>
+  objects: [741] Declaration_Instance name=UDP declid=112
+    type: [739] Type_Name
+      path: [738] Path name=UDP_S absolute=0
+    arguments: [740] Vector<Argument>
+  objects: [748] Declaration_Instance name=TCP declid=113
+    type: [746] Type_Name
+      path: [745] Path name=TCP_S absolute=0
+    arguments: [747] Vector<Argument>
+  objects: [765] Declaration_Variable name=PHI declid=114
+    annotations: [755] Annotation name=segment structured=1
+      body::IR::Vector<IR::Expression>: [752] StringLiteral value=
+        type: [753] Type_Unknown
+    annotations: [761] Annotation name=volatile structured=1
+      body::IR::Vector<IR::Expression>: [757] StringLiteral value=
+        type: [753] Type_Unknown
+      body::IR::Vector<IR::Expression>: [759] StringLiteral value=
+        type: [753] Type_Unknown
+      body::IR::Vector<IR::Expression>: [760] StringLiteral value=
+        type: [753] Type_Unknown
+    type: [764] Type_Name
+      path: [763] Path name=PHI_S absolute=0
+  objects: [784] Declaration_Variable name=PHO declid=115
+    annotations: [770] Annotation name=segment structured=1
+      body::IR::Vector<IR::Expression>: [768] StringLiteral value=
+        type: [753] Type_Unknown
+    annotations: [776] Annotation name=volatile structured=1
+      body::IR::Vector<IR::Expression>: [772] StringLiteral value=
+        type: [753] Type_Unknown
+      body::IR::Vector<IR::Expression>: [774] StringLiteral value=
+        type: [753] Type_Unknown
+      body::IR::Vector<IR::Expression>: [775] StringLiteral value=
+        type: [753] Type_Unknown
+    type: [783] Type_Stack
+      elementType: [780] Type_Bits size=7 isSigned=0
+      size: [782] Constant value=5 base=10
+        type: [781] Type_InfInt declid=97
+  objects: [792] Declaration_Variable name=NGSFBuffer declid=116
+    type: [791] Type_Stack
+      elementType: [189] Type_Bits size=8 isSigned=0...
+      size: [790] Constant value=64 base=10
+        type: [789] Type_InfInt declid=99
+  objects: [798] Declaration_Variable name=GLSP declid=117
+    type: [797] Type_Bits size=10 isSigned=0
+  objects: [803] Declaration_Variable name=GLTP declid=118
+    type: [797] Type_Bits size=10 isSigned=0...
+  objects: [808] Declaration_Variable name=LLTP declid=119
+    type: [345] Type_Bits size=6 isSigned=0...
+  objects: [813] Declaration_Variable name=Vrf declid=120
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [818] Declaration_Variable name=FQID declid=121
+    type: [345] Type_Bits size=6 isSigned=0...
+  objects: [824] Declaration_Variable name=PktLength declid=122
+    type: [823] Type_Bits size=14 isSigned=0
+  objects: [829] Declaration_Variable name=DropFlag declid=123
+    type: [258] Type_Bits size=1 isSigned=0...
+  objects: [834] Declaration_Variable name=IsUc declid=124
+    type: [258] Type_Bits size=1 isSigned=0...
+  objects: [839] Declaration_Variable name=Mgid declid=125
+    type: [289] Type_Bits size=12 isSigned=0...
+  objects: [844] Declaration_Variable name=SB declid=126
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [849] Declaration_Variable name=SP declid=127
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [854] Declaration_Variable name=TB declid=128
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [859] Declaration_Variable name=TP declid=129
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [864] Declaration_Variable name=HashValue declid=130
+    type: [203] Type_Bits size=16 isSigned=0...
+  objects: [869] Declaration_Variable name=TOS declid=131
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [874] Declaration_Variable name=TTL declid=132
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [879] Declaration_Variable name=EncapIndex declid=133
+    type: [189] Type_Bits size=8 isSigned=0...
+  objects: [884] Declaration_Variable name=HubSpkGrp declid=134
+    type: [251] Type_Bits size=3 isSigned=0...
+  objects: [889] Declaration_Variable name=EncapProfile declid=135
+    type: [173] Type_Bits size=2 isSigned=0...
+  objects: [910] Function name=iprs declid=136
+    annotations: [893] Annotation name=parser structured=1
+    type: [907] Type_Method name=iprs
+      typeParameters: [908] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [895] ParameterList
+    body: [897] BlockStatement
+      components: [906] ReturnStatement
+        expression: [905] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [902] PathExpression
+            type: [753] Type_Unknown
+            path: [903] Path name=parse_ETHER absolute=0
+          typeArguments: [904] Vector<Type>
+          arguments: [901] Vector<Argument>
+  objects: [931] Function name=eprs declid=137
+    annotations: [914] Annotation name=parser structured=1
+    type: [928] Type_Method name=eprs
+      typeParameters: [929] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [916] ParameterList
+    body: [918] BlockStatement
+      components: [927] ReturnStatement
+        expression: [926] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [923] PathExpression
+            type: [753] Type_Unknown
+            path: [924] Path name=parse_ETHER absolute=0
+          typeArguments: [925] Vector<Type>
+          arguments: [922] Vector<Argument>
+  objects: [1071] Function name=parse_ETHER declid=138
+    annotations: [937] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [935] Constant value=0 base=10
+        type: [934] Type_InfInt declid=119
+    type: [1068] Type_Method name=parse_ETHER
+      typeParameters: [1069] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [939] ParameterList
+    body: [941] BlockStatement
+      components: [950] AssignmentStatement
+        left: [947] Member member=L2Type
+          type: [753] Type_Unknown
+          expr: [946] PathExpression
+            type: [753] Type_Unknown
+            path: [945] Path name=PHI absolute=0
+        right: [949] PathExpression
+          type: [753] Type_Unknown
+          path: [948] Path name=L2_TYPE_ETHERNET absolute=0
+      components: [965] AssignmentStatement
+        left: [956] ArrayIndex
+          type: [753] Type_Unknown
+          left: [953] PathExpression
+            type: [753] Type_Unknown
+            path: [952] Path name=PHO absolute=0
+          right: [955] PathExpression
+            type: [753] Type_Unknown
+            path: [954] Path name=PHO_OUTER_L2_START absolute=0
+        right: [963] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [958] PathExpression
+            type: [753] Type_Unknown
+            path: [957] Path name=_extract absolute=0
+          typeArguments: [964] Vector<Type>
+          arguments: [962] Vector<Argument>
+            arguments: [961] Argument name=<null>
+              expression: [960] PathExpression
+                type: [753] Type_Unknown
+                path: [959] Path name=ETHER absolute=0
+      components: [1066] SwitchStatement
+        expression: [974] ListExpression
+          type: [979] Type_List
+            components: [753] Type_Unknown
+          components: [970] Member member=Type
+            type: [753] Type_Unknown
+            expr: [969] Member member=ETHER_TYPE
+              type: [753] Type_Unknown
+              expr: [968] PathExpression
+                type: [753] Type_Unknown
+                path: [967] Path name=ETHER absolute=0
+        [1002] SwitchCase
+          label: [992] ListExpression
+            type: [997] Type_List
+              components: [981] Type_InfInt declid=120
+            components: [982] Constant value=33024 base=16
+              type: [981] Type_InfInt declid=120
+          statement: [999] BlockStatement
+            components: [989] ReturnStatement
+              expression: [988] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [985] PathExpression
+                  type: [753] Type_Unknown
+                  path: [986] Path name=parse_VlanTag absolute=0
+                typeArguments: [987] Vector<Type>
+                arguments: [984] Vector<Argument>
+        [1025] SwitchCase
+          label: [1015] ListExpression
+            type: [1020] Type_List
+              components: [1004] Type_InfInt declid=121
+            components: [1005] Constant value=2048 base=16
+              type: [1004] Type_InfInt declid=121
+          statement: [1022] BlockStatement
+            components: [1012] ReturnStatement
+              expression: [1011] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1008] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1009] Path name=parse_IPv4 absolute=0
+                typeArguments: [1010] Vector<Type>
+                arguments: [1007] Vector<Argument>
+        [1047] SwitchCase
+          label: [1037] ListExpression
+            type: [1042] Type_List
+              components: [1026] Type_InfInt declid=122
+            components: [1027] Constant value=34525 base=16
+              type: [1026] Type_InfInt declid=122
+          statement: [1044] BlockStatement
+            components: [1034] ReturnStatement
+              expression: [1033] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1030] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1031] Path name=parse_IPv6 absolute=0
+                typeArguments: [1032] Vector<Type>
+                arguments: [1029] Vector<Argument>
+        [1064] SwitchCase
+          label: [1060] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [1061] BlockStatement
+            components: [1059] ReturnStatement
+              expression: [1058] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1055] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1056] Path name=_parser_next absolute=0
+                typeArguments: [1057] Vector<Type>
+                arguments: [1051] Vector<Argument>
+                  arguments: [1050] Argument name=<null>
+                    expression: [1049] Constant value=0 base=10
+                      type: [1048] Type_InfInt declid=123
+                  arguments: [1054] Argument name=<null>
+                    expression: [1053] Constant value=0 base=10
+                      type: [1052] Type_InfInt declid=124
+  objects: [1189] Function name=parse_VlanTag declid=139
+    annotations: [1077] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [1075] Constant value=0 base=10
+        type: [1074] Type_InfInt declid=125
+    type: [1186] Type_Method name=parse_VlanTag
+      typeParameters: [1187] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1079] ParameterList
+    body: [1081] BlockStatement
+      components: [1090] AssignmentStatement
+        left: [1087] Member member=TagType
+          type: [753] Type_Unknown
+          expr: [1086] PathExpression
+            type: [753] Type_Unknown
+            path: [1085] Path name=PHI absolute=0
+        right: [1089] PathExpression
+          type: [753] Type_Unknown
+          path: [1088] Path name=VLAN_SINGLE_TAGGED absolute=0
+      components: [1105] AssignmentStatement
+        left: [1096] ArrayIndex
+          type: [753] Type_Unknown
+          left: [1093] PathExpression
+            type: [753] Type_Unknown
+            path: [1092] Path name=PHO absolute=0
+          right: [1095] PathExpression
+            type: [753] Type_Unknown
+            path: [1094] Path name=PHO_OUTER_VLANS_START absolute=0
+        right: [1103] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1098] PathExpression
+            type: [753] Type_Unknown
+            path: [1097] Path name=_extract absolute=0
+          typeArguments: [1104] Vector<Type>
+          arguments: [1102] Vector<Argument>
+            arguments: [1101] Argument name=<null>
+              expression: [1100] PathExpression
+                type: [753] Type_Unknown
+                path: [1099] Path name=VLAN_TAG0 absolute=0
+      components: [1184] SwitchStatement
+        expression: [1114] ListExpression
+          type: [1119] Type_List
+            components: [753] Type_Unknown
+          components: [1110] Member member=Type
+            type: [753] Type_Unknown
+            expr: [1109] Member member=ETHER_TYPE
+              type: [753] Type_Unknown
+              expr: [1108] PathExpression
+                type: [753] Type_Unknown
+                path: [1107] Path name=VLAN_TAG0 absolute=0
+        [1142] SwitchCase
+          label: [1132] ListExpression
+            type: [1137] Type_List
+              components: [1121] Type_InfInt declid=126
+            components: [1122] Constant value=2048 base=16
+              type: [1121] Type_InfInt declid=126
+          statement: [1139] BlockStatement
+            components: [1129] ReturnStatement
+              expression: [1128] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1125] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1126] Path name=parse_IPv4 absolute=0
+                typeArguments: [1127] Vector<Type>
+                arguments: [1124] Vector<Argument>
+        [1165] SwitchCase
+          label: [1155] ListExpression
+            type: [1160] Type_List
+              components: [1144] Type_InfInt declid=127
+            components: [1145] Constant value=34525 base=16
+              type: [1144] Type_InfInt declid=127
+          statement: [1162] BlockStatement
+            components: [1152] ReturnStatement
+              expression: [1151] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1148] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1149] Path name=parse_IPv6 absolute=0
+                typeArguments: [1150] Vector<Type>
+                arguments: [1147] Vector<Argument>
+        [1182] SwitchCase
+          label: [1178] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [1179] BlockStatement
+            components: [1177] ReturnStatement
+              expression: [1176] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1173] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1174] Path name=_parser_next absolute=0
+                typeArguments: [1175] Vector<Type>
+                arguments: [1169] Vector<Argument>
+                  arguments: [1168] Argument name=<null>
+                    expression: [1167] Constant value=0 base=10
+                      type: [1166] Type_InfInt declid=128
+                  arguments: [1172] Argument name=<null>
+                    expression: [1171] Constant value=0 base=10
+                      type: [1170] Type_InfInt declid=129
+  objects: [1306] Function name=parse_IPv4 declid=140
+    annotations: [1195] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [1193] Constant value=1 base=10
+        type: [1192] Type_InfInt declid=130
+    type: [1303] Type_Method name=parse_IPv4
+      typeParameters: [1304] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1197] ParameterList
+    body: [1199] BlockStatement
+      components: [1208] AssignmentStatement
+        left: [1205] Member member=L3Type
+          type: [753] Type_Unknown
+          expr: [1204] PathExpression
+            type: [753] Type_Unknown
+            path: [1203] Path name=PHI absolute=0
+        right: [1207] PathExpression
+          type: [753] Type_Unknown
+          path: [1206] Path name=L3_TYPE_IPv4 absolute=0
+      components: [1223] AssignmentStatement
+        left: [1214] ArrayIndex
+          type: [753] Type_Unknown
+          left: [1211] PathExpression
+            type: [753] Type_Unknown
+            path: [1210] Path name=PHO absolute=0
+          right: [1213] PathExpression
+            type: [753] Type_Unknown
+            path: [1212] Path name=PHO_OUTER_L3_START absolute=0
+        right: [1221] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1216] PathExpression
+            type: [753] Type_Unknown
+            path: [1215] Path name=_extract absolute=0
+          typeArguments: [1222] Vector<Type>
+          arguments: [1220] Vector<Argument>
+            arguments: [1219] Argument name=<null>
+              expression: [1218] PathExpression
+                type: [753] Type_Unknown
+                path: [1217] Path name=IPv4 absolute=0
+      components: [1301] SwitchStatement
+        expression: [1231] ListExpression
+          type: [1236] Type_List
+            components: [753] Type_Unknown
+          components: [1227] Member member=Protocol
+            type: [753] Type_Unknown
+            expr: [1226] PathExpression
+              type: [753] Type_Unknown
+              path: [1225] Path name=IPv4 absolute=0
+        [1259] SwitchCase
+          label: [1249] ListExpression
+            type: [1254] Type_List
+              components: [1238] Type_InfInt declid=131
+            components: [1239] Constant value=17 base=16
+              type: [1238] Type_InfInt declid=131
+          statement: [1256] BlockStatement
+            components: [1246] ReturnStatement
+              expression: [1245] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1242] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1243] Path name=parse_UDP absolute=0
+                typeArguments: [1244] Vector<Type>
+                arguments: [1241] Vector<Argument>
+        [1282] SwitchCase
+          label: [1272] ListExpression
+            type: [1277] Type_List
+              components: [1261] Type_InfInt declid=132
+            components: [1262] Constant value=6 base=16
+              type: [1261] Type_InfInt declid=132
+          statement: [1279] BlockStatement
+            components: [1269] ReturnStatement
+              expression: [1268] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1265] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1266] Path name=parse_TCP absolute=0
+                typeArguments: [1267] Vector<Type>
+                arguments: [1264] Vector<Argument>
+        [1299] SwitchCase
+          label: [1295] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [1296] BlockStatement
+            components: [1294] ReturnStatement
+              expression: [1293] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1290] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1291] Path name=_parser_next absolute=0
+                typeArguments: [1292] Vector<Type>
+                arguments: [1286] Vector<Argument>
+                  arguments: [1285] Argument name=<null>
+                    expression: [1284] Constant value=0 base=10
+                      type: [1283] Type_InfInt declid=133
+                  arguments: [1289] Argument name=<null>
+                    expression: [1288] Constant value=0 base=10
+                      type: [1287] Type_InfInt declid=134
+  objects: [1423] Function name=parse_IPv6 declid=141
+    annotations: [1312] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [1310] Constant value=1 base=10
+        type: [1309] Type_InfInt declid=135
+    type: [1420] Type_Method name=parse_IPv6
+      typeParameters: [1421] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1314] ParameterList
+    body: [1316] BlockStatement
+      components: [1325] AssignmentStatement
+        left: [1322] Member member=L3Type
+          type: [753] Type_Unknown
+          expr: [1321] PathExpression
+            type: [753] Type_Unknown
+            path: [1320] Path name=PHI absolute=0
+        right: [1324] PathExpression
+          type: [753] Type_Unknown
+          path: [1323] Path name=L3_TYPE_IPv6 absolute=0
+      components: [1340] AssignmentStatement
+        left: [1331] ArrayIndex
+          type: [753] Type_Unknown
+          left: [1328] PathExpression
+            type: [753] Type_Unknown
+            path: [1327] Path name=PHO absolute=0
+          right: [1330] PathExpression
+            type: [753] Type_Unknown
+            path: [1329] Path name=PHO_OUTER_L3_START absolute=0
+        right: [1338] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1333] PathExpression
+            type: [753] Type_Unknown
+            path: [1332] Path name=_extract absolute=0
+          typeArguments: [1339] Vector<Type>
+          arguments: [1337] Vector<Argument>
+            arguments: [1336] Argument name=<null>
+              expression: [1335] PathExpression
+                type: [753] Type_Unknown
+                path: [1334] Path name=IPv6 absolute=0
+      components: [1418] SwitchStatement
+        expression: [1348] ListExpression
+          type: [1353] Type_List
+            components: [753] Type_Unknown
+          components: [1344] Member member=NextProtocol
+            type: [753] Type_Unknown
+            expr: [1343] PathExpression
+              type: [753] Type_Unknown
+              path: [1342] Path name=IPv6 absolute=0
+        [1376] SwitchCase
+          label: [1366] ListExpression
+            type: [1371] Type_List
+              components: [1355] Type_InfInt declid=136
+            components: [1356] Constant value=17 base=16
+              type: [1355] Type_InfInt declid=136
+          statement: [1373] BlockStatement
+            components: [1363] ReturnStatement
+              expression: [1362] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1359] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1360] Path name=parse_UDP absolute=0
+                typeArguments: [1361] Vector<Type>
+                arguments: [1358] Vector<Argument>
+        [1399] SwitchCase
+          label: [1389] ListExpression
+            type: [1394] Type_List
+              components: [1378] Type_InfInt declid=137
+            components: [1379] Constant value=6 base=16
+              type: [1378] Type_InfInt declid=137
+          statement: [1396] BlockStatement
+            components: [1386] ReturnStatement
+              expression: [1385] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1382] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1383] Path name=parse_TCP absolute=0
+                typeArguments: [1384] Vector<Type>
+                arguments: [1381] Vector<Argument>
+        [1416] SwitchCase
+          label: [1412] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [1413] BlockStatement
+            components: [1411] ReturnStatement
+              expression: [1410] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [1407] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1408] Path name=_parser_next absolute=0
+                typeArguments: [1409] Vector<Type>
+                arguments: [1403] Vector<Argument>
+                  arguments: [1402] Argument name=<null>
+                    expression: [1401] Constant value=0 base=10
+                      type: [1400] Type_InfInt declid=138
+                  arguments: [1406] Argument name=<null>
+                    expression: [1405] Constant value=0 base=10
+                      type: [1404] Type_InfInt declid=139
+  objects: [1474] Function name=parse_TCP declid=142
+    annotations: [1429] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [1427] Constant value=2 base=10
+        type: [1426] Type_InfInt declid=140
+    type: [1471] Type_Method name=parse_TCP
+      typeParameters: [1472] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1431] ParameterList
+    body: [1433] BlockStatement
+      components: [1442] AssignmentStatement
+        left: [1439] Member member=L4Type
+          type: [753] Type_Unknown
+          expr: [1438] PathExpression
+            type: [753] Type_Unknown
+            path: [1437] Path name=PHI absolute=0
+        right: [1441] PathExpression
+          type: [753] Type_Unknown
+          path: [1440] Path name=L4_PROTOCOL_TCP absolute=0
+      components: [1457] AssignmentStatement
+        left: [1448] ArrayIndex
+          type: [753] Type_Unknown
+          left: [1445] PathExpression
+            type: [753] Type_Unknown
+            path: [1444] Path name=PHO absolute=0
+          right: [1447] PathExpression
+            type: [753] Type_Unknown
+            path: [1446] Path name=PHO_OUTER_L4_START absolute=0
+        right: [1455] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1450] PathExpression
+            type: [753] Type_Unknown
+            path: [1449] Path name=_extract absolute=0
+          typeArguments: [1456] Vector<Type>
+          arguments: [1454] Vector<Argument>
+            arguments: [1453] Argument name=<null>
+              expression: [1452] PathExpression
+                type: [753] Type_Unknown
+                path: [1451] Path name=TCP absolute=0
+      components: [1470] ReturnStatement
+        expression: [1469] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1466] PathExpression
+            type: [753] Type_Unknown
+            path: [1467] Path name=_parser_next absolute=0
+          typeArguments: [1468] Vector<Type>
+          arguments: [1462] Vector<Argument>
+            arguments: [1461] Argument name=<null>
+              expression: [1460] Constant value=0 base=10
+                type: [1459] Type_InfInt declid=141
+            arguments: [1465] Argument name=<null>
+              expression: [1464] Constant value=0 base=10
+                type: [1463] Type_InfInt declid=142
+  objects: [1525] Function name=parse_UDP declid=143
+    annotations: [1480] Annotation name=parser structured=1
+      body::IR::Vector<IR::Expression>: [1478] Constant value=2 base=10
+        type: [1477] Type_InfInt declid=143
+    type: [1522] Type_Method name=parse_UDP
+      typeParameters: [1523] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1482] ParameterList
+    body: [1484] BlockStatement
+      components: [1493] AssignmentStatement
+        left: [1490] Member member=L4Type
+          type: [753] Type_Unknown
+          expr: [1489] PathExpression
+            type: [753] Type_Unknown
+            path: [1488] Path name=PHI absolute=0
+        right: [1492] PathExpression
+          type: [753] Type_Unknown
+          path: [1491] Path name=L4_PROTOCOL_UDP absolute=0
+      components: [1508] AssignmentStatement
+        left: [1499] ArrayIndex
+          type: [753] Type_Unknown
+          left: [1496] PathExpression
+            type: [753] Type_Unknown
+            path: [1495] Path name=PHO absolute=0
+          right: [1498] PathExpression
+            type: [753] Type_Unknown
+            path: [1497] Path name=PHO_OUTER_L4_START absolute=0
+        right: [1506] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1501] PathExpression
+            type: [753] Type_Unknown
+            path: [1500] Path name=_extract absolute=0
+          typeArguments: [1507] Vector<Type>
+          arguments: [1505] Vector<Argument>
+            arguments: [1504] Argument name=<null>
+              expression: [1503] PathExpression
+                type: [753] Type_Unknown
+                path: [1502] Path name=UDP absolute=0
+      components: [1521] ReturnStatement
+        expression: [1520] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1517] PathExpression
+            type: [753] Type_Unknown
+            path: [1518] Path name=_parser_next absolute=0
+          typeArguments: [1519] Vector<Type>
+          arguments: [1513] Vector<Argument>
+            arguments: [1512] Argument name=<null>
+              expression: [1511] Constant value=0 base=10
+                type: [1510] Type_InfInt declid=144
+            arguments: [1516] Argument name=<null>
+              expression: [1515] Constant value=0 base=10
+                type: [1514] Type_InfInt declid=145
+  objects: [1536] Type_Struct name=IpatCtrlInfo_S declid=27
+    typeParameters: [1538] TypeParameters
+    fields: [1531] StructField name=ForwardEn declid=144
+      type: [258] Type_Bits size=1 isSigned=0...
+  objects: [1573] Type_Struct name=IPATRSP_S declid=28
+    typeParameters: [1575] TypeParameters
+    fields: [1548] StructField name=Valid declid=145
+      annotations: [1544] Annotation name=global_valid structured=1
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [1554] StructField name=RouterIntf declid=146
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [1559] StructField name=QinQ declid=147
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [1564] StructField name=VrfId declid=148
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [1569] StructField name=Pvid declid=149
+      type: [1568] Type_Name
+        path: [1567] Path name=VlanInfo_S absolute=0
+  objects: [1581] Type_Typedef name=IPATFull_S declid=29
+    type: [1580] Type_Name
+      path: [1579] Path name=_inflate<IPATRSP_S> absolute=0
+  objects: [1707] Function name=IpatLookup declid=154
+    annotations: [1585] Annotation name=lookup structured=1
+    type: [1704] Type_Method name=IpatLookup
+      typeParameters: [1705] TypeParameters
+      returnType: [1588] Type_Name
+        path: [1587] Path name=IPATFull_S absolute=0
+      parameters: [1594] ParameterList
+        parameters: [1592] Parameter name=Status declid=150 direction=inout
+          type: [173] Type_Bits size=2 isSigned=0...
+    body: [1596] BlockStatement
+      components: [1602] Declaration_Variable name=Glsp declid=151
+        type: [797] Type_Bits size=10 isSigned=0...
+      components: [1619] Declaration_Variable name=CompressedIpatRsp declid=152
+        type: [1606] Type_Name
+          path: [1605] Path name=_compressed_IPATRSP_S absolute=0
+        initializer: [1612] ListExpression
+          type: [1617] Type_List
+            components: [1607] Type_InfInt declid=153
+          components: [1608] Constant value=0 base=10
+            type: [1607] Type_InfInt declid=153
+      components: [1636] Declaration_Variable name=Mem declid=153
+        type: [1623] Type_Name
+          path: [1622] Path name=_compressed_IPATRSP_S absolute=0
+        initializer: [1629] ListExpression
+          type: [1634] Type_List
+            components: [1624] Type_InfInt declid=154
+          components: [1625] Constant value=0 base=10
+            type: [1624] Type_InfInt declid=154
+      components: [1646] AssignmentStatement
+        left: [1640] PathExpression
+          type: [753] Type_Unknown
+          path: [1639] Path name=Glsp absolute=0
+        right: [1644] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1642] PathExpression
+            type: [753] Type_Unknown
+            path: [1641] Path name=_key absolute=0
+          typeArguments: [1645] Vector<Type>
+          arguments: [1643] Vector<Argument>
+      components: [1664] AssignmentStatement
+        left: [1649] PathExpression
+          type: [753] Type_Unknown
+          path: [1648] Path name=Mem absolute=0
+        right: [1662] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1651] PathExpression
+            type: [753] Type_Unknown
+            path: [1650] Path name=_lookup absolute=0
+          typeArguments: [1663] Vector<Type>
+          arguments: [1655] Vector<Argument>
+            arguments: [1654] Argument name=<null>
+              expression: [1653] PathExpression
+                type: [753] Type_Unknown
+                path: [1652] Path name=SE_TID_IPAT absolute=0
+            arguments: [1658] Argument name=<null>
+              expression: [1657] PathExpression
+                type: [753] Type_Unknown
+                path: [1656] Path name=TBL_LKUP_TYPE_INDEX absolute=0
+            arguments: [1661] Argument name=<null>
+              expression: [1660] PathExpression
+                type: [753] Type_Unknown
+                path: [1659] Path name=Glsp absolute=0
+      components: [1676] AssignmentStatement
+        left: [1667] PathExpression
+          type: [753] Type_Unknown
+          path: [1666] Path name=Status absolute=0
+        right: [1674] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1669] PathExpression
+            type: [753] Type_Unknown
+            path: [1668] Path name=_status absolute=0
+          typeArguments: [1675] Vector<Type>
+          arguments: [1673] Vector<Argument>
+            arguments: [1672] Argument name=<null>
+              expression: [1671] PathExpression
+                type: [753] Type_Unknown
+                path: [1670] Path name=SE_TID_IPAT absolute=0
+      components: [1699] MethodCallStatement
+        methodCall: [1697] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1696] PathExpression
+            type: [753] Type_Unknown
+            path: [1695] Path name=_memcpy absolute=0
+          typeArguments: [1698] Vector<Type>
+          arguments: [1681] Vector<Argument>
+            arguments: [1680] Argument name=<null>
+              expression: [1679] PathExpression
+                type: [753] Type_Unknown
+                path: [1678] Path name=CompressedIpatRsp absolute=0
+            arguments: [1694] Argument name=<null>
+              expression: [1687] ListExpression
+                type: [1692] Type_List
+                  components: [753] Type_Unknown
+                components: [1683] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1682] Path name=Mem absolute=0
+      components: [1703] ReturnStatement
+        expression: [1701] PathExpression
+          type: [753] Type_Unknown
+          path: [1702] Path name=CompressedIpatRsp absolute=0
+  objects: [1862] P5Table name=IPAT_TBL declid=158
+    parameters: [1710] ParameterList
+    body: [1826] BlockStatement
+      components: [1823] P5Key
+        switches: [1819] P5KeySwitch
+          select: [1718] ListExpression
+            type: [1723] Type_List
+              components: [753] Type_Unknown
+            components: [1714] Member member=PortType
+              type: [753] Type_Unknown
+              expr: [1713] PathExpression
+                type: [753] Type_Unknown
+                path: [1712] Path name=PHI absolute=0
+          cases: [1774] P5KeyCase fallthrough=0
+            label: [1767] ListExpression
+              type: [1772] Type_List
+                components: [753] Type_Unknown
+              components: [1727] PathExpression
+                type: [753] Type_Unknown
+                path: [1726] Path name=PORT_TYPE_ETH absolute=0
+            elements: [1733] P5KeyElement matchType=<null>
+              expr: [1732] PathExpression
+                type: [753] Type_Unknown
+                path: [1731] Path name=GLSP absolute=0
+            elements: [1760] P5KeyElement matchType=<null>
+              components: [1759] AssignmentStatement
+                left: [1743] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1742] Path name=control_info absolute=0
+                right: [1758] Cast
+                  type: [1745] Type_Name
+                    path: [1744] Path name=IpatCtrlInfo_S absolute=0
+                  expr: [1751] ListExpression
+                    type: [1756] Type_List
+                      components: [1746] Type_InfInt declid=155
+                    components: [1747] Constant value=1 base=10
+                      type: [1746] Type_InfInt declid=155
+                  destType: [1745] Type_Name...
+          cases: [1792] P5KeyCase fallthrough=0
+            label: [1785] ListExpression
+              type: [1790] Type_List
+                components: [753] Type_Unknown
+              components: [1780] PathExpression
+                type: [753] Type_Unknown
+                path: [1779] Path name=PORT_TYPE_CPU absolute=0
+          cases: [1809] P5KeyCase fallthrough=0
+            label: [1802] ListExpression
+              type: [1807] Type_List
+                components: [753] Type_Unknown
+              components: [1797] PathExpression
+                type: [753] Type_Unknown
+                path: [1796] Path name=PORT_TYPE_STACK absolute=0
+          cases: [1815] P5KeyCase fallthrough=0
+            label: [1814] DefaultExpression
+              type: [753] Type_Unknown
+      components: [1837] Declaration_Variable name=IpatStatus declid=155
+        type: [173] Type_Bits size=2 isSigned=0...
+        initializer: [1835] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1833] PathExpression
+            type: [753] Type_Unknown
+            path: [1832] Path name=_status absolute=0
+          typeArguments: [1836] Vector<Type>
+          arguments: [1834] Vector<Argument>
+      components: [1850] Declaration_Variable name=rsIpat declid=156
+        type: [1841] Type_Name
+          path: [1840] Path name=IPATFull_S absolute=0
+        initializer: [1848] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1843] PathExpression
+            type: [753] Type_Unknown
+            path: [1842] Path name=IpatLookup absolute=0
+          typeArguments: [1849] Vector<Type>
+          arguments: [1847] Vector<Argument>
+            arguments: [1846] Argument name=<null>
+              expression: [1845] PathExpression
+                type: [753] Type_Unknown
+                path: [1844] Path name=IpatStatus absolute=0
+      components: [1860] Declaration_Variable name=IpatCtrlInfo declid=157
+        type: [1854] Type_Name
+          path: [1853] Path name=IpatCtrlInfo_S absolute=0
+        initializer: [1858] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1856] PathExpression
+            type: [753] Type_Unknown
+            path: [1855] Path name=_control_info absolute=0
+          typeArguments: [1859] Vector<Type>
+          arguments: [1857] Vector<Argument>
+  objects: [1896] P5Table name=IMA0_MATCH_TBL declid=160
+    parameters: [1865] ParameterList
+    body: [1877] BlockStatement
+      components: [1875] Declaration_Variable name=tbIPAT declid=159
+        type: [1869] Type_Name
+          path: [1868] Path name=IPAT_TBL absolute=0
+        initializer: [1873] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1871] PathExpression
+            type: [753] Type_Unknown
+            path: [1870] Path name=IPAT_TBL absolute=0
+          typeArguments: [1874] Vector<Type>
+          arguments: [1872] Vector<Argument>
+      components: [1889] MethodCallStatement
+        methodCall: [1887] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [1886] PathExpression
+            type: [753] Type_Unknown
+            path: [1885] Path name=_apply absolute=0
+          typeArguments: [1888] Vector<Type>
+          arguments: [1884] Vector<Argument>
+            arguments: [1883] Argument name=<null>
+              expression: [1882] PathExpression
+                type: [753] Type_Unknown
+                path: [1881] Path name=tbIPAT absolute=0
+      components: [1895] AssignmentStatement
+        left: [1892] PathExpression
+          type: [753] Type_Unknown
+          path: [1891] Path name=ma_id absolute=0
+        right: [1894] Constant value=0 base=10
+          type: [1893] Type_InfInt declid=157
+  objects: [1986] Function name=iMA0Action declid=164
+    type: [1983] Type_Method name=iMA0Action
+      typeParameters: [1984] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [1904] ParameterList
+        parameters: [1902] Parameter name=rsIpat declid=161 direction=in
+          type: [1901] Type_Name
+            path: [1900] Path name=IPATFull_S absolute=0
+        parameters: [1909] Parameter name=IpatStatus declid=162 direction=in
+          type: [173] Type_Bits size=2 isSigned=0...
+        parameters: [1914] Parameter name=CtrlInfo declid=163 direction=in
+          type: [1913] Type_Name
+            path: [1912] Path name=IpatCtrlInfo_S absolute=0
+    body: [1916] BlockStatement
+      components: [1982] IfStatement
+        condition: [1944] LAnd
+          type: [1932] Type_Boolean
+          left: [1931] LAnd
+            type: [1932] Type_Boolean
+            left: [1926] MethodCallExpression
+              type: [753] Type_Unknown
+              method: [1921] PathExpression
+                type: [753] Type_Unknown
+                path: [1920] Path name=_valid absolute=0
+              typeArguments: [1927] Vector<Type>
+              arguments: [1925] Vector<Argument>
+                arguments: [1924] Argument name=<null>
+                  expression: [1923] PathExpression
+                    type: [753] Type_Unknown
+                    path: [1922] Path name=rsIpat absolute=0
+            right: [1930] Member member=ForwardEn
+              type: [753] Type_Unknown
+              expr: [1929] PathExpression
+                type: [753] Type_Unknown
+                path: [1928] Path name=CtrlInfo absolute=0
+          right: [1943] Equ
+            type: [1932] Type_Boolean
+            left: [1940] Slice
+              type: [258] Type_Bits size=1 isSigned=0...
+              e0: [1935] Member member=L3Type
+                type: [753] Type_Unknown
+                expr: [1934] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1933] Path name=PHI absolute=0
+              e1: [1937] Constant value=1 base=10
+                type: [1936] Type_InfInt declid=159
+              e2: [1939] Constant value=1 base=10
+                type: [1938] Type_InfInt declid=160
+            right: [1942] Constant value=1 base=10
+              type: [1941] Type_InfInt declid=161
+        [1974] BlockStatement
+          components: [1946] BlockStatement
+            components: [1955] AssignmentStatement
+              left: [1951] PathExpression
+                type: [753] Type_Unknown
+                path: [1950] Path name=Vrf absolute=0
+              right: [1954] Member member=VrfId
+                type: [753] Type_Unknown
+                expr: [1953] PathExpression
+                  type: [753] Type_Unknown
+                  path: [1952] Path name=rsIpat absolute=0
+            components: [1961] AssignmentStatement
+              left: [1958] PathExpression
+                type: [753] Type_Unknown
+                path: [1957] Path name=IsUc absolute=0
+              right: [1960] Constant value=1 base=10
+                type: [1959] Type_InfInt declid=162
+        [1979] BlockStatement
+          components: [1963] BlockStatement
+            components: [1971] AssignmentStatement
+              left: [1968] PathExpression
+                type: [753] Type_Unknown
+                path: [1967] Path name=DropFlag absolute=0
+              right: [1970] Constant value=1 base=10
+                type: [1969] Type_InfInt declid=163
+  objects: [2027] P5Table name=IMA0_ACTION_TBL declid=166
+    parameters: [1994] ParameterList
+      parameters: [1992] Parameter name=tbIMA0Match declid=165 direction=in
+        type: [1991] Type_Name
+          path: [1990] Path name=IMA0_MATCH_TBL absolute=0
+    body: [2018] BlockStatement
+      components: [2017] MethodCallStatement
+        methodCall: [2015] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2014] PathExpression
+            type: [753] Type_Unknown
+            path: [2013] Path name=iMA0Action absolute=0
+          typeArguments: [2016] Vector<Type>
+          arguments: [2002] Vector<Argument>
+            arguments: [2001] Argument name=<null>
+              expression: [2000] Member member=rsIpat
+                type: [753] Type_Unknown
+                expr: [1999] Member member=tbIPAT
+                  type: [753] Type_Unknown
+                  expr: [1998] PathExpression
+                    type: [753] Type_Unknown
+                    path: [1997] Path name=tbIMA0Match absolute=0
+            arguments: [2007] Argument name=<null>
+              expression: [2006] Member member=IpatStatus
+                type: [753] Type_Unknown
+                expr: [2005] Member member=tbIPAT
+                  type: [753] Type_Unknown
+                  expr: [2004] PathExpression
+                    type: [753] Type_Unknown
+                    path: [2003] Path name=tbIMA0Match absolute=0
+            arguments: [2012] Argument name=<null>
+              expression: [2011] Member member=IpatCtrlInfo
+                type: [753] Type_Unknown
+                expr: [2010] Member member=tbIPAT
+                  type: [753] Type_Unknown
+                  expr: [2009] PathExpression
+                    type: [753] Type_Unknown
+                    path: [2008] Path name=tbIMA0Match absolute=0
+      components: [2026] AssignmentStatement
+        left: [2023] PathExpression
+          type: [753] Type_Unknown
+          path: [2022] Path name=ma_id absolute=0
+        right: [2025] Constant value=0 base=10
+          type: [2024] Type_InfInt declid=164
+  objects: [2043] Type_Struct name=FIBRSP_S declid=30
+    typeParameters: [2045] TypeParameters
+    fields: [2033] StructField name=Port declid=167
+      type: [797] Type_Bits size=10 isSigned=0...
+    fields: [2039] StructField name=EncapIndex declid=168
+      type: [189] Type_Bits size=8 isSigned=0...
+  objects: [2051] Type_Typedef name=FIBFull_S declid=31
+    type: [2050] Type_Name
+      path: [2049] Path name=_inflate<FIBRSP_S> absolute=0
+  objects: [2067] Type_Struct name=FIBKEY_S declid=32
+    typeParameters: [2069] TypeParameters
+    fields: [2057] StructField name=VrfId declid=169
+      type: [189] Type_Bits size=8 isSigned=0...
+    fields: [2063] StructField name=DIP declid=170
+      type: [490] Type_Bits size=128 isSigned=0...
+  objects: [2201] Function name=FibLookup declid=176
+    annotations: [2074] Annotation name=lookup structured=1
+    type: [2198] Type_Method name=FibLookup
+      typeParameters: [2199] TypeParameters
+      returnType: [2077] Type_Name
+        path: [2076] Path name=FIBFull_S absolute=0
+      parameters: [2083] ParameterList
+        parameters: [2081] Parameter name=Status declid=171 direction=inout
+          type: [173] Type_Bits size=2 isSigned=0...
+        parameters: [2088] Parameter name=tid declid=172 direction=in
+          type: [166] Type_Bits size=4 isSigned=0...
+    body: [2090] BlockStatement
+      components: [2096] Declaration_Variable name=FibKey declid=173
+        type: [2095] Type_Name
+          path: [2094] Path name=FIBKEY_S absolute=0
+      components: [2113] Declaration_Variable name=CompressedFibRsp declid=174
+        type: [2100] Type_Name
+          path: [2099] Path name=_compressed_FIBRSP_S absolute=0
+        initializer: [2106] ListExpression
+          type: [2111] Type_List
+            components: [2101] Type_InfInt declid=171
+          components: [2102] Constant value=0 base=10
+            type: [2101] Type_InfInt declid=171
+      components: [2130] Declaration_Variable name=Mem declid=175
+        type: [2117] Type_Name
+          path: [2116] Path name=_compressed_FIBRSP_S absolute=0
+        initializer: [2123] ListExpression
+          type: [2128] Type_List
+            components: [2118] Type_InfInt declid=172
+          components: [2119] Constant value=0 base=10
+            type: [2118] Type_InfInt declid=172
+      components: [2140] AssignmentStatement
+        left: [2134] PathExpression
+          type: [753] Type_Unknown
+          path: [2133] Path name=FibKey absolute=0
+        right: [2138] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2136] PathExpression
+            type: [753] Type_Unknown
+            path: [2135] Path name=_key absolute=0
+          typeArguments: [2139] Vector<Type>
+          arguments: [2137] Vector<Argument>
+      components: [2158] AssignmentStatement
+        left: [2143] PathExpression
+          type: [753] Type_Unknown
+          path: [2142] Path name=Mem absolute=0
+        right: [2156] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2145] PathExpression
+            type: [753] Type_Unknown
+            path: [2144] Path name=_lookup absolute=0
+          typeArguments: [2157] Vector<Type>
+          arguments: [2149] Vector<Argument>
+            arguments: [2148] Argument name=<null>
+              expression: [2147] PathExpression
+                type: [753] Type_Unknown
+                path: [2146] Path name=SE_TID_FIB absolute=0
+            arguments: [2152] Argument name=<null>
+              expression: [2151] PathExpression
+                type: [753] Type_Unknown
+                path: [2150] Path name=TBL_LKUP_TYPE_LPM absolute=0
+            arguments: [2155] Argument name=<null>
+              expression: [2154] PathExpression
+                type: [753] Type_Unknown
+                path: [2153] Path name=FibKey absolute=0
+      components: [2170] AssignmentStatement
+        left: [2161] PathExpression
+          type: [753] Type_Unknown
+          path: [2160] Path name=Status absolute=0
+        right: [2168] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2163] PathExpression
+            type: [753] Type_Unknown
+            path: [2162] Path name=_status absolute=0
+          typeArguments: [2169] Vector<Type>
+          arguments: [2167] Vector<Argument>
+            arguments: [2166] Argument name=<null>
+              expression: [2165] PathExpression
+                type: [753] Type_Unknown
+                path: [2164] Path name=SE_TID_FIB absolute=0
+      components: [2193] MethodCallStatement
+        methodCall: [2191] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2190] PathExpression
+            type: [753] Type_Unknown
+            path: [2189] Path name=_memcpy absolute=0
+          typeArguments: [2192] Vector<Type>
+          arguments: [2175] Vector<Argument>
+            arguments: [2174] Argument name=<null>
+              expression: [2173] PathExpression
+                type: [753] Type_Unknown
+                path: [2172] Path name=CompressedFibRsp absolute=0
+            arguments: [2188] Argument name=<null>
+              expression: [2181] ListExpression
+                type: [2186] Type_List
+                  components: [753] Type_Unknown
+                components: [2177] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2176] Path name=Mem absolute=0
+      components: [2197] ReturnStatement
+        expression: [2195] PathExpression
+          type: [753] Type_Unknown
+          path: [2196] Path name=CompressedFibRsp absolute=0
+  objects: [2436] P5Table name=FIB_TBL declid=180
+    parameters: [2204] ParameterList
+    body: [2397] BlockStatement
+      components: [2394] P5Key
+        switches: [2390] P5KeySwitch
+          select: [2212] ListExpression
+            type: [2217] Type_List
+              components: [753] Type_Unknown
+            components: [2208] Member member=L3Type
+              type: [753] Type_Unknown
+              expr: [2207] PathExpression
+                type: [753] Type_Unknown
+                path: [2206] Path name=PHI absolute=0
+          cases: [2297] P5KeyCase fallthrough=0
+            label: [2290] ListExpression
+              type: [2295] Type_List
+                components: [753] Type_Unknown
+              components: [2221] PathExpression
+                type: [753] Type_Unknown
+                path: [2220] Path name=L3_TYPE_IPv4 absolute=0
+            elements: [2227] P5KeyElement matchType=<null>
+              expr: [2226] PathExpression
+                type: [753] Type_Unknown
+                path: [2225] Path name=Vrf absolute=0
+            elements: [2236] P5KeyElement matchType=<null>
+              expr: [2235] Member member=DIP
+                type: [753] Type_Unknown
+                expr: [2234] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2233] Path name=IPv4 absolute=0
+            elements: [2247] P5KeyElement matchType=<null>
+              expr: [2246] Cast
+                type: [3] Type_Bits size=32 isSigned=0...
+                expr: [2245] Constant value=0 base=10
+                  type: [2244] Type_InfInt declid=174
+                destType: [3] Type_Bits size=32 isSigned=0...
+            elements: [2258] P5KeyElement matchType=<null>
+              expr: [2257] Cast
+                type: [3] Type_Bits size=32 isSigned=0...
+                expr: [2256] Constant value=0 base=10
+                  type: [2255] Type_InfInt declid=176
+                destType: [3] Type_Bits size=32 isSigned=0...
+            elements: [2269] P5KeyElement matchType=<null>
+              expr: [2268] Cast
+                type: [3] Type_Bits size=32 isSigned=0...
+                expr: [2267] Constant value=0 base=10
+                  type: [2266] Type_InfInt declid=178
+                destType: [3] Type_Bits size=32 isSigned=0...
+            elements: [2283] P5KeyElement matchType=<null>
+              components: [2282] AssignmentStatement
+                left: [2279] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2278] Path name=table_id absolute=0
+                right: [2281] Constant value=0 base=10
+                  type: [2280] Type_InfInt declid=179
+          cases: [2346] P5KeyCase fallthrough=0
+            label: [2339] ListExpression
+              type: [2344] Type_List
+                components: [753] Type_Unknown
+              components: [2303] PathExpression
+                type: [753] Type_Unknown
+                path: [2302] Path name=L3_TYPE_IPv6 absolute=0
+            elements: [2309] P5KeyElement matchType=<null>
+              expr: [2308] PathExpression
+                type: [753] Type_Unknown
+                path: [2307] Path name=Vrf absolute=0
+            elements: [2318] P5KeyElement matchType=<null>
+              expr: [2317] Member member=DIP
+                type: [753] Type_Unknown
+                expr: [2316] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2315] Path name=IPv6 absolute=0
+            elements: [2332] P5KeyElement matchType=<null>
+              components: [2331] AssignmentStatement
+                left: [2328] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2327] Path name=table_id absolute=0
+                right: [2330] Constant value=1 base=10
+                  type: [2329] Type_InfInt declid=180
+          cases: [2363] P5KeyCase fallthrough=0
+            label: [2356] ListExpression
+              type: [2361] Type_List
+                components: [753] Type_Unknown
+              components: [2351] PathExpression
+                type: [753] Type_Unknown
+                path: [2350] Path name=L3_TYPE_NON_IP absolute=0
+          cases: [2380] P5KeyCase fallthrough=0
+            label: [2373] ListExpression
+              type: [2378] Type_List
+                components: [753] Type_Unknown
+              components: [2368] PathExpression
+                type: [753] Type_Unknown
+                path: [2367] Path name=L3_TYPE_INVALID absolute=0
+          cases: [2386] P5KeyCase fallthrough=0
+            label: [2385] DefaultExpression
+              type: [753] Type_Unknown
+      components: [2408] Declaration_Variable name=StatusFib declid=177
+        type: [173] Type_Bits size=2 isSigned=0...
+        initializer: [2406] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2404] PathExpression
+            type: [753] Type_Unknown
+            path: [2403] Path name=_status absolute=0
+          typeArguments: [2407] Vector<Type>
+          arguments: [2405] Vector<Argument>
+      components: [2418] Declaration_Variable name=tid declid=178
+        type: [166] Type_Bits size=4 isSigned=0...
+        initializer: [2416] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2414] PathExpression
+            type: [753] Type_Unknown
+            path: [2413] Path name=_table_id absolute=0
+          typeArguments: [2417] Vector<Type>
+          arguments: [2415] Vector<Argument>
+      components: [2434] Declaration_Variable name=rsFib declid=179
+        type: [2422] Type_Name
+          path: [2421] Path name=FIBFull_S absolute=0
+        initializer: [2432] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2424] PathExpression
+            type: [753] Type_Unknown
+            path: [2423] Path name=FibLookup absolute=0
+          typeArguments: [2433] Vector<Type>
+          arguments: [2428] Vector<Argument>
+            arguments: [2427] Argument name=<null>
+              expression: [2426] PathExpression
+                type: [753] Type_Unknown
+                path: [2425] Path name=StatusFib absolute=0
+            arguments: [2431] Argument name=<null>
+              expression: [2430] PathExpression
+                type: [753] Type_Unknown
+                path: [2429] Path name=tid absolute=0
+  objects: [2470] P5Table name=IMA1_MATCH_TBL declid=182
+    parameters: [2439] ParameterList
+    body: [2451] BlockStatement
+      components: [2449] Declaration_Variable name=tbFib declid=181
+        type: [2443] Type_Name
+          path: [2442] Path name=FIB_TBL absolute=0
+        initializer: [2447] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2445] PathExpression
+            type: [753] Type_Unknown
+            path: [2444] Path name=FIB_TBL absolute=0
+          typeArguments: [2448] Vector<Type>
+          arguments: [2446] Vector<Argument>
+      components: [2463] MethodCallStatement
+        methodCall: [2461] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2460] PathExpression
+            type: [753] Type_Unknown
+            path: [2459] Path name=_apply absolute=0
+          typeArguments: [2462] Vector<Type>
+          arguments: [2458] Vector<Argument>
+            arguments: [2457] Argument name=<null>
+              expression: [2456] PathExpression
+                type: [753] Type_Unknown
+                path: [2455] Path name=tbFib absolute=0
+      components: [2469] AssignmentStatement
+        left: [2466] PathExpression
+          type: [753] Type_Unknown
+          path: [2465] Path name=ma_id absolute=0
+        right: [2468] Constant value=1 base=10
+          type: [2467] Type_InfInt declid=183
+  objects: [2528] Function name=iMA1Action declid=184
+    type: [2525] Type_Method name=iMA1Action
+      typeParameters: [2526] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [2478] ParameterList
+        parameters: [2476] Parameter name=rsFib declid=183 direction=in
+          type: [2475] Type_Name
+            path: [2474] Path name=FIBFull_S absolute=0
+    body: [2480] BlockStatement
+      components: [2524] IfStatement
+        condition: [2490] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2485] PathExpression
+            type: [753] Type_Unknown
+            path: [2484] Path name=_valid absolute=0
+          typeArguments: [2491] Vector<Type>
+          arguments: [2489] Vector<Argument>
+            arguments: [2488] Argument name=<null>
+              expression: [2487] PathExpression
+                type: [753] Type_Unknown
+                path: [2486] Path name=rsFib absolute=0
+        [2521] BlockStatement
+          components: [2493] BlockStatement
+            components: [2502] AssignmentStatement
+              left: [2498] PathExpression
+                type: [753] Type_Unknown
+                path: [2497] Path name=GLTP absolute=0
+              right: [2501] Member member=Port
+                type: [753] Type_Unknown
+                expr: [2500] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2499] Path name=rsFib absolute=0
+            components: [2509] AssignmentStatement
+              left: [2505] PathExpression
+                type: [753] Type_Unknown
+                path: [2504] Path name=EncapIndex absolute=0
+              right: [2508] Member member=EncapIndex
+                type: [753] Type_Unknown
+                expr: [2507] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2506] Path name=rsFib absolute=0
+            components: [2518] AssignmentStatement
+              left: [2512] PathExpression
+                type: [753] Type_Unknown
+                path: [2511] Path name=TTL absolute=0
+              right: [2517] Sub
+                type: [753] Type_Unknown
+                left: [2514] PathExpression
+                  type: [753] Type_Unknown
+                  path: [2513] Path name=TTL absolute=0
+                right: [2516] Constant value=1 base=10
+                  type: [2515] Type_InfInt declid=184
+  objects: [2559] P5Table name=IMA1_ACTION_TBL declid=186
+    parameters: [2536] ParameterList
+      parameters: [2534] Parameter name=tbIMA1Match declid=185 direction=in
+        type: [2533] Type_Name
+          path: [2532] Path name=IMA1_MATCH_TBL absolute=0
+    body: [2550] BlockStatement
+      components: [2549] MethodCallStatement
+        methodCall: [2547] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2546] PathExpression
+            type: [753] Type_Unknown
+            path: [2545] Path name=iMA1Action absolute=0
+          typeArguments: [2548] Vector<Type>
+          arguments: [2544] Vector<Argument>
+            arguments: [2543] Argument name=<null>
+              expression: [2542] Member member=rsFib
+                type: [753] Type_Unknown
+                expr: [2541] Member member=tbFib
+                  type: [753] Type_Unknown
+                  expr: [2540] PathExpression
+                    type: [753] Type_Unknown
+                    path: [2539] Path name=tbIMA1Match absolute=0
+      components: [2558] AssignmentStatement
+        left: [2555] PathExpression
+          type: [753] Type_Unknown
+          path: [2554] Path name=ma_id absolute=0
+        right: [2557] Constant value=1 base=10
+          type: [2556] Type_InfInt declid=185
+  objects: [2574] P5Table name=IPRS_TBL declid=187
+    parameters: [2562] ParameterList
+    body: [2571] BlockStatement
+      components: [2570] MethodCallStatement
+        methodCall: [2568] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2567] PathExpression
+            type: [753] Type_Unknown
+            path: [2566] Path name=iprs absolute=0
+          typeArguments: [2569] Vector<Type>
+          arguments: [2565] Vector<Argument>
+  objects: [2612] Function name=pre_iMAControl declid=189
+    annotations: [2578] Annotation name=control structured=1
+    type: [2609] Type_Method name=pre_iMAControl
+      typeParameters: [2610] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [2580] ParameterList
+    body: [2582] BlockStatement
+      components: [2597] Declaration_Variable name=tbIprs declid=188
+        annotations: [2588] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [2586] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [2591] Type_Name
+          path: [2590] Path name=IPRS_TBL absolute=0
+        initializer: [2595] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2593] PathExpression
+            type: [753] Type_Unknown
+            path: [2592] Path name=IPRS_TBL absolute=0
+          typeArguments: [2596] Vector<Type>
+          arguments: [2594] Vector<Argument>
+      components: [2608] MethodCallStatement
+        methodCall: [2606] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2605] PathExpression
+            type: [753] Type_Unknown
+            path: [2604] Path name=_apply absolute=0
+          typeArguments: [2607] Vector<Type>
+          arguments: [2603] Vector<Argument>
+            arguments: [2602] Argument name=<null>
+              expression: [2601] PathExpression
+                type: [753] Type_Unknown
+                path: [2600] Path name=tbIprs absolute=0
+  objects: [2677] Function name=iMA0Control declid=192
+    annotations: [2616] Annotation name=control structured=1
+    type: [2674] Type_Method name=iMA0Control
+      typeParameters: [2675] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [2618] ParameterList
+    body: [2620] BlockStatement
+      components: [2635] Declaration_Variable name=tbIMA0Match declid=190
+        annotations: [2626] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [2624] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [2629] Type_Name
+          path: [2628] Path name=IMA0_MATCH_TBL absolute=0
+        initializer: [2633] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2631] PathExpression
+            type: [753] Type_Unknown
+            path: [2630] Path name=IMA0_MATCH_TBL absolute=0
+          typeArguments: [2634] Vector<Type>
+          arguments: [2632] Vector<Argument>
+      components: [2652] Declaration_Variable name=tbIMA0Action declid=191
+        annotations: [2640] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [2638] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [2643] Type_Name
+          path: [2642] Path name=IMA0_ACTION_TBL absolute=0
+        initializer: [2650] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2645] PathExpression
+            type: [753] Type_Unknown
+            path: [2644] Path name=IMA0_ACTION_TBL absolute=0
+          typeArguments: [2651] Vector<Type>
+          arguments: [2649] Vector<Argument>
+            arguments: [2648] Argument name=<null>
+              expression: [2647] PathExpression
+                type: [753] Type_Unknown
+                path: [2646] Path name=tbIMA0Match absolute=0
+      components: [2663] MethodCallStatement
+        methodCall: [2661] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2660] PathExpression
+            type: [753] Type_Unknown
+            path: [2659] Path name=_apply absolute=0
+          typeArguments: [2662] Vector<Type>
+          arguments: [2658] Vector<Argument>
+            arguments: [2657] Argument name=<null>
+              expression: [2656] PathExpression
+                type: [753] Type_Unknown
+                path: [2655] Path name=tbIMA0Match absolute=0
+      components: [2673] MethodCallStatement
+        methodCall: [2671] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2670] PathExpression
+            type: [753] Type_Unknown
+            path: [2669] Path name=_apply absolute=0
+          typeArguments: [2672] Vector<Type>
+          arguments: [2668] Vector<Argument>
+            arguments: [2667] Argument name=<null>
+              expression: [2666] PathExpression
+                type: [753] Type_Unknown
+                path: [2665] Path name=tbIMA0Action absolute=0
+  objects: [2742] Function name=iMA1Control declid=195
+    annotations: [2681] Annotation name=control structured=1
+    type: [2739] Type_Method name=iMA1Control
+      typeParameters: [2740] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [2683] ParameterList
+    body: [2685] BlockStatement
+      components: [2700] Declaration_Variable name=tbIMA1Match declid=193
+        annotations: [2691] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [2689] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [2694] Type_Name
+          path: [2693] Path name=IMA1_MATCH_TBL absolute=0
+        initializer: [2698] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2696] PathExpression
+            type: [753] Type_Unknown
+            path: [2695] Path name=IMA1_MATCH_TBL absolute=0
+          typeArguments: [2699] Vector<Type>
+          arguments: [2697] Vector<Argument>
+      components: [2717] Declaration_Variable name=tbIMA1Action declid=194
+        annotations: [2705] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [2703] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [2708] Type_Name
+          path: [2707] Path name=IMA1_ACTION_TBL absolute=0
+        initializer: [2715] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2710] PathExpression
+            type: [753] Type_Unknown
+            path: [2709] Path name=IMA1_ACTION_TBL absolute=0
+          typeArguments: [2716] Vector<Type>
+          arguments: [2714] Vector<Argument>
+            arguments: [2713] Argument name=<null>
+              expression: [2712] PathExpression
+                type: [753] Type_Unknown
+                path: [2711] Path name=tbIMA1Match absolute=0
+      components: [2728] MethodCallStatement
+        methodCall: [2726] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2725] PathExpression
+            type: [753] Type_Unknown
+            path: [2724] Path name=_apply absolute=0
+          typeArguments: [2727] Vector<Type>
+          arguments: [2723] Vector<Argument>
+            arguments: [2722] Argument name=<null>
+              expression: [2721] PathExpression
+                type: [753] Type_Unknown
+                path: [2720] Path name=tbIMA1Match absolute=0
+      components: [2738] MethodCallStatement
+        methodCall: [2736] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2735] PathExpression
+            type: [753] Type_Unknown
+            path: [2734] Path name=_apply absolute=0
+          typeArguments: [2737] Vector<Type>
+          arguments: [2733] Vector<Argument>
+            arguments: [2732] Argument name=<null>
+              expression: [2731] PathExpression
+                type: [753] Type_Unknown
+                path: [2730] Path name=tbIMA1Action absolute=0
+  objects: [2777] Function name=ingress declid=196
+    annotations: [2746] Annotation name=control structured=1
+    type: [2774] Type_Method name=ingress
+      typeParameters: [2775] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [2748] ParameterList
+    body: [2750] BlockStatement
+      components: [2759] MethodCallStatement
+        methodCall: [2757] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2756] PathExpression
+            type: [753] Type_Unknown
+            path: [2755] Path name=pre_iMAControl absolute=0
+          typeArguments: [2758] Vector<Type>
+          arguments: [2754] Vector<Argument>
+      components: [2766] MethodCallStatement
+        methodCall: [2764] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2763] PathExpression
+            type: [753] Type_Unknown
+            path: [2762] Path name=iMA0Control absolute=0
+          typeArguments: [2765] Vector<Type>
+          arguments: [2761] Vector<Argument>
+      components: [2773] MethodCallStatement
+        methodCall: [2771] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2770] PathExpression
+            type: [753] Type_Unknown
+            path: [2769] Path name=iMA1Control absolute=0
+          typeArguments: [2772] Vector<Type>
+          arguments: [2768] Vector<Argument>
+  objects: [2788] Type_Struct name=ENCAP_LOCAL_ADDR_S declid=33
+    typeParameters: [2790] TypeParameters
+    fields: [2783] StructField name=SMAC declid=197
+      type: [218] Type_Bits size=48 isSigned=0...
+  objects: [2834] Type_Struct name=EPATRSP_S declid=35
+    typeParameters: [2836] TypeParameters
+    fields: [2800] StructField name=Valid declid=198
+      annotations: [2796] Annotation name=global_valid structured=1
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [2807] StructField name=Rsvd declid=199
+      type: [2806] Type_Bits size=31 isSigned=0
+    fields: [2830] StructField name=Dma declid=201
+      type: [2823] Type_Struct name=_anon_7 declid=34
+        annotations: [2828] Annotation name=union structured=0
+        annotations: [2811] Annotation name=dma structured=1
+        typeParameters: [2825] TypeParameters
+        fields: [2816] StructField name=Addr declid=200
+          type: [2815] Type_Name
+            path: [2814] Path name=ENCAP_LOCAL_ADDR_S absolute=0
+  objects: [2842] Type_Typedef name=EPATFull_S declid=36
+    type: [2841] Type_Name
+      path: [2840] Path name=_inflate<EPATRSP_S> absolute=0
+  objects: [2853] Type_Struct name=ENCAP_ARP_S declid=37
+    typeParameters: [2855] TypeParameters
+    fields: [2848] StructField name=DMAC declid=202
+      type: [218] Type_Bits size=48 isSigned=0...
+  objects: [2898] Type_Struct name=ENCAPRSP_S declid=39
+    typeParameters: [2900] TypeParameters
+    fields: [2865] StructField name=Valid declid=203
+      annotations: [2861] Annotation name=global_valid structured=1
+      type: [258] Type_Bits size=1 isSigned=0...
+    fields: [2871] StructField name=Rsvd declid=204
+      type: [2806] Type_Bits size=31 isSigned=0...
+    fields: [2894] StructField name=Dma declid=206
+      type: [2887] Type_Struct name=_anon_8 declid=38
+        annotations: [2892] Annotation name=union structured=0
+        annotations: [2875] Annotation name=dma structured=1
+        typeParameters: [2889] TypeParameters
+        fields: [2880] StructField name=Arp declid=205
+          type: [2879] Type_Name
+            path: [2878] Path name=ENCAP_ARP_S absolute=0
+  objects: [2906] Type_Typedef name=ENCAPFull_S declid=40
+    type: [2905] Type_Name
+      path: [2904] Path name=_inflate<ENCAPRSP_S> absolute=0
+  objects: [3032] Function name=EpatLookup declid=211
+    annotations: [2910] Annotation name=lookup structured=1
+    type: [3029] Type_Method name=EpatLookup
+      typeParameters: [3030] TypeParameters
+      returnType: [2913] Type_Name
+        path: [2912] Path name=EPATFull_S absolute=0
+      parameters: [2919] ParameterList
+        parameters: [2917] Parameter name=Status declid=207 direction=inout
+          type: [173] Type_Bits size=2 isSigned=0...
+    body: [2921] BlockStatement
+      components: [2927] Declaration_Variable name=Gltp declid=208
+        type: [797] Type_Bits size=10 isSigned=0...
+      components: [2944] Declaration_Variable name=CompressedEpatRsp declid=209
+        type: [2931] Type_Name
+          path: [2930] Path name=_compressed_EPATRSP_S absolute=0
+        initializer: [2937] ListExpression
+          type: [2942] Type_List
+            components: [2932] Type_InfInt declid=194
+          components: [2933] Constant value=0 base=10
+            type: [2932] Type_InfInt declid=194
+      components: [2961] Declaration_Variable name=Mem declid=210
+        type: [2948] Type_Name
+          path: [2947] Path name=_compressed_EPATRSP_S absolute=0
+        initializer: [2954] ListExpression
+          type: [2959] Type_List
+            components: [2949] Type_InfInt declid=195
+          components: [2950] Constant value=0 base=10
+            type: [2949] Type_InfInt declid=195
+      components: [2971] AssignmentStatement
+        left: [2965] PathExpression
+          type: [753] Type_Unknown
+          path: [2964] Path name=Gltp absolute=0
+        right: [2969] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2967] PathExpression
+            type: [753] Type_Unknown
+            path: [2966] Path name=_key absolute=0
+          typeArguments: [2970] Vector<Type>
+          arguments: [2968] Vector<Argument>
+      components: [2989] AssignmentStatement
+        left: [2974] PathExpression
+          type: [753] Type_Unknown
+          path: [2973] Path name=Mem absolute=0
+        right: [2987] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2976] PathExpression
+            type: [753] Type_Unknown
+            path: [2975] Path name=_lookup absolute=0
+          typeArguments: [2988] Vector<Type>
+          arguments: [2980] Vector<Argument>
+            arguments: [2979] Argument name=<null>
+              expression: [2978] PathExpression
+                type: [753] Type_Unknown
+                path: [2977] Path name=SE_TID_EPAT absolute=0
+            arguments: [2983] Argument name=<null>
+              expression: [2982] PathExpression
+                type: [753] Type_Unknown
+                path: [2981] Path name=TBL_LKUP_TYPE_INDEX absolute=0
+            arguments: [2986] Argument name=<null>
+              expression: [2985] PathExpression
+                type: [753] Type_Unknown
+                path: [2984] Path name=Gltp absolute=0
+      components: [3001] AssignmentStatement
+        left: [2992] PathExpression
+          type: [753] Type_Unknown
+          path: [2991] Path name=Status absolute=0
+        right: [2999] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [2994] PathExpression
+            type: [753] Type_Unknown
+            path: [2993] Path name=_status absolute=0
+          typeArguments: [3000] Vector<Type>
+          arguments: [2998] Vector<Argument>
+            arguments: [2997] Argument name=<null>
+              expression: [2996] PathExpression
+                type: [753] Type_Unknown
+                path: [2995] Path name=SE_TID_EPAT absolute=0
+      components: [3024] MethodCallStatement
+        methodCall: [3022] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3021] PathExpression
+            type: [753] Type_Unknown
+            path: [3020] Path name=_memcpy absolute=0
+          typeArguments: [3023] Vector<Type>
+          arguments: [3006] Vector<Argument>
+            arguments: [3005] Argument name=<null>
+              expression: [3004] PathExpression
+                type: [753] Type_Unknown
+                path: [3003] Path name=CompressedEpatRsp absolute=0
+            arguments: [3019] Argument name=<null>
+              expression: [3012] ListExpression
+                type: [3017] Type_List
+                  components: [753] Type_Unknown
+                components: [3008] PathExpression
+                  type: [753] Type_Unknown
+                  path: [3007] Path name=Mem absolute=0
+      components: [3028] ReturnStatement
+        expression: [3026] PathExpression
+          type: [753] Type_Unknown
+          path: [3027] Path name=CompressedEpatRsp absolute=0
+  objects: [3158] Function name=EncapLookup declid=216
+    annotations: [3036] Annotation name=lookup structured=1
+    type: [3155] Type_Method name=EncapLookup
+      typeParameters: [3156] TypeParameters
+      returnType: [3039] Type_Name
+        path: [3038] Path name=ENCAPFull_S absolute=0
+      parameters: [3045] ParameterList
+        parameters: [3043] Parameter name=Status declid=212 direction=inout
+          type: [173] Type_Bits size=2 isSigned=0...
+    body: [3047] BlockStatement
+      components: [3053] Declaration_Variable name=index declid=213
+        type: [189] Type_Bits size=8 isSigned=0...
+      components: [3070] Declaration_Variable name=CompressedEncapRsp declid=214
+        type: [3057] Type_Name
+          path: [3056] Path name=_compressed_ENCAPRSP_S absolute=0
+        initializer: [3063] ListExpression
+          type: [3068] Type_List
+            components: [3058] Type_InfInt declid=198
+          components: [3059] Constant value=0 base=10
+            type: [3058] Type_InfInt declid=198
+      components: [3087] Declaration_Variable name=Mem declid=215
+        type: [3074] Type_Name
+          path: [3073] Path name=_compressed_ENCAPRSP_S absolute=0
+        initializer: [3080] ListExpression
+          type: [3085] Type_List
+            components: [3075] Type_InfInt declid=199
+          components: [3076] Constant value=0 base=10
+            type: [3075] Type_InfInt declid=199
+      components: [3097] AssignmentStatement
+        left: [3091] PathExpression
+          type: [753] Type_Unknown
+          path: [3090] Path name=index absolute=0
+        right: [3095] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3093] PathExpression
+            type: [753] Type_Unknown
+            path: [3092] Path name=_key absolute=0
+          typeArguments: [3096] Vector<Type>
+          arguments: [3094] Vector<Argument>
+      components: [3115] AssignmentStatement
+        left: [3100] PathExpression
+          type: [753] Type_Unknown
+          path: [3099] Path name=Mem absolute=0
+        right: [3113] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3102] PathExpression
+            type: [753] Type_Unknown
+            path: [3101] Path name=_lookup absolute=0
+          typeArguments: [3114] Vector<Type>
+          arguments: [3106] Vector<Argument>
+            arguments: [3105] Argument name=<null>
+              expression: [3104] PathExpression
+                type: [753] Type_Unknown
+                path: [3103] Path name=SE_TID_ENCAP absolute=0
+            arguments: [3109] Argument name=<null>
+              expression: [3108] PathExpression
+                type: [753] Type_Unknown
+                path: [3107] Path name=TBL_LKUP_TYPE_INDEX absolute=0
+            arguments: [3112] Argument name=<null>
+              expression: [3111] PathExpression
+                type: [753] Type_Unknown
+                path: [3110] Path name=index absolute=0
+      components: [3127] AssignmentStatement
+        left: [3118] PathExpression
+          type: [753] Type_Unknown
+          path: [3117] Path name=Status absolute=0
+        right: [3125] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3120] PathExpression
+            type: [753] Type_Unknown
+            path: [3119] Path name=_status absolute=0
+          typeArguments: [3126] Vector<Type>
+          arguments: [3124] Vector<Argument>
+            arguments: [3123] Argument name=<null>
+              expression: [3122] PathExpression
+                type: [753] Type_Unknown
+                path: [3121] Path name=SE_TID_ENCAP absolute=0
+      components: [3150] MethodCallStatement
+        methodCall: [3148] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3147] PathExpression
+            type: [753] Type_Unknown
+            path: [3146] Path name=_memcpy absolute=0
+          typeArguments: [3149] Vector<Type>
+          arguments: [3132] Vector<Argument>
+            arguments: [3131] Argument name=<null>
+              expression: [3130] PathExpression
+                type: [753] Type_Unknown
+                path: [3129] Path name=CompressedEncapRsp absolute=0
+            arguments: [3145] Argument name=<null>
+              expression: [3138] ListExpression
+                type: [3143] Type_List
+                  components: [753] Type_Unknown
+                components: [3134] PathExpression
+                  type: [753] Type_Unknown
+                  path: [3133] Path name=Mem absolute=0
+      components: [3154] ReturnStatement
+        expression: [3152] PathExpression
+          type: [753] Type_Unknown
+          path: [3153] Path name=CompressedEncapRsp absolute=0
+  objects: [3242] P5Table name=EPAT_TBL declid=219
+    parameters: [3161] ParameterList
+    body: [3216] BlockStatement
+      components: [3213] P5Key
+        switches: [3209] P5KeySwitch
+          select: [3169] ListExpression
+            type: [3174] Type_List
+              components: [753] Type_Unknown
+            components: [3165] Member member=PortType
+              type: [753] Type_Unknown
+              expr: [3164] PathExpression
+                type: [753] Type_Unknown
+                path: [3163] Path name=PHI absolute=0
+          cases: [3198] P5KeyCase fallthrough=0
+            label: [3191] ListExpression
+              type: [3196] Type_List
+                components: [753] Type_Unknown
+              components: [3178] PathExpression
+                type: [753] Type_Unknown
+                path: [3177] Path name=PORT_TYPE_ETH absolute=0
+            elements: [3184] P5KeyElement matchType=<null>
+              expr: [3183] PathExpression
+                type: [753] Type_Unknown
+                path: [3182] Path name=GLTP absolute=0
+          cases: [3205] P5KeyCase fallthrough=0
+            label: [3204] DefaultExpression
+              type: [753] Type_Unknown
+      components: [3227] Declaration_Variable name=EpatStatus declid=217
+        type: [173] Type_Bits size=2 isSigned=0...
+        initializer: [3225] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3223] PathExpression
+            type: [753] Type_Unknown
+            path: [3222] Path name=_status absolute=0
+          typeArguments: [3226] Vector<Type>
+          arguments: [3224] Vector<Argument>
+      components: [3240] Declaration_Variable name=rsEpat declid=218
+        type: [3231] Type_Name
+          path: [3230] Path name=EPATFull_S absolute=0
+        initializer: [3238] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3233] PathExpression
+            type: [753] Type_Unknown
+            path: [3232] Path name=EpatLookup absolute=0
+          typeArguments: [3239] Vector<Type>
+          arguments: [3237] Vector<Argument>
+            arguments: [3236] Argument name=<null>
+              expression: [3235] PathExpression
+                type: [753] Type_Unknown
+                path: [3234] Path name=EpatStatus absolute=0
+  objects: [3326] P5Table name=ENCAP_TBL declid=222
+    parameters: [3245] ParameterList
+    body: [3300] BlockStatement
+      components: [3297] P5Key
+        switches: [3293] P5KeySwitch
+          select: [3253] ListExpression
+            type: [3258] Type_List
+              components: [753] Type_Unknown
+            components: [3249] Member member=PortType
+              type: [753] Type_Unknown
+              expr: [3248] PathExpression
+                type: [753] Type_Unknown
+                path: [3247] Path name=PHI absolute=0
+          cases: [3282] P5KeyCase fallthrough=0
+            label: [3275] ListExpression
+              type: [3280] Type_List
+                components: [753] Type_Unknown
+              components: [3262] PathExpression
+                type: [753] Type_Unknown
+                path: [3261] Path name=PORT_TYPE_ETH absolute=0
+            elements: [3268] P5KeyElement matchType=<null>
+              expr: [3267] PathExpression
+                type: [753] Type_Unknown
+                path: [3266] Path name=EncapIndex absolute=0
+          cases: [3289] P5KeyCase fallthrough=0
+            label: [3288] DefaultExpression
+              type: [753] Type_Unknown
+      components: [3311] Declaration_Variable name=EncapStatus declid=220
+        type: [173] Type_Bits size=2 isSigned=0...
+        initializer: [3309] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3307] PathExpression
+            type: [753] Type_Unknown
+            path: [3306] Path name=_status absolute=0
+          typeArguments: [3310] Vector<Type>
+          arguments: [3308] Vector<Argument>
+      components: [3324] Declaration_Variable name=rsEncap declid=221
+        type: [3315] Type_Name
+          path: [3314] Path name=ENCAPFull_S absolute=0
+        initializer: [3322] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3317] PathExpression
+            type: [753] Type_Unknown
+            path: [3316] Path name=EncapLookup absolute=0
+          typeArguments: [3323] Vector<Type>
+          arguments: [3321] Vector<Argument>
+            arguments: [3320] Argument name=<null>
+              expression: [3319] PathExpression
+                type: [753] Type_Unknown
+                path: [3318] Path name=EncapStatus absolute=0
+  objects: [3380] P5Table name=EMA0_MATCH_TBL declid=225
+    parameters: [3329] ParameterList
+    body: [3341] BlockStatement
+      components: [3339] Declaration_Variable name=tbEPAT declid=223
+        type: [3333] Type_Name
+          path: [3332] Path name=EPAT_TBL absolute=0
+        initializer: [3337] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3335] PathExpression
+            type: [753] Type_Unknown
+            path: [3334] Path name=EPAT_TBL absolute=0
+          typeArguments: [3338] Vector<Type>
+          arguments: [3336] Vector<Argument>
+      components: [3352] Declaration_Variable name=tbEncap declid=224
+        type: [3346] Type_Name
+          path: [3345] Path name=ENCAP_TBL absolute=0
+        initializer: [3350] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3348] PathExpression
+            type: [753] Type_Unknown
+            path: [3347] Path name=ENCAP_TBL absolute=0
+          typeArguments: [3351] Vector<Type>
+          arguments: [3349] Vector<Argument>
+      components: [3363] MethodCallStatement
+        methodCall: [3361] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3360] PathExpression
+            type: [753] Type_Unknown
+            path: [3359] Path name=_apply absolute=0
+          typeArguments: [3362] Vector<Type>
+          arguments: [3358] Vector<Argument>
+            arguments: [3357] Argument name=<null>
+              expression: [3356] PathExpression
+                type: [753] Type_Unknown
+                path: [3355] Path name=tbEPAT absolute=0
+      components: [3373] MethodCallStatement
+        methodCall: [3371] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3370] PathExpression
+            type: [753] Type_Unknown
+            path: [3369] Path name=_apply absolute=0
+          typeArguments: [3372] Vector<Type>
+          arguments: [3368] Vector<Argument>
+            arguments: [3367] Argument name=<null>
+              expression: [3366] PathExpression
+                type: [753] Type_Unknown
+                path: [3365] Path name=tbEncap absolute=0
+      components: [3379] AssignmentStatement
+        left: [3376] PathExpression
+          type: [753] Type_Unknown
+          path: [3375] Path name=ma_id absolute=0
+        right: [3378] Constant value=0 base=10
+          type: [3377] Type_InfInt declid=202
+  objects: [3435] Function name=eMA0Action declid=228
+    type: [3432] Type_Method name=eMA0Action
+      typeParameters: [3433] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3388] ParameterList
+        parameters: [3386] Parameter name=rsEpat declid=226 direction=in
+          type: [3385] Type_Name
+            path: [3384] Path name=EPATFull_S absolute=0
+        parameters: [3393] Parameter name=rsEncap declid=227 direction=in
+          type: [3392] Type_Name
+            path: [3391] Path name=ENCAPFull_S absolute=0
+    body: [3395] BlockStatement
+      components: [3431] IfStatement
+        condition: [3400] PathExpression
+          type: [753] Type_Unknown
+          path: [3399] Path name=IsUc absolute=0
+        [3423] BlockStatement
+          components: [3402] BlockStatement
+            components: [3410] AssignmentStatement
+              left: [3407] PathExpression
+                type: [753] Type_Unknown
+                path: [3406] Path name=EncapProfile absolute=0
+              right: [3409] Constant value=1 base=10
+                type: [3408] Type_InfInt declid=203
+        [3428] BlockStatement
+          components: [3412] BlockStatement
+            components: [3420] AssignmentStatement
+              left: [3417] PathExpression
+                type: [753] Type_Unknown
+                path: [3416] Path name=EncapProfile absolute=0
+              right: [3419] Constant value=0 base=10
+                type: [3418] Type_InfInt declid=204
+  objects: [3471] P5Table name=EMA0_ACTION_TBL declid=230
+    parameters: [3443] ParameterList
+      parameters: [3441] Parameter name=tbEMA0Match declid=229 direction=in
+        type: [3440] Type_Name
+          path: [3439] Path name=EMA0_MATCH_TBL absolute=0
+    body: [3462] BlockStatement
+      components: [3461] MethodCallStatement
+        methodCall: [3459] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3458] PathExpression
+            type: [753] Type_Unknown
+            path: [3457] Path name=eMA0Action absolute=0
+          typeArguments: [3460] Vector<Type>
+          arguments: [3451] Vector<Argument>
+            arguments: [3450] Argument name=<null>
+              expression: [3449] Member member=rsEpat
+                type: [753] Type_Unknown
+                expr: [3448] Member member=tbEPAT
+                  type: [753] Type_Unknown
+                  expr: [3447] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3446] Path name=tbEMA0Match absolute=0
+            arguments: [3456] Argument name=<null>
+              expression: [3455] Member member=rsEncap
+                type: [753] Type_Unknown
+                expr: [3454] Member member=tbEncap
+                  type: [753] Type_Unknown
+                  expr: [3453] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3452] Path name=tbEMA0Match absolute=0
+      components: [3470] AssignmentStatement
+        left: [3467] PathExpression
+          type: [753] Type_Unknown
+          path: [3466] Path name=ma_id absolute=0
+        right: [3469] Constant value=0 base=10
+          type: [3468] Type_InfInt declid=205
+  objects: [3565] Function name=EthODma declid=233
+    annotations: [3475] Annotation name=dma_primitive structured=1
+    type: [3562] Type_Method name=EthODma
+      typeParameters: [3563] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3482] ParameterList
+        parameters: [3480] Parameter name=rsEpat declid=231 direction=in
+          type: [3479] Type_Name
+            path: [3478] Path name=EPATFull_S absolute=0
+        parameters: [3487] Parameter name=rsEncap declid=232 direction=in
+          type: [3486] Type_Name
+            path: [3485] Path name=ENCAPFull_S absolute=0
+    body: [3489] BlockStatement
+      components: [3560] SwitchStatement
+        expression: [3498] ListExpression
+          type: [3503] Type_List
+            components: [753] Type_Unknown
+          components: [3494] PathExpression
+            type: [753] Type_Unknown
+            path: [3493] Path name=EncapProfile absolute=0
+        [3547] SwitchCase
+          label: [3535] ListExpression
+            type: [3540] Type_List
+              components: [3506] Type_InfInt declid=206
+            components: [3507] Constant value=1 base=10
+              type: [3506] Type_InfInt declid=206
+          statement: [3544] BlockStatement
+            components: [3510] BlockStatement
+              components: [3522] AssignmentStatement
+                left: [3516] Member member=Dmac
+                  type: [753] Type_Unknown
+                  expr: [3515] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3514] Path name=ETHER absolute=0
+                right: [3521] Member member=DMAC
+                  type: [753] Type_Unknown
+                  expr: [3520] Member member=Arp
+                    type: [753] Type_Unknown
+                    expr: [3519] Member member=Dma
+                      type: [753] Type_Unknown
+                      expr: [3518] PathExpression
+                        type: [753] Type_Unknown
+                        path: [3517] Path name=rsEncap absolute=0
+              components: [3532] AssignmentStatement
+                left: [3526] Member member=Smac
+                  type: [753] Type_Unknown
+                  expr: [3525] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3524] Path name=ETHER absolute=0
+                right: [3531] Member member=SMAC
+                  type: [753] Type_Unknown
+                  expr: [3530] Member member=Addr
+                    type: [753] Type_Unknown
+                    expr: [3529] Member member=Dma
+                      type: [753] Type_Unknown
+                      expr: [3528] PathExpression
+                        type: [753] Type_Unknown
+                        path: [3527] Path name=rsEpat absolute=0
+        [3558] SwitchCase
+          label: [3557] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [3554] BlockStatement
+            components: [3549] BlockStatement
+  objects: [3644] Function name=IpOverwrite declid=234
+    annotations: [3569] Annotation name=fwd_primitive structured=1
+    type: [3641] Type_Method name=IpOverwrite
+      typeParameters: [3642] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3571] ParameterList
+    body: [3573] BlockStatement
+      components: [3639] SwitchStatement
+        expression: [3582] ListExpression
+          type: [3587] Type_List
+            components: [753] Type_Unknown
+          components: [3578] PathExpression
+            type: [753] Type_Unknown
+            path: [3577] Path name=EncapProfile absolute=0
+        [3626] SwitchCase
+          label: [3614] ListExpression
+            type: [3619] Type_List
+              components: [3590] Type_InfInt declid=207
+            components: [3591] Constant value=1 base=10
+              type: [3590] Type_InfInt declid=207
+          statement: [3623] BlockStatement
+            components: [3594] BlockStatement
+              components: [3603] AssignmentStatement
+                left: [3600] Member member=TTL
+                  type: [753] Type_Unknown
+                  expr: [3599] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3598] Path name=IPv4 absolute=0
+                right: [3602] PathExpression
+                  type: [753] Type_Unknown
+                  path: [3601] Path name=TTL absolute=0
+              components: [3611] AssignmentStatement
+                left: [3608] Member member=TOS
+                  type: [753] Type_Unknown
+                  expr: [3607] Member member=u_0
+                    type: [753] Type_Unknown
+                    expr: [3606] PathExpression
+                      type: [753] Type_Unknown
+                      path: [3605] Path name=IPv4 absolute=0
+                right: [3610] PathExpression
+                  type: [753] Type_Unknown
+                  path: [3609] Path name=TOS absolute=0
+        [3637] SwitchCase
+          label: [3636] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [3633] BlockStatement
+            components: [3628] BlockStatement
+  objects: [3685] Function name=eMA0_HmProc declid=237
+    type: [3682] Type_Method name=eMA0_HmProc
+      typeParameters: [3683] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3652] ParameterList
+        parameters: [3650] Parameter name=rsEpat declid=235 direction=in
+          type: [3649] Type_Name
+            path: [3648] Path name=EPATFull_S absolute=0
+        parameters: [3657] Parameter name=rsEncap declid=236 direction=in
+          type: [3656] Type_Name
+            path: [3655] Path name=ENCAPFull_S absolute=0
+    body: [3659] BlockStatement
+      components: [3674] MethodCallStatement
+        methodCall: [3672] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3671] PathExpression
+            type: [753] Type_Unknown
+            path: [3670] Path name=EthODma absolute=0
+          typeArguments: [3673] Vector<Type>
+          arguments: [3666] Vector<Argument>
+            arguments: [3665] Argument name=<null>
+              expression: [3664] PathExpression
+                type: [753] Type_Unknown
+                path: [3663] Path name=rsEpat absolute=0
+            arguments: [3669] Argument name=<null>
+              expression: [3668] PathExpression
+                type: [753] Type_Unknown
+                path: [3667] Path name=rsEncap absolute=0
+      components: [3681] MethodCallStatement
+        methodCall: [3679] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3678] PathExpression
+            type: [753] Type_Unknown
+            path: [3677] Path name=IpOverwrite absolute=0
+          typeArguments: [3680] Vector<Type>
+          arguments: [3676] Vector<Argument>
+  objects: [3721] P5Table name=EMA0_HM_TBL declid=239
+    parameters: [3693] ParameterList
+      parameters: [3691] Parameter name=tbEMA0Match declid=238 direction=in
+        type: [3690] Type_Name
+          path: [3689] Path name=EMA0_MATCH_TBL absolute=0
+    body: [3712] BlockStatement
+      components: [3711] MethodCallStatement
+        methodCall: [3709] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3708] PathExpression
+            type: [753] Type_Unknown
+            path: [3707] Path name=eMA0_HmProc absolute=0
+          typeArguments: [3710] Vector<Type>
+          arguments: [3701] Vector<Argument>
+            arguments: [3700] Argument name=<null>
+              expression: [3699] Member member=rsEpat
+                type: [753] Type_Unknown
+                expr: [3698] Member member=tbEPAT
+                  type: [753] Type_Unknown
+                  expr: [3697] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3696] Path name=tbEMA0Match absolute=0
+            arguments: [3706] Argument name=<null>
+              expression: [3705] Member member=rsEncap
+                type: [753] Type_Unknown
+                expr: [3704] Member member=tbEncap
+                  type: [753] Type_Unknown
+                  expr: [3703] PathExpression
+                    type: [753] Type_Unknown
+                    path: [3702] Path name=tbEMA0Match absolute=0
+      components: [3720] AssignmentStatement
+        left: [3717] PathExpression
+          type: [753] Type_Unknown
+          path: [3716] Path name=ma_id absolute=0
+        right: [3719] Constant value=0 base=10
+          type: [3718] Type_InfInt declid=208
+  objects: [3736] P5Table name=EPRS_TBL declid=240
+    parameters: [3724] ParameterList
+    body: [3733] BlockStatement
+      components: [3732] MethodCallStatement
+        methodCall: [3730] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3729] PathExpression
+            type: [753] Type_Unknown
+            path: [3728] Path name=eprs absolute=0
+          typeArguments: [3731] Vector<Type>
+          arguments: [3727] Vector<Argument>
+  objects: [3774] Function name=pre_eMAControl declid=242
+    annotations: [3740] Annotation name=control structured=1
+    type: [3771] Type_Method name=pre_eMAControl
+      typeParameters: [3772] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3742] ParameterList
+    body: [3744] BlockStatement
+      components: [3759] Declaration_Variable name=tbEprs declid=241
+        annotations: [3750] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [3748] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [3753] Type_Name
+          path: [3752] Path name=EPRS_TBL absolute=0
+        initializer: [3757] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3755] PathExpression
+            type: [753] Type_Unknown
+            path: [3754] Path name=EPRS_TBL absolute=0
+          typeArguments: [3758] Vector<Type>
+          arguments: [3756] Vector<Argument>
+      components: [3770] MethodCallStatement
+        methodCall: [3768] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3767] PathExpression
+            type: [753] Type_Unknown
+            path: [3766] Path name=_apply absolute=0
+          typeArguments: [3769] Vector<Type>
+          arguments: [3765] Vector<Argument>
+            arguments: [3764] Argument name=<null>
+              expression: [3763] PathExpression
+                type: [753] Type_Unknown
+                path: [3762] Path name=tbEprs absolute=0
+  objects: [3869] Function name=eMA0Control declid=246
+    annotations: [3778] Annotation name=control structured=1
+    type: [3866] Type_Method name=eMA0Control
+      typeParameters: [3867] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3780] ParameterList
+    body: [3782] BlockStatement
+      components: [3797] Declaration_Variable name=tbEMA0Match declid=243
+        annotations: [3788] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [3786] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [3791] Type_Name
+          path: [3790] Path name=EMA0_MATCH_TBL absolute=0
+        initializer: [3795] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3793] PathExpression
+            type: [753] Type_Unknown
+            path: [3792] Path name=EMA0_MATCH_TBL absolute=0
+          typeArguments: [3796] Vector<Type>
+          arguments: [3794] Vector<Argument>
+      components: [3814] Declaration_Variable name=tbEMA0Action declid=244
+        annotations: [3802] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [3800] StringLiteral value=
+            type: [753] Type_Unknown
+        type: [3805] Type_Name
+          path: [3804] Path name=EMA0_ACTION_TBL absolute=0
+        initializer: [3812] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3807] PathExpression
+            type: [753] Type_Unknown
+            path: [3806] Path name=EMA0_ACTION_TBL absolute=0
+          typeArguments: [3813] Vector<Type>
+          arguments: [3811] Vector<Argument>
+            arguments: [3810] Argument name=<null>
+              expression: [3809] PathExpression
+                type: [753] Type_Unknown
+                path: [3808] Path name=tbEMA0Match absolute=0
+      components: [3834] Declaration_Variable name=tbEMA0HM declid=245
+        annotations: [3819] Annotation name=hw_map structured=1
+          body::IR::Vector<IR::Expression>: [3817] StringLiteral value=
+            type: [753] Type_Unknown
+        annotations: [3822] Annotation name=modifier structured=1
+        type: [3825] Type_Name
+          path: [3824] Path name=EMA0_HM_TBL absolute=0
+        initializer: [3832] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3827] PathExpression
+            type: [753] Type_Unknown
+            path: [3826] Path name=EMA0_HM_TBL absolute=0
+          typeArguments: [3833] Vector<Type>
+          arguments: [3831] Vector<Argument>
+            arguments: [3830] Argument name=<null>
+              expression: [3829] PathExpression
+                type: [753] Type_Unknown
+                path: [3828] Path name=tbEMA0Match absolute=0
+      components: [3845] MethodCallStatement
+        methodCall: [3843] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3842] PathExpression
+            type: [753] Type_Unknown
+            path: [3841] Path name=_apply absolute=0
+          typeArguments: [3844] Vector<Type>
+          arguments: [3840] Vector<Argument>
+            arguments: [3839] Argument name=<null>
+              expression: [3838] PathExpression
+                type: [753] Type_Unknown
+                path: [3837] Path name=tbEMA0Match absolute=0
+      components: [3855] MethodCallStatement
+        methodCall: [3853] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3852] PathExpression
+            type: [753] Type_Unknown
+            path: [3851] Path name=_apply absolute=0
+          typeArguments: [3854] Vector<Type>
+          arguments: [3850] Vector<Argument>
+            arguments: [3849] Argument name=<null>
+              expression: [3848] PathExpression
+                type: [753] Type_Unknown
+                path: [3847] Path name=tbEMA0Action absolute=0
+      components: [3865] MethodCallStatement
+        methodCall: [3863] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3862] PathExpression
+            type: [753] Type_Unknown
+            path: [3861] Path name=_apply absolute=0
+          typeArguments: [3864] Vector<Type>
+          arguments: [3860] Vector<Argument>
+            arguments: [3859] Argument name=<null>
+              expression: [3858] PathExpression
+                type: [753] Type_Unknown
+                path: [3857] Path name=tbEMA0HM absolute=0
+  objects: [3897] Function name=egress declid=247
+    annotations: [3873] Annotation name=control structured=1
+    type: [3894] Type_Method name=egress
+      typeParameters: [3895] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3875] ParameterList
+    body: [3877] BlockStatement
+      components: [3886] MethodCallStatement
+        methodCall: [3884] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3883] PathExpression
+            type: [753] Type_Unknown
+            path: [3882] Path name=pre_eMAControl absolute=0
+          typeArguments: [3885] Vector<Type>
+          arguments: [3881] Vector<Argument>
+      components: [3893] MethodCallStatement
+        methodCall: [3891] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [3890] PathExpression
+            type: [753] Type_Unknown
+            path: [3889] Path name=eMA0Control absolute=0
+          typeArguments: [3892] Vector<Type>
+          arguments: [3888] Vector<Argument>
+  objects: [4079] Function name=func0 declid=253
+    type: [4076] Type_Method name=func0
+      typeParameters: [4077] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [3900] ParameterList
+    body: [3902] BlockStatement
+      components: [3910] Declaration_Variable name=A declid=248
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [3909] Constant value=1 base=10
+          type: [3908] Type_InfInt declid=210
+      components: [3917] Declaration_Variable name=B declid=249
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [3916] Constant value=2 base=10
+          type: [3915] Type_InfInt declid=212
+      components: [3924] Declaration_Variable name=C declid=250
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [3923] Constant value=3 base=10
+          type: [3922] Type_InfInt declid=214
+      components: [3931] Declaration_Variable name=a declid=251
+        type: [166] Type_Bits size=4 isSigned=0...
+        initializer: [3930] Constant value=0 base=10
+          type: [3929] Type_InfInt declid=216
+      components: [3938] Declaration_Variable name=b declid=252
+        type: [166] Type_Bits size=4 isSigned=0...
+        initializer: [3937] Constant value=0 base=10
+          type: [3936] Type_InfInt declid=218
+      components: [4074] SwitchStatement
+        expression: [3946] ListExpression
+          type: [3951] Type_List
+            components: [753] Type_Unknown
+          components: [3942] PathExpression
+            type: [753] Type_Unknown
+            path: [3941] Path name=A absolute=0
+          components: [3954] PathExpression
+            type: [753] Type_Unknown
+            path: [3953] Path name=B absolute=0
+          components: [3956] PathExpression
+            type: [753] Type_Unknown
+            path: [3955] Path name=C absolute=0
+        [3982] SwitchCase
+          label: [3972] ListExpression
+            type: [3977] Type_List
+              components: [3957] Type_InfInt declid=219
+              components: [3960] Type_InfInt declid=220
+              components: [3962] Type_InfInt declid=221
+            components: [3958] Constant value=1 base=10
+              type: [3957] Type_InfInt declid=219
+            components: [3961] Constant value=2 base=10
+              type: [3960] Type_InfInt declid=220
+            components: [3963] Constant value=3 base=10
+              type: [3962] Type_InfInt declid=221
+          statement: [3979] BlockStatement
+            components: [3969] ReturnStatement
+              expression: [3968] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [3965] PathExpression
+                  type: [753] Type_Unknown
+                  path: [3966] Path name=parse_IPv4 absolute=0
+                typeArguments: [3967] Vector<Type>
+                arguments: [3964] Vector<Argument>
+        [4006] SwitchCase
+          label: [3999] ListExpression
+            type: [4004] Type_List
+              components: [3984] Type_InfInt declid=222
+              components: [753] Type_Unknown
+              components: [3992] Type_InfInt declid=225
+            components: [3985] Constant value=1 base=10
+              type: [3984] Type_InfInt declid=222
+            components: [3991] Mask
+              type: [753] Type_Unknown
+              left: [3988] Constant value=0 base=10
+                type: [3987] Type_InfInt declid=223
+              right: [3990] Constant value=0 base=10
+                type: [3989] Type_InfInt declid=224
+            components: [3993] Constant value=4 base=10
+              type: [3992] Type_InfInt declid=225
+          statement: [3994] BlockStatement
+        [4026] SwitchCase
+          label: [4019] ListExpression
+            type: [4024] Type_List
+              components: [4007] Type_InfInt declid=226
+              components: [753] Type_Unknown
+              components: [4015] Type_InfInt declid=229
+            components: [4008] Constant value=1 base=10
+              type: [4007] Type_InfInt declid=226
+            components: [4014] Mask
+              type: [753] Type_Unknown
+              left: [4011] Constant value=1 base=10
+                type: [4010] Type_InfInt declid=227
+              right: [4013] Constant value=0 base=10
+                type: [4012] Type_InfInt declid=228
+            components: [4016] Constant value=5 base=10
+              type: [4015] Type_InfInt declid=229
+        [4055] SwitchCase
+          label: [4045] ListExpression
+            type: [4050] Type_List
+              components: [753] Type_Unknown
+              components: [4033] Type_InfInt declid=230
+              components: [4035] Type_InfInt declid=231
+            components: [4031] Mask
+              type: [753] Type_Unknown
+              left: [4028] PathExpression
+                type: [753] Type_Unknown
+                path: [4027] Path name=a absolute=0
+              right: [4030] PathExpression
+                type: [753] Type_Unknown
+                path: [4029] Path name=b absolute=0
+            components: [4034] Constant value=2 base=10
+              type: [4033] Type_InfInt declid=230
+            components: [4036] Constant value=1 base=10
+              type: [4035] Type_InfInt declid=231
+          statement: [4052] BlockStatement
+            components: [4042] ReturnStatement
+              expression: [4041] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [4038] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4039] Path name=parse_IPv6 absolute=0
+                typeArguments: [4040] Vector<Type>
+                arguments: [4037] Vector<Argument>
+        [4072] SwitchCase
+          label: [4068] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [4069] BlockStatement
+            components: [4067] ReturnStatement
+              expression: [4066] MethodCallExpression
+                type: [753] Type_Unknown
+                method: [4063] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4064] Path name=_parser_next absolute=0
+                typeArguments: [4065] Vector<Type>
+                arguments: [4059] Vector<Argument>
+                  arguments: [4058] Argument name=<null>
+                    expression: [4057] Constant value=0 base=10
+                      type: [4056] Type_InfInt declid=232
+                  arguments: [4062] Argument name=<null>
+                    expression: [4061] Constant value=0 base=10
+                      type: [4060] Type_InfInt declid=233
+  objects: [4293] Function name=func1 declid=258
+    type: [4290] Type_Method name=func1
+      typeParameters: [4291] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [4082] ParameterList
+    body: [4084] BlockStatement
+      components: [4092] Declaration_Variable name=A declid=254
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4091] Constant value=1 base=10
+          type: [4090] Type_InfInt declid=235
+      components: [4099] Declaration_Variable name=B declid=255
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4098] Constant value=2 base=10
+          type: [4097] Type_InfInt declid=237
+      components: [4106] Declaration_Variable name=C declid=256
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4105] Constant value=3 base=10
+          type: [4104] Type_InfInt declid=239
+      components: [4111] Declaration_Variable name=Z declid=257
+        type: [189] Type_Bits size=8 isSigned=0...
+      components: [4288] SwitchStatement
+        expression: [4119] ListExpression
+          type: [4124] Type_List
+            components: [753] Type_Unknown
+          components: [4115] PathExpression
+            type: [753] Type_Unknown
+            path: [4114] Path name=A absolute=0
+          components: [4127] PathExpression
+            type: [753] Type_Unknown
+            path: [4126] Path name=B absolute=0
+          components: [4129] PathExpression
+            type: [753] Type_Unknown
+            path: [4128] Path name=C absolute=0
+        [4165] SwitchCase
+          label: [4153] ListExpression
+            type: [4158] Type_List
+              components: [4131] Type_InfInt declid=241
+              components: [753] Type_Unknown
+              components: [4139] Type_InfInt declid=244
+            components: [4132] Constant value=1 base=10
+              type: [4131] Type_InfInt declid=241
+            components: [4138] Mask
+              type: [753] Type_Unknown
+              left: [4135] Constant value=0 base=10
+                type: [4134] Type_InfInt declid=242
+              right: [4137] Constant value=0 base=10
+                type: [4136] Type_InfInt declid=243
+            components: [4140] Constant value=4 base=10
+              type: [4139] Type_InfInt declid=244
+          statement: [4162] BlockStatement
+            components: [4142] BlockStatement
+              components: [4150] AssignmentStatement
+                left: [4147] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4146] Path name=Z absolute=0
+                right: [4149] Constant value=1 base=10
+                  type: [4148] Type_InfInt declid=245
+        [4194] SwitchCase
+          label: [4182] ListExpression
+            type: [4187] Type_List
+              components: [753] Type_Unknown
+              components: [4172] Type_InfInt declid=248
+              components: [4174] Type_InfInt declid=249
+            components: [4170] Mask
+              type: [753] Type_Unknown
+              left: [4167] Constant value=0 base=10
+                type: [4166] Type_InfInt declid=246
+              right: [4169] Constant value=0 base=10
+                type: [4168] Type_InfInt declid=247
+            components: [4173] Constant value=2 base=10
+              type: [4172] Type_InfInt declid=248
+            components: [4175] Constant value=1 base=10
+              type: [4174] Type_InfInt declid=249
+          statement: [4191] BlockStatement
+            components: [4177] BlockStatement
+        [4220] SwitchCase
+          label: [4208] ListExpression
+            type: [4213] Type_List
+              components: [4195] Type_InfInt declid=250
+              components: [4198] Type_InfInt declid=251
+              components: [4200] Type_InfInt declid=252
+            components: [4196] Constant value=1 base=10
+              type: [4195] Type_InfInt declid=250
+            components: [4199] Constant value=2 base=10
+              type: [4198] Type_InfInt declid=251
+            components: [4201] Constant value=3 base=10
+              type: [4200] Type_InfInt declid=252
+          statement: [4217] BlockStatement
+            components: [4203] BlockStatement
+        [4237] SwitchCase
+          label: [4230] ListExpression
+            type: [4235] Type_List
+              components: [4221] Type_InfInt declid=253
+              components: [4224] Type_InfInt declid=254
+              components: [4226] Type_InfInt declid=255
+            components: [4222] Constant value=1 base=10
+              type: [4221] Type_InfInt declid=253
+            components: [4225] Constant value=3 base=10
+              type: [4224] Type_InfInt declid=254
+            components: [4227] Constant value=3 base=10
+              type: [4226] Type_InfInt declid=255
+        [4269] SwitchCase
+          label: [4257] ListExpression
+            type: [4262] Type_List
+              components: [4238] Type_InfInt declid=256
+              components: [4241] Type_InfInt declid=257
+              components: [4243] Type_InfInt declid=258
+            components: [4239] Constant value=1 base=10
+              type: [4238] Type_InfInt declid=256
+            components: [4242] Constant value=4 base=10
+              type: [4241] Type_InfInt declid=257
+            components: [4244] Constant value=3 base=10
+              type: [4243] Type_InfInt declid=258
+          statement: [4266] BlockStatement
+            components: [4246] BlockStatement
+              components: [4254] AssignmentStatement
+                left: [4251] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4250] Path name=Z absolute=0
+                right: [4253] Constant value=2 base=10
+                  type: [4252] Type_InfInt declid=259
+        [4286] SwitchCase
+          label: [4285] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [4282] BlockStatement
+            components: [4271] BlockStatement
+              components: [4279] AssignmentStatement
+                left: [4276] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4275] Path name=Z absolute=0
+                right: [4278] Constant value=0 base=10
+                  type: [4277] Type_InfInt declid=260
+  objects: [4476] P5Table name=TBL declid=263
+    parameters: [4296] ParameterList
+    body: [4305] BlockStatement
+      components: [4303] Declaration_Variable name=A declid=259
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4302] Constant value=1 base=10
+          type: [4301] Type_InfInt declid=262
+      components: [4313] Declaration_Variable name=B declid=260
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4312] Constant value=2 base=10
+          type: [4311] Type_InfInt declid=264
+      components: [4320] Declaration_Variable name=C declid=261
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4319] Constant value=3 base=10
+          type: [4318] Type_InfInt declid=266
+      components: [4325] Declaration_Variable name=Z declid=262
+        type: [189] Type_Bits size=8 isSigned=0...
+      components: [4474] SwitchStatement
+        expression: [4332] ListExpression
+          type: [4337] Type_List
+            components: [753] Type_Unknown
+          components: [4328] PathExpression
+            type: [753] Type_Unknown
+            path: [4327] Path name=A absolute=0
+          components: [4340] PathExpression
+            type: [753] Type_Unknown
+            path: [4339] Path name=B absolute=0
+          components: [4342] PathExpression
+            type: [753] Type_Unknown
+            path: [4341] Path name=C absolute=0
+        [4371] SwitchCase
+          label: [4364] ListExpression
+            type: [4369] Type_List
+              components: [4344] Type_InfInt declid=268
+              components: [753] Type_Unknown
+              components: [4352] Type_InfInt declid=271
+            components: [4345] Constant value=1 base=10
+              type: [4344] Type_InfInt declid=268
+            components: [4351] Mask
+              type: [753] Type_Unknown
+              left: [4348] Constant value=0 base=10
+                type: [4347] Type_InfInt declid=269
+              right: [4350] Constant value=0 base=10
+                type: [4349] Type_InfInt declid=270
+            components: [4353] Constant value=4 base=10
+              type: [4352] Type_InfInt declid=271
+          statement: [4359] BlockStatement
+            components: [4358] AssignmentStatement
+              left: [4355] PathExpression
+                type: [753] Type_Unknown
+                path: [4354] Path name=Z absolute=0
+              right: [4357] Constant value=1 base=10
+                type: [4356] Type_InfInt declid=272
+        [4396] SwitchCase
+          label: [4389] ListExpression
+            type: [4394] Type_List
+              components: [753] Type_Unknown
+              components: [4380] Type_InfInt declid=275
+              components: [4382] Type_InfInt declid=276
+            components: [4378] Mask
+              type: [753] Type_Unknown
+              left: [4375] Constant value=0 base=10
+                type: [4374] Type_InfInt declid=273
+              right: [4377] Constant value=0 base=10
+                type: [4376] Type_InfInt declid=274
+            components: [4381] Constant value=2 base=10
+              type: [4380] Type_InfInt declid=275
+            components: [4383] Constant value=1 base=10
+              type: [4382] Type_InfInt declid=276
+          statement: [4384] BlockStatement
+        [4417] SwitchCase
+          label: [4410] ListExpression
+            type: [4415] Type_List
+              components: [4398] Type_InfInt declid=277
+              components: [4401] Type_InfInt declid=278
+              components: [4403] Type_InfInt declid=279
+            components: [4399] Constant value=1 base=10
+              type: [4398] Type_InfInt declid=277
+            components: [4402] Constant value=2 base=10
+              type: [4401] Type_InfInt declid=278
+            components: [4404] Constant value=3 base=10
+              type: [4403] Type_InfInt declid=279
+          statement: [4405] BlockStatement
+        [4435] SwitchCase
+          label: [4428] ListExpression
+            type: [4433] Type_List
+              components: [4419] Type_InfInt declid=280
+              components: [4422] Type_InfInt declid=281
+              components: [4424] Type_InfInt declid=282
+            components: [4420] Constant value=1 base=10
+              type: [4419] Type_InfInt declid=280
+            components: [4423] Constant value=3 base=10
+              type: [4422] Type_InfInt declid=281
+            components: [4425] Constant value=3 base=10
+              type: [4424] Type_InfInt declid=282
+        [4461] SwitchCase
+          label: [4454] ListExpression
+            type: [4459] Type_List
+              components: [4437] Type_InfInt declid=283
+              components: [4440] Type_InfInt declid=284
+              components: [4442] Type_InfInt declid=285
+            components: [4438] Constant value=1 base=10
+              type: [4437] Type_InfInt declid=283
+            components: [4441] Constant value=4 base=10
+              type: [4440] Type_InfInt declid=284
+            components: [4443] Constant value=3 base=10
+              type: [4442] Type_InfInt declid=285
+          statement: [4449] BlockStatement
+            components: [4448] AssignmentStatement
+              left: [4445] PathExpression
+                type: [753] Type_Unknown
+                path: [4444] Path name=Z absolute=0
+              right: [4447] Constant value=2 base=10
+                type: [4446] Type_InfInt declid=286
+        [4472] SwitchCase
+          label: [4471] DefaultExpression
+            type: [753] Type_Unknown
+          statement: [4468] BlockStatement
+            components: [4467] AssignmentStatement
+              left: [4464] PathExpression
+                type: [753] Type_Unknown
+                path: [4463] Path name=Z absolute=0
+              right: [4466] Constant value=0 base=10
+                type: [4465] Type_InfInt declid=287
+  objects: [4953] P5Table name=TBL_key declid=269
+    parameters: [4479] ParameterList
+    body: [4488] BlockStatement
+      components: [4486] Declaration_Variable name=A declid=264
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4485] Constant value=1 base=10
+          type: [4484] Type_InfInt declid=289
+      components: [4496] Declaration_Variable name=B declid=265
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4495] Constant value=2 base=10
+          type: [4494] Type_InfInt declid=291
+      components: [4503] Declaration_Variable name=C declid=266
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4502] Constant value=3 base=10
+          type: [4501] Type_InfInt declid=293
+      components: [4510] Declaration_Variable name=Z declid=267
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4509] Constant value=4 base=10
+          type: [4508] Type_InfInt declid=295
+      components: [4517] Declaration_Variable name=Y declid=268
+        type: [189] Type_Bits size=8 isSigned=0...
+        initializer: [4516] Constant value=5 base=10
+          type: [4515] Type_InfInt declid=297
+      components: [4950] P5Key
+        switches: [4720] P5KeySwitch
+          select: [4524] ListExpression
+            type: [4529] Type_List
+              components: [753] Type_Unknown
+            components: [4520] PathExpression
+              type: [753] Type_Unknown
+              path: [4519] Path name=A absolute=0
+            components: [4532] PathExpression
+              type: [753] Type_Unknown
+              path: [4531] Path name=B absolute=0
+            components: [4534] PathExpression
+              type: [753] Type_Unknown
+              path: [4533] Path name=C absolute=0
+          cases: [4578] P5KeyCase fallthrough=0
+            label: [4571] ListExpression
+              type: [4576] Type_List
+                components: [4536] Type_InfInt declid=298
+                components: [753] Type_Unknown
+                components: [4544] Type_InfInt declid=301
+              components: [4537] Constant value=1 base=10
+                type: [4536] Type_InfInt declid=298
+              components: [4543] Mask
+                type: [753] Type_Unknown
+                left: [4540] Constant value=0 base=10
+                  type: [4539] Type_InfInt declid=299
+                right: [4542] Constant value=0 base=10
+                  type: [4541] Type_InfInt declid=300
+              components: [4545] Constant value=4 base=10
+                type: [4544] Type_InfInt declid=301
+            elements: [4550] P5KeyElement matchType=<null>
+              expr: [4549] PathExpression
+                type: [753] Type_Unknown
+                path: [4548] Path name=Z absolute=0
+            elements: [4564] P5KeyElement matchType=<null>
+              components: [4563] AssignmentStatement
+                left: [4560] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4559] Path name=command absolute=0
+                right: [4562] Constant value=0 base=10
+                  type: [4561] Type_InfInt declid=302
+          cases: [4625] P5KeyCase fallthrough=0
+            label: [4618] ListExpression
+              type: [4623] Type_List
+                components: [753] Type_Unknown
+                components: [4589] Type_InfInt declid=305
+                components: [4591] Type_InfInt declid=306
+              components: [4587] Mask
+                type: [753] Type_Unknown
+                left: [4584] Constant value=0 base=10
+                  type: [4583] Type_InfInt declid=303
+                right: [4586] Constant value=0 base=10
+                  type: [4585] Type_InfInt declid=304
+              components: [4590] Constant value=2 base=10
+                type: [4589] Type_InfInt declid=305
+              components: [4592] Constant value=1 base=10
+                type: [4591] Type_InfInt declid=306
+            elements: [4597] P5KeyElement matchType=<null>
+              expr: [4596] PathExpression
+                type: [753] Type_Unknown
+                path: [4595] Path name=Z absolute=0
+            elements: [4611] P5KeyElement matchType=<null>
+              components: [4610] AssignmentStatement
+                left: [4607] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4606] Path name=command absolute=0
+                right: [4609] Constant value=1 base=10
+                  type: [4608] Type_InfInt declid=307
+          cases: [4646] P5KeyCase fallthrough=0
+            label: [4639] ListExpression
+              type: [4644] Type_List
+                components: [4629] Type_InfInt declid=308
+                components: [4632] Type_InfInt declid=309
+                components: [4634] Type_InfInt declid=310
+              components: [4630] Constant value=1 base=10
+                type: [4629] Type_InfInt declid=308
+              components: [4633] Constant value=2 base=10
+                type: [4632] Type_InfInt declid=309
+              components: [4635] Constant value=3 base=10
+                type: [4634] Type_InfInt declid=310
+          cases: [4666] P5KeyCase fallthrough=1
+            label: [4659] ListExpression
+              type: [4664] Type_List
+                components: [4650] Type_InfInt declid=311
+                components: [4653] Type_InfInt declid=312
+                components: [4655] Type_InfInt declid=313
+              components: [4651] Constant value=1 base=10
+                type: [4650] Type_InfInt declid=311
+              components: [4654] Constant value=3 base=10
+                type: [4653] Type_InfInt declid=312
+              components: [4656] Constant value=3 base=10
+                type: [4655] Type_InfInt declid=313
+          cases: [4710] P5KeyCase fallthrough=0
+            label: [4703] ListExpression
+              type: [4708] Type_List
+                components: [4671] Type_InfInt declid=314
+                components: [4674] Type_InfInt declid=315
+                components: [4676] Type_InfInt declid=316
+              components: [4672] Constant value=1 base=10
+                type: [4671] Type_InfInt declid=314
+              components: [4675] Constant value=4 base=10
+                type: [4674] Type_InfInt declid=315
+              components: [4677] Constant value=3 base=10
+                type: [4676] Type_InfInt declid=316
+            elements: [4682] P5KeyElement matchType=<null>
+              expr: [4681] PathExpression
+                type: [753] Type_Unknown
+                path: [4680] Path name=Z absolute=0
+            elements: [4696] P5KeyElement matchType=<null>
+              components: [4695] AssignmentStatement
+                left: [4692] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4691] Path name=command absolute=0
+                right: [4694] Constant value=3 base=10
+                  type: [4693] Type_InfInt declid=317
+          cases: [4716] P5KeyCase fallthrough=0
+            label: [4715] DefaultExpression
+              type: [753] Type_Unknown
+        switches: [4946] P5KeySwitch
+          select: [4728] ListExpression
+            type: [4733] Type_List
+              components: [753] Type_Unknown
+            components: [4724] PathExpression
+              type: [753] Type_Unknown
+              path: [4723] Path name=A absolute=0
+            components: [4736] PathExpression
+              type: [753] Type_Unknown
+              path: [4735] Path name=B absolute=0
+            components: [4738] PathExpression
+              type: [753] Type_Unknown
+              path: [4737] Path name=C absolute=0
+          cases: [4782] P5KeyCase fallthrough=0
+            label: [4775] ListExpression
+              type: [4780] Type_List
+                components: [4740] Type_InfInt declid=318
+                components: [753] Type_Unknown
+                components: [4748] Type_InfInt declid=321
+              components: [4741] Constant value=1 base=10
+                type: [4740] Type_InfInt declid=318
+              components: [4747] Mask
+                type: [753] Type_Unknown
+                left: [4744] Constant value=0 base=10
+                  type: [4743] Type_InfInt declid=319
+                right: [4746] Constant value=0 base=10
+                  type: [4745] Type_InfInt declid=320
+              components: [4749] Constant value=4 base=10
+                type: [4748] Type_InfInt declid=321
+            elements: [4754] P5KeyElement matchType=<null>
+              expr: [4753] PathExpression
+                type: [753] Type_Unknown
+                path: [4752] Path name=Y absolute=0
+            elements: [4768] P5KeyElement matchType=<null>
+              components: [4767] AssignmentStatement
+                left: [4764] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4763] Path name=command absolute=0
+                right: [4766] Constant value=0 base=10
+                  type: [4765] Type_InfInt declid=322
+          cases: [4829] P5KeyCase fallthrough=0
+            label: [4822] ListExpression
+              type: [4827] Type_List
+                components: [753] Type_Unknown
+                components: [4793] Type_InfInt declid=325
+                components: [4795] Type_InfInt declid=326
+              components: [4791] Mask
+                type: [753] Type_Unknown
+                left: [4788] Constant value=0 base=10
+                  type: [4787] Type_InfInt declid=323
+                right: [4790] Constant value=0 base=10
+                  type: [4789] Type_InfInt declid=324
+              components: [4794] Constant value=2 base=10
+                type: [4793] Type_InfInt declid=325
+              components: [4796] Constant value=1 base=10
+                type: [4795] Type_InfInt declid=326
+            elements: [4801] P5KeyElement matchType=<null>
+              expr: [4800] PathExpression
+                type: [753] Type_Unknown
+                path: [4799] Path name=Y absolute=0
+            elements: [4815] P5KeyElement matchType=<null>
+              components: [4814] AssignmentStatement
+                left: [4811] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4810] Path name=command absolute=0
+                right: [4813] Constant value=1 base=10
+                  type: [4812] Type_InfInt declid=327
+          cases: [4872] P5KeyCase fallthrough=0
+            label: [4865] ListExpression
+              type: [4870] Type_List
+                components: [4833] Type_InfInt declid=328
+                components: [4836] Type_InfInt declid=329
+                components: [4838] Type_InfInt declid=330
+              components: [4834] Constant value=1 base=10
+                type: [4833] Type_InfInt declid=328
+              components: [4837] Constant value=2 base=10
+                type: [4836] Type_InfInt declid=329
+              components: [4839] Constant value=3 base=10
+                type: [4838] Type_InfInt declid=330
+            elements: [4844] P5KeyElement matchType=<null>
+              expr: [4843] PathExpression
+                type: [753] Type_Unknown
+                path: [4842] Path name=Y absolute=0
+            elements: [4858] P5KeyElement matchType=<null>
+              components: [4857] AssignmentStatement
+                left: [4854] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4853] Path name=command absolute=0
+                right: [4856] Constant value=2 base=10
+                  type: [4855] Type_InfInt declid=331
+          cases: [4893] P5KeyCase fallthrough=0
+            label: [4886] ListExpression
+              type: [4891] Type_List
+                components: [4876] Type_InfInt declid=332
+                components: [4879] Type_InfInt declid=333
+                components: [4881] Type_InfInt declid=334
+              components: [4877] Constant value=1 base=10
+                type: [4876] Type_InfInt declid=332
+              components: [4880] Constant value=3 base=10
+                type: [4879] Type_InfInt declid=333
+              components: [4882] Constant value=3 base=10
+                type: [4881] Type_InfInt declid=334
+          cases: [4936] P5KeyCase fallthrough=0
+            label: [4929] ListExpression
+              type: [4934] Type_List
+                components: [4897] Type_InfInt declid=335
+                components: [4900] Type_InfInt declid=336
+                components: [4902] Type_InfInt declid=337
+              components: [4898] Constant value=1 base=10
+                type: [4897] Type_InfInt declid=335
+              components: [4901] Constant value=4 base=10
+                type: [4900] Type_InfInt declid=336
+              components: [4903] Constant value=3 base=10
+                type: [4902] Type_InfInt declid=337
+            elements: [4908] P5KeyElement matchType=<null>
+              expr: [4907] PathExpression
+                type: [753] Type_Unknown
+                path: [4906] Path name=Y absolute=0
+            elements: [4922] P5KeyElement matchType=<null>
+              components: [4921] AssignmentStatement
+                left: [4918] PathExpression
+                  type: [753] Type_Unknown
+                  path: [4917] Path name=command absolute=0
+                right: [4920] Constant value=3 base=10
+                  type: [4919] Type_InfInt declid=338
+          cases: [4942] P5KeyCase fallthrough=0
+            label: [4941] DefaultExpression
+              type: [753] Type_Unknown
+  objects: [4984] Function name=dot_ex declid=271
+    type: [4981] Type_Method name=dot_ex
+      typeParameters: [4982] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [4956] ParameterList
+    body: [4958] BlockStatement
+      components: [4979] Declaration_Variable name=test declid=270
+        type: [4963] Type_Name
+          path: [4962] Path name=UDP_S absolute=0
+        initializer: [4972] ListExpression
+          type: [4977] Type_List
+            components: [753] Type_Unknown
+          components: [4968] P5DesignatedInitializer isMember=1
+            type: [753] Type_Unknown
+            designator: [4965] PathExpression
+              type: [753] Type_Unknown
+              path: [4964] Path name=SrcPort absolute=0
+            value: [4967] Constant value=1 base=10
+              type: [4966] Type_InfInt declid=339
+  objects: [5073] Function name=uint0_list declid=281
+    type: [5070] Type_Method name=uint0_list
+      typeParameters: [5071] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [4993] ParameterList
+        parameters: [4991] Parameter name=var0 declid=272 direction=in
+          type: [4990] Type_Bits size=0 isSigned=0
+        parameters: [4998] Parameter name=list0 declid=273 direction=in
+          annotations: [5000] Annotation name=p5_unsized_array structured=0
+          type: [4990] Type_Bits size=0 isSigned=0...
+        parameters: [5005] Parameter name=var1 declid=274 direction=inout
+          type: [4990] Type_Bits size=0 isSigned=0...
+        parameters: [5010] Parameter name=list2 declid=275 direction=in
+          annotations: [5012] Annotation name=p5_unsized_array structured=0
+          type: [4990] Type_Bits size=0 isSigned=0...
+        parameters: [5017] Parameter name=list3 declid=276 direction=in
+          annotations: [5019] Annotation name=p5_unsized_array structured=0
+          type: [4990] Type_Bits size=0 isSigned=0...
+    body: [5021] BlockStatement
+      components: [5029] Declaration_Variable name=TempVAR declid=277
+        type: [4990] Type_Bits size=0 isSigned=0...
+        initializer: [5028] PathExpression
+          type: [753] Type_Unknown
+          path: [5027] Path name=var0 absolute=0
+      components: [5042] Declaration_Variable name=TempLIST declid=278
+        type: [4990] Type_Bits size=0 isSigned=0...
+        initializer: [5040] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [5035] PathExpression
+            type: [753] Type_Unknown
+            path: [5034] Path name=_list_alloc absolute=0
+          typeArguments: [5041] Vector<Type>
+          arguments: [5039] Vector<Argument>
+            arguments: [5038] Argument name=<null>
+              expression: [5037] PathExpression
+                type: [753] Type_Unknown
+                path: [5036] Path name=list0 absolute=0
+      components: [5055] Declaration_Variable name=a declid=279
+        type: [4990] Type_Bits size=0 isSigned=0...
+        initializer: [5053] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [5048] PathExpression
+            type: [753] Type_Unknown
+            path: [5047] Path name=_lenof absolute=0
+          typeArguments: [5054] Vector<Type>
+          arguments: [5052] Vector<Argument>
+            arguments: [5051] Argument name=<null>
+              expression: [5050] PathExpression
+                type: [753] Type_Unknown
+                path: [5049] Path name=list0 absolute=0
+      components: [5068] Declaration_Variable name=b declid=280
+        type: [4990] Type_Bits size=0 isSigned=0...
+        initializer: [5066] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [5061] PathExpression
+            type: [753] Type_Unknown
+            path: [5060] Path name=_lenof absolute=0
+          typeArguments: [5067] Vector<Type>
+          arguments: [5065] Vector<Argument>
+            arguments: [5064] Argument name=<null>
+              expression: [5063] PathExpression
+                type: [753] Type_Unknown
+                path: [5062] Path name=TempLIST absolute=0
+  objects: [5127] Type_Struct name=UN declid=43
+    annotations: [5132] Annotation name=union structured=0
+    typeParameters: [5129] TypeParameters
+    fields: [5079] StructField name=member0 declid=282
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [5085] StructField name=member1 declid=283
+      type: [166] Type_Bits size=4 isSigned=0...
+    fields: [5103] StructField name=_anon_9 declid=285
+      type: [5098] Type_Struct name=_anon_9 declid=41
+        typeParameters: [5100] TypeParameters
+        fields: [5091] StructField name=st_a declid=284
+          type: [166] Type_Bits size=4 isSigned=0...
+    fields: [5123] StructField name=_anon_10 declid=287
+      type: [5116] Type_Struct name=_anon_10 declid=42
+        annotations: [5121] Annotation name=union structured=0
+        typeParameters: [5118] TypeParameters
+        fields: [5109] StructField name=un_a declid=286
+          type: [166] Type_Bits size=4 isSigned=0...
+  objects: [5261] Function name=_CmpErrs declid=290
+    type: [5258] Type_Method name=_CmpErrs
+      typeParameters: [5259] TypeParameters
+      returnType: [0] Type_Void
+      parameters: [5135] ParameterList
+    body: [5137] BlockStatement
+      components: [5145] Declaration_Variable name=_var_A declid=288
+        type: [166] Type_Bits size=4 isSigned=0...
+        initializer: [5144] Constant value=3 base=10
+          type: [5143] Type_InfInt declid=354
+      components: [5152] Declaration_Variable name=_var_B declid=289
+        type: [258] Type_Bits size=1 isSigned=0...
+        initializer: [5151] Constant value=1 base=10
+          type: [5150] Type_InfInt declid=356
+      components: [5257] MethodCallStatement
+        methodCall: [5255] MethodCallExpression
+          type: [753] Type_Unknown
+          method: [5254] PathExpression
+            type: [753] Type_Unknown
+            path: [5253] Path name=uint0_list absolute=0
+          typeArguments: [5256] Vector<Type>
+          arguments: [5170] Vector<Argument>
+            arguments: [5169] Argument name=<null>
+              expression: [5168] Add
+                type: [753] Type_Unknown
+                left: [5165] Add
+                  type: [753] Type_Unknown
+                  left: [5162] Add
+                    type: [753] Type_Unknown
+                    left: [5159] Add
+                      type: [753] Type_Unknown
+                      left: [5156] Constant value=1 base=10
+                        type: [5155] Type_InfInt declid=357
+                      right: [5158] Constant value=1 base=10
+                        type: [5157] Type_InfInt declid=358
+                    right: [5161] Constant value=1 base=10
+                      type: [5160] Type_InfInt declid=359
+                  right: [5164] Constant value=1 base=10
+                    type: [5163] Type_InfInt declid=360
+                right: [5167] Constant value=1 base=10
+                  type: [5166] Type_InfInt declid=361
+            arguments: [5196] Argument name=<null>
+              expression: [5189] ListExpression
+                type: [5194] Type_List
+                  components: [166] Type_Bits size=4 isSigned=0...
+                  components: [166] Type_Bits size=4 isSigned=0...
+                  components: [166] Type_Bits size=4 isSigned=0...
+                components: [5175] Cast
+                  type: [166] Type_Bits size=4 isSigned=0...
+                  expr: [5174] Constant value=3 base=10
+                    type: [5173] Type_InfInt declid=363
+                  destType: [166] Type_Bits size=4 isSigned=0...
+                components: [5181] Cast
+                  type: [166] Type_Bits size=4 isSigned=0...
+                  expr: [5180] Constant value=4 base=10
+                    type: [5179] Type_InfInt declid=365
+                  destType: [166] Type_Bits size=4 isSigned=0...
+                components: [5186] Cast
+                  type: [166] Type_Bits size=4 isSigned=0...
+                  expr: [5185] Constant value=5 base=10
+                    type: [5184] Type_InfInt declid=367
+                  destType: [166] Type_Bits size=4 isSigned=0...
+            arguments: [5199] Argument name=<null>
+              expression: [5198] PathExpression
+                type: [753] Type_Unknown
+                path: [5197] Path name=_var_A absolute=0
+            arguments: [5226] Argument name=<null>
+              expression: [5219] ListExpression
+                type: [5224] Type_List
+                  components: [5202] Type_Bits size=5 isSigned=0
+                  components: [5202] Type_Bits size=5 isSigned=0...
+                  components: [5202] Type_Bits size=5 isSigned=0...
+                components: [5205] Cast
+                  type: [5202] Type_Bits size=5 isSigned=0...
+                  expr: [5204] Constant value=3 base=10
+                    type: [5203] Type_InfInt declid=369
+                  destType: [5202] Type_Bits size=5 isSigned=0...
+                components: [5211] Cast
+                  type: [5202] Type_Bits size=5 isSigned=0...
+                  expr: [5210] Constant value=4 base=10
+                    type: [5209] Type_InfInt declid=371
+                  destType: [5202] Type_Bits size=5 isSigned=0...
+                components: [5216] Cast
+                  type: [5202] Type_Bits size=5 isSigned=0...
+                  expr: [5215] Constant value=5 base=10
+                    type: [5214] Type_InfInt declid=373
+                  destType: [5202] Type_Bits size=5 isSigned=0...
+            arguments: [5252] Argument name=<null>
+              expression: [5245] ListExpression
+                type: [5250] Type_List
+                  components: [345] Type_Bits size=6 isSigned=0...
+                  components: [345] Type_Bits size=6 isSigned=0...
+                  components: [345] Type_Bits size=6 isSigned=0...
+                components: [5231] Cast
+                  type: [345] Type_Bits size=6 isSigned=0...
+                  expr: [5230] Constant value=3 base=10
+                    type: [5229] Type_InfInt declid=375
+                  destType: [345] Type_Bits size=6 isSigned=0...
+                components: [5237] Cast
+                  type: [345] Type_Bits size=6 isSigned=0...
+                  expr: [5236] Constant value=4 base=10
+                    type: [5235] Type_InfInt declid=377
+                  destType: [345] Type_Bits size=6 isSigned=0...
+                components: [5242] Cast
+                  type: [345] Type_Bits size=6 isSigned=0...
+                  expr: [5241] Constant value=5 base=10
+                    type: [5240] Type_InfInt declid=379
+                  destType: [345] Type_Bits size=6 isSigned=0...
+  objects: [5277] P5Table name=_ano_tb declid=292
+    parameters: [5264] ParameterList
+    body: [5274] BlockStatement
+      components: [5272] Declaration_Variable name=A declid=291
+        type: [166] Type_Bits size=4 isSigned=0...
+
