@@ -2,3 +2,4 @@ GenSim/docs/todo.md
 GenSim/bin/*
 GenSim/out_dir/*
 build_p5c/*
+precompiler/__pycache__
