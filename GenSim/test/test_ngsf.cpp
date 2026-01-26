@@ -51,7 +51,7 @@ int main() {
 
     // -------- Ingress: append bits into NGSFBuffer across multiple calls --------
     clear_ngsf(ctx);
-    ctx.ngsf_direction = GtvContext::NgsfDirection::INGRESS;
+    ctx.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
 
     // Choose values so the first 16 bits pack to two known bytes (MSB-first):
     // a (5 bits) = 10101
@@ -87,7 +87,7 @@ int main() {
     all_ok &= expect_eq_u64(ctx.ngsf_bit_offset, 6, "cursor bit_offset after +10 bits (union)");
 
     // -------- Egress: restore bits from NGSFBuffer back into variables, continuing from cursor --------
-    ctx.ngsf_direction = GtvContext::NgsfDirection::EGRESS;
+    ctx.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
     ctx.reset_ngsf_offset();
 
     p5::uint<5> a2{};
@@ -110,6 +110,45 @@ int main() {
 
     all_ok &= expect_eq_u64(ctx.ngsf_byte_offset, 4, "egress cursor byte_offset after restore all");
     all_ok &= expect_eq_u64(ctx.ngsf_bit_offset, 6, "egress cursor bit_offset after restore all");
+
+    // -------- Temporary argument tests --------
+    // Validate that `_add_to_ngsf(p5::uint<N>(...))` works in FV2NGSF direction and that
+    // NGSF2FV direction consumes bits (skip) to keep stream aligned.
+    {
+        GtvContext ctxTmp{};
+        clear_ngsf(ctxTmp);
+        ctxTmp.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+
+        // Use temporaries for append.
+        ctxTmp._add_to_ngsf(p5::uint<5>(0b10101));
+        ctxTmp._add_to_ngsf(p5::uint<11>(0x655));
+
+        all_ok &= expect_eq_u64(ctxTmp.NGSFBuffer[0].to_ullong(), 0xAE, "tmp byte0 after append(temp a,b)");
+        all_ok &= expect_eq_u64(ctxTmp.NGSFBuffer[1].to_ullong(), 0x55, "tmp byte1 after append(temp a,b)");
+        all_ok &= expect_eq_u64(ctxTmp.ngsf_byte_offset, 2, "tmp cursor byte_offset after 16 bits");
+        all_ok &= expect_eq_u64(ctxTmp.ngsf_bit_offset, 0, "tmp cursor bit_offset after 16 bits");
+
+        // Switch to restore direction. Temporaries cannot be written back to, so we expect
+        // the stream cursor to advance (skip) while leaving the buffer intact.
+        ctxTmp.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
+        ctxTmp.reset_ngsf_offset();
+
+        ctxTmp._add_to_ngsf(p5::uint<5>(0));
+        ctxTmp._add_to_ngsf(p5::uint<11>(0));
+        all_ok &= expect_eq_u64(ctxTmp.ngsf_byte_offset, 2, "tmp cursor byte_offset after skip 16 bits");
+        all_ok &= expect_eq_u64(ctxTmp.ngsf_bit_offset, 0, "tmp cursor bit_offset after skip 16 bits");
+        all_ok &= expect_eq_u64(ctxTmp.NGSFBuffer[0].to_ullong(), 0xAE, "tmp buffer unchanged byte0 after skip");
+        all_ok &= expect_eq_u64(ctxTmp.NGSFBuffer[1].to_ullong(), 0x55, "tmp buffer unchanged byte1 after skip");
+
+        // Reset and do a real restore into lvalues to ensure data is still decodable.
+        ctxTmp.reset_ngsf_offset();
+        p5::uint<5> a3{};
+        p5::uint<11> b3{};
+        ctxTmp._add_to_ngsf(a3);
+        ctxTmp._add_to_ngsf(b3);
+        all_ok &= expect_eq_p5(a3, p5::uint<5>(0b10101), "tmp restore a after reset");
+        all_ok &= expect_eq_p5(b3, p5::uint<11>(0x655), "tmp restore b after reset");
+    }
 
     std::cout << "[ngsf test] " << (all_ok ? "ALL PASS" : "FAILED") << "\n";
     return all_ok ? 0 : 1;

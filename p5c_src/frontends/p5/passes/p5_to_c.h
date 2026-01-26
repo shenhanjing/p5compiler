@@ -53,6 +53,8 @@ class P5ToC {
     std::unordered_map<std::string, std::unique_ptr<std::ostream>> streams;
     friend struct IndentGuard;
     bool inSwitchMethod = false;
+    // Name of the function currently being emitted (for body prologue tweaks).
+    cstring currentFunctionName;
 
     struct Uint0InitListParam {
         std::string tname;     // e.g. "T0"

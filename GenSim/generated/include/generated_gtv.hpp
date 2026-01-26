@@ -55,10 +55,10 @@ public:
 
     // ============================ NGSF stream state ============================
     // Public direction selector for _add_to_ngsf():
-    // - ingress: append bits from argument into NGSFBuffer (stream write)
-    // - egress:  restore bits from NGSFBuffer into argument (stream read)
-    enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };
-    NgsfDirection ngsf_direction{NgsfDirection::INGRESS};
+    // - FV2NGSF: append bits from argument into NGSFBuffer (stream write)
+    // - NGSF2FV: restore bits from NGSFBuffer into argument (stream read)
+    enum class NgsfDirection : uint8_t { FV2NGSF = 0, NGSF2FV = 1 };
+    NgsfDirection ngsf_direction{NgsfDirection::FV2NGSF};
 
     // Cursor within NGSFBuffer. bit_offset is MSB-first within a byte:
     // - bit_offset==0 targets the current byte's MSB
@@ -66,9 +66,17 @@ public:
     std::size_t ngsf_byte_offset{0};
     uint8_t ngsf_bit_offset{0};
 
+    enum class NPorTM : uint8_t { NP = 0, TM = 1 };
+    NPorTM npor_tm{NPorTM::NP};
+
+    std::size_t tm_byte_offset{0};
+    uint8_t tm_bit_offset{0};
+
     void reset_ngsf_offset() {
         ngsf_byte_offset = 0;
         ngsf_bit_offset = 0;
+        tm_byte_offset = 0;
+        tm_bit_offset = 0;
     }
 
     // Add to / restore from NGSF bit stream.
@@ -79,10 +87,29 @@ public:
     // - aggregate structs composed of the above (nesting allowed)
     template <typename T>
     void _add_to_ngsf(T &value) {
-        if (ngsf_direction == NgsfDirection::INGRESS) {
+        if (ngsf_direction == NgsfDirection::FV2NGSF) {
             ngsf_append_any(value);
+            if (npor_tm == NPorTM::TM) {
+                tm_byte_offset = ngsf_byte_offset;
+                tm_bit_offset = ngsf_bit_offset;
+            }
         } else {
             ngsf_restore_any(value);
+        }
+    }
+
+    template <typename T>
+    void _add_to_ngsf(const T &value) {
+        if (ngsf_direction == NgsfDirection::FV2NGSF) {
+            ngsf_append_any(value);
+            if (npor_tm == NPorTM::TM) {
+                tm_byte_offset = ngsf_byte_offset;
+                tm_bit_offset = ngsf_bit_offset;
+            }
+        } else {
+            // Restore direction: cannot write back to a temporary.
+            // Consume bits to keep stream aligned.
+            ngsf_skip_any<T>();
         }
     }
 
@@ -447,6 +474,31 @@ protected:
         }
         // Works for p5::uint / p5::member / p5::Union (writes underlying storage/view).
         field = tmp;
+    }
+
+    template <typename Field>
+    void ngsf_skip_leaf() {
+        using D = std::decay_t<Field>;
+        constexpr std::size_t W = ngsf_width_bits<D>();
+        static_assert(W > 0, "Unsupported NGSF leaf type");
+        for (std::size_t i = 0; i < W; ++i) {
+            (void)ngsf_read_bit();
+        }
+    }
+
+    template <typename T>
+    void ngsf_skip_any() {
+        using D = std::decay_t<T>;
+        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {
+            ngsf_skip_leaf<D>();
+        } else {
+            static_assert(std::is_aggregate_v<D>,
+                          "_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.");
+            static_assert(std::is_default_constructible_v<D>,
+                          "ngsf_skip_any requires aggregate types to be default-constructible.");
+            D tmp{};
+            boost::pfr::for_each_field(tmp, [&](auto &sub) { ngsf_skip_any<std::decay_t<decltype(sub)>>(); });
+        }
     }
 
     template <typename T>

@@ -644,6 +644,14 @@ void P5ToC::emitFunctionBody(const IR::BlockStatement *body, LocalsMap locals) {
                           << p.initName << ");\n";
         }
 
+        if (!currentFunctionName.isNullOrEmpty()) {
+            if (currentFunctionName == "genNGSFNp2Tm" || currentFunctionName == "genNGSFTm2Np") {
+                *outputStream << indent << "npor_tm = NPorTM::TM;\n";
+            } else if (currentFunctionName.startsWith("genNGSF")) {
+                *outputStream << indent << "npor_tm = NPorTM::NP;\n";
+            }
+        }
+
         for (const auto *comp : body->components) {
             if (auto *var = comp->to<IR::Declaration_Variable>()) {
                 locals.emplace(var->name, var->type);
@@ -1508,6 +1516,12 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
         *outputStream << indent << "void apply() override {\n";
         {
             IndentGuard ig(this);
+            if (tbl->name == "INGSF2FV_TBL" || tbl->name == "INGSF2FV_IF_TBL" ||
+                tbl->name == "ENGSF2FV_TBL" || tbl->name == "ENGSF2FV_IF_TBL") {
+                *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::NGSF2FV;\n";
+            } else if (tbl->name == "IFV2NGSF_TBL") {
+                *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::FV2NGSF;\n";
+            }
             if (tbl->body) {
                 for (const auto *comp : tbl->body->components) {
                     if (auto *keyNode = comp->to<IR::P5Key>()) {
@@ -1542,6 +1556,9 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
         inSwitchMethod = true;
     }
 
+    cstring oldFunctionName = currentFunctionName;
+    currentFunctionName = func->name;
+
     emitFunctionSignature(func, class_name);
 
     LocalsMap locals;
@@ -1555,6 +1572,7 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
 
     emitFunctionBody(func->body, locals);
 
+    currentFunctionName = oldFunctionName;
     inSwitchMethod = oldInSwitch;
 }
 
@@ -1753,24 +1771,51 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
         *outputStream << "\n";
 
         *outputStream << indent
-                      << "enum class NgsfDirection : uint8_t { INGRESS = 0, EGRESS = 1 };\n"
-                      << indent << "NgsfDirection ngsf_direction{NgsfDirection::INGRESS};\n"
+                      << "enum class NgsfDirection : uint8_t { FV2NGSF = 0, NGSF2FV = 1 };\n"
+                      << indent << "NgsfDirection ngsf_direction{NgsfDirection::FV2NGSF};\n"
                       << "\n"
                       << indent << "std::size_t ngsf_byte_offset{0};\n"
                       << indent << "uint8_t ngsf_bit_offset{0};\n"
                       << "\n"
+                      << "enum class NPorTM : uint8_t { NP = 0, TM = 1 };\n"
+                      << indent << "NPorTM npor_tm{NPorTM::NP};\n"
+                      << "\n"
+                      << indent << "std::size_t tm_byte_offset{0};\n"
+                      << indent << "uint8_t tm_bit_offset{0};\n"
+                      << "\n"
                       << indent << "void reset_ngsf_offset() { \n"
                       << indent << "    ngsf_byte_offset = 0;\n"
                       << indent << "    ngsf_bit_offset = 0;\n"
+                      << indent << "    tm_byte_offset = 0;\n"
+                      << indent << "    tm_bit_offset = 0;\n"
                       << indent << "}\n"
                       << "\n";
 
         *outputStream << indent << "template <typename T>\n"
                       << indent << "void _add_to_ngsf(T &value) {\n"
-                      << indent << "    if (ngsf_direction == NgsfDirection::INGRESS) {\n"
+                      << indent << "    if (ngsf_direction == NgsfDirection::FV2NGSF) {\n"
                       << indent << "        ngsf_append_any(value);\n"
+                      << indent << "        if (npor_tm == NPorTM::TM) {\n"
+                      << indent << "            tm_byte_offset = ngsf_byte_offset;\n"
+                      << indent << "            tm_bit_offset = ngsf_bit_offset;\n"
+                      << indent << "        }\n"
                       << indent << "    } else {\n"
                       << indent << "        ngsf_restore_any(value);\n"
+                      << indent << "    }\n"
+                      << indent << "}\n"
+                      << "\n"
+                      << indent << "template <typename T>\n"
+                      << indent << "void _add_to_ngsf(const T &value) {\n"
+                      << indent << "    if (ngsf_direction == NgsfDirection::FV2NGSF) {\n"
+                      << indent << "        ngsf_append_any(value);\n"
+                      << indent << "        if (npor_tm == NPorTM::TM) {\n"
+                      << indent << "            tm_byte_offset = ngsf_byte_offset;\n"
+                      << indent << "            tm_bit_offset = ngsf_bit_offset;\n"
+                      << indent << "        }\n"
+                      << indent << "    } else {\n"
+                      << indent << "        // Restore direction: cannot write back to a temporary.\n"
+                      << indent << "        // Consume bits to keep stream aligned.\n"
+                      << indent << "        ngsf_skip_any<T>();\n"
                       << indent << "    }\n"
                       << indent << "}\n"
                       << "\n";
@@ -1930,6 +1975,31 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
             << "        }\n"
             << "        // Works for p5::uint / p5::member / p5::Union (writes underlying storage/view).\n"
             << "        field = tmp;\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename Field>\n"
+            << "    void ngsf_skip_leaf() {\n"
+            << "        using D = std::decay_t<Field>;\n"
+            << "        constexpr std::size_t W = ngsf_width_bits<D>();\n"
+            << "        static_assert(W > 0, \"Unsupported NGSF leaf type\");\n"
+            << "        for (std::size_t i = 0; i < W; ++i) {\n"
+            << "            (void)ngsf_read_bit();\n"
+            << "        }\n"
+            << "    }\n"
+            << "\n"
+            << "    template <typename T>\n"
+            << "    void ngsf_skip_any() {\n"
+            << "        using D = std::decay_t<T>;\n"
+            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value) {\n"
+            << "            ngsf_skip_leaf<D>();\n"
+            << "        } else {\n"
+            << "            static_assert(std::is_aggregate_v<D>,\n"
+            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "            static_assert(std::is_default_constructible_v<D>,\n"
+            << "                          \"ngsf_skip_any requires aggregate types to be default-constructible.\");\n"
+            << "            D tmp{};\n"
+            << "            boost::pfr::for_each_field(tmp, [&](auto &sub) { ngsf_skip_any<std::decay_t<decltype(sub)>>(); });\n"
+            << "        }\n"
             << "    }\n"
             << "\n"
             << "    template <typename T>\n"
