@@ -964,6 +964,8 @@ struct _back_ID {
     } A;
 };
 
+@u_version("v1.1.2", [44]);
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;
@@ -982,6 +984,3 @@ struct _back_ID {
 //  uint<16> b = (uint<4>) (a);
 //}
 //
-
-//
-//@u_version("v1.1.2");

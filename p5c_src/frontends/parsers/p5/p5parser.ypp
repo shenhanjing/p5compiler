@@ -355,6 +355,7 @@ primary_expression
    	| const_value                   { $$ = $1; }
     	| string_lit                    { $$ = $1; }
         | "(" expression ")"            { $$ = $2; }
+        | "[" expression "]"            { $$ = $2; }
         | "{" expression_list "}"       { $$ = new IR::ListExpression(@1, *$2); }
     	;
 
@@ -452,9 +453,9 @@ expression
                 $$ = new IR::P5DesignatedInitializer(@1 + @4, /*isMember=*/true, $2, $4);
         }
         //   [idx] = expr
-        | "[" field_ref "]" "=" expression {
-                $$ = new IR::P5DesignatedInitializer(@1 + @5, /*isMember=*/false, $2, $5);
-        }
+//        | "[" field_ref "]" "=" expression {
+//                $$ = new IR::P5DesignatedInitializer(@1 + @5, /*isMember=*/false, $2, $5);
+//        }
     	;
 
 expression_list
@@ -1440,6 +1441,11 @@ declaration
         {
                 attachAnnotations($2, $1);
                 $$ = $2;
+        }
+        | annotations ";" {
+                // Standalone annotation statement (e.g. @u_version(...);).
+                // Ignore it completely and keep parsing.
+                $$ = nullptr;
         }
         | annotations type_declaration
         {
