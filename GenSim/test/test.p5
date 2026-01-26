@@ -931,6 +931,17 @@ void _DI_func1(){
   _DI_func0({.a.a.a = 1, .a.a.b = 1, .a.d = 0, .b = 2, .c = 3});
 }
 
+table CP_out()
+{
+  key =
+  {
+  }
+  control_parameters =
+  {
+    command = 0;
+  }
+}
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;

@@ -1280,6 +1280,11 @@ table_property
                 key->switches = *$4;
                 $$ = key;
         }
+        | CONTROL_PARAMETERS "=" "{" action_statement_list "}" {
+                // Similar to key_element's CONTROL_PARAMETERS form, but table properties
+                // don't wrap this in a P5KeyElement: return the action block directly.
+                $$ = $4;
+        }
         | SWITCH "(" select_exp ")" "{" table_case_list "}" {
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
         }
