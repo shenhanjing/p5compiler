@@ -591,6 +591,15 @@ anonymous_struct_union_dec
                 }
                 $$ = new IR::StructField(@2, anonName, type);
         }
+        | annotations STRUCT ID "{" struct_field_list "}" ";"
+        {
+                cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
+                auto type = new IR::Type_Struct(@2, IR::ID(anonName), IR::Vector<IR::Annotation>(), *$5);
+                if ($1) {
+                        for (auto *ann : *$1) type->addAnnotation(ann);
+                }
+                $$ = new IR::StructField(@3, *$3, type);
+        }
         | annotations STRUCT "{" struct_field_list "}" ID ";"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
@@ -610,6 +619,16 @@ anonymous_struct_union_dec
                         for (auto *ann : *$1) type->addAnnotation(ann);
                 }
                 $$ = new IR::StructField(@2, anonName, type);
+        }
+        | annotations UNION ID "{" struct_field_list "}" ";"
+        {
+                cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
+                auto type = new IR::Type_Struct(@2, IR::ID(anonName), IR::Vector<IR::Annotation>(), *$5);
+                type->annotations.push_back(new IR::Annotation("union", {}));
+                if ($1) {
+                        for (auto *ann : *$1) type->addAnnotation(ann);
+                }
+                $$ = new IR::StructField(@3, *$3, type);
         }
         | annotations UNION "{" struct_field_list "}" ID ";"
         {

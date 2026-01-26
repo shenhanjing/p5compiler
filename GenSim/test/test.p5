@@ -942,6 +942,28 @@ table CP_out()
   }
 }
 
+struct _front_ID {
+    uint<4> a;
+    union A {
+        uint<16> b;
+        struct B {
+            uint<8> c;
+            uint<8> d;
+        };
+    };
+};
+
+struct _back_ID {
+    uint<4> a;
+    union {
+        uint<16> b;
+        struct {
+            uint<8> c;
+            uint<8> d;
+        } B;
+    } A;
+};
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;
@@ -960,15 +982,6 @@ table CP_out()
 //  uint<16> b = (uint<4>) (a);
 //}
 //
-//struct A {
-//    uint<4> a;
-//    union {
-//        uint<16> b;
-//        struct B {
-//            uint<8> c;
-//            uint<8> d;
-//        };
-//    };
-//};
+
 //
 //@u_version("v1.1.2");
