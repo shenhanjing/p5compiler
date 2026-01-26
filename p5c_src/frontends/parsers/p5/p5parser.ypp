@@ -821,13 +821,15 @@ field_ref_or_func
         }
 
 select_exp
-        : field_ref_or_func {
+        : annotations field_ref_or_func {
                 auto vec = new IR::Vector<IR::Expression>();
-                vec->push_back($1);
+                // Ignore annotations for select list entries.
+                vec->push_back($2);
                 $$ = new IR::ListExpression(@1, *vec);
         }
-        | select_exp ","  field_ref_or_func {
-                $1->components.push_back($3);
+        | select_exp "," annotations field_ref_or_func {
+                // Ignore annotations for select list entries.
+                $1->components.push_back($4);
                 $$ = $1;
         }
 
