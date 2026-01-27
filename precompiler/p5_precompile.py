@@ -38,7 +38,13 @@ def _build_preprocessor_base_cmd(
 ) -> List[str]:
     # Mirrors the flags in p4c/tools/driver/p4c_src/main.py for the P5 directory case.
     cmd: List[str] = [preprocessor, "-E"]
-    cmd.extend(["-C", "-undef", "-nostdinc", "-x", "assembler-with-cpp"])
+    cmd.extend([
+        # "-C", 
+        "-undef", 
+        "-nostdinc", 
+        "-x", 
+        "assembler-with-cpp"
+        ])
 
     for inc in include_paths:
         cmd.extend(["-I", inc])
