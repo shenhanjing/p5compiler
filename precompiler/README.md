@@ -29,5 +29,7 @@ python3 -m p5compiler.precompiler.p5_precompile ./test -o ./out_dir
 - `-I PATH`：增加 include 搜索路径（可重复）
 - `-D NAME[=VALUE]`：增加宏定义（可重复）
 - `--preprocessor CC`：指定预处理器可执行文件（默认 `cc`）
+- `--run-p5c`：在合并输出 `.p5` 生成后，自动调用 `p5compiler/build_p5c/p5c <merged.p5> -o <merged.p5所在目录>` 生成 `include/` + `src/`
+- `--p5c PATH`：指定 `p5c` 可执行文件路径（默认按脚本相对位置查找 `p5compiler/build_p5c/p5c`）
 - `--keep-tmp`：保留每个源文件对应生成的中间 `.p4i` 文件（默认会删除，只保留合并文件）
 

@@ -56,11 +56,48 @@ def _build_preprocessor_base_cmd(
 
 def _run_preprocessor(cmd: Sequence[str]) -> str:
     # Use a list invocation (no shell) so paths don't need manual quoting.
-    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
     if proc.returncode != 0:
         sys.stderr.write(proc.stderr)
         raise RuntimeError(f"preprocessor failed with exit code {proc.returncode}")
     return proc.stdout
+
+
+def _default_p5c_path() -> Path:
+    # This file lives at: <repo>/p5compiler/precompiler/p5_precompile.py
+    # p5c lives at:       <repo>/p5compiler/build_p5c/p5c
+    return Path(__file__).resolve().parent.parent / "build_p5c" / "p5c"
+
+
+def _run_p5c(*, p5c_path: Path, input_p5: Path, out_dir: Path) -> None:
+    if not p5c_path.exists():
+        raise FileNotFoundError(
+            f"p5c not found at: {p5c_path}\n"
+            f"Build it first (see /root/p5compiler/README.md), or pass --p5c <path>."
+        )
+
+    cmd = [str(p5c_path), str(input_p5), "-o", str(out_dir)]
+    proc = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if proc.returncode != 0:
+        if proc.stdout:
+            sys.stdout.write(proc.stdout)
+        if proc.stderr:
+            sys.stderr.write(proc.stderr)
+        raise RuntimeError(f"p5c failed with exit code {proc.returncode}")
 
 
 _LINE_MARKER_RE = re.compile(r'^#\s+\d+\s+"([^"]+)"(?:\s+\d+.*)?$')
@@ -224,6 +261,18 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         help="Pass an extra argument to the preprocessor (repeatable)",
     )
     ap.add_argument(
+        "--run-p5c",
+        action="store_true",
+        default=False,
+        help="After merging, run p5compiler/build_p5c/p5c on the merged .p5 and write outputs into the merged file's directory",
+    )
+    ap.add_argument(
+        "--p5c",
+        dest="p5c_path",
+        default=None,
+        help="Path to p5c executable (default: ../../build_p5c/p5c relative to this script)",
+    )
+    ap.add_argument(
         "--keep-tmp",
         action="store_true",
         default=False,
@@ -245,6 +294,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             extra_preprocessor_args=ns.extra_preprocessor_args,
             keep_tmp=ns.keep_tmp,
         )
+
+        if ns.run_p5c:
+            p5c_path = Path(ns.p5c_path) if ns.p5c_path else _default_p5c_path()
+            _run_p5c(p5c_path=p5c_path, input_p5=res.merged_file, out_dir=res.merged_file.parent)
     except Exception as e:
         sys.stderr.write(f"ERROR: {e}\n")
         return 1
