@@ -5,7 +5,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence
 
 
 @dataclass(frozen=True)
@@ -61,8 +61,6 @@ def precompile_p5_directory(
     *,
     output_file: Optional[str] = None,
     preprocessor: str = "cc",
-    p4_include: str = "14",
-    use_env_includes: bool = True,
     include_paths: Sequence[str] = (),
     defines: Sequence[str] = (),
     extra_preprocessor_args: Sequence[str] = (),
@@ -83,20 +81,9 @@ def precompile_p5_directory(
     if not p5_files:
         raise ValueError(f"no .p5 files found under: {src}")
 
-    env_include_paths: List[str] = []
-    if use_env_includes:
-        if p4_include == "16":
-            p = os.environ.get("P4C_16_INCLUDE_PATH")
-            if p:
-                env_include_paths.append(p)
-        else:
-            p = os.environ.get("P4C_14_INCLUDE_PATH")
-            if p:
-                env_include_paths.append(p)
-
     base_cmd = _build_preprocessor_base_cmd(
         preprocessor=preprocessor,
-        include_paths=list(env_include_paths) + list(include_paths),
+        include_paths=list(include_paths),
         defines=defines,
         extra_preprocessor_args=extra_preprocessor_args,
     )
@@ -154,18 +141,6 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         help="Preprocessor executable to run (default: cc)",
     )
     ap.add_argument(
-        "--p4-include",
-        choices=["14", "16"],
-        default="14",
-        help="Which P4 include env to use: P4C_14_INCLUDE_PATH or P4C_16_INCLUDE_PATH (default: 14)",
-    )
-    ap.add_argument(
-        "--no-env-includes",
-        action="store_true",
-        default=False,
-        help="Do not auto-add P4C_14_INCLUDE_PATH / P4C_16_INCLUDE_PATH to -I",
-    )
-    ap.add_argument(
         "-I",
         dest="include_paths",
         action="append",
@@ -203,8 +178,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ns.output_dir,
             output_file=ns.output_file,
             preprocessor=ns.preprocessor,
-            p4_include=ns.p4_include,
-            use_env_includes=(not ns.no_env_includes),
             include_paths=ns.include_paths,
             defines=ns.defines,
             extra_preprocessor_args=ns.extra_preprocessor_args,

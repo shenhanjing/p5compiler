@@ -29,7 +29,5 @@ python3 -m p5compiler.precompiler.p5_precompile ./test -o ./out_dir
 - `-I PATH`：增加 include 搜索路径（可重复）
 - `-D NAME[=VALUE]`：增加宏定义（可重复）
 - `--preprocessor CC`：指定预处理器可执行文件（默认 `cc`）
-- `--p4-include {14,16}`：自动注入 `$P4C_14_INCLUDE_PATH` 或 `$P4C_16_INCLUDE_PATH`（默认 `14`）
-- `--no-env-includes`：不自动注入上述环境变量 include 路径
 - `--keep-tmp`：保留每个源文件对应生成的中间 `.p4i` 文件（默认会删除，只保留合并文件）
 
