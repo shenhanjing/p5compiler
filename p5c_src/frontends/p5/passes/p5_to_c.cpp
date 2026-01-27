@@ -1,6 +1,7 @@
 #include "frontends/p5/passes/p5_to_c.h"
 
 #include <cctype>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <functional>
@@ -180,12 +181,18 @@ void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
 
     if (auto *bits = type->to<IR::Type_Bits>()) {
         if (mode == EmitMode::Memberized) *outputStream << "p5::member<";
+
+        int width = bits->size;
+        if (bits->expression) {
+            width = evaluateExprToInt(bits->expression);
+        }
+
         if (!bits->isSigned) {
             // 无符号 Type_Bits 生成 p5::uint<N>
-            *outputStream << "p5::uint<" << bits->size << ">";
+            *outputStream << "p5::uint<" << width << ">";
         } else {
             // 有符号的生成标准整数类型
-            *outputStream << "int" << bits->size << "_t";
+            *outputStream << "int" << width << "_t";
         }
         if (mode == EmitMode::Memberized) *outputStream << ">";
         return;
@@ -668,6 +675,10 @@ void P5ToC::emitComponent(const IR::StatOrDecl *comp, const LocalsMap &locals) {
         emitIfStat(ifs, locals);
         return;
     }
+    if (auto *fs = comp->to<IR::ForStatement>()) {
+        emitForStatement(fs, locals);
+        return;
+    }
     if (auto *mcs = comp->to<IR::MethodCallStatement>()) {
         auto *mc = mcs->methodCall;
         std::ostringstream os;
@@ -919,6 +930,61 @@ void P5ToC::emitIfStat(const IR::IfStatement *ifs, const LocalsMap &locals) {
     }
 
     *outputStream << "\n";
+}
+
+void P5ToC::emitForStatement(const IR::ForStatement *fs, const LocalsMap &locals) {
+    if (fs == nullptr) return;
+
+    *outputStream << indent << "for (";
+    bool first = true;
+    for (auto *s : fs->init) {
+        if (!first) *outputStream << ", ";
+        first = false;
+        if (auto *decl = s->to<IR::Parameter>()) {
+            emitFieldType(decl->type);
+            *outputStream << " " << decl->name;
+            if (decl->defaultValue) {
+                *outputStream << " = ";
+                emitExpressionWithCtx(decl->defaultValue, locals);
+            }
+        } else if (auto *var = s->to<IR::Declaration_Variable>()) {
+            emitFieldType(var->type);
+            *outputStream << " " << var->name;
+            if (var->initializer) {
+                *outputStream << " = ";
+                emitExpressionWithCtx(var->initializer, locals);
+            }
+        } else if (auto *stat = s->to<IR::Statement>()) {
+            if (auto *as = stat->to<IR::AssignmentStatement>()) {
+                emitExpressionWithCtx(as->left, locals);
+                *outputStream << " = ";
+                emitExpressionWithCtx(as->right, locals);
+            }
+        }
+    }
+    *outputStream << "; ";
+    emitExpressionWithCtx(fs->condition, locals);
+    *outputStream << "; ";
+    first = true;
+    for (auto *s : fs->updates) {
+        if (!first) *outputStream << ", ";
+        first = false;
+        if (auto *as = s->to<IR::AssignmentStatement>()) {
+            emitExpressionWithCtx(as->left, locals);
+            *outputStream << " = ";
+            emitExpressionWithCtx(as->right, locals);
+        } else if (auto *stat = s->to<IR::Statement>()) {
+            if (auto *expr = stat->to<IR::Expression>()) {
+                emitExpressionWithCtx(expr, locals);
+            }
+        }
+    }
+    *outputStream << ") {\n";
+    {
+        IndentGuard ig(this);
+        emitComponent(fs->body, locals);
+    }
+    *outputStream << indent << "}\n";
 }
 
 void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &locals) {
@@ -2597,6 +2663,64 @@ void P5ToC::emitResetAllFields(const IR::P4Program *program) {
         }
     }
     *outputStream << indent << "}\n\n";
+}
+
+int P5ToC::evaluateExprToInt(const IR::Expression* expr) {
+    if (auto c = expr->to<IR::Constant>()) {
+        return c->asInt();
+    }
+    if (auto mc = expr->to<IR::MethodCallExpression>()) {
+        if (auto pe = mc->method->to<IR::PathExpression>()) {
+            if (pe->path->name == "_log2") {
+                if (mc->arguments->size() == 1) {
+                     int val = evaluateExprToInt(mc->arguments->at(0)->expression);
+                     return (int)std::ceil(std::log2(val));
+                }
+            } else if (pe->path->name == "sizeof") {
+                if (mc->arguments->size() == 1) {
+                    auto arg = mc->arguments->at(0)->expression;
+                    if (auto typePath = arg->to<IR::PathExpression>()) {
+                        cstring name = typePath->path->name;
+                        if (structMap.count(name)) {
+                            return getTypeSize(structMap.at(name));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ::P4::error("Cannot evaluate expression to integer: %s", expr);
+    return 0;
+}
+
+int P5ToC::getTypeSize(const IR::Type* type) {
+    if (auto tb = type->to<IR::Type_Bits>()) {
+        if (tb->expression) {
+            return evaluateExprToInt(tb->expression);
+        }
+        return tb->width_bits();
+    }
+    if (auto tn = type->to<IR::Type_Name>()) {
+        if (structMap.count(tn->path->name)) {
+            return getTypeSize(structMap.at(tn->path->name));
+        }
+        return 0;
+    }
+    if (auto ts = type->to<IR::Type_Struct>()) {
+        int size = 0;
+        for (auto field : ts->fields) {
+            size += getTypeSize(field->type);
+        }
+        return size;
+    }
+    if (auto stack = type->to<IR::Type_Stack>()) {
+         int elemSize = getTypeSize(stack->elementType);
+         if (auto c = stack->size->to<IR::Constant>()) {
+             return elemSize * c->asInt();
+         }
+         return elemSize * evaluateExprToInt(stack->size);
+    }
+    return 0;
 }
 
 const IR::P4Program *runP5ToC(const IR::P4Program *program, const std::string &out_dir) {

@@ -266,7 +266,7 @@ static int globalAnonCount = 0;
 %type<IR::Parameter*>                   parameter
 %type<IR::ParameterList*>               param_list
 %type<IR::Argument*>                    arg
-%type<IR::Statement*>                   do_while_statement conditional_statement for_loop_statement switch_statement assignment_or_call_statement
+%type<IR::Statement*>                   do_while_statement conditional_statement for_loop_statement switch_statement assignment_or_call_statement assignment_or_call
 %type<IR::StatOrDecl*>                  action_statement
 %type<IR::BlockStatement*>              action_statement_list action_compound_statement
 %type<IR::SwitchCase*>                  case
@@ -503,13 +503,21 @@ annotations
 //
 //////////////////////////////////////////////////////////////////////////
 
-type_ref: UINT "<" const_value ">" {
-                auto width = $3->asInt();
-                $$ = IR::Type_Bits::get(width, false); // false 表示无符号
+type_ref: UINT "<" postfix_expression ">" {
+                auto expr = $3;
+                if (auto c = expr->to<IR::Constant>()) {
+                    $$ = IR::Type_Bits::get(c->asInt(), false);
+                } else {
+                    $$ = IR::Type_Bits::get(@1, expr, false);
+                }
         }
-        | INT  "<" const_value ">" {
-                auto width = $3->asInt();
-                $$ = IR::Type_Bits::get(width, true);  // true 表示有符号
+        | INT  "<" postfix_expression ">" {
+                auto expr = $3;
+                if (auto c = expr->to<IR::Constant>()) {
+                    $$ = IR::Type_Bits::get(c->asInt(), true);
+                } else {
+                    $$ = IR::Type_Bits::get(@1, expr, true);
+                }
         }
         | struct_union_type_declaration {
                 $$ = $1;
@@ -966,13 +974,13 @@ conditional_statement
         }
 
 for_loop_statement
-        : FOR "(" parameter ";" expression ";" assignment_or_call_statement ")" action_statement
+        : FOR "(" parameter ";" expression ";" assignment_or_call ")" action_statement
         {
                 IR::IndexedVector<IR::StatOrDecl> init;
                 init.push_back($3);   // parameter 本身就是 IR::Parameter/Declaration
 
                 IR::IndexedVector<IR::StatOrDecl> iter;
-                iter.push_back($7);   // assignment_or_call_statement -> IR::Statement
+                iter.push_back($7);   // assignment_or_call -> IR::Statement
 
                 IR::IndexedVector<IR::StatOrDecl> as_vec;
                 as_vec.push_back($9);
@@ -983,6 +991,43 @@ for_loop_statement
                         init,
                         $5,
                         iter,
+                        as
+                );
+        }
+        | FOR "(" parameter ":" expression ")" action_statement
+        {
+                auto param = $3;
+                auto bound = $5;
+
+                // 1. Initialize param to 0 if it doesn't have a default value
+                if (param->defaultValue == nullptr) {
+                    param->defaultValue = new IR::Constant(param->type, 0);
+                }
+
+                IR::IndexedVector<IR::StatOrDecl> init;
+                init.push_back(param);
+
+                // 2. Condition: param < bound
+                auto param_ref = new IR::PathExpression(param->srcInfo, new IR::Path(param->name));
+                auto cond = new IR::Lss(@4, param_ref, bound);
+
+                // 3. Update: param = param + 1
+                auto one = new IR::Constant(param->type, 1);
+                auto add = new IR::Add(@4, param_ref->clone(), one);
+                auto update = new IR::AssignmentStatement(@4, param_ref->clone(), add);
+                IR::IndexedVector<IR::StatOrDecl> updates;
+                updates.push_back(update);
+
+                // 4. Body
+                IR::IndexedVector<IR::StatOrDecl> as_vec;
+                as_vec.push_back($7);
+                auto as = new IR::BlockStatement(@7, as_vec);
+
+                $$ = new IR::ForStatement(
+                        @1,
+                        init,
+                        cond,
+                        updates,
                         as
                 );
         }
@@ -1030,63 +1075,66 @@ switch_statement
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
         }
 
-assignment_or_call_statement
-        : field_ref_or_func ";" {
+assignment_or_call
+        : field_ref_or_func {
                 if (auto mc = $1->to<IR::MethodCallExpression>()) {
                         $$ = new IR::MethodCallStatement(@1, mc);
                 } else {
                         $$ = new IR::EmptyStatement(@1);
                 }
         }
-        | field_ref "=" expression ";" {
+        | field_ref "=" expression {
                 $$ = new IR::AssignmentStatement(@2, $1, $3);
         }
-        | field_ref "-=" expression ";" {
+        | field_ref "-=" expression {
                 auto sub = new IR::Sub(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, sub);
         }
-        | field_ref "+=" expression ";" {
+        | field_ref "+=" expression {
                 auto sub = new IR::Sub(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, sub);
         }
-        | field_ref "*=" expression ";" {
+        | field_ref "*=" expression {
                 auto mul = new IR::Mul(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, mul);
         }
-        | field_ref "/=" expression ";" {
+        | field_ref "/=" expression {
                 auto div = new IR::Div(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, div);
         }
-        | field_ref "%=" expression ";" {
+        | field_ref "%=" expression {
                 auto mod = new IR::Mod(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, mod);
         }
-        | field_ref "|=" expression ";" {
+        | field_ref "|=" expression {
                 auto bor = new IR::BOr(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, bor);
         }
-        | field_ref "^=" expression ";" {
+        | field_ref "^=" expression {
                 auto bxor = new IR::BXor(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, bxor);
         }
-        | field_ref "<<=" expression ";" {
+        | field_ref "<<=" expression {
                 auto shl = new IR::Shl(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, shl);
         }
-        | field_ref ">>=" expression ";" {
+        | field_ref ">>=" expression {
                 auto shr = new IR::Shr(@2, $1, $3);
                 $$ = new IR::AssignmentStatement(@2, $1, shr);
         }
-        | field_ref "++" ";" {
+        | field_ref "++" {
                 auto one = new IR::Constant(IR::Type_Bits::get(32), 1);
                 auto add = new IR::Add(@2, $1, one);
                 $$ = new IR::AssignmentStatement(@2, $1, add);
         }
-        | field_ref "--" ";" {
+        | field_ref "--" {
                 auto one = new IR::Constant(IR::Type_Bits::get(32), 1);
                 auto sub = new IR::Sub(@2, $1, one);
                 $$ = new IR::AssignmentStatement(@2, $1, sub);
         }
+
+assignment_or_call_statement
+        : assignment_or_call ";" { $$ = $1; }
 
 action_statement
         : annotations variable_declaration {
@@ -1108,6 +1156,9 @@ action_statement
         | annotations return_statement { $$ = $2; }
         | annotations break_statement { $$ = $2; }
         | annotations assignment_or_call_statement { $$ = $2; }
+        | annotations ";" {
+            $$ = new IR::EmptyStatement(@$);
+        }
         ;
 
 action_statement_list

@@ -973,7 +973,7 @@ void _SW_ANNO()
   uint<8> C = 3;
   uint<8> Z;
 
-  switch (@A @a A, @B @b B, C){
+  switch (@A @a A[7:1], @B @b B, C){
     case 1, 0&&&0, 4: {
       Z = 1;
     }

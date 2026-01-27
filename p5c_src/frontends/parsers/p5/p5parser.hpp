@@ -610,6 +610,7 @@ namespace P4 { namespace P5 {
       // conditional_statement
       // for_loop_statement
       // switch_statement
+      // assignment_or_call
       // assignment_or_call_statement
       char dummy22[sizeof (IR::Statement*)];
 
@@ -1008,34 +1009,35 @@ namespace P4 { namespace P5 {
         S_case = 145,                            // case
         S_switch_cases = 146,                    // switch_cases
         S_switch_statement = 147,                // switch_statement
-        S_assignment_or_call_statement = 148,    // assignment_or_call_statement
-        S_action_statement = 149,                // action_statement
-        S_action_statement_list = 150,           // action_statement_list
-        S_action_compound_statement = 151,       // action_compound_statement
-        S_key_element = 152,                     // key_element
-        S_key_element_list = 153,                // key_element_list
-        S_key_case_entry = 154,                  // key_case_entry
-        S_key_case_list = 155,                   // key_case_list
-        S_key_switch_entry = 156,                // key_switch_entry
-        S_key_switch_list = 157,                 // key_switch_list
-        S_program_selection_statement = 158,     // program_selection_statement
-        S_program_selection_statement_list = 159, // program_selection_statement_list
-        S_table_case_entry = 160,                // table_case_entry
-        S_table_case_list = 161,                 // table_case_list
-        S_table_property = 162,                  // table_property
-        S_table_property_list = 163,             // table_property_list
-        S_table_declaration = 164,               // table_declaration
-        S_typedef_declaration = 165,             // typedef_declaration
-        S_enumerator = 166,                      // enumerator
-        S_enumerator_list = 167,                 // enumerator_list
-        S_enum_declaration = 168,                // enum_declaration
-        S_struct_union_type_declaration = 169,   // struct_union_type_declaration
-        S_type_declaration = 170,                // type_declaration
-        S_function_declaration = 171,            // function_declaration
-        S_namespace = 172,                       // namespace
-        S_declaration = 173,                     // declaration
-        S_declaration_list = 174,                // declaration_list
-        S_input = 175                            // input
+        S_assignment_or_call = 148,              // assignment_or_call
+        S_assignment_or_call_statement = 149,    // assignment_or_call_statement
+        S_action_statement = 150,                // action_statement
+        S_action_statement_list = 151,           // action_statement_list
+        S_action_compound_statement = 152,       // action_compound_statement
+        S_key_element = 153,                     // key_element
+        S_key_element_list = 154,                // key_element_list
+        S_key_case_entry = 155,                  // key_case_entry
+        S_key_case_list = 156,                   // key_case_list
+        S_key_switch_entry = 157,                // key_switch_entry
+        S_key_switch_list = 158,                 // key_switch_list
+        S_program_selection_statement = 159,     // program_selection_statement
+        S_program_selection_statement_list = 160, // program_selection_statement_list
+        S_table_case_entry = 161,                // table_case_entry
+        S_table_case_list = 162,                 // table_case_list
+        S_table_property = 163,                  // table_property
+        S_table_property_list = 164,             // table_property_list
+        S_table_declaration = 165,               // table_declaration
+        S_typedef_declaration = 166,             // typedef_declaration
+        S_enumerator = 167,                      // enumerator
+        S_enumerator_list = 168,                 // enumerator_list
+        S_enum_declaration = 169,                // enum_declaration
+        S_struct_union_type_declaration = 170,   // struct_union_type_declaration
+        S_type_declaration = 171,                // type_declaration
+        S_function_declaration = 172,            // function_declaration
+        S_namespace = 173,                       // namespace
+        S_declaration = 174,                     // declaration
+        S_declaration_list = 175,                // declaration_list
+        S_input = 176                            // input
       };
     };
 
@@ -1189,6 +1191,7 @@ namespace P4 { namespace P5 {
       case symbol_kind::S_conditional_statement: // conditional_statement
       case symbol_kind::S_for_loop_statement: // for_loop_statement
       case symbol_kind::S_switch_statement: // switch_statement
+      case symbol_kind::S_assignment_or_call: // assignment_or_call
       case symbol_kind::S_assignment_or_call_statement: // assignment_or_call_statement
         value.move< IR::Statement* > (std::move (that.value));
         break;
@@ -2027,6 +2030,7 @@ switch (yykind)
       case symbol_kind::S_conditional_statement: // conditional_statement
       case symbol_kind::S_for_loop_statement: // for_loop_statement
       case symbol_kind::S_switch_statement: // switch_statement
+      case symbol_kind::S_assignment_or_call: // assignment_or_call
       case symbol_kind::S_assignment_or_call_statement: // assignment_or_call_statement
         value.template destroy< IR::Statement* > ();
         break;
@@ -3984,8 +3988,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 833,     ///< Last index in yytable_.
-      yynnts_ = 83,  ///< Number of nonterminal symbols.
+      yylast_ = 748,     ///< Last index in yytable_.
+      yynnts_ = 84,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
@@ -4179,6 +4183,7 @@ switch (yykind)
       case symbol_kind::S_conditional_statement: // conditional_statement
       case symbol_kind::S_for_loop_statement: // for_loop_statement
       case symbol_kind::S_switch_statement: // switch_statement
+      case symbol_kind::S_assignment_or_call: // assignment_or_call
       case symbol_kind::S_assignment_or_call_statement: // assignment_or_call_statement
         value.copy< IR::Statement* > (YY_MOVE (that.value));
         break;
@@ -4441,6 +4446,7 @@ switch (yykind)
       case symbol_kind::S_conditional_statement: // conditional_statement
       case symbol_kind::S_for_loop_statement: // for_loop_statement
       case symbol_kind::S_switch_statement: // switch_statement
+      case symbol_kind::S_assignment_or_call: // assignment_or_call
       case symbol_kind::S_assignment_or_call_statement: // assignment_or_call_statement
         value.move< IR::Statement* > (YY_MOVE (s.value));
         break;
@@ -4622,7 +4628,7 @@ switch (yykind)
 
 #line 7 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 } } // P4::P5
-#line 4626 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
+#line 4632 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
 
 
 

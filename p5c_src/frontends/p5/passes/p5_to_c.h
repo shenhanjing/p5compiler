@@ -88,12 +88,15 @@ class P5ToC {
     void emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, EmitMode mode, int &anon_counter);
     void emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitFieldType(const IR::Type *type, EmitMode mode = EmitMode::Standard);
+    int evaluateExprToInt(const IR::Expression* expr);
+    int getTypeSize(const IR::Type* type);
     void emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMap &locals = {});
     void emitHeaderDecl(const IR::Declaration_Instance *inst);
     void emitTypedef(const IR::Type_Typedef *td);
     void emitTable(const IR::P5Table *tbl);
     void emitIfStat(const IR::IfStatement *ifs, const LocalsMap &locals = {});
+    void emitForStatement(const IR::ForStatement *fs, const LocalsMap &locals = {});
     bool emitMethodCall(const IR::MethodCallExpression *mc, const cstring &lhs, std::ostream &os, const LocalsMap &locals = {});
     bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const LocalsMap &locals = {});
     void emitGtvHpp(const IR::P4Program *program);
