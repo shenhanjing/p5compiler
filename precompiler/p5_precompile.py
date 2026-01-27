@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -14,14 +15,14 @@ class PrecompileResult:
     preprocessed_files: List[Path]
 
 
-def _find_p5_files(src_dir: Path) -> List[Path]:
-    p5_files: List[Path] = []
+def _find_files(src_dir: Path, *, suffix: str) -> List[Path]:
+    files_out: List[Path] = []
     for root, _, files in os.walk(src_dir):
         for f in files:
-            if f.endswith(".p5"):
-                p5_files.append(Path(root) / f)
-    p5_files.sort()
-    return p5_files
+            if f.endswith(suffix):
+                files_out.append(Path(root) / f)
+    files_out.sort()
+    return files_out
 
 
 def _flatten_relpath(rel_path: Path) -> str:
@@ -47,12 +48,46 @@ def _build_preprocessor_base_cmd(
     return cmd
 
 
-def _run_preprocessor(cmd: Sequence[str]) -> None:
+def _run_preprocessor(cmd: Sequence[str]) -> str:
     # Use a list invocation (no shell) so paths don't need manual quoting.
     proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if proc.returncode != 0:
         sys.stderr.write(proc.stderr)
         raise RuntimeError(f"preprocessor failed with exit code {proc.returncode}")
+    return proc.stdout
+
+
+_LINE_MARKER_RE = re.compile(r'^#\s+\d+\s+"([^"]+)"(?:\s+\d+.*)?$')
+
+
+def _strip_expanded_includes(preprocessed_text: str, *, main_file: Path) -> str:
+    """Keep only lines that originate from main_file, drop expanded include content.
+
+    We rely on the preprocessor's line markers (`# <n> "file" ...`) to track the
+    current origin file. When the origin file is not main_file, we discard those
+    non-marker lines.
+    """
+    # Compare against both the user-specified path and its resolved form,
+    # since preprocessors may emit either in line markers.
+    main_strs = {str(main_file), str(main_file.resolve())}
+
+    out_lines: List[str] = []
+    current_file: Optional[str] = None
+
+    for line in preprocessed_text.splitlines(keepends=True):
+        m = _LINE_MARKER_RE.match(line.rstrip("\n"))
+        if m:
+            current_file = m.group(1)
+            # Keep only the line markers that point back to the main file
+            # (useful for debugging/line mapping), but always update state.
+            if current_file in main_strs:
+                out_lines.append(line)
+            continue
+
+        if current_file in main_strs:
+            out_lines.append(line)
+
+    return "".join(out_lines)
 
 
 def precompile_p5_directory(
@@ -77,9 +112,10 @@ def precompile_p5_directory(
     dir_name = src.resolve().name
     merged = Path(output_file) if output_file else (out_dir / f"{dir_name}_merged.p4i")
 
-    p5_files = _find_p5_files(src)
-    if not p5_files:
-        raise ValueError(f"no .p5 files found under: {src}")
+    p5_files = _find_files(src, suffix=".p5")
+    h_files = _find_files(src, suffix=".h")
+    if not p5_files and not h_files:
+        raise ValueError(f"no .p5 or .h files found under: {src}")
 
     base_cmd = _build_preprocessor_base_cmd(
         preprocessor=preprocessor,
@@ -89,19 +125,39 @@ def precompile_p5_directory(
     )
 
     preprocessed: List[Path] = []
-    for p5_f in p5_files:
-        rel = p5_f.relative_to(src)
-        out_name = _flatten_relpath(rel)
+
+    def preprocess_and_filter_to_file(src_f: Path, *, rel_prefix: str) -> Path:
+        rel = src_f.relative_to(src)
+        out_name = f"{rel_prefix}{_flatten_relpath(rel)}"
         out_f = out_dir / out_name
 
-        # cc -E ... -o <out> <in>
-        cmd = list(base_cmd) + ["-o", str(out_f), str(p5_f)]
-        _run_preprocessor(cmd)
+        # cc -E ... <in>  (stdout captured)
+        cmd = list(base_cmd) + [str(src_f)]
+        raw = _run_preprocessor(cmd)
+        filtered = _strip_expanded_includes(raw, main_file=src_f)
+        out_f.write_text(filtered, encoding="utf-8", errors="replace")
         preprocessed.append(out_f)
+        return out_f
+
+    # Phase 1: preprocess all .h files, strip expanded include content, merge together.
+    h_outputs: List[Path] = []
+    for h_f in h_files:
+        h_outputs.append(preprocess_and_filter_to_file(h_f, rel_prefix="h_"))
+
+    # Phase 2: preprocess all .p5 files, strip expanded include content, merge together.
+    p5_outputs: List[Path] = []
+    for p5_f in p5_files:
+        p5_outputs.append(preprocess_and_filter_to_file(p5_f, rel_prefix="p5_"))
 
     merged.parent.mkdir(parents=True, exist_ok=True)
     with merged.open("w", encoding="utf-8") as out_fp:
-        for p4i_f in preprocessed:
+        # Put merged .h content first, then merged .p5 content.
+        for p4i_f in h_outputs:
+            out_fp.write(f"// File: {p4i_f}\n")
+            out_fp.write(p4i_f.read_text(encoding="utf-8", errors="replace"))
+            out_fp.write("\n")
+
+        for p4i_f in p5_outputs:
             out_fp.write(f"// File: {p4i_f}\n")
             out_fp.write(p4i_f.read_text(encoding="utf-8", errors="replace"))
             out_fp.write("\n")
