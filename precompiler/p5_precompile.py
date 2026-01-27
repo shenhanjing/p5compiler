@@ -116,7 +116,7 @@ def precompile_p5_directory(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     dir_name = src.resolve().name
-    merged = Path(output_file) if output_file else (out_dir / f"{dir_name}_merged.p4i")
+    merged = Path(output_file) if output_file else (out_dir / f"{dir_name}_merged.p5")
 
     p5_files = _find_files(src, suffix=".p5")
     h_files = _find_files(src, suffix=".h")
@@ -181,7 +181,7 @@ def precompile_p5_directory(
 
 def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(
-        description="Precompile a P5 directory: preprocess all .p5 files and merge into one .p4i"
+        description="Precompile a P5 directory: preprocess files and merge into one output"
     )
     ap.add_argument("src_dir", help="Directory to scan recursively for .p5 files")
     ap.add_argument(
@@ -195,7 +195,7 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         "--output-file",
         dest="output_file",
         default=None,
-        help="Path to merged output file (default: <output-dir>/<dir>_merged.p4i)",
+        help="Path to merged output file (default: <output-dir>/<dir>_merged.p5)",
     )
     ap.add_argument(
         "--preprocessor",

@@ -1,6 +1,6 @@
 ## p5 预编译器（从 p4c 驱动中抽离）
 
-这个目录提供一个独立的 **P5 预编译** 工具：输入一个目录，递归查找所有 `.p5` 文件，对每个文件运行 C 预处理器生成 `.p4i`，然后把所有 `.p4i` 合并为一个最终的合并文件。
+这个目录提供一个独立的 **P5 预编译** 工具：输入一个目录，递归查找所有 `.p5` 文件（同时也会处理目录中的 `.h`），对每个文件运行 C 预处理器生成预处理结果，删掉展开的 include 内容，然后合并为一个最终的合并文件。
 
 ### 对齐的行为（对应命令）
 
@@ -14,7 +14,7 @@ p4c -b bmv2-v1model ./test -o ./out_dir --std p5
 
 - 输入目录：`./test`
 - 输出目录：`./out_dir`
-- 合并输出文件：`./out_dir/test_merged.p4i`
+- 合并输出文件：`./out_dir/test_merged.p5`
 
 ### 用法
 
@@ -25,7 +25,7 @@ python3 -m p5compiler.precompiler.p5_precompile ./test -o ./out_dir
 
 可选参数：
 
-- `--output-file PATH`：指定合并输出文件路径（默认按输入目录名生成 `<dir>_merged.p4i`）
+- `--output-file PATH`：指定合并输出文件路径（默认按输入目录名生成 `<dir>_merged.p5`）
 - `-I PATH`：增加 include 搜索路径（可重复）
 - `-D NAME[=VALUE]`：增加宏定义（可重复）
 - `--preprocessor CC`：指定预处理器可执行文件（默认 `cc`）
