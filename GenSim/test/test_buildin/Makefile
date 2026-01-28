@@ -1,5 +1,5 @@
 # Makefile for builtin tests
-CXX = g++-10
+CXX = g++
 CXXFLAGS = -std=c++17 -I ../../include -I ../../generated/include
 
 # Test executables

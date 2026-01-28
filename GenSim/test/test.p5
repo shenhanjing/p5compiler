@@ -1006,6 +1006,15 @@ void _annonymous_test() {
   var.c = 2;
 }
 
+//uint<8> _OutField;
+//uint<sizeof(_OutField)> _Temp[1];
+
+//void _uint_func(uint<0> &OutField){ 
+//  uint<sizeof(OutField)> _Temp[1];
+//}
+
+//header _an_st _header_arr[8];
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;

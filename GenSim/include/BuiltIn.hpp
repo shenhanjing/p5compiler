@@ -13,6 +13,8 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <stdexcept>
+#include <string>
 
 #include <boost/pfr.hpp>
 
@@ -75,43 +77,6 @@ inline auto pack_key_to_uint(const Key &key) {
     append_bits_msb_first(key, bits);
     // Defensive: if someone passes an aggregate with unexpected width, clamp/pad via from_bits behavior.
     return p5::uint<Bits>::from_bits(bits);
-}
-
-// Calculate bit width of basic P5 types
-template <typename T>
-std::size_t calculate_bit_width() {
-    using D = std::decay_t<T>;
-    if constexpr (is_p5_uint<D>::value) {
-        return D::width();
-    } else if constexpr (is_p5_member<D>::value) {
-        return D::width();
-    } else if constexpr (is_p5_union<D>::value) {
-        return D::width();
-    } else {
-        static_assert(always_false<T>::value,
-                      "calculate_bit_width supports p5::uint/p5::member/p5::Union only.");
-        return 0;
-    }
-}
-
-// Recursively calculate total bit width of struct and its nested fields
-template <typename T>
-std::size_t calculate_struct_bit_width() {
-    using D = std::decay_t<T>;
-    if constexpr (std::is_aggregate_v<D>) {
-        std::size_t total = 0;
-        boost::pfr::for_each_field(D{}, [&](const auto &field) {
-            using FieldType = std::decay_t<decltype(field)>;
-            if constexpr (std::is_aggregate_v<FieldType>) {
-                total += calculate_struct_bit_width<FieldType>();
-            } else {
-                total += calculate_bit_width<FieldType>();
-            }
-        });
-        return total;
-    } else {
-        return calculate_bit_width<D>();
-    }
 }
 
 // Type traits for _list_flatten: detect if a type is std::vector
@@ -191,6 +156,71 @@ inline std::vector<T> slice_impl(const std::vector<T>& list_variable,
 
     return result;
 }
+
+// Helper for _map: field name mapping structure
+// Users need to specialize this template for each struct type they want to use with _map
+template <typename StructType>
+struct struct_field_names {
+    // Default: empty array, users must specialize for their struct types
+    static constexpr const char* names[] = {};
+    static constexpr std::size_t count = 0;
+};
+
+// Helper: find field index by field name (case-sensitive)
+template <typename StructType>
+inline std::size_t find_field_index(const char* field_name) {
+    constexpr auto& names = struct_field_names<StructType>::names;
+    constexpr std::size_t name_count = struct_field_names<StructType>::count;
+    constexpr std::size_t field_count = boost::pfr::tuple_size_v<StructType>;
+    
+    // Check if field names are defined
+    if (name_count == 0) {
+        throw std::runtime_error("Field names not defined for this struct type. "
+                                "Please specialize struct_field_names template.");
+    }
+    
+    // Verify field count matches
+    if (name_count != field_count) {
+        throw std::runtime_error("Field name count does not match struct field count.");
+    }
+    
+    // Find matching field name (case-sensitive)
+    for (std::size_t i = 0; i < name_count; ++i) {
+        if (std::strcmp(names[i], field_name) == 0) {
+            return i;
+        }
+    }
+    
+    return SIZE_MAX; // Not found
+}
+
+// Helper: extract field value by index
+template <typename StructType, std::size_t FieldIndex>
+inline auto map_field_by_index_impl(const std::vector<StructType>& struct_list) {
+    using FieldType = std::decay_t<decltype(boost::pfr::get<FieldIndex>(std::declval<StructType>()))>;
+    std::vector<FieldType> result;
+    result.reserve(struct_list.size());
+    for (const auto& obj : struct_list) {
+        result.push_back(boost::pfr::get<FieldIndex>(obj));
+    }
+    return result;
+}
+
+// Helper: dispatch wrapper using function template overloading
+// Each index gets its own overloaded function to avoid return type deduction issues
+template <typename StructType>
+struct map_field_dispatch_wrapper {
+    template <std::size_t Index>
+    static auto dispatch_impl(const std::vector<StructType>& struct_list) {
+        return map_field_by_index_impl<StructType, Index>(struct_list);
+    }
+};
+
+
+
+
+
+
 }  // namespace detail_builtin
 
 // Helper: bit width of a type (only p5::uint<N> is supported).
@@ -205,23 +235,11 @@ constexpr std::size_t bit_width_of_type() {
     }
 }
 
-// Global _sizeof function: can be called without context instance
+// Global _sizeof function: returns bit width (in bits) based on argument type.
 template <typename T>
-inline p5::uint<32> _sizeof() {
+constexpr std::size_t _sizeof(const T&) {
     using Decayed = std::decay_t<T>;
-
-    // Special cases for P5 basic types
-    if constexpr (detail_builtin::is_p5_uint<Decayed>::value) {
-        return p5::uint<32>(Decayed::width());
-    }
-    else if constexpr (detail_builtin::is_p5_member<Decayed>::value) {
-        return p5::uint<32>(Decayed::width());
-    }
-    // Default case for structs and other aggregates
-    else {
-        std::size_t total_bits = detail_builtin::calculate_struct_bit_width<T>();
-        return p5::uint<32>(total_bits);
-    }
+    return p5::bit_width_v<Decayed>;
 }
 
 // Global _lenof function: can be called without context instance
@@ -235,12 +253,29 @@ inline p5::uint<16> _lenof(const T (&arr)[N]) {
     return p5::uint<16>(N);
 }
 
-// Global _log2 function: can be called without context instance
-template <size_t N>
-inline int _log2(const p5::uint<N>& value) {
-    uint64_t n = value.to_ullong();
-    if (n == 0) return -1;  // log2(0) is undefined
-    return 63 - __builtin_clzll(n);
+// Global _log2 function: integer floor(log2(n)).
+// - Accepts integral constants like: _log2(33)
+// - Returns 0 for n <= 0
+// - Returns an unsigned integer
+template <typename Int>
+constexpr std::uint32_t _log2(Int n) {
+    static_assert(std::is_integral_v<std::decay_t<Int>>, "_log2 requires an integral argument");
+
+    std::uint64_t x = 0;
+    if constexpr (std::is_signed_v<std::decay_t<Int>>) {
+        if (n <= 0) return 0;
+        x = static_cast<std::uint64_t>(n);
+    } else {
+        x = static_cast<std::uint64_t>(n);
+        if (x == 0) return 0;
+    }
+
+    std::uint32_t r = 0;
+    while (x > 1) {
+        x >>= 1;
+        ++r;
+    }
+    return r;
 }
 
 // Global _printf function: can be called without context instance
@@ -439,21 +474,9 @@ public:
 
     // Intrisic functions placeholders.
     template <typename T>
-    inline p5::uint<32> _sizeof() const {
+    constexpr std::size_t _sizeof(const T&) const {
         using Decayed = std::decay_t<T>;
-
-        // Special cases for P5 basic types
-        if constexpr (detail_builtin::is_p5_uint<Decayed>::value) {
-            return p5::uint<32>(Decayed::width());
-        }
-        else if constexpr (detail_builtin::is_p5_member<Decayed>::value) {
-            return p5::uint<32>(Decayed::width());
-        }
-        // Default case for structs and other aggregates
-        else {
-            std::size_t total_bits = detail_builtin::calculate_struct_bit_width<T>();
-            return p5::uint<32>(total_bits);
-        }
+        return p5::bit_width_v<Decayed>;
     }
 
     template <typename T>
@@ -481,11 +504,9 @@ public:
         return {};
     }
 
-    template <size_t N>
-    inline int _log2(const p5::uint<N>& value) const {
-        uint64_t n = value.to_ullong();
-        if (n == 0) return -1;  // log2(0) is undefined
-        return 63 - __builtin_clzll(n);
+    template <typename Int>
+    constexpr std::uint32_t _log2(Int n) const {
+        return ::_log2(n);
     }
 
     template <typename... Args>
@@ -577,6 +598,141 @@ public:
         return std::vector<T>(std::begin(arr), std::end(arr));
     }
 
+    // _list_alloc: 分配一个与输入列表相同大小和长度的新列表
+    // 例如: int arr[5] = {1, 2, 3, 4, 5}; auto new_list = ctx._list_alloc(arr);
+    //      返回 std::vector<int>(5)，元素为默认构造的 int{} (即 0)
+    //      用途：用于避免依赖，创建一个独立的新列表
+    // 版本1: 接受数组参数
+    template <typename T, std::size_t N>
+    inline std::vector<T> _list_alloc(const T (&arr)[N]) const {
+        return std::vector<T>(N);
+    }
+
+    // 版本2: 接受 std::vector 参数
+    template <typename T>
+    inline std::vector<T> _list_alloc(const std::vector<T>& list) const {
+        return std::vector<T>(list.size());
+    }
+
+    // _map: 从结构体列表中提取特定字段，生成字段值列表
+    // 例如: ControlInfo list = {ci0, ci1, ci2, ci3};
+    //      _map(list, "Priority") 返回 {ci0.Priority, ci1.Priority, ci2.Priority, ci3.Priority}
+    // 注意：使用前需要为结构体类型特化 detail_builtin::struct_field_names 模板
+    // 示例：
+    //   namespace detail_builtin {
+    //     template <>
+    //     struct struct_field_names<ControlInfo> {
+    //         static constexpr const char* names[] = {"Priority", "Value", "Type"};
+    //         static constexpr std::size_t count = 3;
+    //     };
+    //   }
+    template <typename T>
+    inline auto _map(const std::vector<T>& struct_list, const char* field_name) const {
+        using StructType = std::decay_t<T>;
+        
+        // 查找字段索引
+        std::size_t field_index = detail_builtin::find_field_index<StructType>(field_name);
+        
+        if (field_index == SIZE_MAX) {
+            throw std::invalid_argument(std::string("Field '") + field_name + 
+                                       "' not found in struct");
+        }
+        
+        constexpr std::size_t field_count = boost::pfr::tuple_size_v<StructType>;
+        if (field_index >= field_count) {
+            throw std::invalid_argument("Field index out of range");
+        }
+        
+        // Dispatch based on field_index using explicit template instantiation
+        // Each branch calls a different template function with its own return type
+        // We use separate if statements (not else-if) so compiler can optimize
+        // Note: C++17 requires all return statements to have compatible types for auto deduction
+        // However, with if constexpr, only the matching branch is compiled, so this should work
+        if (field_index == 0) {
+            if constexpr (field_count > 0) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<0>(struct_list);
+            }
+        }
+        if (field_index == 1) {
+            if constexpr (field_count > 1) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<1>(struct_list);
+            }
+        }
+        if (field_index == 2) {
+            if constexpr (field_count > 2) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<2>(struct_list);
+            }
+        }
+        if (field_index == 3) {
+            if constexpr (field_count > 3) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<3>(struct_list);
+            }
+        }
+        if (field_index == 4) {
+            if constexpr (field_count > 4) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<4>(struct_list);
+            }
+        }
+        if (field_index == 5) {
+            if constexpr (field_count > 5) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<5>(struct_list);
+            }
+        }
+        if (field_index == 6) {
+            if constexpr (field_count > 6) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<6>(struct_list);
+            }
+        }
+        if (field_index == 7) {
+            if constexpr (field_count > 7) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<7>(struct_list);
+            }
+        }
+        if (field_index == 8) {
+            if constexpr (field_count > 8) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<8>(struct_list);
+            }
+        }
+        if (field_index == 9) {
+            if constexpr (field_count > 9) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<9>(struct_list);
+            }
+        }
+        if (field_index == 10) {
+            if constexpr (field_count > 10) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<10>(struct_list);
+            }
+        }
+        if (field_index == 11) {
+            if constexpr (field_count > 11) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<11>(struct_list);
+            }
+        }
+        if (field_index == 12) {
+            if constexpr (field_count > 12) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<12>(struct_list);
+            }
+        }
+        if (field_index == 13) {
+            if constexpr (field_count > 13) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<13>(struct_list);
+            }
+        }
+        if (field_index == 14) {
+            if constexpr (field_count > 14) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<14>(struct_list);
+            }
+        }
+        if (field_index == 15) {
+            if constexpr (field_count > 15) {
+                return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<15>(struct_list);
+            }
+        }
+        
+        // If we reach here, field_index is out of range
+        throw std::invalid_argument("Field index out of range (max 16 fields supported)");
+    }
+
     // _list_flatten: 展平嵌套列表，将所有子列表的元素移动到顶层，保持相对位置
     // 例如: _list_flatten({{1, 2}, {3, 4}, {5}}) 返回 {1, 2, 3, 4, 5}
     // 支持任意深度的嵌套: _list_flatten({{{1, 2}}, {{3, 4}}}) 返回 {1, 2, 3, 4}
@@ -647,6 +803,61 @@ public:
         size_t start_idx = static_cast<size_t>(start.to_ullong());
         size_t end_idx = end_negative ? 0 : static_cast<size_t>(end);
         return detail_builtin::slice_impl(list_variable, start_idx, end_idx, false, end_negative);
+    }
+
+    // _vector_reduce: 对列表进行归约操作
+    // 例如: _vector_reduce({1, 2, 3, 4}, "+") 返回 1+2+3+4 = 10
+    //      _vector_reduce({1, 2, 3, 4}, "-") 返回 1-2-3-4 = -8
+    //      _vector_reduce({1, 2, 3, 4}, "|") 返回 1|2|3|4
+    //      _vector_reduce({1, 2, 3, 4}, "&") 返回 1&2&3&4
+    //      _vector_reduce({1, 2, 3, 4}, "^") 返回 1^2^3^4
+    template <typename T>
+    inline T _vector_reduce(const std::vector<T>& list, const char* op) const {
+        // 处理空列表
+        if (list.empty()) {
+            return T{};
+        }
+
+        // 处理单元素列表
+        if (list.size() == 1) {
+            return list[0];
+        }
+
+        // 根据操作符进行归约
+        T result = list[0];
+        
+        if (std::strcmp(op, "+") == 0) {
+            // 加法: list[0] + list[1] + ... + list[n-1]
+            for (size_t i = 1; i < list.size(); ++i) {
+                result = result + list[i];
+            }
+        } else if (std::strcmp(op, "-") == 0) {
+            // 减法: list[0] - list[1] - ... - list[n-1]
+            for (size_t i = 1; i < list.size(); ++i) {
+                result = result - list[i];
+            }
+        } else if (std::strcmp(op, "|") == 0) {
+            // 按位或: list[0] | list[1] | ... | list[n-1]
+            for (size_t i = 1; i < list.size(); ++i) {
+                result = result | list[i];
+            }
+        } else if (std::strcmp(op, "&") == 0) {
+            // 按位与: list[0] & list[1] & ... & list[n-1]
+            for (size_t i = 1; i < list.size(); ++i) {
+                result = result & list[i];
+            }
+        } else if (std::strcmp(op, "^") == 0) {
+            // 按位异或: list[0] ^ list[1] ^ ... ^ list[n-1]
+            for (size_t i = 1; i < list.size(); ++i) {
+                result = result ^ list[i];
+            }
+        } else {
+            // 不支持的操作符，抛出异常
+            throw std::invalid_argument(std::string("Unsupported operator: ") + op + 
+                                        ". Supported operators: +, -, |, &, ^");
+        }
+
+        return result;
     }
 
     template <typename... Args>
