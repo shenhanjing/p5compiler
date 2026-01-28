@@ -973,7 +973,7 @@ void _SW_ANNO()
   uint<8> C = 3;
   uint<8> Z;
 
-  switch (@A @a A[7:1], @B @b B, C){
+  switch (@A @a A, @B @b B, C){
     case 1, 0&&&0, 4: {
       Z = 1;
     }
@@ -988,6 +988,22 @@ void _SW_ANNO()
       Z = 0;
     }
   }
+}
+
+struct _an_st {
+    uint<4> a;
+    union {
+        uint<16> b;
+        struct {
+            uint<8> c;
+            uint<8> d;
+        };
+    };
+};
+
+void _annonymous_test() {
+  _an_st var;
+  var.c = 2;
 }
 
 //void typeref(){
