@@ -88,9 +88,10 @@ int main() {
         ok &= expect_eq<uint64_t>(hdr.byte0.to_ullong(), 0xEEu, "var extracted byte0");
         ok &= expect_eq<uint64_t>(hdr.byte1.to_ullong(), 0xFFu, "var extracted byte1");
 
-        // Position should advance by 6 bytes (48 bits), not 2 bytes
-        ok &= expect_eq<uint32_t>(new_offset, 10u, "offset after variable extract");
-        ok &= expect_eq<uint64_t>(pkt.offset_.to_ullong(), 10u, "current offset after variable extract");
+        // Position advances by: fixed header (2 bytes) + variableFieldSize (6 bytes) = 8 bytes.
+        // Starting from offset=4 (after Test 1), expect offset=12.
+        ok &= expect_eq<uint32_t>(new_offset, 12u, "offset after variable extract");
+        ok &= expect_eq<uint64_t>(pkt.offset_.to_ullong(), 12u, "current offset after variable extract");
         ok &= expect_eq<uint64_t>(pkt.bit_offset_.to_ullong(), 0u, "bit_offset after variable extract");
     }
 
@@ -118,10 +119,10 @@ int main() {
         ok &= expect_eq<uint64_t>(hdr.nibble1.to_ullong(), 0xAu, "bit extracted nibble1");
         ok &= expect_eq<uint64_t>(hdr.nibble2.to_ullong(), 0xBu, "bit extracted nibble2");
 
-        // Position should advance by 12 bits = 1.5 bytes, so offset=1, bit_offset=4
-        ok &= expect_eq<uint32_t>(new_offset, 1u, "offset after bit extract");
-        ok &= expect_eq<uint64_t>(pkt.offset_.to_ullong(), 1u, "current offset after bit extract");
-        ok &= expect_eq<uint64_t>(pkt.bit_offset_.to_ullong(), 4u, "bit_offset after bit extract");
+        // Position advances by: fixed header (12 bits) + variableFieldSize (12 bits) = 24 bits = 3 bytes.
+        ok &= expect_eq<uint32_t>(new_offset, 3u, "offset after bit extract");
+        ok &= expect_eq<uint64_t>(pkt.offset_.to_ullong(), 3u, "current offset after bit extract");
+        ok &= expect_eq<uint64_t>(pkt.bit_offset_.to_ullong(), 0u, "bit_offset after bit extract");
     }
 
     // Test 4: Edge case - extract 0 bits

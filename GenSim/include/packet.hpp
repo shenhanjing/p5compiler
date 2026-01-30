@@ -70,44 +70,10 @@ public:
         static_assert(is_supported_header<Header>(),
                       "_extract supports only p5::uint<N>/p5::member/p5::Union or their aggregates.");
 
-        // 获取要提取的总位数
-        const std::size_t extract_bits = static_cast<std::size_t>(variableFieldSize.to_ullong());
+        // 先执行定长版本的 extract（按 Header 的定长位宽解码并前进）
+        _extract(hdr);
 
-        // 获取当前位置
-        const std::size_t start_byte = static_cast<std::size_t>(offset_.to_ullong());
-        const std::size_t start_bit_in_byte = static_cast<std::size_t>(bit_offset_.to_ullong());
-        const std::size_t start_bit = start_byte * 8 + start_bit_in_byte;
-        const std::size_t end_bit = start_bit + extract_bits;
-        const std::size_t total_bits = static_cast<std::size_t>(PKT_HEADER_BYTE_LEN) * 8;
-
-        // 检查数据是否足够
-        if (end_bit > total_bits) {
-            std::cerr << "[Packet] insufficient data for variable extract: need " << extract_bits
-                      << " bits, have "
-                      << (total_bits > start_bit ? (total_bits - start_bit) : 0)
-                      << " bits\n";
-        }
-
-        // 提取位数据
-        std::vector<bool> bits;
-        bits.reserve(extract_bits);
-        for (std::size_t i = 0; i < extract_bits; ++i) {
-            const std::size_t abs_bit = start_bit + i;
-            const std::size_t byte_idx = abs_bit / 8;
-            const std::size_t bit_idx_in_byte = abs_bit % 8; // 0..7, MSB-first
-            uint8_t byte = 0;
-            if (byte_idx < PKT_HEADER_BYTE_LEN) {
-                byte = data_[byte_idx];
-            }
-            const uint8_t bit = static_cast<uint8_t>((byte >> (7 - bit_idx_in_byte)) & 0x1);
-            bits.push_back(bit != 0);
-        }
-
-        // 解码到 header 中
-        std::size_t cur = 0;
-        decode_any(bits, cur, hdr);
-
-        // 前进解析指针 variableFieldSize 位
+        // 再按 variableFieldSize 额外前进（单位：bit）
         _advance(variableFieldSize);
 
         return offset_;
