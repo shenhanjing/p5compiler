@@ -608,7 +608,7 @@ anonymous_struct_union_dec
                 if ($1) {
                         for (auto *ann : *$1) type->addAnnotation(ann);
                 }
-                $$ = new IR::StructField(@3, *$3, type);
+                $$ = new IR::StructField(@2, anonName, type);
         }
         | annotations STRUCT "{" struct_field_list "}" ID ";"
         {
@@ -638,7 +638,7 @@ anonymous_struct_union_dec
                 if ($1) {
                         for (auto *ann : *$1) type->addAnnotation(ann);
                 }
-                $$ = new IR::StructField(@3, *$3, type);
+                $$ = new IR::StructField(@2, anonName, type);
         }
         | annotations UNION "{" struct_field_list "}" ID ";"
         {
