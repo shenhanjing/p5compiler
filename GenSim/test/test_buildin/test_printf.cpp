@@ -50,7 +50,7 @@ int main() {
     int32_t signed_val = -42;
     uint32_t unsigned_val = 42;
     uint64_t large_val = 18446744073709551615ULL;  // 2^64 - 1
-    ctx._printf("Signed: %d, Unsigned: %u, Large: %llu\n",
+    _printf("Signed: %d, Unsigned: %u, Large: %llu\n",
                signed_val, unsigned_val, large_val);
     ok &= expect_true(true, "member mixed formats call");
 
@@ -58,24 +58,24 @@ int main() {
     std::cout << "4. Member string/char: ";
     const char* message = "Test message";
     char ch = 'A';
-    ctx._printf("Message: %s, Character: %c\n", message, ch);
+    _printf("Message: %s, Character: %c\n", message, ch);
     ok &= expect_true(true, "member string/char call");
 
     // Test 5: Member hexadecimal output
     std::cout << "5. Member hex output: ";
     uint32_t hex_val = 0xDEADBEEF;
-    ctx._printf("Hex: 0x%x, Upper: 0x%X\n", hex_val, hex_val);
+    _printf("Hex: 0x%x, Upper: 0x%X\n", hex_val, hex_val);
     ok &= expect_true(true, "member hex call");
 
     // Test 6: Member multiple arguments
     std::cout << "6. Member multiple args: ";
-    ctx._printf("%d %u %llu %s %c %x\n",
+    _printf("%d %u %llu %s %c %x\n",
                -1, 2u, 3ULL, "test", 'Z', 255);
     ok &= expect_true(true, "member multiple args call");
 
     // Test 7: Member edge case - empty format
     std::cout << "7. Member empty format: ";
-    ctx._printf("");
+    _printf("");
     ok &= expect_true(true, "member empty format call");
 
     std::cout << "\n[_printf test] " << (ok ? "PASSED" : "FAILED") << "\n";

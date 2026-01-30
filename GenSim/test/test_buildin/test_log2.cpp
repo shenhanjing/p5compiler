@@ -61,13 +61,13 @@ int main() {
     {
         std::cout << "Testing member _log2 function...\n";
 
-        ok &= expect_eq<U>(ctx._log2(1), U{0}, "member log2(1) = 0");
-        ok &= expect_eq<U>(ctx._log2(2), U{1}, "member log2(2) = 1");
-        ok &= expect_eq<U>(ctx._log2(4), U{2}, "member log2(4) = 2");
-        ok &= expect_eq<U>(ctx._log2(8), U{3}, "member log2(8) = 3");
-        ok &= expect_eq<U>(ctx._log2(3), U{1}, "member log2(3) = 1");
-        ok &= expect_eq<U>(ctx._log2(7), U{2}, "member log2(7) = 2");
-        ok &= expect_eq<U>(ctx._log2(0), U{0}, "member log2(0) = 0");
+        ok &= expect_eq<U>(_log2(1), U{0}, "member log2(1) = 0");
+        ok &= expect_eq<U>(_log2(2), U{1}, "member log2(2) = 1");
+        ok &= expect_eq<U>(_log2(4), U{2}, "member log2(4) = 2");
+        ok &= expect_eq<U>(_log2(8), U{3}, "member log2(8) = 3");
+        ok &= expect_eq<U>(_log2(3), U{1}, "member log2(3) = 1");
+        ok &= expect_eq<U>(_log2(7), U{2}, "member log2(7) = 2");
+        ok &= expect_eq<U>(_log2(0), U{0}, "member log2(0) = 0");
     }
 
     // Test 3: Verify mathematical properties

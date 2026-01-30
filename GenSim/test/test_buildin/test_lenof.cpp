@@ -68,38 +68,38 @@ int main() {
         ok &= expect_eq<uint64_t>(result3.to_ullong(), 4u, "p5::uint array size 4");
     }
 
-    // Test 3: Member function _lenof with std::vector
-    {
-        std::cout << "Testing member _lenof with std::vector...\n";
+    // // Test 3: Member function _lenof with std::vector
+    // {
+    //     std::cout << "Testing member _lenof with std::vector...\n";
 
-        std::vector<int> vec1 = {10, 20, 30};
-        auto result1 = ctx._lenof(vec1);
-        static_assert(std::is_same_v<decltype(result1), p5::uint<16>>, "Return type should be p5::uint<16>");
-        ok &= expect_eq<uint64_t>(result1.to_ullong(), 3u, "member vector size 3");
+    //     std::vector<int> vec1 = {10, 20, 30};
+    //     auto result1 = ctx._lenof(vec1);
+    //     static_assert(std::is_same_v<decltype(result1), p5::uint<16>>, "Return type should be p5::uint<16>");
+    //     ok &= expect_eq<uint64_t>(result1.to_ullong(), 3u, "member vector size 3");
 
-        std::vector<p5::uint<16>> vec2 = {p5::uint<16>(100), p5::uint<16>(200)};
-        auto result2 = ctx._lenof(vec2);
-        ok &= expect_eq<uint64_t>(result2.to_ullong(), 2u, "member p5::uint vector size 2");
+    //     std::vector<p5::uint<16>> vec2 = {p5::uint<16>(100), p5::uint<16>(200)};
+    //     auto result2 = ctx._lenof(vec2);
+    //     ok &= expect_eq<uint64_t>(result2.to_ullong(), 2u, "member p5::uint vector size 2");
 
-        std::vector<int> empty_vec;
-        auto result_empty = ctx._lenof(empty_vec);
-        ok &= expect_eq<uint64_t>(result_empty.to_ullong(), 0u, "member empty vector size 0");
-    }
+    //     std::vector<int> empty_vec;
+    //     auto result_empty = ctx._lenof(empty_vec);
+    //     ok &= expect_eq<uint64_t>(result_empty.to_ullong(), 0u, "member empty vector size 0");
+    // }
 
-    // Test 4: Member function _lenof with arrays
-    {
-        std::cout << "Testing member _lenof with arrays...\n";
+    // // Test 4: Member function _lenof with arrays
+    // {
+    //     std::cout << "Testing member _lenof with arrays...\n";
 
-        int arr1[4] = {100, 200, 300, 400};
-        auto result1 = ctx._lenof(arr1);
-        static_assert(std::is_same_v<decltype(result1), p5::uint<16>>, "Return type should be p5::uint<16>");
-        ok &= expect_eq<uint64_t>(result1.to_ullong(), 4u, "member array size 4");
+    //     int arr1[4] = {100, 200, 300, 400};
+    //     auto result1 = ctx._lenof(arr1);
+    //     static_assert(std::is_same_v<decltype(result1), p5::uint<16>>, "Return type should be p5::uint<16>");
+    //     ok &= expect_eq<uint64_t>(result1.to_ullong(), 4u, "member array size 4");
 
-        p5::uint<2> arr2[6] = {p5::uint<2>(0), p5::uint<2>(1), p5::uint<2>(2),
-                               p5::uint<2>(3), p5::uint<2>(0), p5::uint<2>(1)};
-        auto result2 = ctx._lenof(arr2);
-        ok &= expect_eq<uint64_t>(result2.to_ullong(), 6u, "member p5::uint array size 6");
-    }
+    //     p5::uint<2> arr2[6] = {p5::uint<2>(0), p5::uint<2>(1), p5::uint<2>(2),
+    //                            p5::uint<2>(3), p5::uint<2>(0), p5::uint<2>(1)};
+    //     auto result2 = ctx._lenof(arr2);
+    //     ok &= expect_eq<uint64_t>(result2.to_ullong(), 6u, "member p5::uint array size 6");
+    // }
 
     // Test 5: Pattern from generated_switch.cpp uint0_list function
     {
@@ -142,11 +142,11 @@ int main() {
         ok &= expect_eq<uint64_t>(b.to_ullong(), 3u, "TempLIST length (decltype + size)");
         ok &= expect_eq<uint64_t>(TempLIST.size(), 3u, "TempLIST actual size");
 
-        // Test with member function version
-        auto a_member = ctx._lenof(list0);
-        auto b_member = ctx._lenof(TempLIST);
-        ok &= expect_eq<uint64_t>(a_member.to_ullong(), 3u, "member list0 length");
-        ok &= expect_eq<uint64_t>(b_member.to_ullong(), 3u, "member TempLIST length");
+        // // Test with member function version
+        // auto a_member = ctx._lenof(list0);
+        // auto b_member = ctx._lenof(TempLIST);
+        // ok &= expect_eq<uint64_t>(a_member.to_ullong(), 3u, "member list0 length");
+        // ok &= expect_eq<uint64_t>(b_member.to_ullong(), 3u, "member TempLIST length");
 
         // Test with different initializer list sizes
         std::vector<p5::uint<8>> list_small({p5::uint<8>(1)});
@@ -166,9 +166,9 @@ int main() {
         auto result_const_vec = _lenof(const_vec);
         ok &= expect_eq<uint64_t>(result_const_vec.to_ullong(), 2u, "const vector");
 
-        const int const_arr[3] = {1, 2, 3};
-        auto result_const_arr = ctx._lenof(const_arr);
-        ok &= expect_eq<uint64_t>(result_const_arr.to_ullong(), 3u, "const array");
+        // const int const_arr[3] = {1, 2, 3};
+        // auto result_const_arr = ctx._lenof(const_arr);
+        // ok &= expect_eq<uint64_t>(result_const_arr.to_ullong(), 3u, "const array");
 
         // Test with different element types
         std::vector<char> char_vec = {'a', 'b', 'c', 'd'};

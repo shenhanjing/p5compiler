@@ -58,12 +58,12 @@ int main() {
         {"p5::uint<160> (global)", 160, _sizeof(p5::uint<160>{})},
         {"p5::uint<256> (global)", 256, _sizeof(p5::uint<256>{})},
 
-        // p5::uint<N> types (basic types) - Member function
-        {"p5::uint<1> (member)", 1, ctx._sizeof(p5::uint<1>{})},
-        {"p5::uint<4> (member)", 4, ctx._sizeof(p5::uint<4>{})},
-        {"p5::uint<8> (member)", 8, ctx._sizeof(p5::uint<8>{})},
-        {"p5::uint<16> (member)", 16, ctx._sizeof(p5::uint<16>{})},
-        {"p5::uint<32> (member)", 32, ctx._sizeof(p5::uint<32>{})},
+        // // p5::uint<N> types (basic types) - Member function
+        // {"p5::uint<1> (member)", 1, ctx._sizeof(p5::uint<1>{})},
+        // {"p5::uint<4> (member)", 4, ctx._sizeof(p5::uint<4>{})},
+        // {"p5::uint<8> (member)", 8, ctx._sizeof(p5::uint<8>{})},
+        // {"p5::uint<16> (member)", 16, ctx._sizeof(p5::uint<16>{})},
+        // {"p5::uint<32> (member)", 32, ctx._sizeof(p5::uint<32>{})},
 
         // p5::member<T> types (wrapped types) - Global function
         {"p5::member<p5::uint<8>> (global)", 8, _sizeof(p5::member<p5::uint<8>>{})},
@@ -71,9 +71,9 @@ int main() {
         {"p5::member<p5::uint<32>> (global)", 32, _sizeof(p5::member<p5::uint<32>>{})},
         {"p5::member<p5::uint<64>> (global)", 64, _sizeof(p5::member<p5::uint<64>>{})},
 
-        // p5::member<T> types (wrapped types) - Member function
-        {"p5::member<p5::uint<8>> (member)", 8, ctx._sizeof(p5::member<p5::uint<8>>{})},
-        {"p5::member<p5::uint<16>> (member)", 16, ctx._sizeof(p5::member<p5::uint<16>>{})},
+        // // p5::member<T> types (wrapped types) - Member function
+        // {"p5::member<p5::uint<8>> (member)", 8, ctx._sizeof(p5::member<p5::uint<8>>{})},
+        // {"p5::member<p5::uint<16>> (member)", 16, ctx._sizeof(p5::member<p5::uint<16>>{})},
 
         // Simple custom structs for testing - Global function
         {"SimpleStruct1 (global)", 8, _sizeof(SimpleStruct1{})},
@@ -81,10 +81,10 @@ int main() {
         {"SimpleStruct3 (global)", 15, _sizeof(SimpleStruct3{})},
         {"NestedStruct (global)", 24, _sizeof(NestedStruct{})},
 
-        // Simple custom structs for testing - Member function
-        {"SimpleStruct1 (member)", 8, ctx._sizeof(SimpleStruct1{})},
-        {"SimpleStruct2 (member)", 24, ctx._sizeof(SimpleStruct2{})},
-        {"PHI_S (member)", 18, ctx._sizeof(PHI_S{})},
+        // // Simple custom structs for testing - Member function
+        // {"SimpleStruct1 (member)", 8, ctx._sizeof(SimpleStruct1{})},
+        // {"SimpleStruct2 (member)", 24, ctx._sizeof(SimpleStruct2{})},
+        // {"PHI_S (member)", 18, ctx._sizeof(PHI_S{})},
 
         // Basic structs
         {"PHI_S", 18, _sizeof(PHI_S{})},

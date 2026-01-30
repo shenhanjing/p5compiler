@@ -63,9 +63,13 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
         }
     }
 
+    // In generated headers, members are in-scope, so avoid emitting "ctx." prefixes.
+    bool oldBypass = bypassCtxPrefix;
+    bypassCtxPrefix = true;
     emitEnumsHpp(program);
     emitStructHpp(program);
     emitGtvHpp(program);
+    bypassCtxPrefix = oldBypass;
     emitSwitch(program);
 
     flushCFile();
@@ -182,16 +186,21 @@ void P5ToC::emitFieldType(const IR::Type *type, EmitMode mode) {
     if (auto *bits = type->to<IR::Type_Bits>()) {
         if (mode == EmitMode::Memberized) *outputStream << "p5::member<";
 
-        int width = bits->size;
-        if (bits->expression) {
-            width = evaluateExprToInt(bits->expression);
-        }
-
         if (!bits->isSigned) {
             // 无符号 Type_Bits 生成 p5::uint<N>
-            *outputStream << "p5::uint<" << width << ">";
+            *outputStream << "p5::uint<";
+            if (bits->expression) {
+                emitExpressionWithCtx(bits->expression, {});
+            } else {
+                *outputStream << bits->size;
+            }
+            *outputStream << ">";
         } else {
             // 有符号的生成标准整数类型
+            int width = bits->size;
+            if (bits->expression) {
+                width = evaluateExprToInt(bits->expression);
+            }
             *outputStream << "int" << width << "_t";
         }
         if (mode == EmitMode::Memberized) *outputStream << ">";
@@ -250,7 +259,10 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMa
     // 2) Other uint<0> scalar declarations      -> auto newVar (= ...);
     const bool isUint0Scalar = dims.empty() && [&]() {
         if (auto *bits = baseType->to<IR::Type_Bits>()) {
-            return !bits->isSigned && bits->size == 0;
+            // Only treat it as true uint<0> when the width is literally 0.
+            // If width comes from an expression (e.g. uint<_log2(33)>), bits->size may still be 0
+            // in the IR, but it is NOT a uint<0> and should keep an explicit p5::uint<...> type.
+            return !bits->isSigned && bits->expression == nullptr && bits->size == 0;
         }
         return false;
     }();
@@ -305,7 +317,7 @@ void P5ToC::emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMa
     for (auto *dim : dims) {
         *outputStream << "[";
         if (dim) {
-            *outputStream << dim->toString();
+            emitExpressionWithCtx(dim, locals);
         }
         *outputStream << "]";
     }
@@ -371,7 +383,7 @@ void P5ToC::emitHeaderDecl(const IR::Declaration_Instance *inst) {
     for (auto *dim : dims) {
         *outputStream << "[";
         if (dim) {
-            *outputStream << dim->toString();
+            emitExpressionWithCtx(dim, {});
         }
         *outputStream << "]";
     }
@@ -1043,7 +1055,7 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
         if (inSwitchMethod) {
             *outputStream << pe->path->name;
         } else {
-            if (locals.count(pe->path->name) || !switchMembers.count(pe->path->name)) {
+            if (bypassCtxPrefix || locals.count(pe->path->name) || !switchMembers.count(pe->path->name)) {
                 *outputStream << pe->path->name;
             } else {
                 *outputStream << "ctx." << pe->path->name;
@@ -1710,9 +1722,23 @@ void P5ToC::emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &ano
         }
 
         // Standard field
-        emitFieldType(field->type, mode);
+        const IR::Type *baseType = field->type;
+        std::vector<const IR::Expression *> dims;
+        while (auto *stk = baseType->to<IR::Type_Stack>()) {
+            dims.push_back(stk->size);
+            baseType = stk->elementType;
+        }
+
+        emitFieldType(baseType, mode);
         if (field->name != " " && field->name != cstring::empty) {
             *outputStream << " " << field->name;
+        }
+        for (auto *dim : dims) {
+            *outputStream << "[";
+            if (dim) {
+                emitExpressionWithCtx(dim, {});
+            }
+            *outputStream << "]";
         }
         *outputStream << ";\n";
     }
@@ -1865,14 +1891,13 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
         }
         *outputStream << "\n";
 
-        *outputStream << indent
-                      << "enum class NgsfDirection : uint8_t { FV2NGSF = 0, NGSF2FV = 1 };\n"
+        *outputStream << indent << "enum class NgsfDirection : uint8_t { FV2NGSF = 0, NGSF2FV = 1 };\n"
                       << indent << "NgsfDirection ngsf_direction{NgsfDirection::FV2NGSF};\n"
                       << "\n"
                       << indent << "std::size_t ngsf_byte_offset{0};\n"
                       << indent << "uint8_t ngsf_bit_offset{0};\n"
                       << "\n"
-                      << "enum class NPorTM : uint8_t { NP = 0, TM = 1 };\n"
+                      << indent << "enum class NPorTM : uint8_t { NP = 0, TM = 1 };\n"
                       << indent << "NPorTM npor_tm{NPorTM::NP};\n"
                       << "\n"
                       << indent << "std::size_t tm_byte_offset{0};\n"
@@ -1945,20 +1970,33 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
             << "\n"
             << "    template <typename P5UInt>\n"
             << "    static void append_bits(std::vector<bool> &bits, const P5UInt &value) {\n"
-            << "        using T = std::decay_t<P5UInt>;\n"
-            << "        constexpr std::size_t width = T::width();\n"
-            << "        if constexpr (is_p5_union_type<T>::value) {\n"
-            << "            // For p5::Union: treat it as its underlying storage bits (width = "
-               "base storage width).\n"
-            << "            // Write bits in high-first order.\n"
-            << "            const auto raw = value.to_uint(); // p5::uint<width>\n"
-            << "            for (std::size_t i = 0; i < width; ++i) {\n"
-            << "                bits.push_back(raw[width - 1 - i]);\n"
+            << "        using Raw = std::remove_reference_t<P5UInt>;\n"
+            << "        if constexpr (std::is_array_v<Raw>) {\n"
+            << "            constexpr std::size_t N = std::extent_v<Raw>;\n"
+            << "            for (std::size_t i = 0; i < N; ++i) {\n"
+            << "                append_bits(bits, value[i]);\n"
             << "            }\n"
             << "        } else {\n"
-            << "            // For p5::uint / p5::member: read bits directly (high-first).\n"
-            << "            for (std::size_t i = 0; i < width; ++i) {\n"
-            << "                bits.push_back(value[width - 1 - i]);\n"
+            << "            using T = std::decay_t<P5UInt>;\n"
+            << "            if constexpr (is_p5_union_type<T>::value) {\n"
+            << "                constexpr std::size_t width = T::width();\n"
+            << "                // For p5::Union: treat it as its underlying storage bits (width = base storage width).\n"
+            << "                // Write bits in high-first order.\n"
+            << "                const auto raw = value.to_uint(); // p5::uint<width>\n"
+            << "                for (std::size_t i = 0; i < width; ++i) {\n"
+            << "                    bits.push_back(static_cast<bool>(raw[width - 1 - i]));\n"
+            << "                }\n"
+            << "            } else if constexpr (is_p5_uint_type<T>::value || is_p5_member_type<T>::value) {\n"
+            << "                constexpr std::size_t width = T::width();\n"
+            << "                // For p5::uint / p5::member: read bits directly (high-first).\n"
+            << "                for (std::size_t i = 0; i < width; ++i) {\n"
+            << "                    bits.push_back(static_cast<bool>(value[width - 1 - i]));\n"
+            << "                }\n"
+            << "            } else {\n"
+            << "                static_assert(std::is_aggregate_v<T>,\n"
+            << "                              \"append_bits supports only p5::uint/p5::member/p5::Union, arrays of them, \"\n"
+            << "                              \"or aggregates composed of them.\");\n"
+            << "                boost::pfr::for_each_field(value, [&](const auto &sub) { append_bits(bits, sub); });\n"
             << "            }\n"
             << "        }\n"
             << "    }\n"
@@ -1966,22 +2004,34 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
             << "    template <typename Buffer, typename P5UInt>\n"
             << "    static void assign_from_bits(const Buffer &buf, std::size_t &cursor, P5UInt "
                "&target) {\n"
-            << "        using T = std::decay_t<P5UInt>;\n"
-            << "        constexpr std::size_t width = T::width();\n"
+            << "        using Raw = std::remove_reference_t<P5UInt>;\n"
+            << "        if constexpr (std::is_array_v<Raw>) {\n"
+            << "            constexpr std::size_t N = std::extent_v<Raw>;\n"
+            << "            for (std::size_t i = 0; i < N; ++i) {\n"
+            << "                assign_from_bits(buf, cursor, target[i]);\n"
+            << "            }\n"
+            << "        } else {\n"
+            << "            using T = std::decay_t<P5UInt>;\n"
+            << "            if constexpr (is_p5_uint_type<T>::value || is_p5_member_type<T>::value || is_p5_union_type<T>::value) {\n"
+            << "                constexpr std::size_t width = T::width();\n"
             << "\n"
-            << "        // Read width bits from buffer in high-first order, then assign to "
-               "target.\n"
-            << "        // This works for p5::uint, p5::member and p5::Union (writes to union's "
-               "base storage).\n"
-            << "        p5::uint<width> tmp{};\n"
-            << "        for (std::size_t i = 0; i < width && cursor < buf.size() * 8; ++i, "
-               "++cursor) {\n"
-            << "            const std::size_t byte_idx = cursor / 8;\n"
-            << "            const std::size_t bit_idx = 7 - (cursor % 8); // 高位在前\n"
-            << "            const bool bit = (buf[byte_idx] >> bit_idx) & 0x1;\n"
-            << "            tmp[width - 1 - i] = bit; // i=0 is MSB\n"
+            << "                // Read width bits from buffer in high-first order, then assign to target.\n"
+            << "                // This works for p5::uint, p5::member and p5::Union (writes to union's base storage).\n"
+            << "                p5::uint<width> tmp{};\n"
+            << "                for (std::size_t i = 0; i < width && cursor < buf.size() * 8; ++i, ++cursor) {\n"
+            << "                    const std::size_t byte_idx = cursor / 8;\n"
+            << "                    const std::size_t bit_idx = 7 - (cursor % 8); // 高位在前\n"
+            << "                    const bool bit = (buf[byte_idx] >> bit_idx) & 0x1;\n"
+            << "                    tmp[width - 1 - i] = bit; // i=0 is MSB\n"
+            << "                }\n"
+            << "                target = tmp;\n"
+            << "            } else {\n"
+            << "                static_assert(std::is_aggregate_v<T>,\n"
+            << "                              \"assign_from_bits supports only p5::uint/p5::member/p5::Union, arrays of them, \"\n"
+            << "                              \"or aggregates composed of them.\");\n"
+            << "                boost::pfr::for_each_field(target, [&](auto &sub) { assign_from_bits(buf, cursor, sub); });\n"
+            << "            }\n"
             << "        }\n"
-            << "        target = tmp;\n"
             << "    }\n"
             << "\n"
             << "    template <typename Buffer>\n"
@@ -2157,6 +2207,7 @@ void P5ToC::emitSwitchRuntimeImpl() {
                   << "    std::memcpy(fv_info.phiData, phiOut.data(), FV_PHI_BYTE_NUM);\n"
                   << "    std::memcpy(fv_info.phoData, phoOut.data(), FV_PHO_BYTE_NUM);\n"
                   << "    std::memcpy(fv_info.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_info.pgtvData, gtvOut.data() + FV_GTV_MAX_BYTE_NUM, FV_PGTV_BYTE_NUM);\n"
                   << "}\n"
                   << "\n"
                   << "// 单个 MA 处理流程\n"
@@ -2180,6 +2231,7 @@ void P5ToC::emitSwitchRuntimeImpl() {
                   << "\n"
                   << "    GtvPackedBuffer gtvIn{};\n"
                   << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(gtvIn.data() + FV_GTV_MAX_BYTE_NUM, fv_in.pgtvData, FV_PGTV_BYTE_NUM);\n"
                   << "    unpack_gtv_from_bytes(gtvIn);\n"
                   << "\n"
                   << "    // 按 ma_id 选择执行的控制流程\n"
@@ -2199,6 +2251,7 @@ void P5ToC::emitSwitchRuntimeImpl() {
                   << "    std::memcpy(fv_out.phiData, phiOut.data(), FV_PHI_BYTE_NUM);\n"
                   << "    std::memcpy(fv_out.phoData, phoOut.data(), FV_PHO_BYTE_NUM);\n"
                   << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_out.pgtvData, gtvOut.data() + FV_GTV_MAX_BYTE_NUM, FV_PGTV_BYTE_NUM);\n"
                   << "}\n"
                   << "\n"
                   << "void Switch::ImaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, "
@@ -2219,15 +2272,17 @@ void P5ToC::emitSwitchRuntimeImpl() {
                   << "\n"
                   << "    GtvPackedBuffer gtvIn{};\n"
                   << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(gtvIn.data() + FV_GTV_MAX_BYTE_NUM, fv_in.pgtvData, FV_PGTV_BYTE_NUM);\n"
                   << "    unpack_gtv_from_bytes(gtvIn);\n"
                   << "\n"
                   << "    // 执行 IMA 流程\n"
                   << "    iMA0Control();\n"
                   << "    iMA1Control();\n"
                   << "\n"
-                  << "    // 打包输出，仅 gtvData\n"
+                  << "    // 打包输出：gtvData + pgtvData\n"
                   << "    auto gtvOut = pack_gtv_to_bytes();\n"
                   << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_out.pgtvData, gtvOut.data() + FV_GTV_MAX_BYTE_NUM, FV_PGTV_BYTE_NUM);\n"
                   << "}\n"
                   << "void Switch::EmaProcPkt(const int port_id, const Prs2Ma0FvInfoDef &fv_in, "
                      "Ema2EpmFvInfoDef &fv_out) {\n"
@@ -2247,14 +2302,16 @@ void P5ToC::emitSwitchRuntimeImpl() {
                   << "\n"
                   << "    GtvPackedBuffer gtvIn{};\n"
                   << "    std::memcpy(gtvIn.data(), fv_in.gtvData, FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(gtvIn.data() + FV_GTV_MAX_BYTE_NUM, fv_in.pgtvData, FV_PGTV_BYTE_NUM);\n"
                   << "    unpack_gtv_from_bytes(gtvIn);\n"
                   << "\n"
                   << "    // 执行 EMA 流程\n"
                   << "    eMA0Control();\n"
                   << "\n"
-                  << "    // 打包输出，仅 gtvData\n"
+                  << "    // 打包输出：gtvData + pgtvData\n"
                   << "    auto gtvOut = pack_gtv_to_bytes();\n"
                   << "    std::memcpy(fv_out.gtvData, gtvOut.data(), FV_GTV_MAX_BYTE_NUM);\n"
+                  << "    std::memcpy(fv_out.pgtvData, gtvOut.data() + FV_GTV_MAX_BYTE_NUM, FV_PGTV_BYTE_NUM);\n"
                   << "}\n"
                   << "\n";
 }
@@ -2369,124 +2426,150 @@ void P5ToC::emitHeaders(const IR::P4Program *program) {
     }
 }
 
-void P5ToC::emitStructFieldTraverse(
-    const IR::Type_Struct *st, const std::string &prefix,
-    const std::unordered_map<cstring, const IR::Type_Struct *> &structMap, int &anon_counter,
-    bool emit, bool is_pack) {
-    for (const auto *field : st->fields) {
-        std::string fieldName = field->name.toString().c_str();
-        bool isAnonField = (fieldName == " " || fieldName.empty());
+// void P5ToC::emitStructFieldTraverse(
+//     const IR::Type_Struct *st, const std::string &prefix,
+//     const std::unordered_map<cstring, const IR::Type_Struct *> &structMap, int &anon_counter,
+//     bool emit, bool is_pack) {
+//     for (const auto *field : st->fields) {
+//         std::string fieldName = field->name.toString().c_str();
+//         bool isAnonField = (fieldName == " " || fieldName.empty());
 
-        if (auto *nestedSt = field->type->to<IR::Type_Struct>()) {
-            if (isAnonymous(nestedSt)) {
-                if (isUnion(nestedSt)) {
-                    if (isAnonField) fieldName = "_noname_u_" + std::to_string(anon_counter++);
-                    std::string fullName = prefix + "." + fieldName;
+//         if (auto *nestedSt = field->type->to<IR::Type_Struct>()) {
+//             if (isAnonymous(nestedSt)) {
+//                 if (isUnion(nestedSt)) {
+//                     if (isAnonField) fieldName = "_noname_u_" + std::to_string(anon_counter++);
+//                     std::string fullName = prefix + "." + fieldName;
 
-                    if (emit) {
-                        if (is_pack) {
-                            *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
-                        } else {
-                            *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
-                                          << ");\n";
-                        }
-                    }
+//                     if (emit) {
+//                         if (is_pack) {
+//                             *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+//                         } else {
+//                             *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
+//                                           << ");\n";
+//                         }
+//                     }
 
-                    // Recurse to update counter, but don't emit members
-                    emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, false,
-                                            is_pack);
+//                     // Recurse to update counter, but don't emit members
+//                     emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, false,
+//                                             is_pack);
 
-                } else {
-                    if (isAnonField) fieldName = "_noname_st_" + std::to_string(anon_counter++);
-                    std::string fullName = prefix + "." + fieldName;
-                    emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, emit,
-                                            is_pack);
-                }
-                continue;
-            }
-        }
+//                 } else {
+//                     if (isAnonField) fieldName = "_noname_st_" + std::to_string(anon_counter++);
+//                     std::string fullName = prefix + "." + fieldName;
+//                     emitStructFieldTraverse(nestedSt, fullName, structMap, anon_counter, emit,
+//                                             is_pack);
+//                 }
+//                 continue;
+//             }
+//         }
 
-        if (!emit) continue;
+//         if (!emit) continue;
 
-        std::string fullName = prefix + "." + fieldName;
+//         std::string fullName = prefix + "." + fieldName;
 
-        if (auto *tn = field->type->to<IR::Type_Name>()) {
-            cstring typeName = tn->path->name;
-            if (structMap.count(typeName)) {
-                const auto *typeSt = structMap.at(typeName);
-                if (isUnion(typeSt)) {
-                    if (is_pack) {
-                        *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
-                    } else {
-                        *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
-                                      << ");\n";
-                    }
-                } else {
-                    int subCounter = 0;
-                    emitStructFieldTraverse(typeSt, fullName, structMap, subCounter, true, is_pack);
-                }
-                continue;
-            }
-        }
+//         if (auto *tn = field->type->to<IR::Type_Name>()) {
+//             cstring typeName = tn->path->name;
+//             if (structMap.count(typeName)) {
+//                 const auto *typeSt = structMap.at(typeName);
+//                 if (isUnion(typeSt)) {
+//                     if (is_pack) {
+//                         *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+//                     } else {
+//                         *outputStream << indent << "assign_from_bits(in, cursor, " << fullName
+//                                       << ");\n";
+//                     }
+//                 } else {
+//                     int subCounter = 0;
+//                     emitStructFieldTraverse(typeSt, fullName, structMap, subCounter, true, is_pack);
+//                 }
+//                 continue;
+//             }
+//         }
 
-        if (is_pack) {
-            *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
-        } else {
-            *outputStream << indent << "assign_from_bits(in, cursor, " << fullName << ");\n";
-        }
-    }
-}
+//         if (is_pack) {
+//             *outputStream << indent << "append_bits(bits, " << fullName << ");\n";
+//         } else {
+//             *outputStream << indent << "assign_from_bits(in, cursor, " << fullName << ");\n";
+//         }
+//     }
+// }
 
 void P5ToC::emitPhiPackUnpack(const IR::P4Program *program) {
     // const IR::Declaration_Instance *phiInst = nullptr;
-    const IR::Type_Struct *phiStruct = nullptr;
+    // NOTE: Since append_bits/assign_from_bits now support aggregates/arrays directly, we no longer
+    // need to resolve the concrete struct type of PHI here. We only need to know whether PHI exists
+    // in the program so we can emit the helper functions.
+    //
+    // Previous behavior (kept for reference):
+    // const IR::Type_Struct *phiStruct = nullptr;
+    //
+    // std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+    // for (const auto *obj : program->objects) {
+    //     if (auto *st = obj->to<IR::Type_Struct>()) {
+    //         structMap[st->name] = st;
+    //     }
+    // }
+    //
+    // for (const auto *obj : program->objects) {
+    //     if (auto *var = obj->to<IR::Declaration_Variable>()) {
+    //         if (var->name == "PHI") {
+    //             if (auto *tn = var->type->to<IR::Type_Name>()) {
+    //                 if (structMap.count(tn->path->name)) {
+    //                     phiStruct = structMap.at(tn->path->name);
+    //                 }
+    //             } else if (auto *st = var->type->to<IR::Type_Struct>()) {
+    //                 phiStruct = st;
+    //             }
+    //             if (phiStruct) break;
+    //         }
+    //     } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
+    //         if (inst->name == "PHI") {
+    //             // phiInst = inst;
+    //             if (auto *tn = inst->type->to<IR::Type_Name>()) {
+    //                 if (structMap.count(tn->path->name)) {
+    //                     phiStruct = structMap.at(tn->path->name);
+    //                 }
+    //             } else if (auto *st = inst->type->to<IR::Type_Struct>()) {
+    //                 phiStruct = st;
+    //             }
+    //             break;
+    //         }
+    //     }
+    // }
+    //
+    // if (!phiStruct) return;
 
-    std::unordered_map<cstring, const IR::Type_Struct *> structMap;
-    for (const auto *obj : program->objects) {
-        if (auto *st = obj->to<IR::Type_Struct>()) {
-            structMap[st->name] = st;
-        }
-    }
-
+    bool hasPHI = false;
     for (const auto *obj : program->objects) {
         if (auto *var = obj->to<IR::Declaration_Variable>()) {
             if (var->name == "PHI") {
-                if (auto *tn = var->type->to<IR::Type_Name>()) {
-                    if (structMap.count(tn->path->name)) {
-                        phiStruct = structMap.at(tn->path->name);
-                    }
-                } else if (auto *st = var->type->to<IR::Type_Struct>()) {
-                    phiStruct = st;
-                }
-                if (phiStruct) break;
+                hasPHI = true;
+                break;
             }
         } else if (auto *inst = obj->to<IR::Declaration_Instance>()) {
             if (inst->name == "PHI") {
-                // phiInst = inst;
-                if (auto *tn = inst->type->to<IR::Type_Name>()) {
-                    if (structMap.count(tn->path->name)) {
-                        phiStruct = structMap.at(tn->path->name);
-                    }
-                } else if (auto *st = inst->type->to<IR::Type_Struct>()) {
-                    phiStruct = st;
-                }
+                hasPHI = true;
                 break;
             }
         }
     }
-
-    if (!phiStruct) return;
+    if (!hasPHI) return;
 
     // pack_phi_to_bytes
-    *outputStream << indent << "// 将 PHI 字段按声明顺序拼成 10 字节数组\n";
+    *outputStream << indent << "// 将 PHI 字段按声明顺序拼成 FV_PHI_BYTE_NUM*8 字节数组\n";
     *outputStream << indent << "PhiPackedBuffer pack_phi_to_bytes() const {\n";
     {
         IndentGuard ig(this);
         *outputStream << indent << "std::vector<bool> bits;\n";
-        *outputStream << indent << "bits.reserve(32);\n\n";
+        *outputStream << indent << "bits.reserve(FV_PHI_BYTE_NUM*8);\n\n";
 
-        int anon_counter = 0;
-        emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, true);
+        // int anon_counter = 0;
+        // NOTE: Since append_bits/assign_from_bits now support aggregates/arrays directly,
+        // we can serialize/deserialize PHI as a whole without emitting per-field statements.
+        //
+        // Previous behavior (kept for reference):
+        // emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, true);
+        *outputStream << indent << "append_bits(bits, PHI);\n";
 
         *outputStream << "\n";
         *outputStream << indent << "PhiPackedBuffer out{};\n";
@@ -2496,13 +2579,15 @@ void P5ToC::emitPhiPackUnpack(const IR::P4Program *program) {
     *outputStream << indent << "}\n\n";
 
     // unpack_phi_from_bytes
-    *outputStream << indent << "// 从 10 字节数组按同样顺序解析回 PHI 字段\n";
+    *outputStream << indent << "// 从 FV_PHI_BYTE_NUM*8 字节数组按同样顺序解析回 PHI 字段\n";
     *outputStream << indent << "void unpack_phi_from_bytes(const PhiPackedBuffer &in) {\n";
     {
         IndentGuard ig(this);
         *outputStream << indent << "std::size_t cursor = 0;\n\n";
-        int anon_counter = 0;
-        emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, false);
+        // int anon_counter = 0;
+        // Previous behavior (kept for reference):
+        // emitStructFieldTraverse(phiStruct, "PHI", structMap, anon_counter, true, false);
+        *outputStream << indent << "assign_from_bits(in, cursor, PHI);\n";
     }
     *outputStream << indent << "}\n\n";
 }
@@ -2528,16 +2613,21 @@ void P5ToC::emitPhoPackUnpack(const IR::P4Program *program) {
     if (!phoVar && !phoInst) return;
 
     // pack_pho_to_bytes
-    *outputStream << indent << "// 将 PHO[5] (每个 7bit) 按顺序拼成 32 字节数组\n";
+    *outputStream << indent << "// 将 PHO 按顺序拼成 FV_PHO_BYTE_NUM*8 字节数组\n";
     *outputStream << indent << "PhoPackedBuffer pack_pho_to_bytes() const {\n";
     {
         IndentGuard ig(this);
         *outputStream << indent << "std::vector<bool> bits;\n";
-        *outputStream << indent << "bits.reserve(40);\n\n";
+        *outputStream << indent << "bits.reserve(FV_PHO_BYTE_NUM*8);\n\n";
 
-        *outputStream << indent << "for (const auto &v : PHO) {\n";
-        *outputStream << indent << "    append_bits(bits, v);\n";
-        *outputStream << indent << "}\n\n";
+        // NOTE: Since append_bits/assign_from_bits now support arrays directly,
+        // we can serialize/deserialize PHO as a whole.
+        //
+        // Previous behavior (kept for reference):
+        // *outputStream << indent << "for (const auto &v : PHO) {\\n";
+        // *outputStream << indent << "    append_bits(bits, v);\\n";
+        // *outputStream << indent << "}\\n\\n";
+        *outputStream << indent << "append_bits(bits, PHO);\n\n";
 
         *outputStream << indent << "PhoPackedBuffer out{};\n";
         *outputStream << indent << "write_bits_to_buffer(bits, out);\n";
@@ -2546,47 +2636,61 @@ void P5ToC::emitPhoPackUnpack(const IR::P4Program *program) {
     *outputStream << indent << "}\n\n";
 
     // unpack_pho_from_bytes
-    *outputStream << indent << "// 从 32 字节数组解析回 PHO[5]\n";
+    *outputStream << indent << "// 从 FV_PHO_BYTE_NUM*8 字节数组解析回 PHO\n";
     *outputStream << indent << "void unpack_pho_from_bytes(const PhoPackedBuffer &in) {\n";
     {
         IndentGuard ig(this);
         *outputStream << indent << "std::size_t cursor = 0;\n";
-        *outputStream << indent << "for (auto &v : PHO) {\n";
-        *outputStream << indent << "    assign_from_bits(in, cursor, v);\n";
-        *outputStream << indent << "}\n";
+        // Previous behavior (kept for reference):
+        // *outputStream << indent << "for (auto &v : PHO) {\\n";
+        // *outputStream << indent << "    assign_from_bits(in, cursor, v);\\n";
+        // *outputStream << indent << "}\\n";
+        *outputStream << indent << "assign_from_bits(in, cursor, PHO);\n";
     }
     *outputStream << indent << "}\n\n";
 }
 
 void P5ToC::emitGtvFieldLoop(const IR::P4Program *program, bool is_pack) {
-    std::unordered_map<cstring, const IR::Type_Struct *> structMap;
-    for (const auto *obj : program->objects) {
-        if (auto *st = obj->to<IR::Type_Struct>()) {
-            structMap[st->name] = st;
-        }
-    }
+    // NOTE: Since append_bits/assign_from_bits now support aggregates/arrays directly, we don't
+    // need to collect struct types and expand instance members one-by-one here.
+    //
+    // Previous behavior (kept for reference):
+    // std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+    // for (const auto *obj : program->objects) {
+    //     if (auto *st = obj->to<IR::Type_Struct>()) {
+    //         structMap[st->name] = st;
+    //     }
+    // }
 
     *outputStream << indent << "// outer headers\n";
     for (const auto *obj : program->objects) {
         if (auto *inst = obj->to<IR::Declaration_Instance>()) {
-            cstring typeName;
-            if (auto *tn = inst->type->to<IR::Type_Name>()) {
-                typeName = tn->path->name;
-            } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
-                typeName = ts->name;
-            }
+            // Previous behavior (kept for reference):
+            // cstring typeName;
+            // if (auto *tn = inst->type->to<IR::Type_Name>()) {
+            //     typeName = tn->path->name;
+            // } else if (auto *ts = inst->type->to<IR::Type_Struct>()) {
+            //     typeName = ts->name;
+            // }
+            //
+            // if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
+            //     int anon_counter = 0;
+            //     emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
+            //                             structMap, anon_counter, true, is_pack);
+            // } else {
+            //     if (is_pack) {
+            //         *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
+            //     } else {
+            //         *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name
+            //                       << ");\n";
+            //     }
+            // }
 
-            if (!typeName.isNullOrEmpty() && structMap.count(typeName)) {
-                int anon_counter = 0;
-                emitStructFieldTraverse(structMap[typeName], inst->name.toString().c_str(),
-                                        structMap, anon_counter, true, is_pack);
+            // New behavior: serialize/deserialize the instance as a whole.
+            if (is_pack) {
+                *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
             } else {
-                if (is_pack) {
-                    *outputStream << indent << "append_bits(bits, " << inst->name << ");\n";
-                } else {
-                    *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name
-                                  << ");\n";
-                }
+                *outputStream << indent << "assign_from_bits(in, cursor, " << inst->name << ");\n";
             }
         }
     }
@@ -2615,7 +2719,7 @@ void P5ToC::emitPackGtvToBytes(const IR::P4Program *program) {
     {
         IndentGuard ig(this);
         *outputStream << indent << "std::vector<bool> bits;\n";
-        *outputStream << indent << "bits.reserve(1200); // 外层头部 + fv\n\n";
+        *outputStream << indent << "bits.reserve(FV_GTV_MAX_BYTE_NUM*8 + FV_PGTV_BYTE_NUM*8); // 外层头部 + fv\n\n";
 
         emitGtvFieldLoop(program, true);
 
@@ -2698,59 +2802,39 @@ int P5ToC::evaluateExprToInt(const IR::Expression* expr) {
     if (auto c = expr->to<IR::Constant>()) {
         return c->asInt();
     }
-    if (auto mc = expr->to<IR::MethodCallExpression>()) {
-        if (auto pe = mc->method->to<IR::PathExpression>()) {
-            if (pe->path->name == "_log2") {
-                if (mc->arguments->size() == 1) {
-                     int val = evaluateExprToInt(mc->arguments->at(0)->expression);
-                     return (int)std::ceil(std::log2(val));
-                }
-            } else if (pe->path->name == "sizeof") {
-                if (mc->arguments->size() == 1) {
-                    auto arg = mc->arguments->at(0)->expression;
-                    if (auto typePath = arg->to<IR::PathExpression>()) {
-                        cstring name = typePath->path->name;
-                        if (structMap.count(name)) {
-                            return getTypeSize(structMap.at(name));
-                        }
-                    }
-                }
-            }
-        }
-    }
     ::P4::error("Cannot evaluate expression to integer: %s", expr);
     return 0;
 }
 
-int P5ToC::getTypeSize(const IR::Type* type) {
-    if (auto tb = type->to<IR::Type_Bits>()) {
-        if (tb->expression) {
-            return evaluateExprToInt(tb->expression);
-        }
-        return tb->width_bits();
-    }
-    if (auto tn = type->to<IR::Type_Name>()) {
-        if (structMap.count(tn->path->name)) {
-            return getTypeSize(structMap.at(tn->path->name));
-        }
-        return 0;
-    }
-    if (auto ts = type->to<IR::Type_Struct>()) {
-        int size = 0;
-        for (auto field : ts->fields) {
-            size += getTypeSize(field->type);
-        }
-        return size;
-    }
-    if (auto stack = type->to<IR::Type_Stack>()) {
-         int elemSize = getTypeSize(stack->elementType);
-         if (auto c = stack->size->to<IR::Constant>()) {
-             return elemSize * c->asInt();
-         }
-         return elemSize * evaluateExprToInt(stack->size);
-    }
-    return 0;
-}
+// int P5ToC::getTypeSize(const IR::Type* type) {
+//     if (auto tb = type->to<IR::Type_Bits>()) {
+//         if (tb->expression) {
+//             return evaluateExprToInt(tb->expression);
+//         }
+//         return tb->width_bits();
+//     }
+//     if (auto tn = type->to<IR::Type_Name>()) {
+//         if (structMap.count(tn->path->name)) {
+//             return getTypeSize(structMap.at(tn->path->name));
+//         }
+//         return 0;
+//     }
+//     if (auto ts = type->to<IR::Type_Struct>()) {
+//         int size = 0;
+//         for (auto field : ts->fields) {
+//             size += getTypeSize(field->type);
+//         }
+//         return size;
+//     }
+//     if (auto stack = type->to<IR::Type_Stack>()) {
+//          int elemSize = getTypeSize(stack->elementType);
+//          if (auto c = stack->size->to<IR::Constant>()) {
+//              return elemSize * c->asInt();
+//          }
+//          return elemSize * evaluateExprToInt(stack->size);
+//     }
+//     return 0;
+// }
 
 const IR::P4Program *runP5ToC(const IR::P4Program *program, const std::string &out_dir) {
     CHECK_NULL(program);

@@ -473,21 +473,21 @@ public:
     };
 
     // Intrisic functions placeholders.
-    template <typename T>
-    constexpr std::size_t _sizeof(const T&) const {
-        using Decayed = std::decay_t<T>;
-        return p5::bit_width_v<Decayed>;
-    }
+    // template <typename T>
+    // constexpr std::size_t _sizeof(const T&) const {
+    //     using Decayed = std::decay_t<T>;
+    //     return p5::bit_width_v<Decayed>;
+    // }
 
-    template <typename T>
-    inline p5::uint<16> _lenof(const std::vector<T>& v) const {
-        return p5::uint<16>(v.size());
-    }
+    // template <typename T>
+    // inline p5::uint<16> _lenof(const std::vector<T>& v) const {
+    //     return p5::uint<16>(v.size());
+    // }
 
-    template <typename T, std::size_t N>
-    inline p5::uint<16> _lenof(const T (&arr)[N]) const {
-        return p5::uint<16>(N);
-    }
+    // template <typename T, std::size_t N>
+    // inline p5::uint<16> _lenof(const T (&arr)[N]) const {
+    //     return p5::uint<16>(N);
+    // }
 
     template <typename... Args>
     inline _any_rvalue _offsetof(Args &&... /*args*/) const {
@@ -504,10 +504,10 @@ public:
         return {};
     }
 
-    template <typename Int>
-    constexpr std::uint32_t _log2(Int n) const {
-        return ::_log2(n);
-    }
+    // template <typename Int>
+    // constexpr std::uint32_t _log2(Int n) const {
+    //     return ::_log2(n);
+    // }
 
     template <typename... Args>
     inline _any_rvalue _valid_set(Args &&... /*args*/) const {
@@ -535,10 +535,10 @@ public:
         return {};
     }
 
-    template <typename... Args>
-    void _printf(const char* format, Args&&... args) const {
-        std::printf(format, std::forward<Args>(args)...);
-    }
+    // template <typename... Args>
+    // void _printf(const char* format, Args&&... args) const {
+    //     std::printf(format, std::forward<Args>(args)...);
+    // }
 
     template <typename... Args>
     inline _any_rvalue _restrict(Args &&... /*args*/) const {

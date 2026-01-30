@@ -66,6 +66,9 @@ class P5ToC {
     std::vector<Uint0InitListParam> curUint0InitListParams;
 
     std::unordered_set<cstring> switchMembers;
+    // When true, PathExpression emission will NOT prefix switch members with "ctx.".
+    // This is useful when emitting header/type contexts where members are directly visible.
+    bool bypassCtxPrefix = false;
     
     // Type resolution maps
     using LocalsMap = std::unordered_map<cstring, const IR::Type *>;
@@ -89,7 +92,7 @@ class P5ToC {
     void emitStructMembers(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitFieldType(const IR::Type *type, EmitMode mode = EmitMode::Standard);
     int evaluateExprToInt(const IR::Expression* expr);
-    int getTypeSize(const IR::Type* type);
+    // int getTypeSize(const IR::Type* type);
     void emitNestedStructOrUnion(const IR::Type_Struct *st, EmitMode mode, int &anon_counter);
     void emitVariableDecl(const IR::Declaration_Variable *var, const LocalsMap &locals = {});
     void emitHeaderDecl(const IR::Declaration_Instance *inst);
@@ -110,7 +113,7 @@ class P5ToC {
     void emitPhiPackUnpack(const IR::P4Program *program);
     void emitPhoPackUnpack(const IR::P4Program *program);
     void emitResetAllFields(const IR::P4Program *program);
-    void emitStructFieldTraverse(const IR::Type_Struct* st, const std::string& prefix, const std::unordered_map<cstring, const IR::Type_Struct*>& structMap, int& anon_counter, bool emit = true, bool is_pack = true);
+    // void emitStructFieldTraverse(const IR::Type_Struct* st, const std::string& prefix, const std::unordered_map<cstring, const IR::Type_Struct*>& structMap, int& anon_counter, bool emit = true, bool is_pack = true);
     void emitGtvFieldLoop(const IR::P4Program *program, bool is_pack);
     void emitFunction(const IR::Function *func, const std::string &class_name = "");
     void emitFunctionSignature(const IR::Function *func, const std::string &class_name = "");
