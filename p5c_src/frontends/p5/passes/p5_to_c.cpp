@@ -839,6 +839,33 @@ void P5ToC::emitSwitchDispatch(const IR::SwitchStatement *swStmt, const LocalsMa
 }
 
 void P5ToC::emitSwitchStatement(const IR::SwitchStatement *swStmt, const LocalsMap &locals) {
+    if (swStmt->expression == nullptr) {
+        *outputStream << indent << "{\n";
+        {
+            IndentGuard ig(this);
+            for (const auto &caseStmt : swStmt->cases) {
+                if (caseStmt->label->is<IR::DefaultExpression>()) {
+                    if (caseStmt->statement) {
+                        if (auto *bs = caseStmt->statement->to<IR::BlockStatement>()) {
+                            for (const auto *comp : bs->components) {
+                                emitComponent(comp, locals);
+                            }
+                        } else {
+                            if (auto *stat = caseStmt->statement->to<IR::StatOrDecl>()) {
+                                emitComponent(stat, locals);
+                            } else {
+                                *outputStream << indent << caseStmt->statement->toString() << ";\n";
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        *outputStream << indent << "}\n";
+        return;
+    }
+
     // 1. Emit block start
     *outputStream << indent << "{\n";
     IndentGuard ig(this);
@@ -1287,6 +1314,8 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
 
     if (auto *ai = expr->to<IR::ArrayIndex>()) {
         emitExpressionWithCtx(ai->left, locals);
+        if (ai->right && ai->right->is<IR::DefaultExpression>())
+            return;
         *outputStream << "[";
         emitExpressionWithCtx(ai->right, locals);
         *outputStream << "]";

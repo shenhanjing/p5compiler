@@ -547,6 +547,7 @@ field_ref_no_slice
                $$ = new IR::PathExpression(@1, path); }
         | field_ref "." ID { $$ = new IR::Member(@2, $1, *$3); }
         | field_ref "[" expression "]" { $$ = new IR::ArrayIndex(@2, $1, $3); }
+        | field_ref "[" "]" { $$ = new IR::ArrayIndex(@2, $1, new IR::DefaultExpression(@2)); }
         | ID "::" field_ref { auto path = new IR::Path(@1, *$1);
                               auto base = new IR::PathExpression(@1, path);
                               $$ = new IR::Member(@2, base, $3->toString()); }
@@ -699,7 +700,7 @@ header_declaration
         }
         | HEADER type_ref ID "[" expression "]" ";"{
                 auto type = new IR::Type_Stack(@2, $2, $5);
-                $$ = new IR::Declaration_Instance(@3, *$3, type, {});
+                $$ = new IR::Declaration_Instance(@3, *$3, type, new IR::Vector<IR::Argument>());
         }
 
 variable_declaration
@@ -844,6 +845,9 @@ select_exp
 return_select_statement
         : SWITCH "(" select_exp ")" "{" case_list "}" {
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
+        }
+        | SWITCH "(" ")" "{" case_list "}" {
+                $$ = new IR::SwitchStatement(@1, nullptr, *$5);
         }
 
 return_statement
@@ -1073,6 +1077,9 @@ switch_cases
 switch_statement
         : SWITCH "(" select_exp ")" "{" switch_cases "}" {
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
+        }
+        | SWITCH "(" ")" "{" switch_cases "}" {
+                $$ = new IR::SwitchStatement(@1, nullptr, *$5);
         }
 
 assignment_or_call
@@ -1360,6 +1367,9 @@ table_property
         }
         | SWITCH "(" select_exp ")" "{" table_case_list "}" {
                 $$ = new IR::SwitchStatement(@1, $3, *$6);
+        }
+        | SWITCH "(" ")" "{" table_case_list "}" {
+                $$ = new IR::SwitchStatement(@1, nullptr, *$5);
         }
         | annotations assignment_or_call_statement {
                 $$ = $2;
