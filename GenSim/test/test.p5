@@ -1017,6 +1017,8 @@ void _uint_func(uint<0> &OutField){
 
 header _an_st _header_arr[8];
 
+typedef _prs_trans_info<_an_st> _an_st_pt;
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;

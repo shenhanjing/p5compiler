@@ -313,6 +313,13 @@ struct _inflate : public T {
     }
 };
 
+// Parser transition info "wrapper" that preserves the original type exactly.
+// This is intentionally NOT a struct/class wrapper: alias templates make
+//   _prs_trans_info<T>
+// identical to T.
+template <typename T>
+using _prs_trans_info = T;
+
 // 对接 search engine / key 的上下文封装，内部自带实例。
 class BuiltInContext {
 public:
