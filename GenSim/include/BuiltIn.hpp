@@ -15,6 +15,8 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <memory>
 
 #include <boost/pfr.hpp>
 
@@ -316,7 +318,10 @@ struct _inflate : public T {
 // Parser transition info "wrapper" that preserves the original type exactly.
 // This is intentionally NOT a struct/class wrapper: alias templates make
 //   _prs_trans_info<T>
-// identical to T.
+// identical to T, so e.g.
+//   using ParserTransInfo_S = _prs_trans_info<TransInfo_S>;
+// is exactly the same as:
+//   using ParserTransInfo_S = TransInfo_S;
 template <typename T>
 using _prs_trans_info = T;
 
@@ -439,6 +444,50 @@ public:
         inline bool _valid(const _inflate<T> &v) const {
         return v.valid;
     }
+
+    // Generic validity storage for arbitrary variables.
+    // - Keyed by the variable's address.
+    // - If address not present, it's inserted with valid=false (0).
+    // - Returned proxy can be used on RHS (read) or LHS (write), e.g.:
+    //     if (_valid(x)) { ... }
+    //     _valid(x) = 1;
+    struct ValidProxy {
+        const BuiltInContext *ctx{nullptr};
+        const void *addr{nullptr};
+
+        explicit ValidProxy(const BuiltInContext *c = nullptr, const void *a = nullptr) : ctx(c), addr(a) {}
+
+        operator bool() const { return ctx ? ctx->validSlotForAddress_(addr) : false; }
+
+        ValidProxy &operator=(bool v) {
+            if (ctx) ctx->validSlotForAddress_(addr) = v;
+            return *this;
+        }
+
+        template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, bool>>>
+        ValidProxy &operator=(U &&v) {
+            return (*this = static_cast<bool>(std::forward<U>(v)));
+        }
+    };
+
+    template <typename U>
+    struct _is_inflate : std::false_type {};
+    template <typename U>
+    struct _is_inflate<_inflate<U>> : std::true_type {};
+
+    template <typename T, typename = std::enable_if_t<!_is_inflate<std::decay_t<T>>::value>>
+    inline ValidProxy _valid(T &v) const {
+        return ValidProxy{this, static_cast<const void *>(std::addressof(v))};
+    }
+
+    template <typename T, typename = std::enable_if_t<!_is_inflate<std::decay_t<T>>::value>>
+    inline ValidProxy _valid(const T &v) const {
+        return ValidProxy{this, static_cast<const void *>(std::addressof(v))};
+    }
+
+    // Prevent taking address of temporaries (would store dangling pointers in the dict).
+    template <typename T>
+    ValidProxy _valid(const T &&) const = delete;
 
     // *********************** _memcpy() ***********************
     template <typename T, typename = std::enable_if_t<!std::is_array_v<std::remove_reference_t<T>>>>
@@ -1161,6 +1210,14 @@ protected:
 
     // Backing storage for control_info.
     std::any stored_control_info_;
+
+    // Address -> valid mapping for generic _valid().
+    mutable std::unordered_map<const void *, bool> valid_dict_{};
+
+    // Ensure slot exists and return it.
+    inline bool &validSlotForAddress_(const void *addr) const {
+        return valid_dict_[addr];
+    }
 };
 
 #endif // BUILTIN_HPP
