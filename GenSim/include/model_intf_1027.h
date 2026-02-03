@@ -38,11 +38,11 @@ struct Cp2NpHeader {
 };
 
 struct Np2NpHeader {
-    // TODO :
+    uint8_t pkt_data[PKT_HEADER_BYTE_LEN];
 };
 
 struct Np2TmHeader {
-    // TODO :
+    uint8_t pkt_data[PKT_HEADER_BYTE_LEN];
 };
 
 struct PktHeader {
