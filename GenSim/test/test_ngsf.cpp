@@ -150,6 +150,93 @@ int main() {
         all_ok &= expect_eq_p5(b3, p5::uint<11>(0x655), "tmp restore b after reset");
     }
 
+    // -------- Slice proxy tests (p5::uint / p5::member) --------
+    // These cover "slice an existing variable then pass into _add_to_ngsf".
+    // - Read value: FV2NGSF appends bits from slice proxy temporaries
+    // - Write value: NGSF2FV restores bits into slice proxy lvalues (writing back to the original storage)
+    {
+        // --- p5::uint slice: read (temporary slice_proxy passed as const T&) ---
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+
+        p5::uint<16> hv = p5::uint<16>(0xABCD);
+        c._add_to_ngsf(hv[p5::bit_range<7, 0>]); // low byte (0xCD)
+        c._add_to_ngsf(hv[p5::bit_range<9, 8>]); // 2-bit slice (bits 9..8 are 0b11 for 0xABCD)
+
+        all_ok &= expect_eq_u64(c.NGSFBuffer[0].to_ullong(), 0xCD, "uint slice read: byte0 == low8(HashValue)");
+        all_ok &= expect_eq_u64(c.NGSFBuffer[1].to_ullong(), 0xC0, "uint slice read: next2bits in byte1[7:6]");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "uint slice read: cursor byte_offset after 10 bits");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 2, "uint slice read: cursor bit_offset after 10 bits");
+    }
+
+    {
+        // --- p5::member slice: read (temporary member::slice_proxy passed as const T&) ---
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+
+        p5::Union<ULayout> u{};
+        u.long_ = p5::uint<10>(0b1101010110); // low8 = 0x56, bits9..8 = 0b11
+
+        c._add_to_ngsf(u.long_[p5::bit_range<7, 0>]);
+        c._add_to_ngsf(u.long_[p5::bit_range<9, 8>]);
+
+        all_ok &= expect_eq_u64(c.NGSFBuffer[0].to_ullong(), 0x56, "member slice read: byte0 == low8(u.long_)");
+        all_ok &= expect_eq_u64(c.NGSFBuffer[1].to_ullong(), 0xC0, "member slice read: next2bits in byte1[7:6]");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "member slice read: cursor byte_offset after 10 bits");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 2, "member slice read: cursor bit_offset after 10 bits");
+    }
+
+    {
+        // --- p5::uint slice: write (slice_proxy lvalue passed as T&) ---
+        // Build a buffer using known values, then restore into slices of an existing uint variable.
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+        c._add_to_ngsf(p5::uint<8>(0x5A));   // 8 bits
+        c._add_to_ngsf(p5::uint<2>(0b10));   // 2 bits
+
+        c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
+        c.reset_ngsf_offset();
+
+        p5::uint<16> out = 0;
+        // Restore directly into slice proxies (temporary expressions) to verify _add_to_ngsf
+        // can write through them back to the underlying variable.
+        c._add_to_ngsf(out[p5::bit_range<7, 0>]);
+        c._add_to_ngsf(out[p5::bit_range<9, 8>]);
+
+        // Note: p5::uint::slice()/const operator[] currently isn't usable here due to cross-instantiation
+        // private access in p5::uint::slice() implementation. Read back via slice_proxy materialization.
+        all_ok &= expect_eq_u64(static_cast<p5::uint<8>>(out[p5::bit_range<7, 0>]).to_ullong(), 0x5A,
+                                "uint slice write: out[7:0] restored");
+        all_ok &= expect_eq_u64(static_cast<p5::uint<2>>(out[p5::bit_range<9, 8>]).to_ullong(), 0b10,
+                                "uint slice write: out[9:8] restored");
+    }
+
+    {
+        // --- p5::member slice: write (member::slice_proxy lvalue passed as T&) ---
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+        c._add_to_ngsf(p5::uint<8>(0xA5));   // 8 bits
+        c._add_to_ngsf(p5::uint<2>(0b01));   // 2 bits
+
+        c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
+        c.reset_ngsf_offset();
+
+        p5::Union<ULayout> u{};
+        u.long_ = p5::uint<10>(0);
+        // Restore directly into member slice proxies (temporary expressions).
+        c._add_to_ngsf(u.long_[p5::bit_range<7, 0>]);
+        c._add_to_ngsf(u.long_[p5::bit_range<9, 8>]);
+
+        all_ok &= expect_eq_u64(static_cast<p5::uint<8>>(u.long_[p5::bit_range<7, 0>]).to_ullong(), 0xA5,
+                                "member slice write: u.long_[7:0] restored");
+        all_ok &= expect_eq_u64(static_cast<p5::uint<2>>(u.long_[p5::bit_range<9, 8>]).to_ullong(), 0b01,
+                                "member slice write: u.long_[9:8] restored");
+    }
+
     std::cout << "[ngsf test] " << (all_ok ? "ALL PASS" : "FAILED") << "\n";
     return all_ok ? 0 : 1;
 }
