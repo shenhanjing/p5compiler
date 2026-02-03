@@ -88,7 +88,7 @@ int main() {
 
     // -------- Egress: restore bits from NGSFBuffer back into variables, continuing from cursor --------
     ctx.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
-    ctx.reset_ngsf_offset();
+    // No need to manually reset offsets: _add_to_ngsf auto-resets on direction changes.
 
     p5::uint<5> a2{};
     p5::uint<11> b2{};
@@ -131,7 +131,7 @@ int main() {
         // Switch to restore direction. Temporaries cannot be written back to, so we expect
         // the stream cursor to advance (skip) while leaving the buffer intact.
         ctxTmp.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
-        ctxTmp.reset_ngsf_offset();
+        // No need to manually reset offsets: _add_to_ngsf auto-resets on direction changes.
 
         ctxTmp._add_to_ngsf(p5::uint<5>(0));
         ctxTmp._add_to_ngsf(p5::uint<11>(0));
@@ -198,7 +198,7 @@ int main() {
         c._add_to_ngsf(p5::uint<2>(0b10));   // 2 bits
 
         c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
-        c.reset_ngsf_offset();
+        // No need to manually reset offsets: _add_to_ngsf auto-resets on direction changes.
 
         p5::uint<16> out = 0;
         // Restore directly into slice proxies (temporary expressions) to verify _add_to_ngsf
@@ -223,7 +223,7 @@ int main() {
         c._add_to_ngsf(p5::uint<2>(0b01));   // 2 bits
 
         c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
-        c.reset_ngsf_offset();
+        // No need to manually reset offsets: _add_to_ngsf auto-resets on direction changes.
 
         p5::Union<ULayout> u{};
         u.long_ = p5::uint<10>(0);
