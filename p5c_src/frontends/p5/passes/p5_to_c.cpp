@@ -2034,7 +2034,8 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
                       << "\n";
 
         *outputStream << indent
-                      << "using GtvPackedBuffer = std::array<uint8_t, FV_GTV_MAX_BYTE_NUM>;\n"
+                      << "// Packed GTV buffer contains both gtvData and pgtvData parts.\n"
+                      << "using GtvPackedBuffer = std::array<uint8_t, FV_GTV_MAX_BYTE_NUM + FV_PGTV_BYTE_NUM>;\n"
                       << indent << "using PhiPackedBuffer = std::array<uint8_t, FV_PHI_BYTE_NUM>;\n"
                       << indent << "using PhoPackedBuffer = std::array<uint8_t, FV_PHO_BYTE_NUM>;\n"
                       << "\n";
