@@ -2824,7 +2824,7 @@ void P5ToC::emitGtvFieldLoop(const IR::P4Program *program, bool is_pack) {
     *outputStream << "\n";
 
     *outputStream << indent << "// fv fields\n";
-    std::set<std::string> print_enable = {"PHI", "PHO", "NGSFBuffer"};
+    std::set<std::string> print_enable = {"PHI", "PHO"/*, "NGSFBuffer"*/};
     for (const auto *obj : program->objects) {
         if (auto *var = obj->to<IR::Declaration_Variable>()) {
             if (print_enable.find(std::string(var->name.toString())) != print_enable.end()) {

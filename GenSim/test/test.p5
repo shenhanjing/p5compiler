@@ -215,7 +215,6 @@ header TCP_S TCP;
 /****************************        FV           *********************************/
 @segment("PHI") @volatile("PHI", "in", "in")          PHI_S             PHI;
 @segment("PHO") @volatile("PHO", "in", "inout")       uint<7>           PHO[5];
-uint<8>                                                                 NGSFBuffer[64];
 uint<10>                                                                GLSP;
 uint<10>                                                                GLTP;
 uint<6>                                                                 LLTP;
@@ -236,6 +235,7 @@ uint<8>                                                                 TTL;
 uint<8>                                                                 EncapIndex;
 uint<3>                                                                 HubSpkGrp;
 uint<2>                                                                 EncapProfile;
+uint<8>                                                                 NGSFBuffer[64];
 
 /****************************        Parser           *********************************/
 @parser void iprs( )
