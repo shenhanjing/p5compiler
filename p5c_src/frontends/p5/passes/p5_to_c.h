@@ -55,6 +55,8 @@ class P5ToC {
     bool inSwitchMethod = false;
     // Name of the function currently being emitted (for body prologue tweaks).
     cstring currentFunctionName;
+    enum class AcceleratorNgsfDir { None, FV2NGSF, NGSF2FV };
+    AcceleratorNgsfDir currentAcceleratorNgsfDir = AcceleratorNgsfDir::None;
 
     struct Uint0InitListParam {
         std::string tname;     // e.g. "T0"

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <type_traits>
+#include <variant>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -661,6 +662,12 @@ void P5ToC::emitFunctionBody(const IR::BlockStatement *body, LocalsMap locals) {
         for (const auto &p : curUint0InitListParams) {
             *outputStream << indent << "std::vector<" << p.tname << "> " << p.origName << "("
                           << p.initName << ");\n";
+        }
+
+        if (currentAcceleratorNgsfDir == AcceleratorNgsfDir::FV2NGSF) {
+            *outputStream << indent << "ngsf_direction = NgsfDirection::FV2NGSF;\n";
+        } else if (currentAcceleratorNgsfDir == AcceleratorNgsfDir::NGSF2FV) {
+            *outputStream << indent << "ngsf_direction = NgsfDirection::NGSF2FV;\n";
         }
 
         if (!currentFunctionName.isNullOrEmpty()) {
@@ -1623,12 +1630,12 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
         *outputStream << indent << "void apply() override {\n";
         {
             IndentGuard ig(this);
-            if (tbl->name == "INGSF2FV_TBL" || tbl->name == "INGSF2FV_IF_TBL" ||
-                tbl->name == "ENGSF2FV_TBL" || tbl->name == "ENGSF2FV_IF_TBL") {
-                *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::NGSF2FV;\n";
-            } else if (tbl->name == "IFV2NGSF_TBL") {
-                *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::FV2NGSF;\n";
-            }
+            // if (tbl->name == "INGSF2FV_TBL" || tbl->name == "INGSF2FV_IF_TBL" ||
+            //     tbl->name == "ENGSF2FV_TBL" || tbl->name == "ENGSF2FV_IF_TBL") {
+            //     *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::NGSF2FV;\n";
+            // } else if (tbl->name == "IFV2NGSF_TBL") {
+            //     *outputStream << indent << "ctx.ngsf_direction = NgsfDirection::FV2NGSF;\n";
+            // }
             if (tbl->body) {
                 for (const auto *comp : tbl->body->components) {
                     if (auto *keyNode = comp->to<IR::P5Key>()) {
@@ -1665,6 +1672,60 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
 
     cstring oldFunctionName = currentFunctionName;
     currentFunctionName = func->name;
+    AcceleratorNgsfDir oldAccel = currentAcceleratorNgsfDir;
+    currentAcceleratorNgsfDir = AcceleratorNgsfDir::None;
+
+    // Parse function annotation: @accelerator("NP") / @accelerator("NGSF")
+    if (!func->annotations.empty()) {
+        for (const auto *ann : func->annotations) {
+            if (!ann) continue;
+            if (!(ann->name == "accelerator" || ann->name == IR::ID("accelerator"))) continue;
+
+            // Extract the first argument in a robust way:
+            // - @accelerator("NP")   -> StringLiteral(value="NP")
+            // - @accelerator(NP)     -> PathExpression(path="NP")
+            // - fallback to textual normalization for other forms/unparsed tokens.
+            std::string norm;
+            if (std::holds_alternative<IR::Vector<IR::Expression>>(ann->body)) {
+                const auto &exprs = std::get<IR::Vector<IR::Expression>>(ann->body);
+                if (!exprs.empty() && exprs.at(0)) {
+                    const auto *e0 = exprs.at(0);
+                    if (auto *sl = e0->to<IR::StringLiteral>()) {
+                        norm = sl->value.c_str();
+                    } else if (auto *pe = e0->to<IR::PathExpression>()) {
+                        norm = pe->path->name.toString();
+                    } else {
+                        // Last-resort: stringify and strip punctuation.
+                        const std::string blob = e0->toString().c_str();
+                        norm.reserve(blob.size());
+                        for (char c : blob) {
+                            if (std::isalnum(static_cast<unsigned char>(c)) || c == '_')
+                                norm.push_back(c);
+                        }
+                    }
+                }
+            } else if (std::holds_alternative<IR::Vector<IR::AnnotationToken>>(ann->body)) {
+                const auto &toks = std::get<IR::Vector<IR::AnnotationToken>>(ann->body);
+                std::string blob;
+                for (const auto *t : toks) {
+                    if (t) blob += t->text.c_str();
+                }
+                norm.reserve(blob.size());
+                for (char c : blob) {
+                    if (std::isalnum(static_cast<unsigned char>(c)) || c == '_') norm.push_back(c);
+                }
+            }
+
+            if (norm == "NP" || norm.find("NP") != std::string::npos) {
+                currentAcceleratorNgsfDir = AcceleratorNgsfDir::FV2NGSF;
+                break;
+            }
+            if (norm == "NGSF" || norm.find("NGSF") != std::string::npos) {
+                currentAcceleratorNgsfDir = AcceleratorNgsfDir::NGSF2FV;
+                break;
+            }
+        }
+    }
 
     emitFunctionSignature(func, class_name);
 
@@ -1679,6 +1740,7 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
 
     emitFunctionBody(func->body, locals);
 
+    currentAcceleratorNgsfDir = oldAccel;
     currentFunctionName = oldFunctionName;
     inSwitchMethod = oldInSwitch;
 }
