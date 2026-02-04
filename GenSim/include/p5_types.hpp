@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <type_traits>
 #include <utility>
 #include <iterator>
@@ -1445,6 +1446,21 @@ public:
           get_bit_(&get_bit_member),
           set_bit_(&set_bit_member) {}
 
+    // Accept uint/member slice proxies (e.g. u[p5::bit_range<hi,lo>]) as writable references.
+    // Note: the proxy itself may be a temporary, but it still references underlying storage.
+    template <typename Slice,
+              typename D = std::decay_t<Slice>,
+              typename = std::enable_if_t<
+                  std::is_same_v<typename D::value_type, value_type>>>
+    /*implicit*/ uint_ref(Slice &&slice) {
+        owner_ = std::make_shared<D>(std::forward<Slice>(slice));
+        ctx_ = owner_.get();
+        read_ = &read_slice<D>;
+        write_ = &write_slice<D>;
+        get_bit_ = &get_bit_slice<D>;
+        set_bit_ = &set_bit_slice<D>;
+    }
+
     value_type read() const { return read_(ctx_); }
     operator value_type() const { return read(); }
 
@@ -1980,6 +1996,10 @@ public:
     value_type operator--(int) { auto old = read(); --(*this); return old; }
 
 private:
+    // When adapting slice proxies we may need to own a copy of the proxy handle.
+    // For plain p5::uint / p5::member, owner_ stays empty.
+    std::shared_ptr<void> owner_{};
+
     void *ctx_{nullptr};
     value_type (*read_)(void *){nullptr};
     void (*write_)(void *, const value_type &){nullptr};
@@ -1997,6 +2017,23 @@ private:
 
     static bool get_bit_member(void *ctx, std::size_t pos) { return (*static_cast<p5::member<p5::uint<N>> *>(ctx))[pos]; }
     static void set_bit_member(void *ctx, std::size_t pos, bool v) { (*static_cast<p5::member<p5::uint<N>> *>(ctx))[pos] = v; }
+
+    template <typename SliceT>
+    static value_type read_slice(void *ctx) {
+        return static_cast<value_type>(*static_cast<SliceT *>(ctx));
+    }
+    template <typename SliceT>
+    static void write_slice(void *ctx, const value_type &v) {
+        *static_cast<SliceT *>(ctx) = v;
+    }
+    template <typename SliceT>
+    static bool get_bit_slice(void *ctx, std::size_t pos) {
+        return static_cast<bool>((*static_cast<SliceT *>(ctx))[pos]);
+    }
+    template <typename SliceT>
+    static void set_bit_slice(void *ctx, std::size_t pos, bool v) {
+        (*static_cast<SliceT *>(ctx))[pos] = v;
+    }
 };
 
 template <typename UIntT>

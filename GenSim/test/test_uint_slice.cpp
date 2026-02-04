@@ -83,6 +83,32 @@ bool test_slice_rw_int_and_truncate() {
     return ok;
 }
 
+void set_u8(p5::uint_ref<8> x, uint8_t v) { x = v; }
+void set_lsb(p5::uint_ref<8> x) { x[0] = true; }
+
+struct RefLayout {
+    p5::member<p5::uint<16>> word;
+};
+
+bool test_uint_ref_accepts_slices() {
+    bool ok = true;
+
+    // ---- slice of p5::uint ----
+    p5::uint<16> u = 0;
+    set_u8(u[p5::bit_range<7, 0>], 0xA4);
+    set_lsb(u[p5::bit_range<7, 0>]); // -> 0xA5
+    ok &= expect_eq(u.to_ullong(), 0x00A5, "uint_ref accepts uint slice_proxy and writes back");
+
+    // ---- slice of p5::member ----
+    p5::Union<RefLayout> un{};
+    un.word = p5::uint<16>(0);
+    set_u8(un.word[p5::bit_range<7, 0>], 0x5A);
+    set_lsb(un.word[p5::bit_range<7, 0>]); // -> 0x5B
+    ok &= expect_eq(p5::uint<16>(un.word).to_ullong(), 0x005B, "uint_ref accepts member slice_proxy and writes back");
+
+    return ok;
+}
+
 } // namespace
 
 int main() {
@@ -90,6 +116,7 @@ int main() {
     all_ok &= test_single_bit_rw();
     all_ok &= test_slice_rw_uint();
     all_ok &= test_slice_rw_int_and_truncate();
+    all_ok &= test_uint_ref_accepts_slices();
 
     if (all_ok) {
         std::cout << "[PASS] uint slice/bit tests\n";
