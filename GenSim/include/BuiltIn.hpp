@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <type_traits>
 #include <utility>
+#include <array>
 #include <vector>
 #include <stdexcept>
 #include <string>
@@ -29,6 +30,9 @@ constexpr std::size_t bit_width_of_type();
 
 namespace detail_builtin {
 template <typename T>
+using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename T>
 struct is_p5_uint : std::false_type {};
 template <std::size_t N>
 struct is_p5_uint<p5::uint<N>> : std::true_type {};
@@ -43,8 +47,53 @@ struct is_p5_union : std::false_type {};
 template <typename Layout>
 struct is_p5_union<p5::Union<Layout>> : std::true_type {};
 
+template <typename T>
+struct is_std_vector : std::false_type {};
+template <typename T, typename Alloc>
+struct is_std_vector<std::vector<T, Alloc>> : std::true_type {};
+
+template <typename T>
+struct is_std_array : std::false_type {};
+template <typename T, std::size_t N>
+struct is_std_array<std::array<T, N>> : std::true_type {};
+
 template <typename...>
 struct always_false : std::false_type {};
+
+// Clear a single object "in place" by setting all its fields/bits to 0.
+// Supports:
+// - p5::uint<N> / p5::member<uint<N>> / p5::Union<Layout>
+// - slice proxies (uint/member slices), via "assignable from int"
+// - C arrays / std::array / std::vector (recursively)
+// - aggregates composed of the above (recursively via boost::pfr)
+template <typename T>
+inline void clear_fields_one(T &&value) {
+    using U = remove_cvref_t<T>;
+
+    if constexpr (std::is_array_v<U>) {
+        for (auto &elem : value) clear_fields_one(elem);
+    } else if constexpr (is_std_array<U>::value) {
+        for (auto &elem : value) clear_fields_one(elem);
+    } else if constexpr (is_std_vector<U>::value) {
+        for (auto &elem : value) clear_fields_one(elem);
+    } else if constexpr (is_p5_uint<U>::value || is_p5_member<U>::value || is_p5_union<U>::value) {
+        // These p5 types support assignment from integral 0.
+        value = 0;
+    } else if constexpr (std::is_aggregate_v<U>) {
+        boost::pfr::for_each_field(value, [&](auto &sub) { clear_fields_one(sub); });
+    } else if constexpr (std::is_assignable_v<U &, int>) {
+        // Covers slice proxies like:
+        // - p5::uint<N>::slice_proxy<High, Low> (private nested type, but assignable)
+        // - p5::member<...>::slice_proxy<High, Low>
+        value = 0;
+    } else if constexpr (std::is_default_constructible_v<U> && std::is_assignable_v<U &, U>) {
+        value = U{};
+    } else {
+        static_assert(always_false<T>::value,
+                      "ClearFields: unsupported type. Expected p5::uint/p5::member/p5::Union, "
+                      "their slices, arrays/vectors of them, or aggregates composed of them.");
+    }
+}
 
 template <typename T>
 inline void append_bits_msb_first(const T &value, std::vector<bool> &out) {
@@ -224,6 +273,13 @@ struct map_field_dispatch_wrapper {
 
 
 }  // namespace detail_builtin
+
+// Global ClearFields function:
+// Accepts any number of lvalue arguments with potentially different types and clears them to 0.
+template <typename... Args>
+inline void ClearFields(Args &&...args) {
+    (detail_builtin::clear_fields_one(std::forward<Args>(args)), ...);
+}
 
 // Helper: bit width of a type (only p5::uint<N> is supported).
 template <typename T>
