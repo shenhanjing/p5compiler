@@ -438,6 +438,46 @@ bool P5ToC::emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os,
     auto *pe = mc->method->to<IR::PathExpression>();
     if (!pe) return false;
 
+    // ClearFields is a global builtin in GenSim. In P5 it is always called as:
+    //   ClearFields({var0, var1, ...})
+    // where the braced part parses into an IR::ListExpression as a single argument.
+    // In C++, ClearFields is variadic, so we must drop the braces:
+    //   ClearFields(var0, var1, ...)
+    if (pe->path->name == "ClearFields") {
+        auto *old = outputStream;
+        outputStream = &os;
+
+        os << "ClearFields(";
+        bool first = true;
+        if (mc->arguments && mc->arguments->size() == 1) {
+            const auto *arg0 = mc->arguments->at(0);
+            if (arg0 && arg0->expression) {
+                if (auto *list = arg0->expression->to<IR::ListExpression>()) {
+                    for (auto *comp : list->components) {
+                        if (!first) os << ", ";
+                        first = false;
+                        emitExpressionWithCtx(comp, locals);
+                    }
+                } else {
+                    // Fallback: not a braced list, emit the single argument as-is.
+                    emitExpressionWithCtx(arg0->expression, locals);
+                    first = false;
+                }
+            }
+        } else if (mc->arguments) {
+            // Defensive: if frontend ever emits real arguments list, keep it.
+            for (const auto *arg : *mc->arguments) {
+                if (!first) os << ", ";
+                first = false;
+                emitExpressionWithCtx(arg->expression, locals);
+            }
+        }
+        os << ");";
+
+        outputStream = old;
+        return true;
+    }
+
     if (pe->path->name == "_apply" && mc->arguments && mc->arguments->size() == 1) {
         auto *old = outputStream;
         outputStream = &os;
@@ -1110,7 +1150,24 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
         emitExpressionWithCtx(mc->method, locals);
         *outputStream << "(";
         bool addedCtx = false;
-        if (auto *pe = mc->method->to<IR::PathExpression>()) {
+        const IR::PathExpression *methodPath = mc->method->to<IR::PathExpression>();
+        if (methodPath) {
+            // Special-case: ClearFields({a,b,...}) in P5 should become ClearFields(a,b,...)
+            // in C++ (variadic builtin). We strip the braces by expanding the ListExpression.
+            if (methodPath->path->name == "ClearFields" && mc->arguments && mc->arguments->size() == 1) {
+                if (auto *list = mc->arguments->at(0)->expression->to<IR::ListExpression>()) {
+                    bool first = true;
+                    for (auto *comp : list->components) {
+                        if (!first) *outputStream << ", ";
+                        first = false;
+                        emitExpressionWithCtx(comp, locals);
+                    }
+                    *outputStream << ")";
+                    return;
+                }
+            }
+        }
+        if (auto *pe = methodPath) {
             if (pe->path->name.toString().endsWith("_TBL")) {
                 if (inSwitchMethod) {
                     *outputStream << "*this";
@@ -1664,6 +1721,9 @@ void P5ToC::emitTable(const IR::P5Table *tbl) {
 
 void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
+    // ClearFields is implemented in GenSim BuiltIn.hpp. Do not generate it here
+    // to avoid duplicate definitions/declarations.
+    if (func->name == "ClearFields") return;
 
     bool oldInSwitch = inSwitchMethod;
     if (class_name == "Switch::") {
@@ -1747,6 +1807,8 @@ void P5ToC::emitFunction(const IR::Function *func, const std::string &class_name
 
 void P5ToC::emitFunctionDeclaration(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
+    // ClearFields is implemented in GenSim BuiltIn.hpp. Do not redeclare it.
+    if (func->name == "ClearFields") return;
     emitFunctionSignature(func, class_name);
     *outputStream << ";\n";
 }

@@ -1125,6 +1125,16 @@ header _an_st _header_arr[8];
 
 typedef _prs_trans_info<_an_st> _an_st_pt;
 
+void ClearFields (uint<0> list[]){
+  uint<4> tmp = 0;
+}
+
+void _test_ClearFields (){
+  uint<4> var0 = 1;
+  uint<5> var1 = 2;
+  ClearFields({var0, var1});
+}
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;
