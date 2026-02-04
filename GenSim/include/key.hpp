@@ -137,6 +137,16 @@ private:
     template <typename UIntT>
     struct is_p5_member_type<p5::member<UIntT>> : std::true_type {};
 
+    // p5::uint::slice_proxy / p5::member::slice_proxy support:
+    // Detect structurally via a public nested `value_type` (which is a p5::uint<W>).
+    // Note: p5::uint::slice_proxy is a private nested type, so we cannot name it directly here.
+    template <typename T, typename = void>
+    struct is_p5_slice_proxy_type : std::false_type {};
+    template <typename T>
+    struct is_p5_slice_proxy_type<T, std::void_t<typename std::decay_t<T>::value_type>>
+        : std::bool_constant<is_p5_uint_type<std::decay_t<typename std::decay_t<T>::value_type>>::value &&
+                             !is_p5_uint_type<std::decay_t<T>>::value && !is_p5_member_type<std::decay_t<T>>::value> {};
+
     template <typename T>
     static constexpr bool is_p5_uint() {
         return is_p5_uint_type<std::decay_t<T>>::value;
@@ -145,6 +155,11 @@ private:
     template <typename T>
     static constexpr bool is_p5_member() {
         return is_p5_member_type<std::decay_t<T>>::value;
+    }
+
+    template <typename T>
+    static constexpr bool is_p5_slice_proxy() {
+        return is_p5_slice_proxy_type<std::decay_t<T>>::value;
     }
 
     template <typename T>
@@ -222,9 +237,13 @@ inline void append_member_bits(const p5::member<UIntT> &m, std::vector<bool> &ou
 template <typename T>
 constexpr std::size_t KeyManager::bit_width_of() {
     using Decayed = std::decay_t<T>;
-    static_assert(is_p5_uint<Decayed>() || is_p5_member<Decayed>(),
-                  "KeyManager only supports p5::uint<N> or p5::member<p5::uint<N>> components");
-    if constexpr (is_p5_uint<Decayed>()) {
+    static_assert(is_p5_uint<Decayed>() || is_p5_member<Decayed>() || is_p5_union<Decayed>() || is_p5_slice_proxy<Decayed>(),
+                  "KeyManager only supports p5::uint/p5::member/p5::Union or slice proxies of them as leaf components");
+    if constexpr (is_p5_slice_proxy<Decayed>()) {
+        return p5::bit_width_v<typename Decayed::value_type>;
+    } else if constexpr (is_p5_union<Decayed>()) {
+        return Decayed::width();
+    } else if constexpr (is_p5_uint<Decayed>()) {
         return Decayed::width();
     } else {
         return Decayed::width();
@@ -233,27 +252,57 @@ constexpr std::size_t KeyManager::bit_width_of() {
 
 template <typename T>
 std::size_t KeyManager::part_width(const T &value) {
-    if constexpr (std::is_same_v<T, KeyPart>) {
+    using Raw = std::remove_reference_t<T>;
+    using D = std::decay_t<T>;
+    if constexpr (std::is_same_v<D, KeyPart>) {
         return value.bits;
+    } else if constexpr (std::is_array_v<Raw>) {
+        constexpr std::size_t N = std::extent_v<Raw>;
+        std::size_t sum = 0;
+        for (std::size_t i = 0; i < N; ++i) sum += part_width(value[i]);
+        return sum;
+    } else if constexpr (is_p5_uint<D>() || is_p5_member<D>() || is_p5_union<D>() || is_p5_slice_proxy<D>()) {
+        return bit_width_of<D>();
     } else {
-        return bit_width_of<T>();
+        static_assert(std::is_aggregate_v<D>,
+                      "KeyManager key parts must be p5::uint/p5::member/p5::Union (and their slice proxies), arrays, "
+                      "KeyPart, or aggregates composed of them.");
+        std::size_t sum = 0;
+        boost::pfr::for_each_field(value, [&](const auto &sub) { sum += part_width(sub); });
+        return sum;
     }
 }
 
 template <typename T>
 void KeyManager::append_bits(const T &value, std::vector<bool> &out) {
-    if constexpr (is_p5_uint<T>()) {
+    using Raw = std::remove_reference_t<T>;
+    using D = std::decay_t<T>;
+    if constexpr (std::is_array_v<Raw>) {
+        constexpr std::size_t N = std::extent_v<Raw>;
+        for (std::size_t i = 0; i < N; ++i) append_bits(value[i], out);
+    } else if constexpr (is_p5_union<D>()) {
+        // For p5::Union: treat it as underlying storage bits (high-first).
+        const auto raw = value.to_uint(); // p5::uint<width>
+        append_bits(raw, out);
+    } else if constexpr (is_p5_slice_proxy<D>()) {
+        // slice_proxy: materialize to its value_type (p5::uint<W>) and recurse.
+        using V = typename D::value_type;
+        append_bits(static_cast<V>(value), out);
+    } else if constexpr (is_p5_uint<D>()) {
         detail_keymgr::append_uint_bits(value, out);
-    } else if constexpr (is_p5_member<T>()) {
+    } else if constexpr (is_p5_member<D>()) {
         detail_keymgr::append_member_bits(value, out);
-    } else if constexpr (std::is_same_v<T, KeyPart>) {
+    } else if constexpr (std::is_same_v<D, KeyPart>) {
         // KeyPart.value is interpreted with high bit first over 'bits' width.
         for (std::size_t i = 0; i < value.bits; ++i) {
             std::size_t shift = value.bits - 1 - i;
             out.push_back((value.value >> shift) & 1);
         }
     } else {
-        static_assert(detail_keymgr::always_false<T>::value, "Unsupported key component type");
+        static_assert(std::is_aggregate_v<D>,
+                      "Unsupported key component type: expected p5::uint/p5::member/p5::Union (and slice proxies), arrays, "
+                      "KeyPart, or aggregates composed of them.");
+        boost::pfr::for_each_field(value, [&](const auto &sub) { append_bits(sub, out); });
     }
 }
 
