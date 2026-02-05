@@ -501,6 +501,14 @@ public:
         return v.valid;
     }
 
+    // Allow _valid(_inflate<T>) to be used as an lvalue:
+    //   _valid(v) = 1;      // write
+    //   if (_valid(v)) ...  // read
+    template <typename T>
+    inline bool &_valid(_inflate<T> &v) const {
+        return v.valid;
+    }
+
     // Generic validity storage for arbitrary variables.
     // - Keyed by the variable's address.
     // - If address not present, it's inserted with valid=false (0).

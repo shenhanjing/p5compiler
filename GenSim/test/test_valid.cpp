@@ -111,6 +111,10 @@ int main() {
         _inflate<SimpleAgg> iv; // default valid=false
         ok &= expect_eq<bool>(ctx._valid(iv), false, "_inflate default valid=false");
 
+        // Can be used as an lvalue via the _inflate<T>& overload
+        ctx._valid(iv) = 1;
+        ok &= expect_eq<bool>(ctx._valid(iv), true, "_valid(_inflate) lvalue write sets valid=true");
+
         iv = SimpleAgg{7, 8}; // assignment sets iv.valid=true
         ok &= expect_eq<bool>(ctx._valid(iv), true, "_inflate assignment sets valid=true");
 
