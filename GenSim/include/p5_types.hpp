@@ -13,6 +13,14 @@
 
 namespace p5 {
 
+// Compile-time bit-width limit for p5::uint<N>.
+// You can override this at compile time, e.g.:
+//   g++ ... -DP5_UINT_MAX_BITS=1024
+// NOTE: very large N can significantly increase compile time and make *, /, % slower (O(N^2)).
+#ifndef P5_UINT_MAX_BITS
+#define P5_UINT_MAX_BITS 512
+#endif
+
 // 编译期描述位范围的标签，用于提供数组下标式的切片访问
 template<size_t High, size_t Low>
 struct bit_range_t {
@@ -28,14 +36,27 @@ inline constexpr bit_range_t<High, Low> bit_range{};
  * 
  * 支持 1-128 位的固定位宽整数，提供位切片、运算符重载等功能
  * 
- * @tparam N 位宽（1-256）
+ * @tparam N 位宽（1-P5_UINT_MAX_BITS）
  */
 template<size_t N>
 class uint {
-    static_assert(N > 0 && N <= 256, "Bit width must be between 1 and 256");
+    static_assert(N > 0 && N <= static_cast<size_t>(P5_UINT_MAX_BITS),
+                  "Bit width must be between 1 and P5_UINT_MAX_BITS");
     
 private:
     std::bitset<N> value;
+
+    static int cmp_bits(const std::bitset<N> &a, const std::bitset<N> &b) {
+        // Compare as unsigned integer (MSB-first).
+        for (std::size_t i = N; i-- > 0;) {
+            const bool abit = a[i];
+            const bool bbit = b[i];
+            if (abit != bbit) return abit ? 1 : -1;
+        }
+        return 0;
+    }
+
+    bool is_zero() const { return value.none(); }
 
     // 可写切片代理，支持对固定编译期范围 [High:Low] 进行读写
     template<size_t High, size_t Low>
@@ -338,11 +359,10 @@ public:
     // 从其他 uint<N> 构造
     template<size_t M>
     explicit uint(const uint<M>& other) {
-        if constexpr (M <= N) {
-            value = other.value.to_ullong();
-        } else {
-            // 截断高位
-            value = other.value.to_ullong() & ((1ULL << N) - 1);
+        value.reset();
+        constexpr std::size_t copy_width = (M < N) ? M : N;
+        for (std::size_t i = 0; i < copy_width; ++i) {
+            value[i] = other[i];
         }
     }
     
@@ -359,10 +379,10 @@ public:
     
     template<size_t M>
     uint& operator=(const uint<M>& other) {
-        if constexpr (M <= N) {
-            value = other.value.to_ullong();
-        } else {
-            value = other.value.to_ullong() & ((1ULL << N) - 1);
+        value.reset();
+        constexpr std::size_t copy_width = (M < N) ? M : N;
+        for (std::size_t i = 0; i < copy_width; ++i) {
+            value[i] = other[i];
         }
         return *this;
     }
@@ -373,34 +393,79 @@ public:
     
     // 算术运算符
     uint operator+(const uint& other) const {
-        uint64_t result = value.to_ullong() + other.value.to_ullong();
-        return uint(result & ((1ULL << N) - 1));
+        uint out{};
+        bool carry = false;
+        for (std::size_t i = 0; i < N; ++i) {
+            const bool a = value[i];
+            const bool b = other.value[i];
+            out.value[i] = a ^ b ^ carry;
+            carry = (a & b) | (a & carry) | (b & carry);
+        }
+        return out;
     }
     
     uint operator-(const uint& other) const {
-        uint64_t result = value.to_ullong() - other.value.to_ullong();
-        return uint(result & ((1ULL << N) - 1));
+        uint out{};
+        bool borrow = false;
+        for (std::size_t i = 0; i < N; ++i) {
+            const bool a = value[i];
+            const bool b = other.value[i];
+            out.value[i] = a ^ b ^ borrow;
+            const bool axb = a ^ b;
+            borrow = (!a & b) | (!axb & borrow);
+        }
+        return out;
     }
     
     uint operator*(const uint& other) const {
-        uint64_t result = value.to_ullong() * other.value.to_ullong();
-        return uint(result & ((1ULL << N) - 1));
+        uint result{};
+        for (std::size_t i = 0; i < N; ++i) {
+            if (other.value[i]) {
+                result += (*this << i);
+            }
+        }
+        return result;
     }
     
     uint operator/(const uint& other) const {
-        if (other.value.to_ullong() == 0) return uint(0);
-        return uint(value.to_ullong() / other.value.to_ullong());
+        if (other.is_zero()) return uint(0);
+        uint quotient{};
+        uint remainder{};
+        for (std::size_t i = N; i-- > 0;) {
+            remainder <<= 1;
+            remainder.value[0] = value[i];
+            if (remainder >= other) {
+                remainder -= other;
+                quotient.value[i] = true;
+            }
+        }
+        return quotient;
     }
     
     uint operator%(const uint& other) const {
-        if (other.value.to_ullong() == 0) return uint(0);
-        return uint(value.to_ullong() % other.value.to_ullong());
+        if (other.is_zero()) return uint(0);
+        uint quotient{};
+        uint remainder{};
+        for (std::size_t i = N; i-- > 0;) {
+            remainder <<= 1;
+            remainder.value[0] = value[i];
+            if (remainder >= other) {
+                remainder -= other;
+                quotient.value[i] = true;
+            }
+        }
+        (void)quotient;
+        return remainder;
     }
     
     // 自增自减
     uint& operator++() {
-        uint64_t val = value.to_ullong();
-        value = (val + 1) & ((1ULL << N) - 1);
+        bool carry = true;
+        for (std::size_t i = 0; i < N && carry; ++i) {
+            const bool bit = value[i];
+            value[i] = bit ^ carry;
+            carry = bit & carry;
+        }
         return *this;
     }
     
@@ -411,8 +476,12 @@ public:
     }
     
     uint& operator--() {
-        uint64_t val = value.to_ullong();
-        value = (val - 1) & ((1ULL << N) - 1);
+        bool borrow = true;
+        for (std::size_t i = 0; i < N && borrow; ++i) {
+            const bool bit = value[i];
+            value[i] = bit ^ borrow;
+            borrow = (!bit) & borrow;
+        }
         return *this;
     }
     
@@ -424,27 +493,39 @@ public:
     
     // 位运算符
     uint operator&(const uint& other) const {
-        return uint((value & other.value).to_ullong());
+        uint out{};
+        out.value = (value & other.value);
+        return out;
     }
     
     uint operator|(const uint& other) const {
-        return uint((value | other.value).to_ullong());
+        uint out{};
+        out.value = (value | other.value);
+        return out;
     }
     
     uint operator^(const uint& other) const {
-        return uint((value ^ other.value).to_ullong());
+        uint out{};
+        out.value = (value ^ other.value);
+        return out;
     }
     
     uint operator~() const {
-        return uint((~value).to_ullong() & ((1ULL << N) - 1));
+        uint out{};
+        out.value = (~value);
+        return out;
     }
     
     uint operator<<(size_t shift) const {
-        return uint((value << shift).to_ullong() & ((1ULL << N) - 1));
+        uint out{};
+        out.value = (value << shift);
+        return out;
     }
     
     uint operator>>(size_t shift) const {
-        return uint((value >> shift).to_ullong());
+        uint out{};
+        out.value = (value >> shift);
+        return out;
     }
     
     // 复合赋值运算符
@@ -490,7 +571,6 @@ public:
     
     uint& operator<<=(size_t shift) {
         value <<= shift;
-        value &= std::bitset<N>((1ULL << N) - 1);
         return *this;
     }
     
@@ -509,44 +589,79 @@ public:
     }
     
     bool operator<(const uint& other) const {
-        return value.to_ullong() < other.value.to_ullong();
+        return cmp_bits(value, other.value) < 0;
     }
     
     bool operator<=(const uint& other) const {
-        return value.to_ullong() <= other.value.to_ullong();
+        return cmp_bits(value, other.value) <= 0;
     }
     
     bool operator>(const uint& other) const {
-        return value.to_ullong() > other.value.to_ullong();
+        return cmp_bits(value, other.value) > 0;
     }
     
     bool operator>=(const uint& other) const {
-        return value.to_ullong() >= other.value.to_ullong();
+        return cmp_bits(value, other.value) >= 0;
     }
     
     // 与整数比较
     bool operator==(uint64_t val) const {
-        return value.to_ullong() == val;
+        if constexpr (N < 64) {
+            // If val has any bits above N-1 set, it cannot equal an N-bit value.
+            if ((val >> N) != 0) return false;
+        }
+        // Compare low min(N,64) bits.
+        constexpr std::size_t w = (N < 64) ? N : 64;
+        for (std::size_t i = 0; i < w; ++i) {
+            const bool bit = (val >> i) & 1ULL;
+            if (value[i] != bit) return false;
+        }
+        if constexpr (N > 64) {
+            // For N>64, val has no higher bits; require ours to be zero above bit 63.
+            for (std::size_t i = 64; i < N; ++i) {
+                if (value[i]) return false;
+            }
+        }
+        return true;
     }
     
     bool operator!=(uint64_t val) const {
-        return value.to_ullong() != val;
+        return !(*this == val);
     }
     
     bool operator<(uint64_t val) const {
-        return value.to_ullong() < val;
+        if constexpr (N < 64) {
+            // If val has higher bits beyond N, then val > max(uint<N>) so it's always greater.
+            if ((val >> N) != 0) return true;
+        }
+        // Now val fits within N bits (or N>=64). Compare as uint values.
+        for (std::size_t i = N; i-- > 0;) {
+            const bool abit = value[i];
+            const bool bbit = (i < 64) ? (((val >> i) & 1ULL) != 0) : false; // i>=64 => val has no such bits
+            if (abit != bbit) return !abit && bbit;
+        }
+        return false;
     }
     
     bool operator<=(uint64_t val) const {
-        return value.to_ullong() <= val;
+        return (*this < val) || (*this == val);
     }
     
     bool operator>(uint64_t val) const {
-        return value.to_ullong() > val;
+        if constexpr (N < 64) {
+            // If val has higher bits beyond N, then val > max(uint<N>) so we can never be greater.
+            if ((val >> N) != 0) return false;
+        }
+        for (std::size_t i = N; i-- > 0;) {
+            const bool abit = value[i];
+            const bool bbit = (i < 64) ? (((val >> i) & 1ULL) != 0) : false;
+            if (abit != bbit) return abit && !bbit;
+        }
+        return false;
     }
     
     bool operator>=(uint64_t val) const {
-        return value.to_ullong() >= val;
+        return (*this > val) || (*this == val);
     }
     
     // 位切片操作 [high:low]
@@ -585,7 +700,14 @@ public:
     
     // 获取底层值（用于调试）
     uint64_t to_ullong() const {
-        return value.to_ullong();
+        // Return the low 64 bits (truncating if N > 64). This avoids
+        // std::bitset::to_ullong() overflow exceptions when N > 64.
+        uint64_t out = 0;
+        constexpr std::size_t w = (N < 64) ? N : 64;
+        for (std::size_t i = 0; i < w; ++i) {
+            if (value[i]) out |= (1ULL << i);
+        }
+        return out;
     }
 
     // 以“高位在前”的 bit 序列构造，便于从动态拼接结果生成定长 uint<N>
@@ -611,7 +733,9 @@ public:
     
     // 获取最大值
     static uint max() {
-        return uint((1ULL << N) - 1);
+        uint out{};
+        out.value.set();
+        return out;
     }
     
     // 获取最小值
