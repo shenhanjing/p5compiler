@@ -81,6 +81,9 @@ inline void clear_fields_one(T &&value) {
         value = 0;
     } else if constexpr (std::is_aggregate_v<U>) {
         boost::pfr::for_each_field(value, [&](auto &sub) { clear_fields_one(sub); });
+    } else if constexpr (std::is_assignable_v<U &, bool>) {
+        // Supports BuiltInContext::ValidProxy (returned by ctx._valid(...)).
+        value = false;
     } else if constexpr (std::is_assignable_v<U &, int>) {
         // Covers slice proxies like:
         // - p5::uint<N>::slice_proxy<High, Low> (private nested type, but assignable)

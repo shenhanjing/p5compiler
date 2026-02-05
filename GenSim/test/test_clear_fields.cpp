@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <type_traits>
 
 #include "BuiltIn.hpp"
 
@@ -156,6 +157,63 @@ bool test_c_array_std_array_vector_and_aggregate() {
     return ok;
 }
 
+bool test_valid_proxy() {
+    bool ok = true;
+
+    BuiltInContext ctx;
+    int x = 123;
+
+    // Set valid bit to 1 then clear it via ClearFields on the proxy.
+    ctx._valid(x) = true;
+    ok &= expect_true(static_cast<bool>(ctx._valid(x)) == true, "_valid(x) precondition true");
+
+    // Pass the proxy expression directly (temporary).
+    ClearFields(ctx._valid(x));
+    ok &= expect_true(static_cast<bool>(ctx._valid(x)) == false, "ClearFields(_valid(x)) clears valid bit");
+
+    return ok;
+}
+
+struct PlainAgg {
+    int x;
+    std::uint32_t y;
+};
+
+bool test_inflate_valid_overloads() {
+    bool ok = true;
+
+    BuiltInContext ctx;
+
+    // Default: valid=false
+    _inflate<PlainAgg> iv;
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == false,
+                      "_valid(const _inflate<T>&) reads default valid=false");
+
+    // Assignment from T sets valid=true
+    iv = PlainAgg{7, 8};
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == true,
+                      "_inflate assignment sets valid=true");
+
+    // Writable overload returns bool&, can clear directly.
+    ctx._valid(iv) = false;
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == false,
+                      "_valid(_inflate<T>&) allows clearing valid=false");
+
+    // Set true again, then clear via ClearFields on the lvalue bool&.
+    ctx._valid(iv) = true;
+    ClearFields(ctx._valid(iv));
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == false,
+                      "ClearFields(_valid(_inflate<T>&)) clears valid=false");
+
+    // Also support clearing the whole inflate wrapper (value reset + valid=false).
+    iv = PlainAgg{1, 2};
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == true, "precondition true before ClearFields(iv)");
+    ClearFields(iv);
+    ok &= expect_true(ctx._valid(static_cast<const _inflate<PlainAgg> &>(iv)) == false, "ClearFields(_inflate<T>) resets valid=false");
+
+    return ok;
+}
+
 } // namespace
 
 int main() {
@@ -166,6 +224,8 @@ int main() {
     ok &= test_member_and_member_slice();
     ok &= test_union_and_nested_fields();
     ok &= test_c_array_std_array_vector_and_aggregate();
+    ok &= test_valid_proxy();
+    ok &= test_inflate_valid_overloads();
 
     std::cout << "[test_clear_fields] " << (ok ? "PASS" : "FAILED") << "\n";
     return ok ? 0 : 1;
