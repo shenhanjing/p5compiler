@@ -1,6 +1,6 @@
 ## p5 预编译器（从 p4c 驱动中抽离）
 
-这个目录提供一个独立的 **P5 预编译** 工具：输入一个目录，递归查找所有 `.p5` 文件（同时也会处理目录中的 `.h`），对每个文件运行 C 预处理器生成预处理结果，删掉展开的 include 内容，然后合并为一个最终的合并文件。
+这个目录提供一个独立的 **P5 预编译** 工具：输入一个目录或一个 `makefile.bat`，对文件运行 C 预处理器生成预处理结果，删掉展开的 include 内容，然后合并为一个最终的合并文件。
 
 ### 对齐的行为（对应命令）
 
@@ -22,6 +22,11 @@ p4c -b bmv2-v1model ./test -o ./out_dir --std p5
 cd /root
 python3 -m p5compiler.precompiler.p5_precompile ./test -o ./out_dir
 ```
+
+如果输入是 `makefile.bat`（Windows 批处理风格），脚本会解析其中：
+
+- `set INCLUDES=...`：提取 `-I` include 路径
+- `set SRC_FILES= ^ ...`：提取 `.p5` 源文件列表，并 **严格按 makefile 中顺序合并**
 
 可选参数：
 

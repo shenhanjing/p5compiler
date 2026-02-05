@@ -6,7 +6,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 
 @dataclass(frozen=True)
@@ -133,32 +133,145 @@ def _strip_expanded_includes(preprocessed_text: str, *, main_file: Path) -> str:
     return "".join(out_lines)
 
 
-def precompile_p5_directory(
-    src_dir: str,
-    output_dir: str,
+_BAT_SET_RE = re.compile(r"^\s*set\s+([A-Za-z_][A-Za-z0-9_]*)=(.*)$", re.IGNORECASE)
+_BAT_VAR_REF_RE = re.compile(r"%([A-Za-z_][A-Za-z0-9_]*)%")
+
+
+def _bat_expand_vars(value: str, vars_map: Dict[str, str], *, max_passes: int = 20) -> str:
+    """Expand %VAR% references using vars_map (Windows .bat style)."""
+    out = value
+    for _ in range(max_passes):
+        changed = False
+
+        def repl(m: re.Match[str]) -> str:
+            nonlocal changed
+            k = m.group(1)
+            if k in vars_map:
+                changed = True
+                return vars_map[k]
+            return m.group(0)
+
+        new_out = _BAT_VAR_REF_RE.sub(repl, out)
+        out = new_out
+        if not changed:
+            break
+    return out
+
+
+def _parse_makefile_bat(makefile_path: Path) -> Tuple[List[str], List[Path]]:
+    """Parse a Windows .bat 'makefile' and return (include_dirs, ordered_p5_files).
+
+    Expected patterns:
+    - set INCLUDES=-I... -I...
+    - set SRC_FILES= ^  (followed by path lines ending with ^, terminated by blank line)
+    """
+    text = makefile_path.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()
+
+    vars_map: Dict[str, str] = {}
+    includes_raw: Optional[str] = None
+    src_files_lines: List[str] = []
+    in_src_files = False
+
+    for line in lines:
+        # Stop SRC_FILES block on first blank line.
+        if in_src_files and line.strip() == "":
+            in_src_files = False
+            continue
+
+        m = _BAT_SET_RE.match(line)
+        if m and not in_src_files:
+            name = m.group(1)
+            value = m.group(2).strip()
+
+            # Special-case SRC_FILES: it typically starts with just '^' then continues.
+            if name.upper() == "SRC_FILES":
+                in_src_files = True
+                if value:
+                    src_files_lines.append(value)
+                continue
+
+            vars_map[name] = value
+            if name.upper() == "INCLUDES":
+                includes_raw = value
+            continue
+
+        if in_src_files:
+            src_files_lines.append(line.strip())
+
+    if includes_raw is None:
+        raise ValueError(f"makefile missing INCLUDES: {makefile_path}")
+    if not src_files_lines:
+        raise ValueError(f"makefile missing SRC_FILES: {makefile_path}")
+
+    # Expand vars in INCLUDES and parse -I entries.
+    includes_expanded = _bat_expand_vars(includes_raw, vars_map)
+    include_dirs: List[str] = []
+    for tok in includes_expanded.split():
+        if tok.startswith("-I") and len(tok) > 2:
+            include_dirs.append(tok[2:])
+
+    # Parse ordered SRC_FILES (keep original order).
+    ordered_p5: List[Path] = []
+    for raw_line in src_files_lines:
+        if not raw_line:
+            continue
+        # Remove caret continuation markers.
+        s = raw_line.rstrip()
+        if s.endswith("^"):
+            s = s[:-1].rstrip()
+        if not s:
+            continue
+        s = _bat_expand_vars(s, vars_map)
+        # Support multiple paths per line (rare).
+        for tok in s.split():
+            if tok.endswith("^"):
+                tok = tok[:-1]
+            tok = tok.strip()
+            if not tok:
+                continue
+            # Normalize slashes for Path() on Linux.
+            tok_norm = tok.replace("\\", "/")
+            p = (makefile_path.parent / tok_norm).resolve()
+            ordered_p5.append(p)
+
+    if not ordered_p5:
+        raise ValueError(f"SRC_FILES expanded to empty list: {makefile_path}")
+
+    # Normalize include dirs to absolute paths.
+    include_dirs_abs: List[str] = []
+    for inc in include_dirs:
+        inc_norm = inc.replace("\\", "/")
+        include_dirs_abs.append(str((makefile_path.parent / inc_norm).resolve()))
+
+    return include_dirs_abs, ordered_p5
+
+
+def _common_base_dir(paths: Sequence[Path]) -> Path:
+    if not paths:
+        raise ValueError("paths must be non-empty")
+    common = os.path.commonpath([str(p) for p in paths])
+    return Path(common)
+
+
+def _precompile_files(
     *,
-    output_file: Optional[str] = None,
-    preprocessor: str = "cc",
-    include_paths: Sequence[str] = (),
-    defines: Sequence[str] = (),
-    extra_preprocessor_args: Sequence[str] = (),
-    keep_tmp: bool = False,
+    p5_files: Sequence[Path],
+    h_files: Sequence[Path],
+    base_root: Path,
+    output_dir: Path,
+    output_file: Optional[str],
+    preprocessor: str,
+    include_paths: Sequence[str],
+    defines: Sequence[str],
+    extra_preprocessor_args: Sequence[str],
+    keep_tmp: bool,
+    merged_name_hint: str,
 ) -> PrecompileResult:
-    src = Path(src_dir)
-    out_dir = Path(output_dir)
-
-    if not src.exists() or not src.is_dir():
-        raise ValueError(f"src_dir must be an existing directory: {src}")
-
+    out_dir = output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    dir_name = src.resolve().name
-    merged = Path(output_file) if output_file else (out_dir / f"{dir_name}_merged.p5")
-
-    p5_files = _find_files(src, suffix=".p5")
-    h_files = _find_files(src, suffix=".h")
-    if not p5_files and not h_files:
-        raise ValueError(f"no .p5 or .h files found under: {src}")
+    merged = Path(output_file) if output_file else (out_dir / f"{merged_name_hint}_merged.p5")
 
     base_cmd = _build_preprocessor_base_cmd(
         preprocessor=preprocessor,
@@ -170,11 +283,13 @@ def precompile_p5_directory(
     preprocessed: List[Path] = []
 
     def preprocess_and_filter_to_file(src_f: Path, *, rel_prefix: str) -> Path:
-        rel = src_f.relative_to(src)
+        try:
+            rel = src_f.resolve().relative_to(base_root.resolve())
+        except Exception:
+            rel = Path(src_f.name)
         out_name = f"{rel_prefix}{_flatten_relpath(rel)}"
         out_f = out_dir / out_name
 
-        # cc -E ... <in>  (stdout captured)
         cmd = list(base_cmd) + [str(src_f)]
         raw = _run_preprocessor(cmd)
         filtered = _strip_expanded_includes(raw, main_file=src_f)
@@ -182,19 +297,16 @@ def precompile_p5_directory(
         preprocessed.append(out_f)
         return out_f
 
-    # Phase 1: preprocess all .h files, strip expanded include content, merge together.
     h_outputs: List[Path] = []
     for h_f in h_files:
         h_outputs.append(preprocess_and_filter_to_file(h_f, rel_prefix="h_"))
 
-    # Phase 2: preprocess all .p5 files, strip expanded include content, merge together.
     p5_outputs: List[Path] = []
     for p5_f in p5_files:
         p5_outputs.append(preprocess_and_filter_to_file(p5_f, rel_prefix="p5_"))
 
     merged.parent.mkdir(parents=True, exist_ok=True)
     with merged.open("w", encoding="utf-8") as out_fp:
-        # Put merged .h content first, then merged .p5 content.
         for p4i_f in h_outputs:
             out_fp.write(f"// File: {p4i_f}\n")
             out_fp.write(p4i_f.read_text(encoding="utf-8", errors="replace"))
@@ -210,17 +322,119 @@ def precompile_p5_directory(
             try:
                 p4i_f.unlink(missing_ok=True)
             except Exception:
-                # Best-effort cleanup; keep merged output regardless.
                 pass
 
     return PrecompileResult(merged_file=merged, preprocessed_files=preprocessed)
+
+
+def precompile_p5_directory(
+    src_dir: str,
+    output_dir: str,
+    *,
+    output_file: Optional[str] = None,
+    preprocessor: str = "cc",
+    include_paths: Sequence[str] = (),
+    defines: Sequence[str] = (),
+    extra_preprocessor_args: Sequence[str] = (),
+    keep_tmp: bool = False,
+) -> PrecompileResult:
+    src = Path(src_dir)
+
+    if not src.exists() or not src.is_dir():
+        raise ValueError(f"src_dir must be an existing directory: {src}")
+
+    p5_files = _find_files(src, suffix=".p5")
+    h_files = _find_files(src, suffix=".h")
+    if not p5_files and not h_files:
+        raise ValueError(f"no .p5 or .h files found under: {src}")
+    all_for_base: List[Path] = []
+    all_for_base.extend([p.resolve() for p in p5_files])
+    all_for_base.extend([p.resolve() for p in h_files])
+    base_root = _common_base_dir(all_for_base)
+
+    return _precompile_files(
+        p5_files=p5_files,
+        h_files=h_files,
+        base_root=base_root,
+        output_dir=Path(output_dir),
+        output_file=output_file,
+        preprocessor=preprocessor,
+        include_paths=include_paths,
+        defines=defines,
+        extra_preprocessor_args=extra_preprocessor_args,
+        keep_tmp=keep_tmp,
+        merged_name_hint=src.resolve().name,
+    )
+
+
+def precompile_p5_makefile_bat(
+    makefile_path: str,
+    output_dir: str,
+    *,
+    output_file: Optional[str] = None,
+    preprocessor: str = "cc",
+    include_paths: Sequence[str] = (),
+    defines: Sequence[str] = (),
+    extra_preprocessor_args: Sequence[str] = (),
+    keep_tmp: bool = False,
+) -> PrecompileResult:
+    mk = Path(makefile_path)
+    if not mk.exists() or not mk.is_file():
+        raise ValueError(f"makefile_path must be an existing file: {mk}")
+
+    mk_includes, ordered_p5 = _parse_makefile_bat(mk)
+    # Merge include paths: makefile-provided first, then CLI -I (caller additions).
+    all_includes = list(mk_includes) + list(include_paths)
+
+    # Collect headers from include roots.
+    h_files: List[Path] = []
+    for inc in mk_includes:
+        inc_p = Path(inc)
+        if inc_p.exists() and inc_p.is_dir():
+            h_files.extend(_find_files(inc_p, suffix=".h"))
+    # De-dup while keeping deterministic order.
+    seen_h: set[str] = set()
+    h_unique: List[Path] = []
+    for p in h_files:
+        s = str(p.resolve())
+        if s not in seen_h:
+            seen_h.add(s)
+            h_unique.append(p)
+
+    # Ensure src files exist; keep order exactly as in makefile.
+    missing = [str(p) for p in ordered_p5 if not p.exists()]
+    if missing:
+        raise FileNotFoundError("Missing SRC_FILES entries:\n" + "\n".join(missing))
+
+    all_for_base: List[Path] = []
+    all_for_base.extend([p.resolve() for p in ordered_p5])
+    all_for_base.extend([p.resolve() for p in h_unique])
+    base_root = _common_base_dir(all_for_base) if all_for_base else mk.parent.resolve()
+
+    merged_name_hint = mk.parent.resolve().name
+    return _precompile_files(
+        p5_files=ordered_p5,
+        h_files=h_unique,
+        base_root=base_root,
+        output_dir=Path(output_dir),
+        output_file=output_file,
+        preprocessor=preprocessor,
+        include_paths=all_includes,
+        defines=defines,
+        extra_preprocessor_args=extra_preprocessor_args,
+        keep_tmp=keep_tmp,
+        merged_name_hint=merged_name_hint,
+    )
 
 
 def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(
         description="Precompile a P5 directory: preprocess files and merge into one output"
     )
-    ap.add_argument("src_dir", help="Directory to scan recursively for .p5 files")
+    ap.add_argument(
+        "input",
+        help="Either a directory to scan, or a Windows makefile.bat path (parsed for INCLUDES/SRC_FILES)",
+    )
     ap.add_argument(
         "-o",
         "--output-dir",
@@ -284,16 +498,29 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ns = _parse_args(argv)
     try:
-        res = precompile_p5_directory(
-            ns.src_dir,
-            ns.output_dir,
-            output_file=ns.output_file,
-            preprocessor=ns.preprocessor,
-            include_paths=ns.include_paths,
-            defines=ns.defines,
-            extra_preprocessor_args=ns.extra_preprocessor_args,
-            keep_tmp=ns.keep_tmp,
-        )
+        inp = Path(ns.input)
+        if inp.exists() and inp.is_file():
+            res = precompile_p5_makefile_bat(
+                str(inp),
+                ns.output_dir,
+                output_file=ns.output_file,
+                preprocessor=ns.preprocessor,
+                include_paths=ns.include_paths,
+                defines=ns.defines,
+                extra_preprocessor_args=ns.extra_preprocessor_args,
+                keep_tmp=ns.keep_tmp,
+            )
+        else:
+            res = precompile_p5_directory(
+                ns.input,
+                ns.output_dir,
+                output_file=ns.output_file,
+                preprocessor=ns.preprocessor,
+                include_paths=ns.include_paths,
+                defines=ns.defines,
+                extra_preprocessor_args=ns.extra_preprocessor_args,
+                keep_tmp=ns.keep_tmp,
+            )
 
         if ns.run_p5c:
             p5c_path = Path(ns.p5c_path) if ns.p5c_path else _default_p5c_path()
