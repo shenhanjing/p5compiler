@@ -3516,7 +3516,7 @@ namespace P4 { namespace P5 {
                 if (yystack_[6].value.as < IR::Vector<IR::Annotation>* > ()) {
                         for (auto *ann : *yystack_[6].value.as < IR::Vector<IR::Annotation>* > ()) type->addAnnotation(ann);
                 }
-                yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[4].location, *yystack_[4].value.as < IR::ID* > (), type);
+                yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[5].location, anonName, type);
         }
 #line 3522 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
@@ -3558,7 +3558,7 @@ namespace P4 { namespace P5 {
                 if (yystack_[6].value.as < IR::Vector<IR::Annotation>* > ()) {
                         for (auto *ann : *yystack_[6].value.as < IR::Vector<IR::Annotation>* > ()) type->addAnnotation(ann);
                 }
-                yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[4].location, *yystack_[4].value.as < IR::ID* > (), type);
+                yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[5].location, anonName, type);
         }
 #line 3564 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
