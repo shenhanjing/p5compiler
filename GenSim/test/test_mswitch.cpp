@@ -239,6 +239,45 @@ bool test_single_param_switch_style() {
     return ok;
 }
 
+bool test_mswitch_with_slices() {
+    bool ok = true;
+
+    // ---- p5::uint slice: equality match ----
+    {
+        p5::uint<16> x = 0xABCD;
+        // Directly pass temporary slice_proxy into tie (should be safe now).
+        auto sw = p5::mswitch::tie(x[p5::bit_range<7, 0>], x[p5::bit_range<9, 8>]);
+        ok &= expect_true(p5::mswitch::match(sw, 0xCD, 0b11), "uint slice == integral patterns");
+        ok &= expect_true(!p5::mswitch::match(sw, 0xCC, 0b11), "uint slice mismatch on low8");
+        ok &= expect_true(!p5::mswitch::match(sw, 0xCD, 0b10), "uint slice mismatch on [9:8]");
+    }
+
+    // ---- p5::member slice: equality match ----
+    {
+        p5::Union<MemberLayout> u{};
+        u.st.a = 0xAB;
+        // Directly pass temporary slice_proxy into tie (should be safe now).
+        auto sw = p5::mswitch::tie(u.st.a[p5::bit_range<3, 0>], u.st.a[p5::bit_range<7, 4>]);
+        ok &= expect_true(p5::mswitch::match(sw, 0xB, 0xA), "member slice == integral patterns");
+        ok &= expect_true(!p5::mswitch::match(sw, 0xB, 0xB), "member slice mismatch on high nibble");
+    }
+
+    // ---- p5::uint slice: masked match (materialize slice to p5::uint) ----
+    // Directly use temporary slice_proxy as input; tie() now stores rvalues by value safely.
+    {
+        p5::uint<16> x = 0xABCD;
+        auto sw = p5::mswitch::tie(x[p5::bit_range<7, 0>]); // low8 == 0xCD
+        ok &= expect_true(
+            p5::mswitch::match(sw, p5::mswitch::mask(p5::uint<8>(0xC0), p5::uint<8>(0xF0))),
+            "slice masked match on high nibble");
+        ok &= expect_true(
+            !p5::mswitch::match(sw, p5::mswitch::mask(p5::uint<8>(0xD0), p5::uint<8>(0xF0))),
+            "slice masked mismatch on high nibble");
+    }
+
+    return ok;
+}
+
 } // namespace
 
 int main() {
@@ -250,6 +289,7 @@ int main() {
     all_ok &= test_eq_member_with_integral_pattern();
     all_ok &= test_mask_patterns_more();
     all_ok &= test_single_param_switch_style();
+    all_ok &= test_mswitch_with_slices();
 
     if (all_ok) {
         std::cout << "[PASS] mswitch tests\n";

@@ -18,6 +18,7 @@
 #define P5_MSWITCH_HPP
 
 #include <cstddef>
+#include <functional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -31,6 +32,31 @@ struct always_false : std::false_type {};
 
 template <typename Pattern>
 using decay_t = std::decay_t<Pattern>;
+
+template <typename T>
+struct is_reference_wrapper : std::false_type {};
+template <typename U>
+struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
+
+template <typename T>
+constexpr decltype(auto) unwrap_value(T &&v) {
+    using D = std::decay_t<T>;
+    if constexpr (is_reference_wrapper<D>::value) {
+        return v.get();
+    } else {
+        return std::forward<T>(v);
+    }
+}
+
+template <typename T>
+constexpr auto store_value(T &&v) {
+    // Store lvalues by reference to avoid copies; store rvalues by value to avoid dangling.
+    if constexpr (std::is_lvalue_reference_v<T>) {
+        return std::ref(v);
+    } else {
+        return std::decay_t<T>(std::forward<T>(v));
+    }
+}
 
 // Detect p5::uint<N>.
 template <typename T>
@@ -136,7 +162,7 @@ constexpr bool match_one(Pattern &&pat, Value &&val) {
 template <typename ValuesTuple, typename PatternsTuple, std::size_t... I>
 constexpr bool match_tuple_impl(ValuesTuple &&vals, PatternsTuple &&pats, std::index_sequence<I...>) {
     return (match_one(std::get<I>(std::forward<PatternsTuple>(pats)),
-                      std::get<I>(std::forward<ValuesTuple>(vals))) &&
+                      unwrap_value(std::get<I>(std::forward<ValuesTuple>(vals)))) &&
             ...);
 }
 } // namespace detail
@@ -155,7 +181,10 @@ constexpr detail::mask_pattern<std::decay_t<ValueT>, std::decay_t<MaskT>> mask(V
 // Prefer this over manually writing std::forward_as_tuple in generated code.
 template <typename... Values>
 constexpr auto tie(Values &&...vals) {
-    return std::forward_as_tuple(std::forward<Values>(vals)...);
+    // Robustness improvement:
+    // - If callers pass temporaries (e.g. slice_proxy), forward_as_tuple would store dangling references.
+    // - We store lvalues by reference (via reference_wrapper) and rvalues by value.
+    return std::make_tuple(detail::store_value<Values>(std::forward<Values>(vals))...);
 }
 
 // Match a values tuple against a patterns tuple. Arity must match exactly.
