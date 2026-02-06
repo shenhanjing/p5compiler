@@ -1256,11 +1256,6 @@ public:
     }
 
     template <typename... Args>
-    inline _any_rvalue _mapping_converter(Args &&... /*args*/) const {
-        return {};
-    }
-
-    template <typename... Args>
     inline _any_rvalue _pkt_offset_reached(Args &&... /*args*/) const {
         return {};
     }

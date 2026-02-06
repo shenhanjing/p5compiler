@@ -560,6 +560,8 @@ void iFv2Ngsf(uint<8>buffer[])
     uint<8> tmpTB;
     uint<8> tmpTP;
 
+    _port_mapping("GLSP", tmpSb, tmpSP, GLSP);
+    _port_mapping("GLTP", tmpTB, tmpTP, GLTP);
     genNGSFNp2Tm(tmpTB, tmpTP);
     genNGSFBasic(tmpSb, tmpSP, tmpTP);
     genNGSFExt1();
@@ -573,6 +575,8 @@ void eNgsf2Fv(uint<8>buffer[])
     genNGSFTm2Np(tmpTP);
     genNGSFBasic(SB, tmpSP, 0);
     genNGSFExt1();
+    _port_mapping("GLSP", SB, tmpSP, GLSP);
+    _port_mapping("LLTP", tmpTP, GLTP, LLTP);
 }
 
 
