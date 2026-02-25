@@ -1157,6 +1157,14 @@ table _EMPTY_SWITCH()
   }
 }
 
+struct _arr_UN {
+  uint<4> a;
+  union {
+    uint<4> b[3];
+    uint<12> c;
+  };
+};
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;

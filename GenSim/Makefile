@@ -6,7 +6,7 @@ BIN_DIR := $(ROOT_DIR)/bin
 
 # Use GNU C++17 mode so we can use C++ designated initializers in tests (".field = ...").
 # Note: GCC does not support C99-style array designators ("[idx] = ...") in C++ mode here.
-CXXFLAGS ?= -std=gnu++17 -Wall -Wextra
+CXXFLAGS ?= -std=gnu++17 -Wall -Wextra -DBOOST_PFR_USE_CPP17=0
 CXXFLAGS += -I$(INC_DIR)
 LDFLAGS ?=
 
