@@ -22,6 +22,21 @@ struct ULayout {
     St st;
 };
 
+// ---- C-style array member layouts ----
+struct ArrLayoutTopLevel {
+    p5::member<p5::uint<3>> a[2];     // total width = 6, a[0] -> bits3..5, a[1] -> bits0..2
+    p5::member<p5::uint<6>> raw6;     // overlay full 6 bits
+};
+
+struct ArrStruct {
+    p5::member<p5::uint<2>> a[3];     // total width = 6, a[0] -> bits4..5, a[1] -> bits2..3, a[2] -> bits0..1
+};
+
+struct ArrLayoutInStruct {
+    ArrStruct st;                     // width = 6
+    p5::member<p5::uint<6>> raw6;     // overlay full 6 bits
+};
+
 // nested union inside a struct, to validate nested binding
 struct InnerLayout {
     p5::member<p5::uint<3>> x;
@@ -98,6 +113,41 @@ bool test_macro_factory_smoke() {
     ok &= expect_eq(p5::uint<2>(u.short_).to_ullong(), 0b10, "macro factory: short_ reads bits8..9");
     ok &= expect_eq(p5::uint<3>(u.st.a).to_ullong(), 0b101, "macro factory: st.a reads bits7..9");
     ok &= expect_eq(p5::uint<3>(u.st.b).to_ullong(), 0b011, "macro factory: st.b reads bits4..6");
+    return ok;
+}
+
+bool test_c_array_members() {
+    bool ok = true;
+
+    // 1) Top-level array member overlays raw storage.
+    {
+        p5::Union<ArrLayoutTopLevel> u{};
+        u.raw6 = p5::uint<6>(0b101011); // high3=101, low3=011
+
+        ok &= expect_eq(u.a[0].to_ullong(), 0b101ULL, "c-array top-level: a[0] reads high 3 bits");
+        ok &= expect_eq(u.a[1].to_ullong(), 0b011ULL, "c-array top-level: a[1] reads low 3 bits");
+
+        // Mutate via array elements and verify raw view updates.
+        u.a[0] = 0;
+        ok &= expect_eq(u.raw6.to_ullong(), 0b000011ULL, "c-array top-level: write a[0] clears high 3 bits only");
+        u.a[1] = 0;
+        ok &= expect_eq(u.raw6.to_ullong(), 0b000000ULL, "c-array top-level: write a[1] clears low 3 bits only");
+    }
+
+    // 2) Array nested inside an aggregate struct, which is then used as a union member.
+    {
+        p5::Union<ArrLayoutInStruct> u{};
+        u.raw6 = p5::uint<6>(0b111001); // split into 2-bit chunks: 11 10 01
+
+        ok &= expect_eq(u.st.a[0].to_ullong(), 0b11ULL, "c-array in struct: st.a[0] reads bits4..5");
+        ok &= expect_eq(u.st.a[1].to_ullong(), 0b10ULL, "c-array in struct: st.a[1] reads bits2..3");
+        ok &= expect_eq(u.st.a[2].to_ullong(), 0b01ULL, "c-array in struct: st.a[2] reads bits0..1");
+
+        // Mutate one element and ensure only its slice changes.
+        u.st.a[1] = 0;
+        ok &= expect_eq(u.raw6.to_ullong(), 0b110001ULL, "c-array in struct: write st.a[1] clears bits2..3 only");
+    }
+
     return ok;
 }
 
@@ -292,6 +342,7 @@ int main() {
     all_ok &= test_basic_overlay();
     all_ok &= test_nested_union_in_struct();
     all_ok &= test_macro_factory_smoke();
+    all_ok &= test_c_array_members();
     all_ok &= test_complex_nested_layout();
     all_ok &= test_integral_assignment_and_implicit_reads();
     all_ok &= test_union_assign_from_integral();

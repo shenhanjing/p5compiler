@@ -9,6 +9,12 @@
 #include <utility>
 #include <iterator>
 #include <vector>
+#ifndef BOOST_PFR_USE_CPP17
+// Boost.PFR C++17 mode relies on structured bindings for `tuple_element_t/get`, which
+// breaks for aggregates with C-style array members (field counting vs decomposition mismatch).
+// Force the non-C++17 implementation so Layouts containing `T a[N];` remain reflectable.
+#define BOOST_PFR_USE_CPP17 0
+#endif
 #include <boost/pfr.hpp>
 
 namespace p5 {
@@ -807,8 +813,13 @@ struct bit_width;
 template <std::size_t N>
 struct bit_width<p5::uint<N>, void> : std::integral_constant<std::size_t, N> {};
 
+// Note: do NOT use std::decay_t here, otherwise C-style arrays (T[N]) decay to pointers
+// and we lose width information. Use remove_cvref_t to preserve array extents.
 template <typename T>
-inline constexpr std::size_t bit_width_v = bit_width<std::decay_t<T>>::value;
+using bit_width_base_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template <typename T>
+inline constexpr std::size_t bit_width_v = bit_width<bit_width_base_t<T>>::value;
 
 // A view of a fixed bit range interpreted as a p5::uint<N>.
 template <typename UIntT>
@@ -2183,21 +2194,43 @@ constexpr std::size_t aggregate_width() {
     return aggregate_width_impl<T>(std::make_index_sequence<fields>{});
 }
 
-template <typename Layout, std::size_t... I>
-constexpr std::size_t union_width_impl(std::index_sequence<I...>) {
-    std::size_t m = 0;
-    ((m = (p5::bit_width_v<typename boost::pfr::tuple_element_t<I, Layout>> > m
-               ? p5::bit_width_v<typename boost::pfr::tuple_element_t<I, Layout>>
-               : m)),
-     ...);
-    return m;
+// Union width with support for C-style arrays:
+// Boost.PFR counts `T a[N];` as N "fields". We treat consecutive equal-typed fields
+// as one group, whose width is the sum of the group element widths.
+template <typename Layout, std::size_t I, typename T0>
+constexpr std::size_t run_len_same_type() {
+    constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
+    if constexpr (I + 1 >= fields) {
+        return 1;
+    } else {
+        using T1 = std::decay_t<typename boost::pfr::tuple_element_t<I + 1, Layout>>;
+        if constexpr (std::is_same_v<T0, T1>) {
+            return 1 + run_len_same_type<Layout, I + 1, T0>();
+        } else {
+            return 1;
+        }
+    }
+}
+
+template <typename Layout, std::size_t I = 0>
+constexpr std::size_t union_width_grouped() {
+    constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
+    if constexpr (I >= fields) {
+        return 0;
+    } else {
+        using T0 = std::decay_t<typename boost::pfr::tuple_element_t<I, Layout>>;
+        constexpr std::size_t run = run_len_same_type<Layout, I, T0>();
+        constexpr std::size_t group_w = run * p5::bit_width_v<T0>;
+        constexpr std::size_t rest = union_width_grouped<Layout, I + run>();
+        return (group_w > rest) ? group_w : rest;
+    }
 }
 
 template <typename Layout>
 constexpr std::size_t union_width() {
     constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
     static_assert(fields > 0, "p5::Union<Layout> requires Layout to have at least one field");
-    return union_width_impl<Layout>(std::make_index_sequence<fields>{});
+    return union_width_grouped<Layout, 0>();
 }
 
 // ---- binding (offset assignment) ----
@@ -2214,12 +2247,31 @@ struct detail_union_binder {
         u.bind_view(access, offset);
     }
 
+    // C-style array: bind elements sequentially (MSB -> LSB) within the array's total width.
+    template <typename Elem, std::size_t N>
+    static void bind_any(Elem (&arr)[N], bit_access access, std::size_t offset) {
+        bind_array(arr, access, offset);
+    }
+
     // Aggregate struct: bind its fields sequentially starting from offset
     template <typename Agg>
     static void bind_any(Agg &agg, bit_access access, std::size_t offset) {
         static_assert(std::is_aggregate_v<Agg>,
                       "Union member must be p5::member<p5::uint<N>>, p5::Union<...>, or an aggregate thereof.");
         bind_aggregate(agg, access, offset);
+    }
+
+    template <typename Elem, std::size_t N>
+    static void bind_array(Elem (&arr)[N], bit_access access, std::size_t base) {
+        constexpr std::size_t W = p5::bit_width_v<Elem[N]>;
+        std::size_t prefix = 0;
+        for (std::size_t i = 0; i < N; ++i) {
+            using E = std::decay_t<decltype(arr[i])>;
+            constexpr std::size_t ew = p5::bit_width_v<E>;
+            const std::size_t off = base + (W - prefix - ew);
+            bind_any(arr[i], access, off);
+            prefix += ew;
+        }
     }
 
     template <typename Agg, std::size_t... I>
@@ -2250,8 +2302,14 @@ struct detail_union_binder {
 
 }  // namespace detail_p5_union
 
+// C-style array bit width: sum of element widths (N * width(elem)).
+// Works for element types that are themselves supported by bit_width (member/Union/aggregate/...).
+template <typename T, std::size_t N>
+struct bit_width<T[N], void> : std::integral_constant<std::size_t, N * p5::bit_width_v<T>> {};
+
 template <typename T>
-struct bit_width<T, std::enable_if_t<std::is_aggregate_v<std::decay_t<T>>>> : std::integral_constant<std::size_t, detail_p5_union::aggregate_width<std::decay_t<T>>()> {};
+struct bit_width<T, std::enable_if_t<std::is_aggregate_v<bit_width_base_t<T>>>>
+    : std::integral_constant<std::size_t, detail_p5_union::aggregate_width<bit_width_base_t<T>>()> {};
 
 template <typename Layout>
 class Union : public Layout {
@@ -2317,25 +2375,47 @@ private:
     detail_p5_union::bit_access access_{};
     std::size_t base_offset_{0};
 
-    void bind_members() {
-        // Top-level union fields all start at base_offset_
+    // Bind top-level fields, with special handling for flattened C-style arrays:
+    // Boost.PFR counts `T a[N];` as N fields. We group consecutive equal-typed fields and
+    // bind them sequentially (MSB->LSB) within a single MSB-aligned group.
+    void bind_members() { bind_members_from<0>(); }
+
+    template <std::size_t I>
+    void bind_members_from() {
         constexpr std::size_t fields = boost::pfr::tuple_size_v<Layout>;
-        bind_members_impl(std::make_index_sequence<fields>{});
+        if constexpr (I >= fields) {
+            return;
+        } else {
+            using T0 = std::decay_t<typename boost::pfr::tuple_element_t<I, Layout>>;
+            constexpr std::size_t run = detail_p5_union::run_len_same_type<Layout, I, T0>();
+            bind_run<I, run>();
+            bind_members_from<I + run>();
+        }
     }
 
-    template <std::size_t... I>
-    void bind_members_impl(std::index_sequence<I...>) {
+    template <std::size_t I, std::size_t Run, std::size_t... J>
+    void bind_run_impl(std::index_sequence<J...>) {
         auto &layout = static_cast<Layout &>(*this);
-        // Top-level fields are MSB-aligned within this union's storage:
-        // each field's bit0 maps to (base_offset_ + (width - field_width)).
+        using T0 = std::decay_t<typename boost::pfr::tuple_element_t<I, Layout>>;
+        constexpr std::size_t group_w = Run * p5::bit_width_v<T0>;
+        static_assert(group_w <= width(), "Grouped union field width must be <= Union::width()");
+
+        const std::size_t group_base = base_offset_ + (width() - group_w);
+
+        std::size_t prefix = 0;
         auto bind_one = [&](auto &field) {
             using FieldT = std::decay_t<decltype(field)>;
             constexpr std::size_t fw = p5::bit_width_v<FieldT>;
-            static_assert(fw <= width(), "Union field width must be <= Union::width()");
-            const std::size_t off = base_offset_ + (width() - fw);
+            const std::size_t off = group_base + (group_w - prefix - fw);
             detail_p5_union::detail_union_binder::bind_any(field, access_, off);
+            prefix += fw;
         };
-        (bind_one(boost::pfr::get<I>(layout)), ...);
+        (bind_one(boost::pfr::get<I + J>(layout)), ...);
+    }
+
+    template <std::size_t I, std::size_t Run>
+    void bind_run() {
+        bind_run_impl<I, Run>(std::make_index_sequence<Run>{});
     }
 
     template <std::size_t M>

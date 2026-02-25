@@ -491,8 +491,8 @@ table IMA1_ACTION_TBL(IMA1_MATCH_TBL tbIMA1Match)
 
 /****************************          NGSF            *********************************/
 #define _port_mapping _mapping_converter
-#define FV2NGSF NP
-#define NGSF2FV NGSF
+#define FV2NGSF "NP"
+#define NGSF2FV "NGSF"
 #define FV_NGSF_BDR "NP"
 
 void genNGSFTm2Np(uint<8> tmpTP)
@@ -1137,6 +1137,24 @@ void _test_ClearFields (){
   uint<4> var0 = 1;
   uint<5> var1 = 2;
   ClearFields({var0, var1});
+}
+
+table _EMPTY_SWITCH()
+{
+  uint<8> A = 1;
+
+  key =
+  {
+    switch (){
+      default: {
+        A;
+        control_parameters =
+        {
+          command = 3;
+        }
+      }
+    }
+  }
 }
 
 //void typeref(){
