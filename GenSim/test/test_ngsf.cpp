@@ -150,6 +150,58 @@ int main() {
         all_ok &= expect_eq_p5(b3, p5::uint<11>(0x655), "tmp restore b after reset");
     }
 
+    // -------- C-style array argument tests --------
+    // Validate that `_add_to_ngsf(arr)` works for arrays of supported leaf types,
+    // in both FV2NGSF (append) and NGSF2FV (restore) directions.
+    {
+        // --- byte-aligned: 2x4-bit => 8 bits => exactly 1 byte ---
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+
+        p5::uint<4> nibbles[2]{p5::uint<4>(0xA), p5::uint<4>(0x5)}; // 1010 0101 => 0xA5
+        c._add_to_ngsf(nibbles);
+
+        all_ok &= expect_eq_u64(c.NGSFBuffer[0].to_ullong(), 0xA5, "array append: byte0 == 0xA5");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "array append: cursor byte_offset after 8 bits");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 0, "array append: cursor bit_offset after 8 bits");
+
+        c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
+        // No need to manually reset offsets: _add_to_ngsf auto-resets on direction changes.
+        p5::uint<4> nibbles2[2]{};
+        c._add_to_ngsf(nibbles2);
+
+        all_ok &= expect_eq_p5(nibbles2[0], nibbles[0], "array restore: nibbles2[0]");
+        all_ok &= expect_eq_p5(nibbles2[1], nibbles[1], "array restore: nibbles2[1]");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "array restore: cursor byte_offset after 8 bits");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 0, "array restore: cursor bit_offset after 8 bits");
+    }
+
+    {
+        // --- non-byte-aligned: 3x3-bit => 9 bits => byte0 + 1 bit in byte1 ---
+        GtvContext c{};
+        clear_ngsf(c);
+        c.ngsf_direction = GtvContext::NgsfDirection::FV2NGSF;
+
+        p5::uint<3> tri[3]{p5::uint<3>(0b101), p5::uint<3>(0b001), p5::uint<3>(0b111)}; // 101 001 111
+        c._add_to_ngsf(tri);
+
+        all_ok &= expect_eq_u64(c.NGSFBuffer[0].to_ullong(), 0xA7, "array append(9b): byte0 == 0xA7");
+        all_ok &= expect_eq_u64(c.NGSFBuffer[1].to_ullong(), 0x80, "array append(9b): byte1[7] == 1");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "array append(9b): cursor byte_offset");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 1, "array append(9b): cursor bit_offset");
+
+        c.ngsf_direction = GtvContext::NgsfDirection::NGSF2FV;
+        p5::uint<3> tri2[3]{};
+        c._add_to_ngsf(tri2);
+
+        all_ok &= expect_eq_p5(tri2[0], tri[0], "array restore(9b): tri2[0]");
+        all_ok &= expect_eq_p5(tri2[1], tri[1], "array restore(9b): tri2[1]");
+        all_ok &= expect_eq_p5(tri2[2], tri[2], "array restore(9b): tri2[2]");
+        all_ok &= expect_eq_u64(c.ngsf_byte_offset, 1, "array restore(9b): cursor byte_offset");
+        all_ok &= expect_eq_u64(c.ngsf_bit_offset, 1, "array restore(9b): cursor bit_offset");
+    }
+
     // -------- Slice proxy tests (p5::uint / p5::member) --------
     // These cover "slice an existing variable then pass into _add_to_ngsf".
     // - Read value: FV2NGSF appends bits from slice proxy temporaries

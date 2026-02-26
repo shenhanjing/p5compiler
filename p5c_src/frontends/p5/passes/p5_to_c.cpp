@@ -30,11 +30,17 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
     switchMembers.clear();
     globalVariables.clear();
     structMap.clear();
+    declaredTypes.clear();
 
-    // Populate structMap first
+    // Populate structMap and declaredTypes
     for (const auto *obj : program->objects) {
         if (auto *st = obj->to<IR::Type_Struct>()) {
             structMap.emplace(st->name, st);
+            declaredTypes.insert(st->name);
+        } else if (auto *td = obj->to<IR::Type_Typedef>()) {
+            declaredTypes.insert(td->name);
+        } else if (auto *se = obj->to<IR::Type_SerEnum>()) {
+            declaredTypes.insert(se->name);
         }
     }
 
@@ -494,15 +500,30 @@ void P5ToC::emitTypedef(const IR::Type_Typedef *td) {
     if (td == nullptr) return;
 
     // Render mapped type using existing emitFieldType (Standard)
-    std::ostringstream oss;
-    auto *oldStream = outputStream;
-    outputStream = &oss;
-    emitFieldType(td->type, EmitMode::Standard);
-    outputStream = oldStream;
-    std::string mappedType = oss.str();
+    {
+        std::ostringstream oss;
+        auto *oldStream = outputStream;
+        outputStream = &oss;
+        emitFieldType(td->type, EmitMode::Standard);
+        outputStream = oldStream;
+        std::string mappedType = oss.str();
 
-    *outputStream << indent;
-    *outputStream << "using " << td->name << " = " << mappedType << ";\n";
+        *outputStream << indent;
+        *outputStream << "using " << td->name << " = " << mappedType << ";\n";
+    }
+
+    // Render mapped type using existing emitFieldType (Memberized) for union compatibility
+    {
+        std::ostringstream oss;
+        auto *oldStream = outputStream;
+        outputStream = &oss;
+        emitFieldType(td->type, EmitMode::Memberized);
+        outputStream = oldStream;
+        std::string mappedType = oss.str();
+
+        *outputStream << indent;
+        *outputStream << "using _inU_" << td->name << " = " << mappedType << ";\n";
+    }
 }
 
 void P5ToC::emitSerEnum(const IR::Type_SerEnum *serEnum) {
@@ -1147,10 +1168,45 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
     }
 
     if (auto *mc = expr->to<IR::MethodCallExpression>()) {
-        emitExpressionWithCtx(mc->method, locals);
+        const IR::PathExpression *methodPath = mc->method->to<IR::PathExpression>();
+
+        // Support sizeof(Type) -> _sizeof<Type>()
+        // P5 sizeof(Type) -> C++ _sizeof<Type>()
+        if (methodPath && methodPath->path->name == "sizeof") {
+            // Case 1: Explicit type argument (e.g. sizeof(uint<16>)) - passed via typeArguments (from parser)
+            if (mc->typeArguments && mc->typeArguments->size() == 1) {
+                 *outputStream << "_sizeof<";
+                 emitFieldType(mc->typeArguments->at(0), EmitMode::Standard);
+                 *outputStream << ">()";
+                 return;
+            }
+            // Case 2: Argument is an expression that refers to a type name (e.g. sizeof(MyStruct))
+            if (mc->arguments && mc->arguments->size() == 1) {
+                 const auto *argExpr = mc->arguments->at(0)->expression;
+                 // If arg is TypeNameExpression (kept for safety)
+                 if (auto *tne = argExpr->to<IR::TypeNameExpression>()) {
+                      *outputStream << "_sizeof<";
+                      emitFieldType(tne->typeName, EmitMode::Standard);
+                      *outputStream << ">()";
+                      return;
+                 }
+                 // If arg is PathExpression and name is in declaredTypes
+                 if (auto *pe = argExpr->to<IR::PathExpression>()) {
+                      if (declaredTypes.count(pe->path->name)) {
+                          *outputStream << "_sizeof<" << pe->path->name << ">()";
+                          return;
+                      }
+                 }
+            }
+            // Case 3: Standard sizeof(expr) -> _sizeof(expr)
+            // Fallthrough to normal emission, but map "sizeof" to "_sizeof"
+            *outputStream << "_sizeof";
+        } else {
+            emitExpressionWithCtx(mc->method, locals);
+        }
+
         *outputStream << "(";
         bool addedCtx = false;
-        const IR::PathExpression *methodPath = mc->method->to<IR::PathExpression>();
         if (methodPath) {
             // Special-case: ClearFields({a,b,...}) in P5 should become ClearFields(a,b,...)
             // in C++ (variadic builtin). We strip the braces by expanding the ListExpression.
@@ -1477,6 +1533,32 @@ void P5ToC::emitTableConstructor(const IR::P5Table *tbl) {
 void P5ToC::emitTableKeySelect(const IR::P5Key *keyNode, const LocalsMap &locals) {
     auto emitOneKeySwitch = [&](const IR::Expression *expr,
                                 const IR::Vector<IR::P5KeyCase> &cases) {
+        if (expr == nullptr) {
+            *outputStream << indent << "{\n";
+            {
+                IndentGuard ig(this);
+                for (const auto *cse : cases) {
+                    if (!cse->label || cse->label->is<IR::DefaultExpression>()) {
+                        for (const auto *elem : cse->elements) {
+                            if (elem->expr) {
+                                *outputStream << indent << "_KeyBuilder.append(";
+                                emitExpressionWithCtx(elem->expr, locals);
+                                *outputStream << ");\n";
+                            }
+                            if (!elem->control.components.empty()) {
+                                for (const auto *c : elem->control.components) {
+                                    emitComponent(c, locals);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            *outputStream << indent << "}\n";
+            return;
+        }
+
         *outputStream << indent << "{\n";
         {
             IndentGuard igSwitch(this);
@@ -1965,10 +2047,10 @@ void P5ToC::emitStructHpp(const IR::P4Program *program) {
                   << "#include \"generated_enum.hpp\"\n"
                   << "\n";
 
-    emitStructsAndUnions(program);
-
     for (const auto *obj : program->objects) {
-        if (auto *td = obj->to<IR::Type_Typedef>()) {
+        if (auto *st = obj->to<IR::Type_Struct>()) {
+            emitStructOrUnion(st);
+        } else if (auto *td = obj->to<IR::Type_Typedef>()) {
             emitTypedef(td);
         }
     }
@@ -2458,43 +2540,69 @@ void P5ToC::emitGtvHpp(const IR::P4Program *program) {
             << "\n"
             << "    template <typename T>\n"
             << "    void ngsf_skip_any() {\n"
-            << "        using D = std::decay_t<T>;\n"
-            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
-            << "                      is_p5_slice_proxy_type<D>::value) {\n"
-            << "            ngsf_skip_leaf<D>();\n"
+            << "        using Raw = std::remove_reference_t<T>;\n"
+            << "        if constexpr (std::is_array_v<Raw>) {\n"
+            << "            constexpr std::size_t N = std::extent_v<Raw>;\n"
+            << "            using Elem = std::remove_cv_t<std::remove_extent_t<Raw>>;\n"
+            << "            for (std::size_t i = 0; i < N; ++i) {\n"
+            << "                (void)i;\n"
+            << "                ngsf_skip_any<Elem>();\n"
+            << "            }\n"
             << "        } else {\n"
-            << "            static_assert(std::is_aggregate_v<D>,\n"
-            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
-            << "            static_assert(std::is_default_constructible_v<D>,\n"
-            << "                          \"ngsf_skip_any requires aggregate types to be default-constructible.\");\n"
-            << "            D tmp{};\n"
-            << "            boost::pfr::for_each_field(tmp, [&](auto &sub) { ngsf_skip_any<std::decay_t<decltype(sub)>>(); });\n"
+            << "            using D = std::decay_t<T>;\n"
+            << "            if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
+            << "                          is_p5_slice_proxy_type<D>::value) {\n"
+            << "                ngsf_skip_leaf<D>();\n"
+            << "            } else {\n"
+            << "                static_assert(std::is_aggregate_v<D>,\n"
+            << "                              \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "                static_assert(std::is_default_constructible_v<D>,\n"
+            << "                              \"ngsf_skip_any requires aggregate types to be default-constructible.\");\n"
+            << "                D tmp{};\n"
+            << "                boost::pfr::for_each_field(tmp, [&](auto &sub) { ngsf_skip_any<std::decay_t<decltype(sub)>>(); });\n"
+            << "            }\n"
             << "        }\n"
             << "    }\n"
             << "\n"
             << "    template <typename T>\n"
             << "    void ngsf_append_any(const T &value) {\n"
-            << "        using D = std::decay_t<T>;\n"
-            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
-            << "                      is_p5_slice_proxy_type<D>::value) {\n"
-            << "            ngsf_append_leaf(value);\n"
+            << "        using Raw = std::remove_reference_t<T>;\n"
+            << "        if constexpr (std::is_array_v<Raw>) {\n"
+            << "            constexpr std::size_t N = std::extent_v<Raw>;\n"
+            << "            for (std::size_t i = 0; i < N; ++i) {\n"
+            << "                ngsf_append_any(value[i]);\n"
+            << "            }\n"
             << "        } else {\n"
-            << "            static_assert(std::is_aggregate_v<D>,\n"
-            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
-            << "            boost::pfr::for_each_field(value, [&](const auto &sub) { ngsf_append_any(sub); });\n"
+            << "            using D = std::decay_t<T>;\n"
+            << "            if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
+            << "                          is_p5_slice_proxy_type<D>::value) {\n"
+            << "                ngsf_append_leaf(value);\n"
+            << "            } else {\n"
+            << "                static_assert(std::is_aggregate_v<D>,\n"
+            << "                              \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "                boost::pfr::for_each_field(value, [&](const auto &sub) { ngsf_append_any(sub); });\n"
+            << "            }\n"
             << "        }\n"
             << "    }\n"
             << "\n"
             << "    template <typename T>\n"
             << "    void ngsf_restore_any(T &value) {\n"
-            << "        using D = std::decay_t<T>;\n"
-            << "        if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
-            << "                      is_p5_slice_proxy_type<D>::value) {\n"
-            << "            ngsf_restore_leaf(value);\n"
+            << "        using Raw = std::remove_reference_t<T>;\n"
+            << "        if constexpr (std::is_array_v<Raw>) {\n"
+            << "            constexpr std::size_t N = std::extent_v<Raw>;\n"
+            << "            for (std::size_t i = 0; i < N; ++i) {\n"
+            << "                ngsf_restore_any(value[i]);\n"
+            << "            }\n"
             << "        } else {\n"
-            << "            static_assert(std::is_aggregate_v<D>,\n"
-            << "                          \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
-            << "            boost::pfr::for_each_field(value, [&](auto &sub) { ngsf_restore_any(sub); });\n"
+            << "            using D = std::decay_t<T>;\n"
+            << "            if constexpr (is_p5_uint_type<D>::value || is_p5_member_type<D>::value || is_p5_union_type<D>::value ||\n"
+            << "                          is_p5_slice_proxy_type<D>::value) {\n"
+            << "                ngsf_restore_leaf(value);\n"
+            << "            } else {\n"
+            << "                static_assert(std::is_aggregate_v<D>,\n"
+            << "                              \"_add_to_ngsf supports only p5::uint/p5::member/p5::Union or aggregates composed of them.\");\n"
+            << "                boost::pfr::for_each_field(value, [&](auto &sub) { ngsf_restore_any(sub); });\n"
+            << "            }\n"
             << "        }\n"
             << "    }\n";
     }
