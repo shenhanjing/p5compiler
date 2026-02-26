@@ -126,6 +126,9 @@ private:
     struct is_p5_union<p5::Union<Layout>> : std::true_type {};
 
     template <typename T>
+    using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+    template <typename T>
     static constexpr bool is_supported_header();
 
     template <typename T, std::size_t... I>
@@ -154,13 +157,21 @@ private:
 
     template <typename Field>
     static void decode_any(const std::vector<bool> &bits, std::size_t &cursor, Field &target) {
-        using Decayed = std::decay_t<Field>;
-        if constexpr (is_p5_uint<Decayed>::value || is_p5_member<Decayed>::value || is_p5_union<Decayed>::value) {
-            assign_bits(bits, cursor, target);
+        using Raw = remove_cvref_t<Field>;
+        if constexpr (std::is_array_v<Raw>) {
+            constexpr std::size_t N = std::extent_v<Raw>;
+            for (std::size_t i = 0; i < N; ++i) {
+                decode_any(bits, cursor, target[i]);
+            }
         } else {
-            static_assert(is_supported_header<Decayed>(),
-                          "Header fields must be p5::uint<N>/p5::member/p5::Union or nested aggregates thereof.");
-            boost::pfr::for_each_field(target, [&](auto &sub) { decode_any(bits, cursor, sub); });
+            using Decayed = std::decay_t<Field>;
+            if constexpr (is_p5_uint<Decayed>::value || is_p5_member<Decayed>::value || is_p5_union<Decayed>::value) {
+                assign_bits(bits, cursor, target);
+            } else {
+                static_assert(is_supported_header<Decayed>(),
+                              "Header fields must be p5::uint<N>/p5::member/p5::Union or nested aggregates thereof.");
+                boost::pfr::for_each_field(target, [&](auto &sub) { decode_any(bits, cursor, sub); });
+            }
         }
     }
 
@@ -211,16 +222,19 @@ private:
 // ---- inline template definitions (after class to avoid redecl issues) ----
 template <typename T>
 inline constexpr bool Packet::is_supported_header() {
-    using Decayed = std::decay_t<T>;
-    if constexpr (is_p5_uint<Decayed>::value) {
+    using Raw = remove_cvref_t<T>;
+    if constexpr (std::is_array_v<Raw>) {
+        using Elem = std::remove_extent_t<Raw>;
+        return is_supported_header<Elem>();
+    } else if constexpr (is_p5_uint<Raw>::value) {
         return true;
-    } else if constexpr (is_p5_member<Decayed>::value) {
+    } else if constexpr (is_p5_member<Raw>::value) {
         return true;
-    } else if constexpr (is_p5_union<Decayed>::value) {
+    } else if constexpr (is_p5_union<Raw>::value) {
         return true;
-    } else if constexpr (std::is_aggregate_v<Decayed>) {
-        constexpr std::size_t fields = boost::pfr::tuple_size_v<Decayed>;
-        return is_supported_fields<Decayed>(std::make_index_sequence<fields>{});
+    } else if constexpr (std::is_aggregate_v<Raw>) {
+        constexpr std::size_t fields = boost::pfr::tuple_size_v<Raw>;
+        return is_supported_fields<Raw>(std::make_index_sequence<fields>{});
     } else {
         return false;
     }
@@ -233,20 +247,24 @@ inline constexpr bool Packet::is_supported_fields(std::index_sequence<I...>) {
 
 template <typename T>
 inline constexpr std::size_t Packet::bit_width_of() {
-    using Decayed = std::decay_t<T>;
-    if constexpr (is_p5_uint<Decayed>::value) {
-        return Decayed::width();
-    } else if constexpr (is_p5_member<Decayed>::value) {
-        return Decayed::width();
-    } else if constexpr (is_p5_union<Decayed>::value) {
-        return Decayed::width();
+    using Raw = remove_cvref_t<T>;
+    if constexpr (std::is_array_v<Raw>) {
+        constexpr std::size_t N = std::extent_v<Raw>;
+        using Elem = std::remove_extent_t<Raw>;
+        return N * bit_width_of<Elem>();
+    } else if constexpr (is_p5_uint<Raw>::value) {
+        return Raw::width();
+    } else if constexpr (is_p5_member<Raw>::value) {
+        return Raw::width();
+    } else if constexpr (is_p5_union<Raw>::value) {
+        return Raw::width();
     } else {
-        static_assert(std::is_aggregate_v<Decayed>,
+        static_assert(std::is_aggregate_v<Raw>,
                       "Header must be aggregate or p5::uint<N>.");
-        static_assert(is_supported_header<Decayed>(),
+        static_assert(is_supported_header<Raw>(),
                       "All fields must be p5::uint<N>/p5::member/p5::Union or nested aggregates thereof.");
-        constexpr std::size_t fields = boost::pfr::tuple_size_v<Decayed>;
-        return bit_width_fields<Decayed>(std::make_index_sequence<fields>{});
+        constexpr std::size_t fields = boost::pfr::tuple_size_v<Raw>;
+        return bit_width_fields<Raw>(std::make_index_sequence<fields>{});
     }
 }
 
