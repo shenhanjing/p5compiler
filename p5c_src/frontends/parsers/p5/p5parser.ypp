@@ -50,6 +50,12 @@ struct EnumItem {
         : srcInfo(s), name(n), value(v) {}
 };
 
+struct MethodArgs {
+    IR::Vector<IR::Type>* typeArgs;
+    IR::Vector<IR::Argument>* args;
+    MethodArgs() : typeArgs(nullptr), args(nullptr) {}
+};
+
 }  // namespace P5
 }  // namespace P4
 
@@ -239,7 +245,7 @@ static int globalAnonCount = 0;
 %type<IR::StringLiteral*>               string_lit
 %type<IR::ID*>                          ID
 %type<IR::Constant*>                    const_value
-%type<IR::Expression*>                  expression field_ref field_ref_no_slice field_ref_or_func
+%type<IR::Expression*>                  expression field_ref field_ref_no_slice field_ref_or_func method_call
                                         primary_expression postfix_expression unary_expression cast_expression
                                         multiplicative_expression additive_expression shift_expression
                                         relational_expression equality_expression and_expression
@@ -247,7 +253,7 @@ static int globalAnonCount = 0;
                                         logical_and_expression logical_or_expression conditional_expression
 %type<IR::Vector<IR::Expression>*>      expression_list
 %type<IR::Vector<IR::Argument>*>        arg_list
-%type<const IR::Type*>                  type_ref
+%type<const IR::Type*>                  type_ref type_ref_explicit
 %type<IR::Vector<IR::Annotation>*>      annotations
 %type<IR::Annotation*>                  annotation
 %type<IR::StructField*>                 field_dec struct_field_dec
@@ -261,6 +267,7 @@ static int globalAnonCount = 0;
 %type<IR::Statement*>                   return_statement return_value_type return_select_statement break_statement
 %type<IR::BlockStatement*>              return_value_type_list
 %type<IR::Expression*>                  value_masked_or_set
+%type<P4::P5::MethodArgs*>              method_args
 %type<IR::Vector<IR::Expression>*>      value_list
 %type<IR::ListExpression*>              select_exp
 %type<IR::Parameter*>                   parameter
@@ -361,8 +368,29 @@ primary_expression
 
 postfix_expression
     	: primary_expression            { $$ = $1; }
-    	| postfix_expression "(" arg_list ")" { $$ = new IR::MethodCallExpression(@2, $1, $3); }
+    	| method_call                   { $$ = $1; }
     	;
+
+method_call
+    	: postfix_expression "(" method_args ")" {
+            auto margs = $3;
+            auto typeArgs = margs->typeArgs ? margs->typeArgs : new IR::Vector<IR::Type>();
+            auto args = margs->args ? margs->args : new IR::Vector<IR::Argument>();
+            $$ = new IR::MethodCallExpression(@2, $1, typeArgs, args);
+        }
+    	;
+
+method_args
+        : arg_list {
+            $$ = new P4::P5::MethodArgs();
+            $$->args = $1;
+        }
+        | type_ref_explicit {
+            $$ = new P4::P5::MethodArgs();
+            $$->typeArgs = new IR::Vector<IR::Type>();
+            $$->typeArgs->push_back($1);
+        }
+        ;
 
 unary_expression
    	: postfix_expression            { $$ = $1; }
@@ -503,7 +531,8 @@ annotations
 //
 //////////////////////////////////////////////////////////////////////////
 
-type_ref: UINT "<" postfix_expression ">" {
+type_ref_explicit
+        : UINT "<" postfix_expression ">" {
                 auto expr = $3;
                 if (auto c = expr->to<IR::Constant>()) {
                     $$ = IR::Type_Bits::get(c->asInt(), false);
@@ -522,6 +551,13 @@ type_ref: UINT "<" postfix_expression ">" {
         | struct_union_type_declaration {
                 $$ = $1;
         }
+        | VOID {
+                $$ = IR::Type_Void::get();
+        }
+        ;
+
+type_ref
+        : type_ref_explicit { $$ = $1; }
         | ID {
                 auto path = new IR::Path(@1, *$1);
                 $$ = new IR::Type_Name(@1, path);
@@ -537,9 +573,6 @@ type_ref: UINT "<" postfix_expression ">" {
         | ID "<" ID "::" ID ">" {
                 auto p = new IR::Path(@1, *$1 + "<" + *$3 + "::" + *$5 + ">");
                 $$ = new IR::Type_Name(@1, p);
-        }
-        | VOID {
-                $$ = IR::Type_Void::get();
         }
 
 field_ref_no_slice
@@ -1270,6 +1303,9 @@ key_switch_entry
                 // P5KeySwitch is a dedicated IR node so a single key={...} can contain
                 // multiple switch blocks in source order.
                 $$ = new IR::P5KeySwitch(@1, $3, *$6);
+        }
+        | SWITCH "(" ")" "{" key_case_list "}" {
+                $$ = new IR::P5KeySwitch(@1, nullptr, *$5);
         }
 
 key_switch_list

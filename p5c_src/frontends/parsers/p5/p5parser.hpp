@@ -76,6 +76,12 @@ struct EnumItem {
         : srcInfo(s), name(n), value(v) {}
 };
 
+struct MethodArgs {
+    IR::Vector<IR::Type>* typeArgs;
+    IR::Vector<IR::Argument>* args;
+    MethodArgs() : typeArgs(nullptr), args(nullptr) {}
+};
+
 }  // namespace P5
 }  // namespace P4
 
@@ -154,7 +160,7 @@ typedef const IR::Type ConstType;
 #include "lib/error.h"
 #include "lib/source_file.h"
 
-#line 158 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
+#line 164 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -295,7 +301,7 @@ typedef const IR::Type ConstType;
 
 #line 7 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 namespace P4 { namespace P5 {
-#line 299 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
+#line 305 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
 
 
 
@@ -541,6 +547,7 @@ namespace P4 { namespace P5 {
 
       // primary_expression
       // postfix_expression
+      // method_call
       // unary_expression
       // cast_expression
       // multiplicative_expression
@@ -667,11 +674,15 @@ namespace P4 { namespace P5 {
       // enumerator
       char dummy37[sizeof (P4::P5::EnumItem*)];
 
-      // INTEGER
-      char dummy38[sizeof (UnparsedConstant)];
+      // method_args
+      char dummy38[sizeof (P4::P5::MethodArgs*)];
 
+      // INTEGER
+      char dummy39[sizeof (UnparsedConstant)];
+
+      // type_ref_explicit
       // type_ref
-      char dummy39[sizeof (const IR::Type*)];
+      char dummy40[sizeof (const IR::Type*)];
 
       // BREAK
       // CASE
@@ -704,7 +715,7 @@ namespace P4 { namespace P5 {
       // TABLE
       // IDENTIFIER
       // STRING_LITERAL
-      char dummy40[sizeof (cstring)];
+      char dummy41[sizeof (cstring)];
     };
 
     /// The size of the largest semantic type.
@@ -961,83 +972,86 @@ namespace P4 { namespace P5 {
         S_const_value = 97,                      // const_value
         S_primary_expression = 98,               // primary_expression
         S_postfix_expression = 99,               // postfix_expression
-        S_unary_expression = 100,                // unary_expression
-        S_cast_expression = 101,                 // cast_expression
-        S_multiplicative_expression = 102,       // multiplicative_expression
-        S_additive_expression = 103,             // additive_expression
-        S_shift_expression = 104,                // shift_expression
-        S_relational_expression = 105,           // relational_expression
-        S_equality_expression = 106,             // equality_expression
-        S_and_expression = 107,                  // and_expression
-        S_exclusive_or_expression = 108,         // exclusive_or_expression
-        S_inclusive_or_expression = 109,         // inclusive_or_expression
-        S_logical_and_expression = 110,          // logical_and_expression
-        S_logical_or_expression = 111,           // logical_or_expression
-        S_conditional_expression = 112,          // conditional_expression
-        S_expression = 113,                      // expression
-        S_expression_list = 114,                 // expression_list
-        S_annotation = 115,                      // annotation
-        S_annotations = 116,                     // annotations
-        S_type_ref = 117,                        // type_ref
-        S_field_ref_no_slice = 118,              // field_ref_no_slice
-        S_field_ref = 119,                       // field_ref
-        S_field_dec = 120,                       // field_dec
-        S_anonymous_struct_union_dec = 121,      // anonymous_struct_union_dec
-        S_struct_field_dec = 122,                // struct_field_dec
-        S_struct_field_list = 123,               // struct_field_list
-        S_constant_declaration = 124,            // constant_declaration
-        S_header_declaration = 125,              // header_declaration
-        S_variable_declaration = 126,            // variable_declaration
-        S_return_value_type = 127,               // return_value_type
-        S_return_value_type_list = 128,          // return_value_type_list
-        S_value_masked_or_set = 129,             // value_masked_or_set
-        S_value_list = 130,                      // value_list
-        S_case_entry = 131,                      // case_entry
-        S_case_list = 132,                       // case_list
-        S_field_ref_or_func = 133,               // field_ref_or_func
-        S_select_exp = 134,                      // select_exp
-        S_return_select_statement = 135,         // return_select_statement
-        S_return_statement = 136,                // return_statement
-        S_break_statement = 137,                 // break_statement
-        S_parameter = 138,                       // parameter
-        S_param_list = 139,                      // param_list
-        S_arg = 140,                             // arg
-        S_arg_list = 141,                        // arg_list
-        S_do_while_statement = 142,              // do_while_statement
-        S_conditional_statement = 143,           // conditional_statement
-        S_for_loop_statement = 144,              // for_loop_statement
-        S_case = 145,                            // case
-        S_switch_cases = 146,                    // switch_cases
-        S_switch_statement = 147,                // switch_statement
-        S_assignment_or_call = 148,              // assignment_or_call
-        S_assignment_or_call_statement = 149,    // assignment_or_call_statement
-        S_action_statement = 150,                // action_statement
-        S_action_statement_list = 151,           // action_statement_list
-        S_action_compound_statement = 152,       // action_compound_statement
-        S_key_element = 153,                     // key_element
-        S_key_element_list = 154,                // key_element_list
-        S_key_case_entry = 155,                  // key_case_entry
-        S_key_case_list = 156,                   // key_case_list
-        S_key_switch_entry = 157,                // key_switch_entry
-        S_key_switch_list = 158,                 // key_switch_list
-        S_program_selection_statement = 159,     // program_selection_statement
-        S_program_selection_statement_list = 160, // program_selection_statement_list
-        S_table_case_entry = 161,                // table_case_entry
-        S_table_case_list = 162,                 // table_case_list
-        S_table_property = 163,                  // table_property
-        S_table_property_list = 164,             // table_property_list
-        S_table_declaration = 165,               // table_declaration
-        S_typedef_declaration = 166,             // typedef_declaration
-        S_enumerator = 167,                      // enumerator
-        S_enumerator_list = 168,                 // enumerator_list
-        S_enum_declaration = 169,                // enum_declaration
-        S_struct_union_type_declaration = 170,   // struct_union_type_declaration
-        S_type_declaration = 171,                // type_declaration
-        S_function_declaration = 172,            // function_declaration
-        S_namespace = 173,                       // namespace
-        S_declaration = 174,                     // declaration
-        S_declaration_list = 175,                // declaration_list
-        S_input = 176                            // input
+        S_method_call = 100,                     // method_call
+        S_method_args = 101,                     // method_args
+        S_unary_expression = 102,                // unary_expression
+        S_cast_expression = 103,                 // cast_expression
+        S_multiplicative_expression = 104,       // multiplicative_expression
+        S_additive_expression = 105,             // additive_expression
+        S_shift_expression = 106,                // shift_expression
+        S_relational_expression = 107,           // relational_expression
+        S_equality_expression = 108,             // equality_expression
+        S_and_expression = 109,                  // and_expression
+        S_exclusive_or_expression = 110,         // exclusive_or_expression
+        S_inclusive_or_expression = 111,         // inclusive_or_expression
+        S_logical_and_expression = 112,          // logical_and_expression
+        S_logical_or_expression = 113,           // logical_or_expression
+        S_conditional_expression = 114,          // conditional_expression
+        S_expression = 115,                      // expression
+        S_expression_list = 116,                 // expression_list
+        S_annotation = 117,                      // annotation
+        S_annotations = 118,                     // annotations
+        S_type_ref_explicit = 119,               // type_ref_explicit
+        S_type_ref = 120,                        // type_ref
+        S_field_ref_no_slice = 121,              // field_ref_no_slice
+        S_field_ref = 122,                       // field_ref
+        S_field_dec = 123,                       // field_dec
+        S_anonymous_struct_union_dec = 124,      // anonymous_struct_union_dec
+        S_struct_field_dec = 125,                // struct_field_dec
+        S_struct_field_list = 126,               // struct_field_list
+        S_constant_declaration = 127,            // constant_declaration
+        S_header_declaration = 128,              // header_declaration
+        S_variable_declaration = 129,            // variable_declaration
+        S_return_value_type = 130,               // return_value_type
+        S_return_value_type_list = 131,          // return_value_type_list
+        S_value_masked_or_set = 132,             // value_masked_or_set
+        S_value_list = 133,                      // value_list
+        S_case_entry = 134,                      // case_entry
+        S_case_list = 135,                       // case_list
+        S_field_ref_or_func = 136,               // field_ref_or_func
+        S_select_exp = 137,                      // select_exp
+        S_return_select_statement = 138,         // return_select_statement
+        S_return_statement = 139,                // return_statement
+        S_break_statement = 140,                 // break_statement
+        S_parameter = 141,                       // parameter
+        S_param_list = 142,                      // param_list
+        S_arg = 143,                             // arg
+        S_arg_list = 144,                        // arg_list
+        S_do_while_statement = 145,              // do_while_statement
+        S_conditional_statement = 146,           // conditional_statement
+        S_for_loop_statement = 147,              // for_loop_statement
+        S_case = 148,                            // case
+        S_switch_cases = 149,                    // switch_cases
+        S_switch_statement = 150,                // switch_statement
+        S_assignment_or_call = 151,              // assignment_or_call
+        S_assignment_or_call_statement = 152,    // assignment_or_call_statement
+        S_action_statement = 153,                // action_statement
+        S_action_statement_list = 154,           // action_statement_list
+        S_action_compound_statement = 155,       // action_compound_statement
+        S_key_element = 156,                     // key_element
+        S_key_element_list = 157,                // key_element_list
+        S_key_case_entry = 158,                  // key_case_entry
+        S_key_case_list = 159,                   // key_case_list
+        S_key_switch_entry = 160,                // key_switch_entry
+        S_key_switch_list = 161,                 // key_switch_list
+        S_program_selection_statement = 162,     // program_selection_statement
+        S_program_selection_statement_list = 163, // program_selection_statement_list
+        S_table_case_entry = 164,                // table_case_entry
+        S_table_case_list = 165,                 // table_case_list
+        S_table_property = 166,                  // table_property
+        S_table_property_list = 167,             // table_property_list
+        S_table_declaration = 168,               // table_declaration
+        S_typedef_declaration = 169,             // typedef_declaration
+        S_enumerator = 170,                      // enumerator
+        S_enumerator_list = 171,                 // enumerator_list
+        S_enum_declaration = 172,                // enum_declaration
+        S_struct_union_type_declaration = 173,   // struct_union_type_declaration
+        S_type_declaration = 174,                // type_declaration
+        S_function_declaration = 175,            // function_declaration
+        S_namespace = 176,                       // namespace
+        S_declaration = 177,                     // declaration
+        S_declaration_list = 178,                // declaration_list
+        S_input = 179                            // input
       };
     };
 
@@ -1108,6 +1122,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -1264,10 +1279,15 @@ namespace P4 { namespace P5 {
         value.move< P4::P5::EnumItem* > (std::move (that.value));
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.move< P4::P5::MethodArgs* > (std::move (that.value));
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.move< UnparsedConstant > (std::move (that.value));
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.move< const IR::Type* > (std::move (that.value));
         break;
@@ -1848,6 +1868,20 @@ namespace P4 { namespace P5 {
 #endif
 
 #if 201103L <= YY_CPLUSPLUS
+      basic_symbol (typename Base::kind_type t, P4::P5::MethodArgs*&& v, location_type&& l)
+        : Base (t)
+        , value (std::move (v))
+        , location (std::move (l))
+      {}
+#else
+      basic_symbol (typename Base::kind_type t, const P4::P5::MethodArgs*& v, const location_type& l)
+        : Base (t)
+        , value (v)
+        , location (l)
+      {}
+#endif
+
+#if 201103L <= YY_CPLUSPLUS
       basic_symbol (typename Base::kind_type t, UnparsedConstant&& v, location_type&& l)
         : Base (t)
         , value (std::move (v))
@@ -1947,6 +1981,7 @@ switch (yykind)
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -2103,10 +2138,15 @@ switch (yykind)
         value.template destroy< P4::P5::EnumItem* > ();
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.template destroy< P4::P5::MethodArgs* > ();
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.template destroy< UnparsedConstant > ();
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.template destroy< const IR::Type* > ();
         break;
@@ -3988,8 +4028,8 @@ switch (yykind)
     /// Constants.
     enum
     {
-      yylast_ = 792,     ///< Last index in yytable_.
-      yynnts_ = 84,  ///< Number of nonterminal symbols.
+      yylast_ = 807,     ///< Last index in yytable_.
+      yynnts_ = 87,  ///< Number of nonterminal symbols.
       yyfinal_ = 3 ///< Termination state number.
     };
 
@@ -4100,6 +4140,7 @@ switch (yykind)
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -4256,10 +4297,15 @@ switch (yykind)
         value.copy< P4::P5::EnumItem* > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.copy< P4::P5::MethodArgs* > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.copy< UnparsedConstant > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.copy< const IR::Type* > (YY_MOVE (that.value));
         break;
@@ -4363,6 +4409,7 @@ switch (yykind)
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -4519,10 +4566,15 @@ switch (yykind)
         value.move< P4::P5::EnumItem* > (YY_MOVE (s.value));
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.move< P4::P5::MethodArgs* > (YY_MOVE (s.value));
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.move< UnparsedConstant > (YY_MOVE (s.value));
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.move< const IR::Type* > (YY_MOVE (s.value));
         break;
@@ -4628,7 +4680,7 @@ switch (yykind)
 
 #line 7 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 } } // P4::P5
-#line 4632 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
+#line 4684 "/root/p4c/build/frontends/parsers/p5/p5parser.hpp"
 
 
 

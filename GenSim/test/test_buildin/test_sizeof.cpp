@@ -127,6 +127,11 @@ int main() {
         {"_inU_EPATRSP_S", 80, _sizeof(_inU_EPATRSP_S{})},
         {"_inU_ENCAP_ARP_S", 48, _sizeof(_inU_ENCAP_ARP_S{})},
         {"_inU_ENCAPRSP_S", 80, _sizeof(_inU_ENCAPRSP_S{})},
+
+        // Test new template overload _sizeof<T>()
+        {"p5::uint<8> (template)", 8, _sizeof<p5::uint<8>>()},
+        {"SimpleStruct1 (template)", 8, _sizeof<SimpleStruct1>()},
+        {"SimpleStruct2 (template)", 24, _sizeof<SimpleStruct2>()},
     };
 
     for (const auto& test : tests) {

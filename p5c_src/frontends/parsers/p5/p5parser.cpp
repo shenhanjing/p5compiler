@@ -37,7 +37,7 @@
 
 
 // First part of user prologue.
-#line 139 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 145 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
  /* -*-C++-*- */
 #include <iostream>  // NOLINT(build/include_order)
 
@@ -259,6 +259,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -415,10 +416,15 @@ namespace P4 { namespace P5 {
         value.YY_MOVE_OR_COPY< P4::P5::EnumItem* > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.YY_MOVE_OR_COPY< P4::P5::MethodArgs* > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.YY_MOVE_OR_COPY< UnparsedConstant > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.YY_MOVE_OR_COPY< const IR::Type* > (YY_MOVE (that.value));
         break;
@@ -506,6 +512,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -662,10 +669,15 @@ namespace P4 { namespace P5 {
         value.move< P4::P5::EnumItem* > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.move< P4::P5::MethodArgs* > (YY_MOVE (that.value));
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.move< UnparsedConstant > (YY_MOVE (that.value));
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.move< const IR::Type* > (YY_MOVE (that.value));
         break;
@@ -753,6 +765,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -909,10 +922,15 @@ namespace P4 { namespace P5 {
         value.copy< P4::P5::EnumItem* > (that.value);
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.copy< P4::P5::MethodArgs* > (that.value);
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.copy< UnparsedConstant > (that.value);
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.copy< const IR::Type* > (that.value);
         break;
@@ -999,6 +1017,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -1155,10 +1174,15 @@ namespace P4 { namespace P5 {
         value.move< P4::P5::EnumItem* > (that.value);
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        value.move< P4::P5::MethodArgs* > (that.value);
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         value.move< UnparsedConstant > (that.value);
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         value.move< const IR::Type* > (that.value);
         break;
@@ -1234,199 +1258,199 @@ namespace P4 { namespace P5 {
         switch (yykind)
     {
       case symbol_kind::S_BREAK: // BREAK
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                 { yyoutput << yysym.value.template as < cstring > (); }
-#line 1240 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-        break;
-
-      case symbol_kind::S_CASE: // CASE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                 { yyoutput << yysym.value.template as < cstring > (); }
-#line 1246 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-        break;
-
-      case symbol_kind::S_CONST: // CONST
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                 { yyoutput << yysym.value.template as < cstring > (); }
-#line 1252 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-        break;
-
-      case symbol_kind::S_CLASS: // CLASS
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                 { yyoutput << yysym.value.template as < cstring > (); }
-#line 1258 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-        break;
-
-      case symbol_kind::S_DEFAULT: // DEFAULT
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1264 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_DO: // DO
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_CASE: // CASE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1270 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_ELSE: // ELSE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_CONST: // CONST
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1276 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_ENUM: // ENUM
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_CLASS: // CLASS
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1282 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_FOR: // FOR
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_DEFAULT: // DEFAULT
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1288 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_IF: // IF
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_DO: // DO
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1294 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_INT: // INT
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_ELSE: // ELSE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1300 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_NAMESPACE: // NAMESPACE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_ENUM: // ENUM
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1306 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_PRIVATE: // PRIVATE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_FOR: // FOR
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1312 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_PROTECTED: // PROTECTED
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_IF: // IF
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1318 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_PUBLIC: // PUBLIC
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_INT: // INT
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1324 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_RETURN: // RETURN
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_NAMESPACE: // NAMESPACE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1330 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_STRUCT: // STRUCT
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_PRIVATE: // PRIVATE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1336 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_SWITCH: // SWITCH
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_PROTECTED: // PROTECTED
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1342 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_TYPEDEF: // TYPEDEF
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_PUBLIC: // PUBLIC
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1348 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_UNION: // UNION
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_RETURN: // RETURN
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1354 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_UINT: // UINT
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_STRUCT: // STRUCT
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1360 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_USING: // USING
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_SWITCH: // SWITCH
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1366 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_WHILE: // WHILE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_TYPEDEF: // TYPEDEF
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1372 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_VOID: // VOID
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_UNION: // UNION
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1378 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_KEY: // KEY
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_UINT: // UINT
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1384 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_SIZE: // SIZE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_USING: // USING
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1390 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_CONTROL_PARAMETERS: // CONTROL_PARAMETERS
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_WHILE: // WHILE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1396 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_HEADER: // HEADER
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_VOID: // VOID
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1402 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_TABLE: // TABLE
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_KEY: // KEY
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1408 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_IDENTIFIER: // IDENTIFIER
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_SIZE: // SIZE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1414 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_STRING_LITERAL: // STRING_LITERAL
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_CONTROL_PARAMETERS: // CONTROL_PARAMETERS
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yyoutput << yysym.value.template as < cstring > (); }
 #line 1420 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_INTEGER: // INTEGER
-#line 163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                 { yyoutput << yysym.value.template as < UnparsedConstant > (); }
+      case symbol_kind::S_HEADER: // HEADER
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 { yyoutput << yysym.value.template as < cstring > (); }
 #line 1426 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
+      case symbol_kind::S_TABLE: // TABLE
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 { yyoutput << yysym.value.template as < cstring > (); }
+#line 1432 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_IDENTIFIER: // IDENTIFIER
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 { yyoutput << yysym.value.template as < cstring > (); }
+#line 1438 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_STRING_LITERAL: // STRING_LITERAL
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 { yyoutput << yysym.value.template as < cstring > (); }
+#line 1444 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_INTEGER: // INTEGER
+#line 169 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 { yyoutput << yysym.value.template as < UnparsedConstant > (); }
+#line 1450 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
       case symbol_kind::S_string_lit: // string_lit
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StringLiteral* > ();
     if (val != nullptr) {
@@ -1435,11 +1459,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1439 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1463 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_ID: // ID
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::ID* > ();
     if (val != nullptr) {
@@ -1448,11 +1472,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1452 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1476 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_const_value: // const_value
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Constant* > ();
     if (val != nullptr) {
@@ -1461,11 +1485,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1465 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1489 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_primary_expression: // primary_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1474,11 +1498,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1478 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1502 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_postfix_expression: // postfix_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1487,11 +1511,37 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1491 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1515 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_method_call: // method_call
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 {
+    auto val = yysym.value.template as < IR::Expression* > ();
+    if (val != nullptr) {
+        yyoutput << val;
+    } else {
+        yyoutput << "(null)";
+    }
+}
+#line 1528 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_method_args: // method_args
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 {
+    auto val = yysym.value.template as < P4::P5::MethodArgs* > ();
+    if (val != nullptr) {
+        yyoutput << val;
+    } else {
+        yyoutput << "(null)";
+    }
+}
+#line 1541 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_unary_expression: // unary_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1500,11 +1550,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1504 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1554 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_cast_expression: // cast_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1513,11 +1563,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1517 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1567 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1526,11 +1576,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1530 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1580 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_additive_expression: // additive_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1539,11 +1589,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1543 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1593 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_shift_expression: // shift_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1552,11 +1602,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1556 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1606 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_relational_expression: // relational_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1565,11 +1615,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1569 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1619 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_equality_expression: // equality_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1578,11 +1628,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1582 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1632 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_and_expression: // and_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1591,11 +1641,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1595 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1645 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_exclusive_or_expression: // exclusive_or_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1604,11 +1654,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1608 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1658 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_inclusive_or_expression: // inclusive_or_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1617,11 +1667,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1621 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1671 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_logical_and_expression: // logical_and_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1630,11 +1680,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1634 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1684 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_logical_or_expression: // logical_or_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1643,11 +1693,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1647 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1697 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_conditional_expression: // conditional_expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1656,11 +1706,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1660 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1710 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_expression: // expression
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1669,11 +1719,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1673 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1723 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_expression_list: // expression_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::Expression>* > ();
     if (val != nullptr) {
@@ -1682,11 +1732,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1686 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1736 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_annotation: // annotation
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Annotation* > ();
     if (val != nullptr) {
@@ -1695,11 +1745,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1699 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1749 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_annotations: // annotations
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::Annotation>* > ();
     if (val != nullptr) {
@@ -1708,11 +1758,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1712 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1762 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
-      case symbol_kind::S_type_ref: // type_ref
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < const IR::Type* > ();
     if (val != nullptr) {
@@ -1721,11 +1771,24 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1725 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1775 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+        break;
+
+      case symbol_kind::S_type_ref: // type_ref
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                 {
+    auto val = yysym.value.template as < const IR::Type* > ();
+    if (val != nullptr) {
+        yyoutput << val;
+    } else {
+        yyoutput << "(null)";
+    }
+}
+#line 1788 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_field_ref_no_slice: // field_ref_no_slice
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1734,11 +1797,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1738 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1801 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_field_ref: // field_ref
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1747,11 +1810,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1751 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1814 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_field_dec: // field_dec
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StructField* > ();
     if (val != nullptr) {
@@ -1760,11 +1823,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1764 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1827 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_anonymous_struct_union_dec: // anonymous_struct_union_dec
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StructField* > ();
     if (val != nullptr) {
@@ -1773,11 +1836,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1777 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1840 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_struct_field_dec: // struct_field_dec
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StructField* > ();
     if (val != nullptr) {
@@ -1786,11 +1849,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1790 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1853 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_struct_field_list: // struct_field_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::IndexedVector<IR::StructField>* > ();
     if (val != nullptr) {
@@ -1799,11 +1862,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1803 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1866 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_constant_declaration: // constant_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Declaration_Constant* > ();
     if (val != nullptr) {
@@ -1812,11 +1875,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1816 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1879 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_header_declaration: // header_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Declaration* > ();
     if (val != nullptr) {
@@ -1825,11 +1888,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1829 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1892 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_variable_declaration: // variable_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Declaration_Variable* > ();
     if (val != nullptr) {
@@ -1838,11 +1901,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1842 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1905 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_return_value_type: // return_value_type
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -1851,11 +1914,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1855 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1918 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_return_value_type_list: // return_value_type_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::BlockStatement* > ();
     if (val != nullptr) {
@@ -1864,11 +1927,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1868 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1931 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_value_masked_or_set: // value_masked_or_set
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1877,11 +1940,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1881 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1944 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_value_list: // value_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::Expression>* > ();
     if (val != nullptr) {
@@ -1890,11 +1953,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1894 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1957 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_case_entry: // case_entry
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::SwitchCase* > ();
     if (val != nullptr) {
@@ -1903,11 +1966,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1907 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1970 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_case_list: // case_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::SwitchCase>* > ();
     if (val != nullptr) {
@@ -1916,11 +1979,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1920 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1983 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_field_ref_or_func: // field_ref_or_func
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Expression* > ();
     if (val != nullptr) {
@@ -1929,11 +1992,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1933 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 1996 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_select_exp: // select_exp
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::ListExpression* > ();
     if (val != nullptr) {
@@ -1942,11 +2005,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1946 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2009 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_return_select_statement: // return_select_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -1955,11 +2018,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1959 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2022 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_return_statement: // return_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -1968,11 +2031,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1972 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2035 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_break_statement: // break_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -1981,11 +2044,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1985 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2048 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_parameter: // parameter
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Parameter* > ();
     if (val != nullptr) {
@@ -1994,11 +2057,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 1998 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2061 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_param_list: // param_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::ParameterList* > ();
     if (val != nullptr) {
@@ -2007,11 +2070,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2011 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2074 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_arg: // arg
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Argument* > ();
     if (val != nullptr) {
@@ -2020,11 +2083,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2024 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2087 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_arg_list: // arg_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::Argument>* > ();
     if (val != nullptr) {
@@ -2033,11 +2096,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2037 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2100 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_do_while_statement: // do_while_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2046,11 +2109,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2050 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2113 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_conditional_statement: // conditional_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2059,11 +2122,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2063 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2126 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_for_loop_statement: // for_loop_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2072,11 +2135,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2076 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2139 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_case: // case
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::SwitchCase* > ();
     if (val != nullptr) {
@@ -2085,11 +2148,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2089 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2152 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_switch_cases: // switch_cases
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::SwitchCase>* > ();
     if (val != nullptr) {
@@ -2098,11 +2161,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2102 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2165 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_switch_statement: // switch_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2111,11 +2174,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2115 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2178 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_assignment_or_call: // assignment_or_call
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2124,11 +2187,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2128 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2191 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_assignment_or_call_statement: // assignment_or_call_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Statement* > ();
     if (val != nullptr) {
@@ -2137,11 +2200,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2141 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2204 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_action_statement: // action_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StatOrDecl* > ();
     if (val != nullptr) {
@@ -2150,11 +2213,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2154 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2217 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_action_statement_list: // action_statement_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::BlockStatement* > ();
     if (val != nullptr) {
@@ -2163,11 +2226,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2167 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2230 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_action_compound_statement: // action_compound_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::BlockStatement* > ();
     if (val != nullptr) {
@@ -2176,11 +2239,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2180 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2243 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_element: // key_element
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::P5KeyElement* > ();
     if (val != nullptr) {
@@ -2189,11 +2252,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2193 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2256 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_element_list: // key_element_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::P5KeyElement>* > ();
     if (val != nullptr) {
@@ -2202,11 +2265,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2206 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2269 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_case_entry: // key_case_entry
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::P5KeyCase* > ();
     if (val != nullptr) {
@@ -2215,11 +2278,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2219 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2282 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_case_list: // key_case_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::P5KeyCase>* > ();
     if (val != nullptr) {
@@ -2228,11 +2291,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2232 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2295 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_switch_entry: // key_switch_entry
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::P5KeySwitch* > ();
     if (val != nullptr) {
@@ -2241,11 +2304,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2245 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2308 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_key_switch_list: // key_switch_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::P5KeySwitch>* > ();
     if (val != nullptr) {
@@ -2254,11 +2317,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2258 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2321 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_program_selection_statement: // program_selection_statement
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StatOrDecl* > ();
     if (val != nullptr) {
@@ -2267,11 +2330,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2271 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2334 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_program_selection_statement_list: // program_selection_statement_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::BlockStatement* > ();
     if (val != nullptr) {
@@ -2280,11 +2343,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2284 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2347 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_table_case_entry: // table_case_entry
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::SwitchCase* > ();
     if (val != nullptr) {
@@ -2293,11 +2356,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2297 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2360 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_table_case_list: // table_case_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::SwitchCase>* > ();
     if (val != nullptr) {
@@ -2306,11 +2369,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2310 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2373 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_table_property: // table_property
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::StatOrDecl* > ();
     if (val != nullptr) {
@@ -2319,11 +2382,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2323 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2386 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_table_property_list: // table_property_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::BlockStatement* > ();
     if (val != nullptr) {
@@ -2332,11 +2395,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2336 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2399 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_table_declaration: // table_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::P5Table* > ();
     if (val != nullptr) {
@@ -2345,11 +2408,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2349 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2412 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_typedef_declaration: // typedef_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Type_Typedef* > ();
     if (val != nullptr) {
@@ -2358,11 +2421,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2362 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2425 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_enumerator: // enumerator
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < P4::P5::EnumItem* > ();
     if (val != nullptr) {
@@ -2371,11 +2434,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2375 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2438 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_enumerator_list: // enumerator_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::IndexedVector<IR::SerEnumMember>* > ();
     if (val != nullptr) {
@@ -2384,11 +2447,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2388 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2451 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_enum_declaration: // enum_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Type_Declaration* > ();
     if (val != nullptr) {
@@ -2397,11 +2460,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2401 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2464 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_struct_union_type_declaration: // struct_union_type_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Type_Struct* > ();
     if (val != nullptr) {
@@ -2410,11 +2473,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2414 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2477 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_type_declaration: // type_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Type_Declaration* > ();
     if (val != nullptr) {
@@ -2423,11 +2486,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2427 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2490 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_function_declaration: // function_declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Function* > ();
     if (val != nullptr) {
@@ -2436,11 +2499,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2440 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2503 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_declaration: // declaration
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Node* > ();
     if (val != nullptr) {
@@ -2449,11 +2512,11 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2453 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2516 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       case symbol_kind::S_declaration_list: // declaration_list
-#line 164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
     auto val = yysym.value.template as < IR::Vector<IR::Node>* > ();
     if (val != nullptr) {
@@ -2462,7 +2525,7 @@ namespace P4 { namespace P5 {
         yyoutput << "(null)";
     }
 }
-#line 2466 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 2529 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
         break;
 
       default:
@@ -2726,6 +2789,7 @@ namespace P4 { namespace P5 {
 
       case symbol_kind::S_primary_expression: // primary_expression
       case symbol_kind::S_postfix_expression: // postfix_expression
+      case symbol_kind::S_method_call: // method_call
       case symbol_kind::S_unary_expression: // unary_expression
       case symbol_kind::S_cast_expression: // cast_expression
       case symbol_kind::S_multiplicative_expression: // multiplicative_expression
@@ -2882,10 +2946,15 @@ namespace P4 { namespace P5 {
         yylhs.value.emplace< P4::P5::EnumItem* > ();
         break;
 
+      case symbol_kind::S_method_args: // method_args
+        yylhs.value.emplace< P4::P5::MethodArgs* > ();
+        break;
+
       case symbol_kind::S_INTEGER: // INTEGER
         yylhs.value.emplace< UnparsedConstant > ();
         break;
 
+      case symbol_kind::S_type_ref_explicit: // type_ref_explicit
       case symbol_kind::S_type_ref: // type_ref
         yylhs.value.emplace< const IR::Type* > ();
         break;
@@ -2945,365 +3014,395 @@ namespace P4 { namespace P5 {
           switch (yyn)
             {
   case 2: // program: input END
-#line 328 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 335 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                     { YYACCEPT; }
-#line 2951 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3020 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 3: // string_lit: STRING_LITERAL
-#line 337 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 344 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                          { yylhs.value.as < IR::StringLiteral* > () = new IR::StringLiteral(yystack_[0].location, yystack_[0].value.as < cstring > ()); }
-#line 2957 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3026 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 4: // ID: IDENTIFIER
-#line 341 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 348 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      { yylhs.value.as < IR::ID* > () = new IR::ID(yystack_[0].location, yystack_[0].value.as < cstring > ()); }
-#line 2963 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3032 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 5: // const_value: INTEGER
-#line 351 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 358 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                   { yylhs.value.as < IR::Constant* > () = parseConstant(yystack_[0].location, yystack_[0].value.as < UnparsedConstant > (), 0); }
-#line 2969 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3038 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 6: // primary_expression: field_ref
-#line 354 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 361 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 2975 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3044 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 7: // primary_expression: const_value
-#line 355 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 362 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Constant* > (); }
-#line 2981 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3050 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 8: // primary_expression: string_lit
-#line 356 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 363 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::StringLiteral* > (); }
-#line 2987 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3056 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 9: // primary_expression: "(" expression ")"
-#line 357 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 364 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[1].value.as < IR::Expression* > (); }
-#line 2993 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3062 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 10: // primary_expression: "[" expression "]"
-#line 358 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 365 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[1].value.as < IR::Expression* > (); }
-#line 2999 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3068 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 11: // primary_expression: "{" expression_list "}"
-#line 359 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 366 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = new IR::ListExpression(yystack_[2].location, *yystack_[1].value.as < IR::Vector<IR::Expression>* > ()); }
-#line 3005 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3074 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
   case 12: // postfix_expression: primary_expression
-#line 363 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3011 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 13: // postfix_expression: postfix_expression "(" arg_list ")"
-#line 364 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                              { yylhs.value.as < IR::Expression* > () = new IR::MethodCallExpression(yystack_[2].location, yystack_[3].value.as < IR::Expression* > (), yystack_[1].value.as < IR::Vector<IR::Argument>* > ()); }
-#line 3017 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 14: // unary_expression: postfix_expression
-#line 368 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3023 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 15: // unary_expression: "+" cast_expression
-#line 369 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3029 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 16: // unary_expression: "-" cast_expression
 #line 370 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = new IR::Neg(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
-#line 3035 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3080 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 17: // unary_expression: "!" cast_expression
+  case 13: // postfix_expression: method_call
 #line 371 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = new IR::LNot(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
-#line 3041 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 18: // unary_expression: "~" cast_expression
-#line 372 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = new IR::Cmpl(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
-#line 3047 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 19: // cast_expression: unary_expression
-#line 376 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3053 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3086 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 20: // cast_expression: "(" type_ref ")" cast_expression
-#line 377 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                           { yylhs.value.as < IR::Expression* > () = new IR::Cast(yystack_[3].location, yystack_[2].value.as < const IR::Type* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3059 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 14: // method_call: postfix_expression "(" method_args ")"
+#line 375 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                 {
+            auto margs = yystack_[1].value.as < P4::P5::MethodArgs* > ();
+            auto typeArgs = margs->typeArgs ? margs->typeArgs : new IR::Vector<IR::Type>();
+            auto args = margs->args ? margs->args : new IR::Vector<IR::Argument>();
+            yylhs.value.as < IR::Expression* > () = new IR::MethodCallExpression(yystack_[2].location, yystack_[3].value.as < IR::Expression* > (), typeArgs, args);
+        }
+#line 3097 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 21: // multiplicative_expression: cast_expression
-#line 381 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3065 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 22: // multiplicative_expression: multiplicative_expression "*" cast_expression
-#line 382 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                        { yylhs.value.as < IR::Expression* > () = new IR::Mul(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3071 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 23: // multiplicative_expression: multiplicative_expression "/" cast_expression
-#line 383 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                        { yylhs.value.as < IR::Expression* > () = new IR::Div(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3077 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 24: // multiplicative_expression: multiplicative_expression "%" cast_expression
+  case 15: // method_args: arg_list
 #line 384 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                        { yylhs.value.as < IR::Expression* > () = new IR::Mod(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3083 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                   {
+            yylhs.value.as < P4::P5::MethodArgs* > () = new P4::P5::MethodArgs();
+            yylhs.value.as < P4::P5::MethodArgs* > ()->args = yystack_[0].value.as < IR::Vector<IR::Argument>* > ();
+        }
+#line 3106 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 25: // additive_expression: multiplicative_expression
+  case 16: // method_args: type_ref_explicit
 #line 388 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3089 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                            {
+            yylhs.value.as < P4::P5::MethodArgs* > () = new P4::P5::MethodArgs();
+            yylhs.value.as < P4::P5::MethodArgs* > ()->typeArgs = new IR::Vector<IR::Type>();
+            yylhs.value.as < P4::P5::MethodArgs* > ()->typeArgs->push_back(yystack_[0].value.as < const IR::Type* > ());
+        }
+#line 3116 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 26: // additive_expression: additive_expression "+" multiplicative_expression
-#line 390 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                            { yylhs.value.as < IR::Expression* > () = new IR::Add(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3095 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 27: // additive_expression: additive_expression "-" multiplicative_expression
-#line 391 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                            { yylhs.value.as < IR::Expression* > () = new IR::Sub(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3101 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 28: // shift_expression: additive_expression
-#line 395 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3107 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 29: // shift_expression: shift_expression "<<" additive_expression
+  case 17: // unary_expression: postfix_expression
 #line 396 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                       { yylhs.value.as < IR::Expression* > () = new IR::Shl(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3113 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3122 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 30: // shift_expression: shift_expression ">>" additive_expression
+  case 18: // unary_expression: "+" cast_expression
 #line 397 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                        { yylhs.value.as < IR::Expression* > () = new IR::Shr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3119 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3128 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 31: // relational_expression: shift_expression
-#line 401 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                           { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3125 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 19: // unary_expression: "-" cast_expression
+#line 398 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                        { yylhs.value.as < IR::Expression* > () = new IR::Neg(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
+#line 3134 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 32: // relational_expression: relational_expression "<" shift_expression
-#line 402 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                     { yylhs.value.as < IR::Expression* > () = new IR::Lss(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3131 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 20: // unary_expression: "!" cast_expression
+#line 399 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                        { yylhs.value.as < IR::Expression* > () = new IR::LNot(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
+#line 3140 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 33: // relational_expression: relational_expression ">" shift_expression
-#line 403 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                      { yylhs.value.as < IR::Expression* > () = new IR::Grt(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3137 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 21: // unary_expression: "~" cast_expression
+#line 400 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                        { yylhs.value.as < IR::Expression* > () = new IR::Cmpl(yystack_[1].location, yystack_[0].value.as < IR::Expression* > ()); }
+#line 3146 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 34: // relational_expression: relational_expression "<=" shift_expression
+  case 22: // cast_expression: unary_expression
 #line 404 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                      { yylhs.value.as < IR::Expression* > () = new IR::Leq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3143 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3152 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 35: // relational_expression: relational_expression ">=" shift_expression
+  case 23: // cast_expression: "(" type_ref ")" cast_expression
 #line 405 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                      { yylhs.value.as < IR::Expression* > () = new IR::Geq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3149 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                           { yylhs.value.as < IR::Expression* > () = new IR::Cast(yystack_[3].location, yystack_[2].value.as < const IR::Type* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3158 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 36: // equality_expression: relational_expression
+  case 24: // multiplicative_expression: cast_expression
 #line 409 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                 { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3155 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3164 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 37: // equality_expression: equality_expression "==" relational_expression
+  case 25: // multiplicative_expression: multiplicative_expression "*" cast_expression
 #line 410 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                           { yylhs.value.as < IR::Expression* > () = new IR::Equ(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3161 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                                        { yylhs.value.as < IR::Expression* > () = new IR::Mul(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3170 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 38: // equality_expression: equality_expression "!=" relational_expression
+  case 26: // multiplicative_expression: multiplicative_expression "/" cast_expression
 #line 411 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                           { yylhs.value.as < IR::Expression* > () = new IR::Neq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3167 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                                        { yylhs.value.as < IR::Expression* > () = new IR::Div(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3176 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 39: // and_expression: equality_expression
-#line 415 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                              { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3173 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 27: // multiplicative_expression: multiplicative_expression "%" cast_expression
+#line 412 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                        { yylhs.value.as < IR::Expression* > () = new IR::Mod(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3182 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 40: // and_expression: and_expression "&" equality_expression
+  case 28: // additive_expression: multiplicative_expression
 #line 416 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                 { yylhs.value.as < IR::Expression* > () = new IR::BAnd(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3179 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                        { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3188 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 41: // exclusive_or_expression: and_expression
-#line 420 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                          { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3185 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 29: // additive_expression: additive_expression "+" multiplicative_expression
+#line 418 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                            { yylhs.value.as < IR::Expression* > () = new IR::Add(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3194 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 42: // exclusive_or_expression: exclusive_or_expression "^" and_expression
-#line 421 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                     { yylhs.value.as < IR::Expression* > () = new IR::BXor(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3191 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 30: // additive_expression: additive_expression "-" multiplicative_expression
+#line 419 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                            { yylhs.value.as < IR::Expression* > () = new IR::Sub(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3200 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 43: // inclusive_or_expression: exclusive_or_expression
+  case 31: // shift_expression: additive_expression
+#line 423 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                         { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3206 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 32: // shift_expression: shift_expression "<<" additive_expression
+#line 424 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                       { yylhs.value.as < IR::Expression* > () = new IR::Shl(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3212 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 33: // shift_expression: shift_expression ">>" additive_expression
 #line 425 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                  { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3197 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                                        { yylhs.value.as < IR::Expression* > () = new IR::Shr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3218 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 44: // inclusive_or_expression: inclusive_or_expression "|" exclusive_or_expression
-#line 426 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                              { yylhs.value.as < IR::Expression* > () = new IR::BOr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3203 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 34: // relational_expression: shift_expression
+#line 429 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                           { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3224 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 45: // logical_and_expression: inclusive_or_expression
+  case 35: // relational_expression: relational_expression "<" shift_expression
 #line 430 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                  { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3209 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                                     { yylhs.value.as < IR::Expression* > () = new IR::Lss(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3230 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 46: // logical_and_expression: logical_and_expression "&&" inclusive_or_expression
+  case 36: // relational_expression: relational_expression ">" shift_expression
 #line 431 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                                { yylhs.value.as < IR::Expression* > () = new IR::LAnd(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3215 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+                                                      { yylhs.value.as < IR::Expression* > () = new IR::Grt(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3236 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 47: // logical_or_expression: logical_and_expression
-#line 435 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 37: // relational_expression: relational_expression "<=" shift_expression
+#line 432 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                      { yylhs.value.as < IR::Expression* > () = new IR::Leq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3242 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 38: // relational_expression: relational_expression ">=" shift_expression
+#line 433 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                      { yylhs.value.as < IR::Expression* > () = new IR::Geq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3248 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 39: // equality_expression: relational_expression
+#line 437 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3221 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3254 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 48: // logical_or_expression: logical_or_expression "||" logical_and_expression
-#line 436 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                             { yylhs.value.as < IR::Expression* > () = new IR::LOr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3227 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 40: // equality_expression: equality_expression "==" relational_expression
+#line 438 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                           { yylhs.value.as < IR::Expression* > () = new IR::Equ(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3260 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 49: // conditional_expression: logical_or_expression
-#line 440 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3233 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 41: // equality_expression: equality_expression "!=" relational_expression
+#line 439 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                           { yylhs.value.as < IR::Expression* > () = new IR::Neq(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3266 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 50: // conditional_expression: logical_or_expression "?" expression ":" conditional_expression
-#line 441 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-                                                                          { yylhs.value.as < IR::Expression* > () = new IR::Mux(yystack_[3].location, yystack_[4].value.as < IR::Expression* > (), yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3239 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+  case 42: // and_expression: equality_expression
+#line 443 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                              { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3272 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 51: // expression: conditional_expression
-#line 445 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 43: // and_expression: and_expression "&" equality_expression
+#line 444 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                 { yylhs.value.as < IR::Expression* > () = new IR::BAnd(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3278 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 44: // exclusive_or_expression: and_expression
+#line 448 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                          { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3284 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 45: // exclusive_or_expression: exclusive_or_expression "^" and_expression
+#line 449 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                     { yylhs.value.as < IR::Expression* > () = new IR::BXor(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3290 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 46: // inclusive_or_expression: exclusive_or_expression
+#line 453 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                   { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3245 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3296 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 52: // expression: expression "++"
-#line 447 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 47: // inclusive_or_expression: inclusive_or_expression "|" exclusive_or_expression
+#line 454 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                              { yylhs.value.as < IR::Expression* > () = new IR::BOr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3302 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 48: // logical_and_expression: inclusive_or_expression
+#line 458 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                  { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3308 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 49: // logical_and_expression: logical_and_expression "&&" inclusive_or_expression
+#line 459 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                                { yylhs.value.as < IR::Expression* > () = new IR::LAnd(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3314 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 50: // logical_or_expression: logical_and_expression
+#line 463 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                 { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3320 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 51: // logical_or_expression: logical_or_expression "||" logical_and_expression
+#line 464 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                             { yylhs.value.as < IR::Expression* > () = new IR::LOr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3326 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 52: // conditional_expression: logical_or_expression
+#line 468 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3332 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 53: // conditional_expression: logical_or_expression "?" expression ":" conditional_expression
+#line 469 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                                                          { yylhs.value.as < IR::Expression* > () = new IR::Mux(yystack_[3].location, yystack_[4].value.as < IR::Expression* > (), yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
+#line 3338 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 54: // expression: conditional_expression
+#line 473 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                  { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
+#line 3344 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 55: // expression: expression "++"
+#line 475 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                           {
                 yylhs.value.as < IR::Expression* > () = new IR::P5PostIncrement(yystack_[1].location + yystack_[0].location, yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3253 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3352 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 53: // expression: "." field_ref "=" expression
-#line 452 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 56: // expression: "." field_ref "=" expression
+#line 480 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        {
                 yylhs.value.as < IR::Expression* > () = new IR::P5DesignatedInitializer(yystack_[3].location + yystack_[0].location, /*isMember=*/true, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
         }
-#line 3261 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3360 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 54: // expression_list: expression
-#line 462 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 57: // expression_list: expression
+#line 490 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      { auto v = new IR::Vector<IR::Expression>();
                        v->push_back(yystack_[0].value.as < IR::Expression* > ());
                        yylhs.value.as < IR::Vector<IR::Expression>* > () = v; }
-#line 3269 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3368 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 55: // expression_list: expression_list "," expression
-#line 465 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 58: // expression_list: expression_list "," expression
+#line 493 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yystack_[2].value.as < IR::Vector<IR::Expression>* > ()->push_back(yystack_[0].value.as < IR::Expression* > ());
                                            yylhs.value.as < IR::Vector<IR::Expression>* > () = yystack_[2].value.as < IR::Vector<IR::Expression>* > (); }
-#line 3276 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3375 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 56: // annotation: "@" ID
-#line 476 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 59: // annotation: "@" ID
+#line 504 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                    {
                 // 无参数：生成一个空的、已结构化的表达式列表
                 IR::Vector<IR::Expression> args;
                 yylhs.value.as < IR::Annotation* > () = new IR::Annotation(yystack_[1].location + yystack_[0].location, *yystack_[0].value.as < IR::ID* > (), args, /*structured=*/true);
         }
-#line 3286 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3385 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 57: // annotation: "@" ID "(" expression_list ")"
-#line 482 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 60: // annotation: "@" ID "(" expression_list ")"
+#line 510 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          {
                 // expression_list: IR::Vector<IR::Expression>*
                 yylhs.value.as < IR::Annotation* > () = new IR::Annotation(yystack_[4].location + yystack_[0].location, *yystack_[3].value.as < IR::ID* > (), *yystack_[1].value.as < IR::Vector<IR::Expression>* > (), /*structured=*/true);
         }
-#line 3295 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3394 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 58: // annotations: %empty
-#line 489 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 61: // annotations: %empty
+#line 517 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
                 yylhs.value.as < IR::Vector<IR::Annotation>* > () = new IR::Vector<IR::Annotation>();
         }
-#line 3303 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3402 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 59: // annotations: annotations annotation
-#line 492 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 62: // annotations: annotations annotation
+#line 520 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  {
                 yylhs.value.as < IR::Vector<IR::Annotation>* > () = yystack_[1].value.as < IR::Vector<IR::Annotation>* > ();
                 if (yystack_[0].value.as < IR::Annotation* > () != nullptr) {
@@ -3311,11 +3410,11 @@ namespace P4 { namespace P5 {
                         yylhs.value.as < IR::Vector<IR::Annotation>* > ()->srcInfo = yystack_[1].location + yystack_[0].location;
                 }
         }
-#line 3315 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3414 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 60: // type_ref: UINT "<" postfix_expression ">"
-#line 506 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 63: // type_ref_explicit: UINT "<" postfix_expression ">"
+#line 535 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 auto expr = yystack_[1].value.as < IR::Expression* > ();
                 if (auto c = expr->to<IR::Constant>()) {
@@ -3324,11 +3423,11 @@ namespace P4 { namespace P5 {
                     yylhs.value.as < const IR::Type* > () = IR::Type_Bits::get(yystack_[3].location, expr, false);
                 }
         }
-#line 3328 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3427 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 61: // type_ref: INT "<" postfix_expression ">"
-#line 514 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 64: // type_ref_explicit: INT "<" postfix_expression ">"
+#line 543 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 auto expr = yystack_[1].value.as < IR::Expression* > ();
                 if (auto c = expr->to<IR::Constant>()) {
@@ -3337,114 +3436,120 @@ namespace P4 { namespace P5 {
                     yylhs.value.as < const IR::Type* > () = IR::Type_Bits::get(yystack_[3].location, expr, true);
                 }
         }
-#line 3341 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3440 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 62: // type_ref: struct_union_type_declaration
-#line 522 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 65: // type_ref_explicit: struct_union_type_declaration
+#line 551 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         {
                 yylhs.value.as < const IR::Type* > () = yystack_[0].value.as < IR::Type_Struct* > ();
         }
-#line 3349 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3448 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 63: // type_ref: ID
-#line 525 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 66: // type_ref_explicit: VOID
+#line 554 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+               {
+                yylhs.value.as < const IR::Type* > () = IR::Type_Void::get();
+        }
+#line 3456 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 67: // type_ref: type_ref_explicit
+#line 560 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                            { yylhs.value.as < const IR::Type* > () = yystack_[0].value.as < const IR::Type* > (); }
+#line 3462 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 68: // type_ref: ID
+#line 561 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
              {
                 auto path = new IR::Path(yystack_[0].location, *yystack_[0].value.as < IR::ID* > ());
                 yylhs.value.as < const IR::Type* > () = new IR::Type_Name(yystack_[0].location, path);
         }
-#line 3358 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3471 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 64: // type_ref: ID "::" ID
-#line 529 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 69: // type_ref: ID "::" ID
+#line 565 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      {
                 auto p = new IR::Path(yystack_[2].location, *yystack_[2].value.as < IR::ID* > () + "::" + *yystack_[0].value.as < IR::ID* > ());
                 yylhs.value.as < const IR::Type* > () = new IR::Type_Name(yystack_[2].location, p);
         }
-#line 3367 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3480 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 65: // type_ref: ID "<" ID ">"
-#line 533 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 70: // type_ref: ID "<" ID ">"
+#line 569 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                         {
                 auto p = new IR::Path(yystack_[3].location, *yystack_[3].value.as < IR::ID* > () + "<" + *yystack_[1].value.as < IR::ID* > () + ">");
                 yylhs.value.as < const IR::Type* > () = new IR::Type_Name(yystack_[3].location, p);
         }
-#line 3376 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3489 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 66: // type_ref: ID "<" ID "::" ID ">"
-#line 537 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 71: // type_ref: ID "<" ID "::" ID ">"
+#line 573 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                 {
                 auto p = new IR::Path(yystack_[5].location, *yystack_[5].value.as < IR::ID* > () + "<" + *yystack_[3].value.as < IR::ID* > () + "::" + *yystack_[1].value.as < IR::ID* > () + ">");
                 yylhs.value.as < const IR::Type* > () = new IR::Type_Name(yystack_[5].location, p);
         }
-#line 3385 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3498 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 67: // type_ref: VOID
-#line 541 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
-               {
-                yylhs.value.as < const IR::Type* > () = IR::Type_Void::get();
-        }
-#line 3393 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
-    break;
-
-  case 68: // field_ref_no_slice: ID
-#line 546 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 72: // field_ref_no_slice: ID
+#line 579 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
              { auto path = new IR::Path(yystack_[0].location, *yystack_[0].value.as < IR::ID* > ());
                yylhs.value.as < IR::Expression* > () = new IR::PathExpression(yystack_[0].location, path); }
-#line 3400 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3505 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 69: // field_ref_no_slice: field_ref "." ID
-#line 548 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 73: // field_ref_no_slice: field_ref "." ID
+#line 581 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                            { yylhs.value.as < IR::Expression* > () = new IR::Member(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), *yystack_[0].value.as < IR::ID* > ()); }
-#line 3406 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3511 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 70: // field_ref_no_slice: field_ref "[" expression "]"
-#line 549 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 74: // field_ref_no_slice: field_ref "[" expression "]"
+#line 582 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        { yylhs.value.as < IR::Expression* > () = new IR::ArrayIndex(yystack_[2].location, yystack_[3].value.as < IR::Expression* > (), yystack_[1].value.as < IR::Expression* > ()); }
-#line 3412 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3517 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 71: // field_ref_no_slice: field_ref "[" "]"
-#line 550 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 75: // field_ref_no_slice: field_ref "[" "]"
+#line 583 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                             { yylhs.value.as < IR::Expression* > () = new IR::ArrayIndex(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), new IR::DefaultExpression(yystack_[1].location)); }
-#line 3418 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3523 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 72: // field_ref_no_slice: ID "::" field_ref
-#line 551 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 76: // field_ref_no_slice: ID "::" field_ref
+#line 584 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                             { auto path = new IR::Path(yystack_[2].location, *yystack_[2].value.as < IR::ID* > ());
                               auto base = new IR::PathExpression(yystack_[2].location, path);
                               yylhs.value.as < IR::Expression* > () = new IR::Member(yystack_[1].location, base, yystack_[0].value.as < IR::Expression* > ()->toString()); }
-#line 3426 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3531 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 73: // field_ref: field_ref_no_slice
-#line 556 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 77: // field_ref: field_ref_no_slice
+#line 589 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                              { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3432 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3537 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 74: // field_ref: field_ref "[" expression ":" expression "]"
-#line 557 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 78: // field_ref: field_ref "[" expression ":" expression "]"
+#line 590 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                       { yylhs.value.as < IR::Expression* > () = new IR::Slice(yystack_[4].location, yystack_[5].value.as < IR::Expression* > (), yystack_[3].value.as < IR::Expression* > (), yystack_[1].value.as < IR::Expression* > ()); }
-#line 3438 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3543 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 75: // field_ref: "[" expression ":" expression "]"
-#line 558 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 79: // field_ref: "[" expression ":" expression "]"
+#line 591 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                             { yylhs.value.as < IR::Expression* > () = new IR::Slice(yystack_[4].location, nullptr, yystack_[3].value.as < IR::Expression* > (), yystack_[1].value.as < IR::Expression* > ()); }
-#line 3444 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3549 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 76: // field_dec: annotations type_ref ID ";"
-#line 561 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 80: // field_dec: annotations type_ref ID ";"
+#line 594 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         {
                 auto field = new IR::StructField(yystack_[1].location, *yystack_[1].value.as < IR::ID* > (), yystack_[2].value.as < const IR::Type* > ());
                 if (yystack_[3].value.as < IR::Vector<IR::Annotation>* > ()) {
@@ -3452,11 +3557,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = field;
         }
-#line 3456 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3561 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 77: // field_dec: annotations type_ref ID "=" expression ";"
-#line 568 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 81: // field_dec: annotations type_ref ID "=" expression ";"
+#line 601 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                       {
                 // 只能忽略初始化值，或者记录表达式用于后续处理
                 auto field = new IR::StructField(yystack_[3].location, *yystack_[3].value.as < IR::ID* > (), yystack_[4].value.as < const IR::Type* > ());
@@ -3465,11 +3570,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = field;
         }
-#line 3469 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3574 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 78: // field_dec: annotations type_ref ID "[" expression "]" ";"
-#line 576 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 82: // field_dec: annotations type_ref ID "[" expression "]" ";"
+#line 609 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                          {
                 auto arrayType = new IR::Type_Stack(yystack_[5].value.as < const IR::Type* > (), yystack_[2].value.as < IR::Expression* > ());
                 auto field = new IR::StructField(yystack_[4].location, *yystack_[4].value.as < IR::ID* > (), arrayType);
@@ -3478,11 +3583,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = field;
         }
-#line 3482 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3587 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 79: // field_dec: annotations type_ref ID "[" expression "]" "[" expression "]" ";"
-#line 584 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 83: // field_dec: annotations type_ref ID "[" expression "]" "[" expression "]" ";"
+#line 617 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                             {
                 auto innerArray = new IR::Type_Stack(yystack_[8].value.as < const IR::Type* > (), yystack_[5].value.as < IR::Expression* > ());
                 auto outerArray = new IR::Type_Stack(innerArray, yystack_[2].value.as < IR::Expression* > ());
@@ -3492,11 +3597,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = field;
         }
-#line 3496 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3601 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 80: // anonymous_struct_union_dec: annotations STRUCT "{" struct_field_list "}" ";"
-#line 596 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 84: // anonymous_struct_union_dec: annotations STRUCT "{" struct_field_list "}" ";"
+#line 629 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[4].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[2].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3505,11 +3610,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[4].location, anonName, type);
         }
-#line 3509 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3614 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 81: // anonymous_struct_union_dec: annotations STRUCT ID "{" struct_field_list "}" ";"
-#line 605 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 85: // anonymous_struct_union_dec: annotations STRUCT ID "{" struct_field_list "}" ";"
+#line 638 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[5].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[2].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3518,11 +3623,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[5].location, anonName, type);
         }
-#line 3522 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3627 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 82: // anonymous_struct_union_dec: annotations STRUCT "{" struct_field_list "}" ID ";"
-#line 614 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 86: // anonymous_struct_union_dec: annotations STRUCT "{" struct_field_list "}" ID ";"
+#line 647 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[5].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[3].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3531,11 +3636,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[1].location, *yystack_[1].value.as < IR::ID* > (), type);
         }
-#line 3535 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3640 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 83: // anonymous_struct_union_dec: annotations UNION "{" struct_field_list "}" ";"
-#line 623 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 87: // anonymous_struct_union_dec: annotations UNION "{" struct_field_list "}" ";"
+#line 656 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[4].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[2].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3546,11 +3651,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[4].location, anonName, type);
         }
-#line 3550 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3655 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 84: // anonymous_struct_union_dec: annotations UNION ID "{" struct_field_list "}" ";"
-#line 634 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 88: // anonymous_struct_union_dec: annotations UNION ID "{" struct_field_list "}" ";"
+#line 667 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[5].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[2].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3560,11 +3665,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[5].location, anonName, type);
         }
-#line 3564 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3669 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 85: // anonymous_struct_union_dec: annotations UNION "{" struct_field_list "}" ID ";"
-#line 644 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 89: // anonymous_struct_union_dec: annotations UNION "{" struct_field_list "}" ID ";"
+#line 677 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring anonName = cstring("_anon_" + Util::toString(globalAnonCount++));
                 auto type = new IR::Type_Struct(yystack_[5].location, IR::ID(anonName), IR::Vector<IR::Annotation>(), *yystack_[3].value.as < IR::IndexedVector<IR::StructField>* > ());
@@ -3574,217 +3679,217 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::StructField* > () = new IR::StructField(yystack_[1].location, *yystack_[1].value.as < IR::ID* > (), type);
         }
-#line 3578 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3683 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 86: // struct_field_dec: field_dec
-#line 655 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 90: // struct_field_dec: field_dec
+#line 688 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                     { yylhs.value.as < IR::StructField* > () = yystack_[0].value.as < IR::StructField* > (); }
-#line 3584 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3689 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 87: // struct_field_dec: anonymous_struct_union_dec
-#line 656 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 91: // struct_field_dec: anonymous_struct_union_dec
+#line 689 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                      { yylhs.value.as < IR::StructField* > () = yystack_[0].value.as < IR::StructField* > (); }
-#line 3590 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3695 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 88: // struct_field_list: struct_field_dec
-#line 661 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 92: // struct_field_list: struct_field_dec
+#line 694 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto vec = new IR::IndexedVector<IR::StructField>();
                 vec->push_back(yystack_[0].value.as < IR::StructField* > ());
                 yylhs.value.as < IR::IndexedVector<IR::StructField>* > () = vec;
         }
-#line 3600 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3705 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 89: // struct_field_list: struct_field_list struct_field_dec
-#line 667 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 93: // struct_field_list: struct_field_list struct_field_dec
+#line 700 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yystack_[1].value.as < IR::IndexedVector<IR::StructField>* > ()->push_back(yystack_[0].value.as < IR::StructField* > ());
                 yylhs.value.as < IR::IndexedVector<IR::StructField>* > () = yystack_[1].value.as < IR::IndexedVector<IR::StructField>* > ();
         }
-#line 3609 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3714 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 90: // constant_declaration: CONST type_ref ID "=" expression ";"
-#line 681 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 94: // constant_declaration: CONST type_ref ID "=" expression ";"
+#line 714 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Declaration_Constant* > () = new IR::Declaration_Constant(yystack_[3].location, *yystack_[3].value.as < IR::ID* > (), yystack_[4].value.as < const IR::Type* > (), yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3617 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3722 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 91: // constant_declaration: CONST type_ref ID "[" expression "]" "=" expression ";"
-#line 685 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 95: // constant_declaration: CONST type_ref ID "[" expression "]" "=" expression ";"
+#line 718 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto type = new IR::Type_Stack(yystack_[7].location, yystack_[7].value.as < const IR::Type* > (), yystack_[4].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Declaration_Constant* > () = new IR::Declaration_Constant(yystack_[6].location, *yystack_[6].value.as < IR::ID* > (), type, yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3626 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3731 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 92: // constant_declaration: CONST type_ref ID '[' expression ']' '[' expression ']' '=' expression ';'
-#line 690 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 96: // constant_declaration: CONST type_ref ID '[' expression ']' '[' expression ']' '=' expression ';'
+#line 723 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto innerType = new IR::Type_Stack(yystack_[10].location, yystack_[10].value.as < const IR::Type* > (), yystack_[7].value.as < IR::Expression* > ());
                 auto type = new IR::Type_Stack(yystack_[10].location, innerType, yystack_[4].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Declaration_Constant* > () = new IR::Declaration_Constant(yystack_[9].location, *yystack_[9].value.as < IR::ID* > (), type, yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3636 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3741 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 93: // header_declaration: HEADER type_ref ID ";"
-#line 697 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 97: // header_declaration: HEADER type_ref ID ";"
+#line 730 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  {
                 auto args = new IR::Vector<IR::Argument>();
                 yylhs.value.as < IR::Declaration* > () = new IR::Declaration_Instance(yystack_[1].location, *yystack_[1].value.as < IR::ID* > (), yystack_[2].value.as < const IR::Type* > (), args);
         }
-#line 3645 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3750 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 94: // header_declaration: HEADER type_ref ID "[" expression "]" ";"
-#line 701 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 98: // header_declaration: HEADER type_ref ID "[" expression "]" ";"
+#line 734 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                    {
                 auto type = new IR::Type_Stack(yystack_[5].location, yystack_[5].value.as < const IR::Type* > (), yystack_[2].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Declaration* > () = new IR::Declaration_Instance(yystack_[4].location, *yystack_[4].value.as < IR::ID* > (), type, new IR::Vector<IR::Argument>());
         }
-#line 3654 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3759 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 95: // variable_declaration: type_ref ID ";"
-#line 707 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 99: // variable_declaration: type_ref ID ";"
+#line 740 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                           { yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[1].location, *yystack_[1].value.as < IR::ID* > (), yystack_[2].value.as < const IR::Type* > (), nullptr); }
-#line 3660 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3765 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 96: // variable_declaration: type_ref ID "=" expression ";"
-#line 708 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 100: // variable_declaration: type_ref ID "=" expression ";"
+#line 741 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[3].location, *yystack_[3].value.as < IR::ID* > (), yystack_[4].value.as < const IR::Type* > (), yystack_[1].value.as < IR::Expression* > ()); }
-#line 3666 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3771 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 97: // variable_declaration: type_ref ID "[" expression "]" ";"
-#line 709 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 101: // variable_declaration: type_ref ID "[" expression "]" ";"
+#line 742 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                              {
             auto type = new IR::Type_Stack(yystack_[5].location, yystack_[5].value.as < const IR::Type* > (), yystack_[2].value.as < IR::Expression* > ());
             yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[4].location, *yystack_[4].value.as < IR::ID* > (), type, nullptr);
         }
-#line 3675 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3780 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 98: // variable_declaration: type_ref ID "[" expression "]" "=" expression ";"
-#line 713 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 102: // variable_declaration: type_ref ID "[" expression "]" "=" expression ";"
+#line 746 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                             {
             auto type = new IR::Type_Stack(yystack_[7].location, yystack_[7].value.as < const IR::Type* > (), yystack_[4].value.as < IR::Expression* > ());
             yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[6].location, *yystack_[6].value.as < IR::ID* > (), type, yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3684 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3789 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 99: // variable_declaration: type_ref ID "[" expression "]" "[" expression "]" ";"
-#line 717 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 103: // variable_declaration: type_ref ID "[" expression "]" "[" expression "]" ";"
+#line 750 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                 {
             auto innerType = new IR::Type_Stack(yystack_[8].location, yystack_[8].value.as < const IR::Type* > (), yystack_[5].value.as < IR::Expression* > ());
             auto type = new IR::Type_Stack(yystack_[8].location, innerType, yystack_[2].value.as < IR::Expression* > ());
             yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[7].location, *yystack_[7].value.as < IR::ID* > (), type, nullptr);
         }
-#line 3694 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3799 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 100: // variable_declaration: type_ref ID "[" expression "]" "[" expression "]" "=" expression ";"
-#line 722 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 104: // variable_declaration: type_ref ID "[" expression "]" "[" expression "]" "=" expression ";"
+#line 755 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                                {
             auto innerType = new IR::Type_Stack(yystack_[10].location, yystack_[10].value.as < const IR::Type* > (), yystack_[7].value.as < IR::Expression* > ());
             auto type = new IR::Type_Stack(yystack_[10].location, innerType, yystack_[4].value.as < IR::Expression* > ());
             yylhs.value.as < IR::Declaration_Variable* > () = new IR::Declaration_Variable(yystack_[9].location, *yystack_[9].value.as < IR::ID* > (), type, yystack_[1].value.as < IR::Expression* > ());
         }
-#line 3704 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3809 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 101: // variable_declaration: USING NAMESPACE ID ";"
-#line 727 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 105: // variable_declaration: USING NAMESPACE ID ";"
+#line 760 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  { yylhs.value.as < IR::Declaration_Variable* > () = nullptr; /* TODO: maybe handle 'using namespace' */ }
-#line 3710 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3815 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 102: // return_value_type: ID "(" arg_list ")" ";"
-#line 736 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 106: // return_value_type: ID "(" arg_list ")" ";"
+#line 769 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                   {
                 auto pe = new IR::PathExpression(*yystack_[4].value.as < IR::ID* > ());
                 auto mc = new IR::MethodCallExpression(yystack_[4].location, pe,
                                                  new IR::Vector<IR::Type>(), yystack_[2].value.as < IR::Vector<IR::Argument>* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::ReturnStatement(yystack_[4].location + yystack_[1].location, mc);
         }
-#line 3721 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3826 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 103: // return_value_type: "{" return_value_type_list "}"
-#line 742 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 107: // return_value_type: "{" return_value_type_list "}"
+#line 775 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::Statement* > () = yystack_[1].value.as < IR::BlockStatement* > (); }
-#line 3727 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3832 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 104: // return_value_type: ID ";"
-#line 743 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 108: // return_value_type: ID ";"
+#line 776 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
                 auto pe = new IR::PathExpression(*yystack_[1].value.as < IR::ID* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::ReturnStatement(yystack_[1].location + yystack_[0].location, pe);
         }
-#line 3736 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3841 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 105: // return_value_type_list: %empty
-#line 749 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 109: // return_value_type_list: %empty
+#line 782 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
                 yylhs.value.as < IR::BlockStatement* > () = new IR::BlockStatement(yylhs.location);
         }
-#line 3744 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3849 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 106: // return_value_type_list: return_value_type_list return_value_type
-#line 752 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 110: // return_value_type_list: return_value_type_list return_value_type
+#line 785 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                    {
                 yystack_[1].value.as < IR::BlockStatement* > ()->push_back(yystack_[0].value.as < IR::Statement* > ());
                 yylhs.value.as < IR::BlockStatement* > () = yystack_[1].value.as < IR::BlockStatement* > ();
         }
-#line 3753 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3858 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 107: // value_masked_or_set: expression
-#line 758 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 111: // value_masked_or_set: expression
+#line 791 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      { yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > (); }
-#line 3759 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3864 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 108: // value_masked_or_set: expression "&&&" expression
-#line 759 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 112: // value_masked_or_set: expression "&&&" expression
+#line 792 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                       { yylhs.value.as < IR::Expression* > () = new IR::Mask(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ()); }
-#line 3765 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3870 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 109: // value_list: value_masked_or_set
-#line 763 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 113: // value_list: value_masked_or_set
+#line 796 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto vec = new IR::Vector<IR::Expression>();
                 vec->push_back(yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Vector<IR::Expression>* > () = vec;
         }
-#line 3775 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3880 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 110: // value_list: value_list "," value_masked_or_set
-#line 769 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 114: // value_list: value_list "," value_masked_or_set
+#line 802 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yystack_[2].value.as < IR::Vector<IR::Expression>* > ()->push_back(yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Vector<IR::Expression>* > () = yystack_[2].value.as < IR::Vector<IR::Expression>* > ();
         }
-#line 3784 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3889 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 111: // case_entry: CASE value_list ":" return_value_type
-#line 776 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 115: // case_entry: CASE value_list ":" return_value_type
+#line 809 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 IR::Expression* le =  new IR::ListExpression(yystack_[3].location, *yystack_[2].value.as < IR::Vector<IR::Expression>* > ());
                 const IR::Statement* stmt = yystack_[0].value.as < IR::Statement* > ();
@@ -3795,21 +3900,21 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[3].location, le, stmt);
         }
-#line 3799 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3904 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 112: // case_entry: CASE value_list ":"
-#line 787 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 116: // case_entry: CASE value_list ":"
+#line 820 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 // Empty case body (fallthrough): "case ...:" with nothing after ':'
                 IR::Expression* le =  new IR::ListExpression(yystack_[2].location, *yystack_[1].value.as < IR::Vector<IR::Expression>* > ());
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[2].location, le, nullptr);
         }
-#line 3809 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3914 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 113: // case_entry: DEFAULT ":" return_value_type
-#line 793 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 117: // case_entry: DEFAULT ":" return_value_type
+#line 826 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto label = new IR::DefaultExpression(yystack_[2].location);
                 const IR::Statement* stmt = yystack_[0].value.as < IR::Statement* > ();
@@ -3820,114 +3925,114 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[2].location, label, stmt);
         }
-#line 3824 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3929 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 114: // case_entry: DEFAULT ":"
-#line 804 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 118: // case_entry: DEFAULT ":"
+#line 837 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 // Empty default body (fallthrough).
                 auto label = new IR::DefaultExpression(yystack_[1].location);
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[1].location, label, nullptr);
         }
-#line 3834 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3939 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 115: // case_list: case_entry
-#line 811 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 119: // case_list: case_entry
+#line 844 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      {
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = new IR::Vector<IR::SwitchCase>();
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->push_back(yystack_[0].value.as < IR::SwitchCase* > ());
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->srcInfo = yystack_[0].location;
         }
-#line 3844 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3949 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 116: // case_list: case_list case_entry
-#line 816 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 120: // case_list: case_list case_entry
+#line 849 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                {
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ();
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->push_back(yystack_[0].value.as < IR::SwitchCase* > ());
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->srcInfo = yystack_[1].location + yystack_[0].location;
         }
-#line 3854 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3959 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 117: // field_ref_or_func: field_ref
-#line 823 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 121: // field_ref_or_func: field_ref
+#line 856 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                     {
                 yylhs.value.as < IR::Expression* > () = yystack_[0].value.as < IR::Expression* > ();
         }
-#line 3862 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3967 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 118: // field_ref_or_func: ID "(" arg_list ")"
-#line 826 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 122: // field_ref_or_func: ID "(" arg_list ")"
+#line 859 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                               {
                 auto path   = new IR::Path(yystack_[3].location, *yystack_[3].value.as < IR::ID* > ());
                 auto callee = new IR::PathExpression(yystack_[3].location, path);
                 yylhs.value.as < IR::Expression* > () = new IR::MethodCallExpression(yystack_[2].location, callee, yystack_[1].value.as < IR::Vector<IR::Argument>* > ());
         }
-#line 3872 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3977 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 119: // select_exp: annotations field_ref_or_func
-#line 833 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 123: // select_exp: annotations field_ref_or_func
+#line 866 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         {
                 auto vec = new IR::Vector<IR::Expression>();
                 // Ignore annotations for select list entries.
                 vec->push_back(yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::ListExpression* > () = new IR::ListExpression(yystack_[1].location, *vec);
         }
-#line 3883 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3988 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 120: // select_exp: select_exp "," annotations field_ref_or_func
-#line 839 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 124: // select_exp: select_exp "," annotations field_ref_or_func
+#line 872 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                        {
                 // Ignore annotations for select list entries.
                 yystack_[3].value.as < IR::ListExpression* > ()->components.push_back(yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::ListExpression* > () = yystack_[3].value.as < IR::ListExpression* > ();
         }
-#line 3893 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 3998 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 121: // return_select_statement: SWITCH "(" select_exp ")" "{" case_list "}"
-#line 846 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 125: // return_select_statement: SWITCH "(" select_exp ")" "{" case_list "}"
+#line 879 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                       {
                 yylhs.value.as < IR::Statement* > () = new IR::SwitchStatement(yystack_[6].location, yystack_[4].value.as < IR::ListExpression* > (), *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 3901 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4006 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 122: // return_select_statement: SWITCH "(" ")" "{" case_list "}"
-#line 849 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 126: // return_select_statement: SWITCH "(" ")" "{" case_list "}"
+#line 882 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 yylhs.value.as < IR::Statement* > () = new IR::SwitchStatement(yystack_[5].location, nullptr, *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 3909 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4014 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 123: // return_statement: RETURN return_select_statement
-#line 854 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 127: // return_statement: RETURN return_select_statement
+#line 887 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::Statement* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 3915 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4020 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 124: // return_statement: RETURN return_value_type
-#line 855 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 128: // return_statement: RETURN return_value_type
+#line 888 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                    { yylhs.value.as < IR::Statement* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 3921 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4026 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 125: // break_statement: BREAK ";"
-#line 858 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 129: // break_statement: BREAK ";"
+#line 891 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                     { yylhs.value.as < IR::Statement* > () = new IR::BreakStatement(yystack_[1].location); }
-#line 3927 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4032 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 126: // parameter: annotations type_ref ID
-#line 866 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 130: // parameter: annotations type_ref ID
+#line 899 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                   {
                 auto param = new IR::Parameter(yystack_[0].location, *yystack_[0].value.as < IR::ID* > (), IR::Direction::In, yystack_[1].value.as < const IR::Type* > ());
                 if (yystack_[2].value.as < IR::Vector<IR::Annotation>* > ()) {
@@ -3935,11 +4040,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 3939 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4044 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 127: // parameter: annotations type_ref ID "=" expression
-#line 873 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 131: // parameter: annotations type_ref ID "=" expression
+#line 906 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                  {
                 auto param = new IR::Parameter(yystack_[2].location, *yystack_[2].value.as < IR::ID* > (), IR::Direction::In, yystack_[3].value.as < const IR::Type* > (), yystack_[0].value.as < IR::Expression* > ());
                 if (yystack_[4].value.as < IR::Vector<IR::Annotation>* > ()) {
@@ -3947,11 +4052,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 3951 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4056 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 128: // parameter: annotations type_ref "&" ID
-#line 880 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 132: // parameter: annotations type_ref "&" ID
+#line 913 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                       {
                 auto param = new IR::Parameter(yystack_[0].location, *yystack_[0].value.as < IR::ID* > (), IR::Direction::InOut, yystack_[2].value.as < const IR::Type* > ());
                 if (yystack_[3].value.as < IR::Vector<IR::Annotation>* > ()) {
@@ -3959,11 +4064,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 3963 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4068 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 129: // parameter: annotations type_ref "&" ID "=" expression
-#line 887 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 133: // parameter: annotations type_ref "&" ID "=" expression
+#line 920 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                      {
                 auto param = new IR::Parameter(yystack_[2].location, *yystack_[2].value.as < IR::ID* > (), IR::Direction::InOut, yystack_[4].value.as < const IR::Type* > (), yystack_[0].value.as < IR::Expression* > ());
                 if (yystack_[5].value.as < IR::Vector<IR::Annotation>* > ()) {
@@ -3971,11 +4076,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 3975 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4080 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 130: // parameter: annotations type_ref "&" ID "[" "]"
-#line 894 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 134: // parameter: annotations type_ref "&" ID "[" "]"
+#line 927 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                               {
                 // Unsized array parameter passed by reference (inout).
                 // IR::Type_Stack does not accept a nullptr size, so we preserve "[]" using an annotation.
@@ -3986,11 +4091,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 3990 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4095 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 131: // parameter: annotations type_ref ID "[" "]"
-#line 904 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 135: // parameter: annotations type_ref ID "[" "]"
+#line 937 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 // Unsized array parameter.
                 // IR::Type_Stack does not accept a nullptr size, so we preserve "[]" using an annotation.
@@ -4001,66 +4106,66 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::Parameter* > () = param;
         }
-#line 4005 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4110 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 132: // param_list: %empty
-#line 916 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 136: // param_list: %empty
+#line 949 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yylhs.value.as < IR::ParameterList* > () = new IR::ParameterList(); }
-#line 4011 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4116 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 133: // param_list: parameter
-#line 918 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 137: // param_list: parameter
+#line 951 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto pl = new IR::ParameterList(); pl->push_back(yystack_[0].value.as < IR::Parameter* > ());
                 yylhs.value.as < IR::ParameterList* > () = pl;
         }
-#line 4020 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4125 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 134: // param_list: param_list "," parameter
-#line 923 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 138: // param_list: param_list "," parameter
+#line 956 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yystack_[2].value.as < IR::ParameterList* > ()->push_back(yystack_[0].value.as < IR::Parameter* > ());
                 yylhs.value.as < IR::ParameterList* > () = yystack_[2].value.as < IR::ParameterList* > ();
         }
-#line 4029 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4134 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 135: // arg: expression
-#line 930 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 139: // arg: expression
+#line 963 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      { yylhs.value.as < IR::Argument* > () = new IR::Argument(yystack_[0].location, yystack_[0].value.as < IR::Expression* > ()); }
-#line 4035 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4140 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 136: // arg_list: %empty
-#line 933 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 140: // arg_list: %empty
+#line 966 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yylhs.value.as < IR::Vector<IR::Argument>* > () = new IR::Vector<IR::Argument>(); }
-#line 4041 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4146 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 137: // arg_list: arg
-#line 935 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 141: // arg_list: arg
+#line 968 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto v = new IR::Vector<IR::Argument>();
                 v->push_back(yystack_[0].value.as < IR::Argument* > ());
                 yylhs.value.as < IR::Vector<IR::Argument>* > () = v;
         }
-#line 4051 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4156 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 138: // arg_list: arg_list "," arg
-#line 941 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 142: // arg_list: arg_list "," arg
+#line 974 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yystack_[2].value.as < IR::Vector<IR::Argument>* > ()->push_back(yystack_[0].value.as < IR::Argument* > ());
                 yylhs.value.as < IR::Vector<IR::Argument>* > () = yystack_[2].value.as < IR::Vector<IR::Argument>* > ();
         }
-#line 4060 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4165 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 139: // do_while_statement: DO action_statement WHILE "(" expression ")"
-#line 949 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 143: // do_while_statement: DO action_statement WHILE "(" expression ")"
+#line 982 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 IR::IndexedVector<IR::StatOrDecl> as;
                 as.push_back(yystack_[4].value.as < IR::StatOrDecl* > ());
@@ -4073,22 +4178,22 @@ namespace P4 { namespace P5 {
                         bs
                 );
         }
-#line 4077 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4182 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 140: // conditional_statement: IF "(" expression ")" action_statement
-#line 964 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 144: // conditional_statement: IF "(" expression ")" action_statement
+#line 997 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                    {
                 IR::IndexedVector<IR::StatOrDecl> as;
                 as.push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
                 auto bs = new IR::BlockStatement(yystack_[0].location, as);
                 yylhs.value.as < IR::Statement* > () = new IR::IfStatement(yystack_[4].location, yystack_[2].value.as < IR::Expression* > (), bs, nullptr);
         }
-#line 4088 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4193 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 141: // conditional_statement: IF "(" expression ")" action_statement ELSE action_statement
-#line 970 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 145: // conditional_statement: IF "(" expression ")" action_statement ELSE action_statement
+#line 1003 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                                    {
                 IR::IndexedVector<IR::StatOrDecl> as0;
                 as0.push_back(yystack_[2].value.as < IR::StatOrDecl* > ());
@@ -4098,11 +4203,11 @@ namespace P4 { namespace P5 {
                 auto bs1 = new IR::BlockStatement(yystack_[0].location, as1);
                 yylhs.value.as < IR::Statement* > () = new IR::IfStatement(yystack_[6].location, yystack_[4].value.as < IR::Expression* > (), bs0, bs1);
         }
-#line 4102 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4207 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 142: // for_loop_statement: FOR "(" parameter ";" expression ";" assignment_or_call ")" action_statement
-#line 982 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 146: // for_loop_statement: FOR "(" parameter ";" expression ";" assignment_or_call ")" action_statement
+#line 1015 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 IR::IndexedVector<IR::StatOrDecl> init;
                 init.push_back(yystack_[6].value.as < IR::Parameter* > ());   // parameter 本身就是 IR::Parameter/Declaration
@@ -4122,11 +4227,11 @@ namespace P4 { namespace P5 {
                         as
                 );
         }
-#line 4126 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4231 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 143: // for_loop_statement: FOR "(" parameter ":" expression ")" action_statement
-#line 1002 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 147: // for_loop_statement: FOR "(" parameter ":" expression ")" action_statement
+#line 1035 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto param = yystack_[4].value.as < IR::Parameter* > ();
                 auto bound = yystack_[2].value.as < IR::Expression* > ();
@@ -4163,11 +4268,11 @@ namespace P4 { namespace P5 {
                         as
                 );
         }
-#line 4167 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4272 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 144: // case: CASE value_list ":" action_statement
-#line 1040 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 148: // case: CASE value_list ":" action_statement
+#line 1073 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 IR::Expression* vl = new IR::ListExpression(yystack_[3].location, *yystack_[2].value.as < IR::Vector<IR::Expression>* > ());
 
@@ -4177,21 +4282,21 @@ namespace P4 { namespace P5 {
 
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[3].location, vl, as);
         }
-#line 4181 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4286 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 145: // case: CASE value_list ":"
-#line 1050 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 149: // case: CASE value_list ":"
+#line 1083 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 // Empty case body (fallthrough).
                 IR::Expression* vl = new IR::ListExpression(yystack_[2].location, *yystack_[1].value.as < IR::Vector<IR::Expression>* > ());
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[2].location, vl, nullptr);
         }
-#line 4191 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4296 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 146: // case: DEFAULT ":" action_statement
-#line 1055 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 150: // case: DEFAULT ":" action_statement
+#line 1088 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        {
                 IR::IndexedVector<IR::StatOrDecl> as_vec;
                 as_vec.push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
@@ -4201,52 +4306,52 @@ namespace P4 { namespace P5 {
 
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[2].location, label, as);
         }
-#line 4205 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4310 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 147: // case: DEFAULT ":"
-#line 1064 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 151: // case: DEFAULT ":"
+#line 1097 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                       {
                 // Empty default body (fallthrough).
                 auto label = new IR::DefaultExpression(yystack_[1].location);
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[1].location, label, nullptr);
         }
-#line 4215 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4320 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 148: // switch_cases: %empty
-#line 1071 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 152: // switch_cases: %empty
+#line 1104 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = new IR::Vector<IR::SwitchCase>; }
-#line 4221 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4326 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 149: // switch_cases: switch_cases case
-#line 1072 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 153: // switch_cases: switch_cases case
+#line 1105 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                             {
                 yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ()->push_back(yystack_[0].value.as < IR::SwitchCase* > ());
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ();
         }
-#line 4230 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4335 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 150: // switch_statement: SWITCH "(" select_exp ")" "{" switch_cases "}"
-#line 1078 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 154: // switch_statement: SWITCH "(" select_exp ")" "{" switch_cases "}"
+#line 1111 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                          {
                 yylhs.value.as < IR::Statement* > () = new IR::SwitchStatement(yystack_[6].location, yystack_[4].value.as < IR::ListExpression* > (), *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 4238 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4343 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 151: // switch_statement: SWITCH "(" ")" "{" switch_cases "}"
-#line 1081 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 155: // switch_statement: SWITCH "(" ")" "{" switch_cases "}"
+#line 1114 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                               {
                 yylhs.value.as < IR::Statement* > () = new IR::SwitchStatement(yystack_[5].location, nullptr, *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 4246 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4351 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 152: // assignment_or_call: field_ref_or_func
-#line 1086 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 156: // assignment_or_call: field_ref_or_func
+#line 1119 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                             {
                 if (auto mc = yystack_[0].value.as < IR::Expression* > ()->to<IR::MethodCallExpression>()) {
                         yylhs.value.as < IR::Statement* > () = new IR::MethodCallStatement(yystack_[0].location, mc);
@@ -4254,234 +4359,234 @@ namespace P4 { namespace P5 {
                         yylhs.value.as < IR::Statement* > () = new IR::EmptyStatement(yystack_[0].location);
                 }
         }
-#line 4258 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4363 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 153: // assignment_or_call: field_ref "=" expression
-#line 1093 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 157: // assignment_or_call: field_ref "=" expression
+#line 1126 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                    {
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
         }
-#line 4266 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4371 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 154: // assignment_or_call: field_ref "-=" expression
-#line 1096 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 158: // assignment_or_call: field_ref "-=" expression
+#line 1129 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto sub = new IR::Sub(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), sub);
         }
-#line 4275 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4380 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 155: // assignment_or_call: field_ref "+=" expression
-#line 1100 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 159: // assignment_or_call: field_ref "+=" expression
+#line 1133 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto sub = new IR::Sub(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), sub);
         }
-#line 4284 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4389 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 156: // assignment_or_call: field_ref "*=" expression
-#line 1104 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 160: // assignment_or_call: field_ref "*=" expression
+#line 1137 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto mul = new IR::Mul(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), mul);
         }
-#line 4293 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4398 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 157: // assignment_or_call: field_ref "/=" expression
-#line 1108 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 161: // assignment_or_call: field_ref "/=" expression
+#line 1141 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto div = new IR::Div(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), div);
         }
-#line 4302 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4407 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 158: // assignment_or_call: field_ref "%=" expression
-#line 1112 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 162: // assignment_or_call: field_ref "%=" expression
+#line 1145 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto mod = new IR::Mod(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), mod);
         }
-#line 4311 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4416 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 159: // assignment_or_call: field_ref "|=" expression
-#line 1116 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 163: // assignment_or_call: field_ref "|=" expression
+#line 1149 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto bor = new IR::BOr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), bor);
         }
-#line 4320 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4425 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 160: // assignment_or_call: field_ref "^=" expression
-#line 1120 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 164: // assignment_or_call: field_ref "^=" expression
+#line 1153 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                     {
                 auto bxor = new IR::BXor(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), bxor);
         }
-#line 4329 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4434 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 161: // assignment_or_call: field_ref "<<=" expression
-#line 1124 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 165: // assignment_or_call: field_ref "<<=" expression
+#line 1157 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                      {
                 auto shl = new IR::Shl(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), shl);
         }
-#line 4338 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4443 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 162: // assignment_or_call: field_ref ">>=" expression
-#line 1128 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 166: // assignment_or_call: field_ref ">>=" expression
+#line 1161 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                      {
                 auto shr = new IR::Shr(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), yystack_[0].value.as < IR::Expression* > ());
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[1].location, yystack_[2].value.as < IR::Expression* > (), shr);
         }
-#line 4347 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4452 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 163: // assignment_or_call: field_ref "++"
-#line 1132 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 167: // assignment_or_call: field_ref "++"
+#line 1165 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                          {
                 auto one = new IR::Constant(IR::Type_Bits::get(32), 1);
                 auto add = new IR::Add(yystack_[0].location, yystack_[1].value.as < IR::Expression* > (), one);
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[0].location, yystack_[1].value.as < IR::Expression* > (), add);
         }
-#line 4357 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4462 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 164: // assignment_or_call: field_ref "--"
-#line 1137 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 168: // assignment_or_call: field_ref "--"
+#line 1170 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                          {
                 auto one = new IR::Constant(IR::Type_Bits::get(32), 1);
                 auto sub = new IR::Sub(yystack_[0].location, yystack_[1].value.as < IR::Expression* > (), one);
                 yylhs.value.as < IR::Statement* > () = new IR::AssignmentStatement(yystack_[0].location, yystack_[1].value.as < IR::Expression* > (), sub);
         }
-#line 4367 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4472 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 165: // assignment_or_call_statement: assignment_or_call ";"
-#line 1144 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 169: // assignment_or_call_statement: assignment_or_call ";"
+#line 1177 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  { yylhs.value.as < IR::Statement* > () = yystack_[1].value.as < IR::Statement* > (); }
-#line 4373 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4478 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 166: // action_statement: annotations variable_declaration
-#line 1147 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 170: // action_statement: annotations variable_declaration
+#line 1180 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 attachAnnotations(yystack_[0].value.as < IR::Declaration_Variable* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Variable* > ();
         }
-#line 4382 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4487 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 167: // action_statement: annotations constant_declaration
-#line 1151 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 171: // action_statement: annotations constant_declaration
+#line 1184 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 attachAnnotations(yystack_[0].value.as < IR::Declaration_Constant* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Constant* > ();
         }
-#line 4391 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4496 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 168: // action_statement: annotations action_compound_statement
-#line 1155 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 172: // action_statement: annotations action_compound_statement
+#line 1188 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                 {
                 attachAnnotations(yystack_[0].value.as < IR::BlockStatement* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::BlockStatement* > ();
         }
-#line 4400 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4505 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 169: // action_statement: annotations conditional_statement
-#line 1159 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 173: // action_statement: annotations conditional_statement
+#line 1192 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                             { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4406 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4511 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 170: // action_statement: annotations switch_statement
-#line 1160 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 174: // action_statement: annotations switch_statement
+#line 1193 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4412 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4517 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 171: // action_statement: annotations do_while_statement
-#line 1161 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 175: // action_statement: annotations do_while_statement
+#line 1194 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4418 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4523 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 172: // action_statement: annotations for_loop_statement
-#line 1162 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 176: // action_statement: annotations for_loop_statement
+#line 1195 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4424 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4529 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 173: // action_statement: annotations return_statement
-#line 1163 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 177: // action_statement: annotations return_statement
+#line 1196 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4430 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4535 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 174: // action_statement: annotations break_statement
-#line 1164 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 178: // action_statement: annotations break_statement
+#line 1197 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                       { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4436 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4541 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 175: // action_statement: annotations assignment_or_call_statement
-#line 1165 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 179: // action_statement: annotations assignment_or_call_statement
+#line 1198 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                    { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4442 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4547 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 176: // action_statement: annotations ";"
-#line 1166 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 180: // action_statement: annotations ";"
+#line 1199 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                           {
             yylhs.value.as < IR::StatOrDecl* > () = new IR::EmptyStatement(yylhs.location);
         }
-#line 4450 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4555 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 177: // action_statement_list: %empty
-#line 1172 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 181: // action_statement_list: %empty
+#line 1205 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  { yylhs.value.as < IR::BlockStatement* > () = new IR::BlockStatement(yylhs.location); }
-#line 4456 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4561 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 178: // action_statement_list: action_statement_list action_statement
-#line 1173 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 182: // action_statement_list: action_statement_list action_statement
+#line 1206 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                  {
               yystack_[1].value.as < IR::BlockStatement* > ()->push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
               yylhs.value.as < IR::BlockStatement* > () = yystack_[1].value.as < IR::BlockStatement* > ();
         }
-#line 4465 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4570 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 179: // action_compound_statement: "{" action_statement_list "}"
-#line 1179 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 183: // action_compound_statement: "{" action_statement_list "}"
+#line 1212 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                         { yylhs.value.as < IR::BlockStatement* > () = yystack_[1].value.as < IR::BlockStatement* > (); }
-#line 4471 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4576 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 180: // key_element: CONTROL_PARAMETERS "=" "{" action_statement_list "}"
-#line 1188 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 184: // key_element: CONTROL_PARAMETERS "=" "{" action_statement_list "}"
+#line 1221 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                {
                 auto ke = new IR::P5KeyElement(yystack_[4].location);
                 ke->control = *yystack_[1].value.as < IR::BlockStatement* > ();
                 yylhs.value.as < IR::P5KeyElement* > () = ke;
         }
-#line 4481 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4586 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 181: // key_element: annotations expression ":" ID ";"
-#line 1193 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 185: // key_element: annotations expression ":" ID ";"
+#line 1226 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                             {
                 auto ke = new IR::P5KeyElement(yystack_[4].location);
                 ke->annotations = *yystack_[4].value.as < IR::Vector<IR::Annotation>* > ();
@@ -4489,39 +4594,39 @@ namespace P4 { namespace P5 {
                 ke->matchType = *yystack_[1].value.as < IR::ID* > ();
                 yylhs.value.as < IR::P5KeyElement* > () = ke;
         }
-#line 4493 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4598 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 182: // key_element: annotations expression ";"
-#line 1200 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 186: // key_element: annotations expression ";"
+#line 1233 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                      {
                 auto ke = new IR::P5KeyElement(yystack_[2].location);
                 ke->annotations = *yystack_[2].value.as < IR::Vector<IR::Annotation>* > ();
                 ke->expr = yystack_[1].value.as < IR::Expression* > ();
                 yylhs.value.as < IR::P5KeyElement* > () = ke;
         }
-#line 4504 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4609 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 183: // key_element_list: %empty
-#line 1208 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 187: // key_element_list: %empty
+#line 1241 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
                 yylhs.value.as < IR::Vector<IR::P5KeyElement>* > () = new IR::Vector<IR::P5KeyElement>();
         }
-#line 4512 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4617 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 184: // key_element_list: key_element_list key_element
-#line 1211 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 188: // key_element_list: key_element_list key_element
+#line 1244 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        {
                 yystack_[1].value.as < IR::Vector<IR::P5KeyElement>* > ()->push_back(yystack_[0].value.as < IR::P5KeyElement* > ());
                 yylhs.value.as < IR::Vector<IR::P5KeyElement>* > () = yystack_[1].value.as < IR::Vector<IR::P5KeyElement>* > ();
         }
-#line 4521 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4626 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 185: // key_case_entry: annotations CASE value_list ":" "{" key_element_list "}"
-#line 1217 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 189: // key_case_entry: annotations CASE value_list ":" "{" key_element_list "}"
+#line 1250 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                    {
                 auto label = new IR::ListExpression(yystack_[4].location, *yystack_[4].value.as < IR::Vector<IR::Expression>* > ());
                 auto kce = new IR::P5KeyCase(yystack_[6].location, false);
@@ -4531,11 +4636,11 @@ namespace P4 { namespace P5 {
                 kce->fallthrough = false;
                 yylhs.value.as < IR::P5KeyCase* > () = kce;
         }
-#line 4535 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4640 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 186: // key_case_entry: annotations CASE value_list ":"
-#line 1226 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 190: // key_case_entry: annotations CASE value_list ":"
+#line 1259 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 // Empty case body (fallthrough): "case ...:" with nothing after ':'
                 auto label = new IR::ListExpression(yystack_[1].location, *yystack_[1].value.as < IR::Vector<IR::Expression>* > ());
@@ -4547,11 +4652,11 @@ namespace P4 { namespace P5 {
                 kce->fallthrough = true;
                 yylhs.value.as < IR::P5KeyCase* > () = kce;
         }
-#line 4551 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4656 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 187: // key_case_entry: annotations DEFAULT ":" "{" key_element_list "}"
-#line 1237 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 191: // key_case_entry: annotations DEFAULT ":" "{" key_element_list "}"
+#line 1270 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                            {
                 auto label = new IR::DefaultExpression(yystack_[4].location);
                 auto kce = new IR::P5KeyCase(yystack_[5].location, false);
@@ -4561,11 +4666,11 @@ namespace P4 { namespace P5 {
                 kce->fallthrough = false;
                 yylhs.value.as < IR::P5KeyCase* > () = kce;
         }
-#line 4565 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4670 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 188: // key_case_entry: annotations DEFAULT ":"
-#line 1246 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 192: // key_case_entry: annotations DEFAULT ":"
+#line 1279 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                   {
                 // Empty default body (fallthrough).
                 auto label = new IR::DefaultExpression(yystack_[1].location);
@@ -4576,105 +4681,113 @@ namespace P4 { namespace P5 {
                 kce->fallthrough = true;
                 yylhs.value.as < IR::P5KeyCase* > () = kce;
         }
-#line 4580 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4685 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 189: // key_case_list: key_case_entry
-#line 1258 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 193: // key_case_list: key_case_entry
+#line 1291 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                          {
                 auto v = new IR::Vector<IR::P5KeyCase>();
                 v->push_back(yystack_[0].value.as < IR::P5KeyCase* > ());
                 yylhs.value.as < IR::Vector<IR::P5KeyCase>* > () = v;
         }
-#line 4590 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4695 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 190: // key_case_list: key_case_list key_case_entry
-#line 1263 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 194: // key_case_list: key_case_list key_case_entry
+#line 1296 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                        {
                 yystack_[1].value.as < IR::Vector<IR::P5KeyCase>* > ()->push_back(yystack_[0].value.as < IR::P5KeyCase* > ());
                 yylhs.value.as < IR::Vector<IR::P5KeyCase>* > () = yystack_[1].value.as < IR::Vector<IR::P5KeyCase>* > ();
         }
-#line 4599 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4704 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 191: // key_switch_entry: SWITCH "(" select_exp ")" "{" key_case_list "}"
-#line 1269 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 195: // key_switch_entry: SWITCH "(" select_exp ")" "{" key_case_list "}"
+#line 1302 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                           {
                 // P5KeySwitch is a dedicated IR node so a single key={...} can contain
                 // multiple switch blocks in source order.
                 yylhs.value.as < IR::P5KeySwitch* > () = new IR::P5KeySwitch(yystack_[6].location, yystack_[4].value.as < IR::ListExpression* > (), *yystack_[1].value.as < IR::Vector<IR::P5KeyCase>* > ());
         }
-#line 4609 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4714 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 192: // key_switch_list: key_switch_entry
-#line 1276 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 196: // key_switch_entry: SWITCH "(" ")" "{" key_case_list "}"
+#line 1307 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+                                               {
+                yylhs.value.as < IR::P5KeySwitch* > () = new IR::P5KeySwitch(yystack_[5].location, nullptr, *yystack_[1].value.as < IR::Vector<IR::P5KeyCase>* > ());
+        }
+#line 4722 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+    break;
+
+  case 197: // key_switch_list: key_switch_entry
+#line 1312 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                            {
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > () = new IR::Vector<IR::P5KeySwitch>();
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > ()->push_back(yystack_[0].value.as < IR::P5KeySwitch* > ());
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > ()->srcInfo = yystack_[0].location;
         }
-#line 4619 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4732 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 193: // key_switch_list: key_switch_entry key_switch_list
-#line 1281 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 198: // key_switch_list: key_switch_entry key_switch_list
+#line 1317 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > () = yystack_[0].value.as < IR::Vector<IR::P5KeySwitch>* > ();
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > ()->insert(yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > ()->begin(), yystack_[1].value.as < IR::P5KeySwitch* > ());
                 yylhs.value.as < IR::Vector<IR::P5KeySwitch>* > ()->srcInfo = yystack_[1].location + yystack_[0].location;
         }
-#line 4629 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4742 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 194: // program_selection_statement: constant_declaration
-#line 1288 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 199: // program_selection_statement: constant_declaration
+#line 1324 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Constant* > (); }
-#line 4635 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4748 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 195: // program_selection_statement: variable_declaration
-#line 1289 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 200: // program_selection_statement: variable_declaration
+#line 1325 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                  { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Variable* > (); }
-#line 4641 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4754 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 196: // program_selection_statement: assignment_or_call_statement
-#line 1290 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 201: // program_selection_statement: assignment_or_call_statement
+#line 1326 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          { yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > (); }
-#line 4647 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4760 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 197: // program_selection_statement_list: %empty
-#line 1293 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 202: // program_selection_statement_list: %empty
+#line 1329 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                  {
                 yylhs.value.as < IR::BlockStatement* > () = new IR::BlockStatement(yylhs.location);
         }
-#line 4655 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4768 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 198: // program_selection_statement_list: program_selection_statement
-#line 1296 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 203: // program_selection_statement_list: program_selection_statement
+#line 1332 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                       {
                 auto blk = new IR::BlockStatement(yystack_[0].location);
                 blk->push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
                 yylhs.value.as < IR::BlockStatement* > () = blk;
         }
-#line 4665 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4778 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 199: // program_selection_statement_list: program_selection_statement_list program_selection_statement
-#line 1301 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 204: // program_selection_statement_list: program_selection_statement_list program_selection_statement
+#line 1337 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                        {
                 yystack_[1].value.as < IR::BlockStatement* > ()->push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
                 yylhs.value.as < IR::BlockStatement* > () = yystack_[1].value.as < IR::BlockStatement* > ();
         }
-#line 4674 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4787 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 200: // table_case_entry: annotations CASE value_list ":" "{" program_selection_statement_list "}"
-#line 1307 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 205: // table_case_entry: annotations CASE value_list ":" "{" program_selection_statement_list "}"
+#line 1343 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                                    {
                 IR::Expression* label = new IR::ListExpression(yystack_[4].location, *yystack_[4].value.as < IR::Vector<IR::Expression>* > ());
                 const IR::Statement* stmt = yystack_[1].value.as < IR::BlockStatement* > ();
@@ -4685,21 +4798,21 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[5].location, label, stmt);
         }
-#line 4689 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4802 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 201: // table_case_entry: annotations CASE value_list ":"
-#line 1317 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 206: // table_case_entry: annotations CASE value_list ":"
+#line 1353 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 // Empty case body (fallthrough).
                 IR::Expression* label = new IR::ListExpression(yystack_[1].location, *yystack_[1].value.as < IR::Vector<IR::Expression>* > ());
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[2].location, label, nullptr);
         }
-#line 4699 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4812 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 202: // table_case_entry: annotations DEFAULT ":" "{" program_selection_statement_list "}"
-#line 1322 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 207: // table_case_entry: annotations DEFAULT ":" "{" program_selection_statement_list "}"
+#line 1358 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                            {
                 IR::Expression* label = new IR::DefaultExpression(yystack_[4].location);
                 const IR::Statement* stmt = yystack_[1].value.as < IR::BlockStatement* > ();
@@ -4710,186 +4823,186 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[4].location, label, stmt);
         }
-#line 4714 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4827 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 203: // table_case_entry: annotations DEFAULT ":"
-#line 1332 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 208: // table_case_entry: annotations DEFAULT ":"
+#line 1368 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                   {
                 // Empty default body (fallthrough).
                 IR::Expression* label = new IR::DefaultExpression(yystack_[1].location);
                 yylhs.value.as < IR::SwitchCase* > () = new IR::SwitchCase(yystack_[1].location, label, nullptr);
         }
-#line 4724 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4837 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 204: // table_case_list: table_case_entry
-#line 1340 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 209: // table_case_list: table_case_entry
+#line 1376 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = new IR::Vector<IR::SwitchCase>();
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->push_back(yystack_[0].value.as < IR::SwitchCase* > ());
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->srcInfo = yystack_[0].location;
         }
-#line 4734 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4847 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 205: // table_case_list: table_case_list table_case_entry
-#line 1346 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 210: // table_case_list: table_case_list table_case_entry
+#line 1382 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > () = yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ();
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->push_back(yystack_[0].value.as < IR::SwitchCase* > ());
                 yylhs.value.as < IR::Vector<IR::SwitchCase>* > ()->srcInfo = yystack_[1].location + yystack_[0].location;
         }
-#line 4744 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4857 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 206: // table_property: KEY "=" "{" key_element_list "}"
-#line 1353 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 211: // table_property: KEY "=" "{" key_element_list "}"
+#line 1389 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 auto key = new IR::P5Key(yystack_[4].location);
                 key->elements = *yystack_[1].value.as < IR::Vector<IR::P5KeyElement>* > ();
                 yylhs.value.as < IR::StatOrDecl* > () = key;
         }
-#line 4754 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4867 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 207: // table_property: KEY "=" "{" key_switch_list "}"
-#line 1358 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 212: // table_property: KEY "=" "{" key_switch_list "}"
+#line 1394 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                           {
                 auto key = new IR::P5Key(yystack_[4].location);
                 key->switches = *yystack_[1].value.as < IR::Vector<IR::P5KeySwitch>* > ();
                 yylhs.value.as < IR::StatOrDecl* > () = key;
         }
-#line 4764 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4877 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 208: // table_property: CONTROL_PARAMETERS "=" "{" action_statement_list "}"
-#line 1363 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 213: // table_property: CONTROL_PARAMETERS "=" "{" action_statement_list "}"
+#line 1399 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                {
                 // Similar to key_element's CONTROL_PARAMETERS form, but table properties
                 // don't wrap this in a P5KeyElement: return the action block directly.
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[1].value.as < IR::BlockStatement* > ();
         }
-#line 4774 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4887 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 209: // table_property: SWITCH "(" select_exp ")" "{" table_case_list "}"
-#line 1368 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 214: // table_property: SWITCH "(" select_exp ")" "{" table_case_list "}"
+#line 1404 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                             {
                 yylhs.value.as < IR::StatOrDecl* > () = new IR::SwitchStatement(yystack_[6].location, yystack_[4].value.as < IR::ListExpression* > (), *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 4782 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4895 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 210: // table_property: SWITCH "(" ")" "{" table_case_list "}"
-#line 1371 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 215: // table_property: SWITCH "(" ")" "{" table_case_list "}"
+#line 1407 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                  {
                 yylhs.value.as < IR::StatOrDecl* > () = new IR::SwitchStatement(yystack_[5].location, nullptr, *yystack_[1].value.as < IR::Vector<IR::SwitchCase>* > ());
         }
-#line 4790 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4903 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 211: // table_property: annotations assignment_or_call_statement
-#line 1374 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 216: // table_property: annotations assignment_or_call_statement
+#line 1410 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                    {
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Statement* > ();
         }
-#line 4798 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4911 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 212: // table_property: annotations constant_declaration
-#line 1377 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 217: // table_property: annotations constant_declaration
+#line 1413 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Constant* > ();
         }
-#line 4806 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4919 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 213: // table_property: annotations variable_declaration
-#line 1380 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 218: // table_property: annotations variable_declaration
+#line 1416 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                            {
                 yylhs.value.as < IR::StatOrDecl* > () = yystack_[0].value.as < IR::Declaration_Variable* > ();
         }
-#line 4814 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4927 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 214: // table_property_list: table_property
-#line 1386 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 219: // table_property_list: table_property
+#line 1422 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                          {
                 yylhs.value.as < IR::BlockStatement* > () = new IR::BlockStatement(yystack_[0].location);
                 if (yystack_[0].value.as < IR::StatOrDecl* > ()) yylhs.value.as < IR::BlockStatement* > ()->push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
         }
-#line 4823 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4936 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 215: // table_property_list: table_property_list table_property
-#line 1390 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 220: // table_property_list: table_property_list table_property
+#line 1426 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                              {
                 yylhs.value.as < IR::BlockStatement* > () = yystack_[1].value.as < IR::BlockStatement* > ();
                 if (yystack_[0].value.as < IR::StatOrDecl* > ()) yylhs.value.as < IR::BlockStatement* > ()->push_back(yystack_[0].value.as < IR::StatOrDecl* > ());
         }
-#line 4832 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4945 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 216: // table_declaration: TABLE ID "(" param_list ")" "{" table_property_list "}"
-#line 1398 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 221: // table_declaration: TABLE ID "(" param_list ")" "{" table_property_list "}"
+#line 1434 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                   {
                 yylhs.value.as < IR::P5Table* > () = new IR::P5Table(yystack_[7].location+yystack_[6].location, *yystack_[6].value.as < IR::ID* > (), yystack_[4].value.as < IR::ParameterList* > (), yystack_[1].value.as < IR::BlockStatement* > ());
         }
-#line 4840 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4953 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 217: // table_declaration: TABLE ID "{" table_property_list "}"
-#line 1401 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 222: // table_declaration: TABLE ID "{" table_property_list "}"
+#line 1437 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                {
                 yylhs.value.as < IR::P5Table* > () = new IR::P5Table(yystack_[4].location+yystack_[3].location, *yystack_[3].value.as < IR::ID* > (), new IR::ParameterList(), yystack_[1].value.as < IR::BlockStatement* > ());
         }
-#line 4848 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4961 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 218: // table_declaration: CLASS ID "(" param_list ")" "{" table_property_list "}"
-#line 1404 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 223: // table_declaration: CLASS ID "(" param_list ")" "{" table_property_list "}"
+#line 1440 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                                   {
                 yylhs.value.as < IR::P5Table* > () = new IR::P5Table(yystack_[7].location+yystack_[6].location, *yystack_[6].value.as < IR::ID* > (), yystack_[4].value.as < IR::ParameterList* > (), yystack_[1].value.as < IR::BlockStatement* > ());
         }
-#line 4856 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4969 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 219: // table_declaration: CLASS ID "{" table_property_list "}"
-#line 1407 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 224: // table_declaration: CLASS ID "{" table_property_list "}"
+#line 1443 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                                {
                 yylhs.value.as < IR::P5Table* > () = new IR::P5Table(yystack_[4].location+yystack_[3].location, *yystack_[3].value.as < IR::ID* > (), new IR::ParameterList(), yystack_[1].value.as < IR::BlockStatement* > ());
         }
-#line 4864 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4977 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 220: // typedef_declaration: TYPEDEF type_ref ID
-#line 1420 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 225: // typedef_declaration: TYPEDEF type_ref ID
+#line 1456 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto id = IR::ID(yystack_[0].location, *yystack_[0].value.as < IR::ID* > ());
                 yylhs.value.as < IR::Type_Typedef* > () = new IR::Type_Typedef(yystack_[2].location, id, yystack_[1].value.as < const IR::Type* > ());
         }
-#line 4873 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4986 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 221: // enumerator: ID
-#line 1427 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 226: // enumerator: ID
+#line 1463 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < P4::P5::EnumItem* > () = new P4::P5::EnumItem(yystack_[0].location, yystack_[0].value.as < IR::ID* > (), nullptr);
         }
-#line 4881 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 4994 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 222: // enumerator: ID "=" expression
-#line 1431 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 227: // enumerator: ID "=" expression
+#line 1467 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < P4::P5::EnumItem* > () = new P4::P5::EnumItem(yystack_[2].location + yystack_[0].location, yystack_[2].value.as < IR::ID* > (), yystack_[0].value.as < IR::Expression* > ());
         }
-#line 4889 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5002 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 223: // enumerator_list: enumerator
-#line 1436 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 228: // enumerator_list: enumerator
+#line 1472 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                      {
                 yylhs.value.as < IR::IndexedVector<IR::SerEnumMember>* > () = new IR::IndexedVector<IR::SerEnumMember>();
                 IR::Expression* v = nullptr;
@@ -4900,11 +5013,11 @@ namespace P4 { namespace P5 {
                 }
                 yylhs.value.as < IR::IndexedVector<IR::SerEnumMember>* > ()->push_back(new IR::SerEnumMember(yystack_[0].location, *yystack_[0].value.as < P4::P5::EnumItem* > ()->name, v));
         }
-#line 4904 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5017 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 224: // enumerator_list: enumerator_list "," enumerator
-#line 1446 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 229: // enumerator_list: enumerator_list "," enumerator
+#line 1482 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                          {
                 IR::Expression* v = nullptr;
                 if (yystack_[0].value.as < P4::P5::EnumItem* > ()->value) {
@@ -4917,161 +5030,161 @@ namespace P4 { namespace P5 {
                 yystack_[2].value.as < IR::IndexedVector<IR::SerEnumMember>* > ()->push_back(new IR::SerEnumMember(yystack_[0].location, *yystack_[0].value.as < P4::P5::EnumItem* > ()->name, v));
                 yylhs.value.as < IR::IndexedVector<IR::SerEnumMember>* > () = yystack_[2].value.as < IR::IndexedVector<IR::SerEnumMember>* > ();
         }
-#line 4921 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5034 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 225: // enum_declaration: ENUM ID "{" enumerator_list "}"
-#line 1461 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 230: // enum_declaration: ENUM ID "{" enumerator_list "}"
+#line 1497 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 const IR::Type* underlying = IR::Type_Bits::get(32, false);
                 yylhs.value.as < IR::Type_Declaration* > () = new IR::Type_SerEnum(*yystack_[3].value.as < IR::ID* > (), underlying, *yystack_[1].value.as < IR::IndexedVector<IR::SerEnumMember>* > ());
         }
-#line 4930 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5043 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 226: // struct_union_type_declaration: STRUCT ID "{" struct_field_list "}"
-#line 1468 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 231: // struct_union_type_declaration: STRUCT ID "{" struct_field_list "}"
+#line 1504 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Type_Struct* > () = new IR::Type_Struct(yystack_[3].location + yystack_[0].location, *yystack_[3].value.as < IR::ID* > (), *yystack_[1].value.as < IR::IndexedVector<IR::StructField>* > ());
         }
-#line 4938 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5051 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 227: // struct_union_type_declaration: UNION ID "{" struct_field_list "}"
-#line 1472 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 232: // struct_union_type_declaration: UNION ID "{" struct_field_list "}"
+#line 1508 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 auto st = new IR::Type_Struct(yystack_[3].location + yystack_[0].location, *yystack_[3].value.as < IR::ID* > (), *yystack_[1].value.as < IR::IndexedVector<IR::StructField>* > ());
                 st->annotations.push_back(new IR::Annotation("union", {}));
                 yylhs.value.as < IR::Type_Struct* > () = st;
         }
-#line 4948 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5061 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 228: // type_declaration: struct_union_type_declaration ";"
-#line 1480 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 233: // type_declaration: struct_union_type_declaration ";"
+#line 1516 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                             { yylhs.value.as < IR::Type_Declaration* > () = yystack_[1].value.as < IR::Type_Struct* > (); }
-#line 4954 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5067 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 229: // type_declaration: enum_declaration ";"
-#line 1481 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 234: // type_declaration: enum_declaration ";"
+#line 1517 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                { yylhs.value.as < IR::Type_Declaration* > () = yystack_[1].value.as < IR::Type_Declaration* > (); }
-#line 4960 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5073 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 230: // type_declaration: typedef_declaration ";"
-#line 1482 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 235: // type_declaration: typedef_declaration ";"
+#line 1518 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                                    { yylhs.value.as < IR::Type_Declaration* > () = yystack_[1].value.as < IR::Type_Typedef* > (); }
-#line 4966 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5079 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 231: // function_declaration: type_ref ID "(" param_list ")" action_compound_statement
-#line 1486 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 236: // function_declaration: type_ref ID "(" param_list ")" action_compound_statement
+#line 1522 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 cstring funcName = yystack_[4].value.as < IR::ID* > ()->name;  // ID* -> cstring
                 auto funcType = new IR::Type_Method(yystack_[5].location + yystack_[1].location, yystack_[5].value.as < const IR::Type* > (), yystack_[2].value.as < IR::ParameterList* > (), funcName);
                 yylhs.value.as < IR::Function* > () = new IR::Function(yystack_[4].location + yystack_[0].location, funcName, funcType, yystack_[0].value.as < IR::BlockStatement* > ());
         }
-#line 4976 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5089 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 233: // declaration: annotations constant_declaration
-#line 1504 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 238: // declaration: annotations constant_declaration
+#line 1540 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 attachAnnotations(yystack_[0].value.as < IR::Declaration_Constant* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::Declaration_Constant* > ();
         }
-#line 4985 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5098 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 234: // declaration: annotations ";"
-#line 1508 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 239: // declaration: annotations ";"
+#line 1544 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                           {
                 // Standalone annotation statement (e.g. @u_version(...);).
                 // Ignore it completely and keep parsing.
                 yylhs.value.as < IR::Node* > () = nullptr;
         }
-#line 4995 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5108 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 235: // declaration: annotations type_declaration
-#line 1514 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 240: // declaration: annotations type_declaration
+#line 1550 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 attachAnnotations(yystack_[0].value.as < IR::Type_Declaration* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::Type_Declaration* > ();
         }
-#line 5004 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5117 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 236: // declaration: annotations header_declaration
-#line 1519 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 241: // declaration: annotations header_declaration
+#line 1555 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 attachAnnotations(yystack_[0].value.as < IR::Declaration* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::Declaration* > ();
         }
-#line 5013 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5126 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 237: // declaration: annotations table_declaration
-#line 1524 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 242: // declaration: annotations table_declaration
+#line 1560 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::P5Table* > ();
         }
-#line 5021 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5134 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 239: // declaration: annotations variable_declaration
-#line 1529 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 244: // declaration: annotations variable_declaration
+#line 1565 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 attachAnnotations(yystack_[0].value.as < IR::Declaration_Variable* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::Declaration_Variable* > ();
         }
-#line 5030 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5143 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 240: // declaration: annotations function_declaration
-#line 1534 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 245: // declaration: annotations function_declaration
+#line 1570 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 attachAnnotations(yystack_[0].value.as < IR::Function* > (), yystack_[1].value.as < IR::Vector<IR::Annotation>* > ());
                 yylhs.value.as < IR::Node* > () = yystack_[0].value.as < IR::Function* > ();
         }
-#line 5039 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5152 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 241: // declaration_list: declaration
-#line 1541 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 246: // declaration_list: declaration
+#line 1577 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 yylhs.value.as < IR::Vector<IR::Node>* > () = new IR::IndexedVector<IR::Node>();
                 if (yystack_[0].value.as < IR::Node* > ()) yylhs.value.as < IR::Vector<IR::Node>* > ()->push_back(yystack_[0].value.as < IR::Node* > ());
         }
-#line 5048 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5161 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 242: // declaration_list: declaration_list declaration
-#line 1546 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 247: // declaration_list: declaration_list declaration
+#line 1582 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
         {
                 if (yystack_[0].value.as < IR::Node* > ()) yystack_[1].value.as < IR::Vector<IR::Node>* > ()->push_back(yystack_[0].value.as < IR::Node* > ());
                 yylhs.value.as < IR::Vector<IR::Node>* > () = yystack_[1].value.as < IR::Vector<IR::Node>* > ();
         }
-#line 5057 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5170 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 244: // input: input declaration
-#line 1554 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 249: // input: input declaration
+#line 1590 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                              {
                 if (yystack_[0].value.as < IR::Node* > ()) driver.nodes->push_back(yystack_[0].value.as < IR::Node* > ()->getNode());
         }
-#line 5065 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5178 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
-  case 245: // input: input ";"
-#line 1557 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+  case 250: // input: input ";"
+#line 1593 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
                            {}
-#line 5071 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5184 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
     break;
 
 
-#line 5075 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 5188 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
 
             default:
               break;
@@ -5423,449 +5536,456 @@ namespace P4 { namespace P5 {
   }
 
 
-  const short P5Parser::yypact_ninf_ = -437;
+  const short P5Parser::yypact_ninf_ = -447;
 
-  const short P5Parser::yytable_ninf_ = -148;
+  const short P5Parser::yytable_ninf_ = -152;
 
   const short
   P5Parser::yypact_[] =
   {
-    -437,    57,    44,  -437,  -437,  -437,   578,  -437,    27,  -437,
-     425,    27,    27,   125,    27,    27,   425,    27,   141,   131,
-    -437,   425,    27,  -437,   254,  -437,    27,  -437,  -437,  -437,
-    -437,   248,   262,   282,  -437,  -437,  -437,   381,    27,  -437,
-     397,   413,    63,   418,   445,    27,   467,    63,    27,    27,
-     528,    27,    27,   378,  -437,  -437,  -437,  -437,   315,    26,
-     476,   438,    27,   315,   315,   315,  -437,  -437,  -437,   553,
-    -437,  -437,   320,  -437,   579,  -437,  -437,  -437,  -437,   347,
-     393,   167,   476,   438,  -437,    79,   476,   315,   315,  -437,
-     265,    34,   407,   407,   407,   407,   563,  -437,  -437,   440,
-     550,   624,   560,   478,   519,   532,   531,   536,   263,  -437,
-     573,   500,   315,   315,   315,   115,  -437,   514,   603,   592,
-     597,   170,  -437,    56,   609,  -437,   551,   130,   558,   412,
-      34,   315,  -437,    81,    27,  -437,   625,   369,  -437,  -437,
-    -437,   633,   642,  -437,  -437,   315,  -437,   516,    90,    27,
-    -437,   524,   395,   148,   340,   651,   315,   415,  -437,  -437,
-    -437,  -437,   407,   407,   407,   407,   407,   407,   407,   407,
-     407,   407,   407,   407,   407,   407,   407,   407,   407,   315,
-     407,  -437,  -437,   315,   403,   223,    62,   100,   656,  -437,
-     670,   671,   672,    43,    27,   646,  -437,  -437,  -437,   627,
-    -437,  -437,  -437,   315,  -437,    27,  -437,  -437,  -437,   315,
-     579,   573,  -437,   525,  -437,   453,  -437,  -437,  -437,    21,
-      70,    27,  -437,  -437,  -437,   431,   674,  -437,   647,   676,
-     164,  -437,    34,   407,   429,   315,  -437,  -437,  -437,   440,
-     440,   550,   550,   624,   624,   624,   624,   560,   560,   478,
-     519,   532,   531,   482,   536,   573,   666,  -437,   596,    27,
-     344,   438,  -437,   679,    22,   526,   615,  -437,   315,   185,
-     315,  -437,   315,  -437,   315,   315,   315,   315,   315,   315,
-     315,   315,  -437,   573,  -437,   444,  -437,   315,  -437,   315,
-    -437,   681,  -437,   682,   295,   637,   438,  -437,  -437,  -437,
-     315,   315,  -437,    45,  -437,  -437,   407,   315,   315,   439,
-     684,   315,   177,  -437,    99,   579,  -437,   685,  -437,   691,
-      61,   615,   690,   692,   530,   573,   573,   573,   573,   573,
-     573,   573,   573,   573,   573,  -437,  -437,   461,   693,  -437,
-     694,  -437,   315,   315,  -437,  -437,   188,   695,   477,   230,
-    -437,   266,    69,   689,   315,  -437,   573,  -437,   152,  -437,
-     696,  -437,    22,  -437,  -437,   687,   207,  -437,  -437,  -437,
-    -437,   554,  -437,  -437,  -437,   121,   698,   212,   699,   484,
-     285,  -437,  -437,   204,  -437,  -437,   617,  -437,   573,   315,
-     697,  -437,  -437,   701,  -437,   540,   703,    30,  -437,   658,
-    -437,   707,   709,    60,   710,  -437,  -437,  -437,  -437,  -437,
-    -437,  -437,  -437,  -437,  -437,  -437,   663,   664,  -437,   665,
-     667,   198,  -437,   315,  -437,   315,   313,  -437,   574,   712,
-    -437,   714,  -437,    27,  -437,  -437,   645,  -437,   315,  -437,
-     718,    87,  -437,  -437,   719,  -437,  -437,  -437,  -437,   315,
-    -437,   312,    25,   315,   315,   717,   450,  -437,   721,   673,
-     722,   194,   358,    67,   725,   315,  -437,   726,   541,   485,
-    -437,  -437,   573,  -437,   450,  -437,  -437,  -437,  -437,   224,
-     172,  -437,   724,  -437,  -437,   315,   315,   315,  -437,  -437,
-    -437,   727,   542,   544,  -437,   728,   683,   401,  -437,  -437,
-     315,   723,  -437,  -437,   383,   391,   321,   677,   564,   730,
-     688,   229,  -437,  -437,  -437,   621,   733,  -437,  -437,    34,
-    -437,   315,   729,  -437,   247,   564,  -437,  -437,   315,   731,
-    -437,   253,   735,  -437,  -437,   738,  -437,   626,    71,  -437,
-    -437,   258,   652,   267,  -437,  -437,    77,  -437,    71,  -437,
-    -437,   272,  -437,    91,  -437,  -437,  -437,  -437,  -437
+    -447,   142,   122,  -447,  -447,  -447,   619,  -447,   115,  -447,
+     362,   115,   115,   247,   115,   115,   362,   115,   346,   165,
+    -447,   362,   115,  -447,    64,  -447,  -447,   115,  -447,  -447,
+    -447,  -447,   305,   360,   379,  -447,  -447,  -447,   450,   115,
+    -447,   567,   476,    67,   500,   533,   115,   538,    67,   115,
+     115,   573,   115,   115,   294,  -447,  -447,  -447,  -447,   491,
+      33,   467,   398,   115,   491,   491,   491,  -447,  -447,  -447,
+     539,  -447,  -447,   303,  -447,  -447,    98,  -447,  -447,  -447,
+    -447,   361,   507,    38,   467,   398,  -447,   288,   467,   491,
+     491,  -447,   211,    30,   164,   164,   164,   164,   563,  -447,
+    -447,   499,   371,   279,   528,   485,   547,   551,   556,   544,
+      58,  -447,   591,   468,   491,   491,   491,   117,  -447,   480,
+     607,   598,   600,   203,  -447,    36,   605,  -447,   445,   274,
+     446,   399,    30,   211,  -447,   321,   115,  -447,   620,   187,
+    -447,  -447,  -447,   621,   623,  -447,  -447,   491,  -447,   482,
+      82,   115,  -447,   493,   174,    25,   374,   629,   491,   466,
+    -447,  -447,  -447,  -447,   164,   164,   164,   164,   164,   164,
+     164,   164,   164,   164,   164,   164,   164,   164,   164,   164,
+     164,   491,   164,  -447,  -447,   491,   322,    51,    41,   129,
+     632,  -447,   635,   636,   638,    29,   115,   687,  -447,  -447,
+    -447,   589,  -447,  -447,  -447,   491,  -447,   115,  -447,  -447,
+    -447,   491,    98,   641,   591,  -447,  -447,   637,  -447,   429,
+    -447,  -447,  -447,    48,    55,   115,  -447,  -447,  -447,   408,
+     642,  -447,   613,   644,   298,  -447,    30,   164,   469,   491,
+    -447,  -447,  -447,   499,   499,   371,   371,   279,   279,   279,
+     279,   528,   528,   485,   547,   551,   556,   527,   544,   591,
+     639,  -447,   564,   115,   402,   398,  -447,   647,    76,   495,
+     588,  -447,   491,   351,   491,  -447,   491,  -447,   491,   491,
+     491,   491,   491,   491,   491,   491,  -447,   591,  -447,   437,
+    -447,   491,  -447,   491,  -447,   652,  -447,   657,   369,   615,
+     398,  -447,  -447,  -447,   491,   491,  -447,    32,  -447,  -447,
+     164,   491,   491,   417,   656,   491,    85,  -447,   229,    98,
+    -447,   662,  -447,   665,    81,   588,   666,   667,   496,   591,
+     591,   591,   591,   591,   591,   591,   591,   591,   591,  -447,
+    -447,   440,   670,  -447,   672,  -447,   491,   491,  -447,  -447,
+     265,   674,   441,   184,  -447,   186,    60,   663,   491,  -447,
+     591,  -447,   163,  -447,   675,  -447,    76,   680,  -447,   669,
+     345,  -447,  -447,  -447,  -447,   562,  -447,  -447,  -447,   157,
+     681,   171,   683,   442,   206,  -447,  -447,    77,  -447,  -447,
+     597,  -447,   591,   491,   682,  -447,  -447,   692,  -447,   697,
+     498,   699,   368,  -447,   659,  -447,   704,   708,    72,   710,
+    -447,  -447,  -447,  -447,  -447,  -447,  -447,  -447,  -447,  -447,
+    -447,   664,   668,  -447,   671,   673,   126,  -447,   491,  -447,
+     491,   314,  -447,   541,   712,  -447,  -447,   713,  -447,   115,
+    -447,  -447,   645,  -447,   491,  -447,   718,   132,  -447,  -447,
+     719,  -447,  -447,  -447,  -447,   491,  -447,   249,    20,   491,
+     491,   720,   235,   330,  -447,   721,  -447,   722,   678,   723,
+      50,   388,    62,   727,   491,  -447,   728,   509,   462,  -447,
+    -447,   591,  -447,   235,  -447,  -447,  -447,  -447,   460,   491,
+     724,  -447,  -447,   733,  -447,  -447,   491,   491,   491,  -447,
+    -447,  -447,   735,   524,   526,  -447,   736,   691,   587,  -447,
+    -447,   545,   738,  -447,   394,   396,   271,   685,   511,   740,
+     695,   179,  -447,  -447,  -447,   742,  -447,  -447,  -447,    30,
+    -447,   491,   734,  -447,   195,   511,  -447,  -447,   491,   739,
+    -447,   234,  -447,    84,  -447,   745,  -447,   566,    57,  -447,
+    -447,   245,   585,   262,  -447,    86,  -447,  -447,    57,  -447,
+    -447,   280,  -447,  -447,  -447,  -447,  -447
   };
 
   const unsigned char
   P5Parser::yydefact_[] =
   {
-     243,     0,    58,     1,     2,   245,     0,   244,     0,   234,
+     248,     0,    61,     1,     2,   250,     0,   249,     0,   239,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      67,     0,     0,     4,    63,    59,     0,   233,   236,   239,
-     237,     0,     0,    62,   235,   240,    58,    56,     0,    62,
+      66,     0,     0,     4,    68,    62,    67,     0,   238,   241,
+     244,   242,     0,     0,    65,   240,   245,    61,    59,     0,
+      65,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,   235,   234,   233,   243,     0,
+       0,    61,    61,     0,     0,     0,     0,     3,     5,     8,
+      72,     7,    12,     0,    13,    77,     6,    61,    61,   225,
+      61,     0,     0,     0,    61,    61,    69,     0,    61,     0,
+       0,    99,     0,     0,     0,     0,     0,     0,    17,    22,
+      24,    28,    31,    34,    39,    42,    44,    46,    48,    50,
+      52,    54,    57,     0,     0,     0,     0,     0,   137,     0,
+       0,     0,     0,     0,   219,    61,   226,   228,     0,     0,
+       0,     0,     0,   140,    64,     0,     0,   246,    61,     0,
+      90,    91,    92,    61,    61,    63,   105,     0,    97,     0,
+      61,     0,    70,     0,     0,     0,    72,     0,     0,     0,
+      21,    18,    19,    20,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,   230,   229,   228,   238,     0,     0,
-      58,    58,     0,     0,     0,     0,     3,     5,     8,    68,
-       7,    12,     0,    73,     6,    58,    58,   220,    58,     0,
-       0,     0,    58,    58,    64,     0,    58,     0,     0,    95,
-       0,     0,     0,     0,     0,     0,    14,    19,    21,    25,
-      28,    31,    36,    39,    41,    43,    45,    47,    49,    51,
-      54,     0,     0,     0,     0,     0,   133,     0,     0,     0,
-       0,     0,   214,    58,   221,   223,     0,     0,     0,     0,
-       0,   136,    61,     0,     0,   241,    58,     0,    86,    87,
-      88,    58,    58,    60,   101,     0,    93,     0,    58,     0,
-      65,     0,     0,     0,    68,     0,     0,     0,    18,    15,
-      16,    17,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    52,    57,     0,     0,     0,     0,     0,     0,    58,
-      58,     0,     0,    68,     0,   117,   212,   213,   152,     0,
-     211,   219,   215,     0,   225,     0,     9,    11,    10,     0,
-      72,   135,   137,     0,    71,     0,    69,   232,   242,     0,
-       0,     0,   226,    89,   227,     0,     0,   217,     0,     0,
-       0,    96,     0,     0,     0,     0,    22,    23,    24,    26,
-      27,    30,    29,    33,    32,    35,    34,    37,    38,    40,
-      42,    44,    46,     0,    48,    55,     0,    90,     0,     0,
-     126,    58,   134,     0,     0,     0,   183,   177,   136,     0,
-       0,   163,     0,   164,     0,     0,     0,     0,     0,     0,
-       0,     0,   165,   222,   224,     0,    13,     0,    70,     0,
-      58,     0,    58,     0,     0,     0,    58,    66,   177,   231,
-       0,     0,    97,    68,    20,    53,     0,     0,     0,   128,
-       0,     0,    58,    58,    68,   117,   119,     0,    58,     0,
-      58,   192,     0,    58,     0,   153,   155,   154,   156,   157,
-     158,   159,   160,   162,   161,    75,   138,     0,    58,    58,
-      58,    58,     0,     0,    76,    94,    58,    58,     0,     0,
-      50,     0,     0,     0,     0,   131,   127,   218,     0,   204,
-      58,    58,     0,    58,   206,     0,     0,   184,   193,   207,
-     208,     0,   178,   118,    74,     0,    58,     0,    58,     0,
-       0,   216,   179,     0,    98,    91,     0,   130,   129,     0,
-       0,   210,   205,    58,   120,     0,     0,     0,   176,     0,
-      58,     0,     0,     0,     0,   167,   166,   173,   174,   171,
-     169,   172,   170,   175,   168,    80,     0,   226,    83,     0,
-     227,     0,    77,     0,    99,     0,   107,   109,     0,   203,
-     209,     0,   177,     0,   182,   125,     0,    58,     0,   105,
-       0,     0,   124,   123,    58,    82,    81,    85,    84,     0,
-      78,     0,     0,     0,     0,   201,   197,    58,    58,     0,
-       0,     0,     0,     0,    58,   136,   104,     0,     0,     0,
-     100,    92,   108,   110,   197,   194,   195,   196,   198,     0,
-       0,   189,    58,   180,   181,     0,     0,     0,    58,   103,
-     106,     0,     0,     0,   148,     0,     0,     0,   202,   199,
-       0,     0,   191,   190,     0,     0,     0,   140,     0,     0,
-       0,     0,   148,    79,   200,     0,   188,   139,    58,     0,
-      58,     0,     0,   115,     0,     0,   102,   151,     0,     0,
-     149,     0,   186,   183,   143,     0,   141,     0,   114,   122,
-     116,     0,     0,    58,   150,   183,    58,    58,   112,   113,
-     121,    58,   146,    58,   187,   142,   111,   144,   185
+       0,     0,     0,    55,    60,     0,     0,     0,     0,     0,
+       0,    61,    61,     0,     0,    72,     0,   121,   217,   218,
+     156,     0,   216,   224,   220,     0,   230,     0,     9,    11,
+      10,     0,    76,     0,   139,    16,   141,    15,    75,     0,
+      73,   237,   247,     0,     0,     0,   231,    93,   232,     0,
+       0,   222,     0,     0,     0,   100,     0,     0,     0,     0,
+      25,    26,    27,    29,    30,    33,    32,    36,    35,    38,
+      37,    40,    41,    43,    45,    47,    49,     0,    51,    58,
+       0,    94,     0,     0,   130,    61,   138,     0,     0,     0,
+     187,   181,   140,     0,     0,   167,     0,   168,     0,     0,
+       0,     0,     0,     0,     0,     0,   169,   227,   229,     0,
+      14,     0,    74,     0,    61,     0,    61,     0,     0,     0,
+      61,    71,   181,   236,     0,     0,   101,    72,    23,    56,
+       0,     0,     0,   132,     0,     0,    61,    61,    72,   121,
+     123,     0,    61,     0,    61,   197,     0,    61,     0,   157,
+     159,   158,   160,   161,   162,   163,   164,   166,   165,    79,
+     142,     0,    61,    61,    61,    61,     0,     0,    80,    98,
+      61,    61,     0,     0,    53,     0,     0,     0,     0,   135,
+     131,   223,     0,   209,    61,    61,     0,    61,   211,     0,
+       0,   188,   198,   212,   213,     0,   182,   122,    78,     0,
+      61,     0,    61,     0,     0,   221,   183,     0,   102,    95,
+       0,   134,   133,     0,     0,   215,   210,    61,   124,     0,
+       0,     0,     0,   180,     0,    61,     0,     0,     0,     0,
+     171,   170,   177,   178,   175,   173,   176,   174,   179,   172,
+      84,     0,   231,    87,     0,   232,     0,    81,     0,   103,
+       0,   111,   113,     0,   208,   214,    61,     0,   181,     0,
+     186,   129,     0,    61,     0,   109,     0,     0,   128,   127,
+      61,    86,    85,    89,    88,     0,    82,     0,     0,     0,
+       0,   206,   202,     0,   193,    61,    61,    61,     0,     0,
+       0,     0,     0,    61,   140,   108,     0,     0,     0,   104,
+      96,   112,   114,   202,   199,   200,   201,   203,     0,     0,
+       0,   196,   194,    61,   184,   185,     0,     0,     0,    61,
+     107,   110,     0,     0,     0,   152,     0,     0,     0,   207,
+     204,     0,   192,   195,     0,     0,     0,   144,     0,     0,
+       0,     0,   152,    83,   205,   190,   187,   143,    61,     0,
+      61,     0,     0,   119,     0,     0,   106,   155,     0,     0,
+     153,     0,   187,    61,   147,     0,   145,     0,   118,   126,
+     120,     0,     0,    61,   154,    61,   191,    61,   116,   117,
+     125,    61,   150,   189,   146,   115,   148
   };
 
   const short
   P5Parser::yypgoto_[] =
   {
-    -437,  -437,  -437,     4,  -437,  -437,   520,  -437,   -55,   456,
-     436,   430,   472,   571,   572,   575,   577,   569,  -437,   447,
-     305,   686,  -437,    -2,    55,  -437,   -89,  -437,  -437,  -136,
-     -77,     1,  -437,     2,  -436,  -437,   297,  -144,  -153,   231,
-    -242,  -334,  -437,  -437,  -437,  -185,   474,   470,  -259,  -437,
-    -437,  -437,  -437,   249,  -437,   240,  -118,  -387,  -275,   389,
-    -437,  -139,   280,  -437,  -437,   442,  -137,   290,  -306,   404,
-    -112,   -66,  -437,  -437,   561,  -437,  -437,   761,  -437,  -437,
-    -437,   -12,  -437,  -437
+    -447,  -447,  -447,     4,  -447,  -447,   473,  -447,  -447,  -447,
+     -67,   382,   438,   432,   434,   575,   576,   577,   578,   579,
+    -447,   447,   309,   694,  -447,    -2,   627,    42,  -447,   -91,
+    -447,  -447,  -135,   -79,    -3,  -447,     1,  -439,  -447,   302,
+    -405,  -446,   228,  -255,  -344,  -447,  -447,  -447,  -187,   458,
+     474,  -266,  -447,  -447,  -447,  -447,   244,  -447,   238,  -118,
+    -381,  -280,   395,  -447,  -321,  -148,   306,  -447,   444,  -127,
+     290,  -296,   406,  -114,   -68,  -447,  -447,   568,  -447,  -447,
+     768,  -447,  -447,  -447,     0,  -447,  -447
   };
 
   const short
   P5Parser::yydefgoto_[] =
   {
-       0,     1,    68,    69,    70,    71,    96,    97,    98,    99,
+       0,     1,    69,    70,    71,    72,    98,    74,   213,    99,
      100,   101,   102,   103,   104,   105,   106,   107,   108,   109,
-     426,   111,    25,   137,   194,    73,    74,   138,   139,   140,
-     141,   475,    28,   476,   442,   463,   427,   428,   523,   524,
-     198,   265,   443,   407,   408,   116,   117,   212,   213,   409,
-     410,   411,   530,   511,   412,   199,   477,   372,   323,   299,
-     367,   320,   481,   482,   321,   322,   478,   479,   359,   360,
-     122,   123,    30,    31,   125,   126,    32,    39,    34,    35,
-      36,     7,   136,     2
+     110,   111,   431,   113,    25,   139,    26,   196,    75,    76,
+     140,   141,   142,   143,   484,    29,   485,   448,   472,   432,
+     433,   533,   534,   200,   269,   449,   412,   413,   118,   119,
+     216,   217,   414,   415,   416,   540,   521,   417,   201,   486,
+     376,   327,   303,   371,   324,   464,   465,   325,   326,   487,
+     488,   363,   364,   124,   125,    31,    32,   127,   128,    33,
+      40,    35,    36,    37,     7,   138,     2
   };
 
   const short
   P5Parser::yytable_[] =
   {
-       6,   142,   157,   200,   262,   223,   223,    27,    29,   324,
-      24,   202,    37,   436,    24,    40,    41,   148,    43,    44,
-      24,    46,   316,   347,    57,    24,    50,   490,   290,   395,
-      53,   156,   195,     8,     6,   112,   202,   158,   159,   160,
-     161,   210,    59,   156,   113,   181,   433,     4,   268,    77,
-     181,   -64,    80,    81,   392,    84,    85,     3,   115,   121,
-     232,    26,   130,   135,   201,    38,   124,   439,    63,   364,
-      64,    45,    65,     6,   439,   489,    49,   292,   439,    52,
-     115,   121,   181,   434,   115,   554,    90,   392,    64,   181,
-      65,   214,   465,    91,   154,    92,   149,     5,   227,   558,
-      93,   507,   549,    94,   268,    23,    23,   236,   237,   238,
-     468,    23,   556,    95,   150,   114,   130,   471,    23,    24,
-     394,   121,   196,   197,   218,   193,     8,   -63,   118,   -64,
-     492,   534,   440,   536,     6,   119,   206,   120,   216,   259,
-     466,    24,   365,   210,    23,   155,   121,    23,    66,    67,
-     181,    23,   258,   228,    23,    23,   552,   458,   365,   386,
-     555,    42,   118,     8,   557,    23,    66,    67,   181,   119,
-     187,   120,   365,   300,   415,   315,   145,    47,   304,   156,
-      13,     8,   301,     8,    23,   357,    15,   115,   264,    17,
-      18,   260,   221,    20,    87,   312,   381,    48,   269,    23,
-     202,   231,   223,    88,   223,    23,   493,   449,   389,   124,
-     486,   390,    90,   338,    64,   340,    65,   302,     8,    91,
-     146,    92,   423,   291,   293,   294,    93,    10,   500,    94,
-     346,   501,   498,   156,   202,    13,   303,   527,    89,    95,
-     223,    15,   223,   181,    17,    18,    19,   487,    20,   118,
-     181,   450,   461,   413,    23,   539,   119,   424,   120,   121,
-     118,   544,   376,   309,   378,   418,   550,   119,   314,   120,
-      90,    51,    64,   315,    65,  -147,   257,    91,   179,    92,
-    -145,    10,   195,   384,    93,   528,   181,    94,   529,    13,
-      52,    23,    66,    67,   121,    15,    23,    95,    17,    18,
-      19,    54,    20,   521,   342,   181,   522,   180,    23,   528,
-     121,   358,   529,   343,   521,    55,   362,   522,   366,   385,
-      90,   371,    64,  -147,    65,   131,  -147,    91,  -145,    92,
-      13,  -145,   181,   181,    93,    56,    15,    94,   422,    17,
-      18,   181,   499,    20,   121,   371,   -63,    95,   344,    23,
-      66,    67,   131,   310,   453,   132,   515,   232,   358,   358,
-     499,   264,   311,   110,   488,   470,   314,   195,   127,   110,
-     129,   540,   405,   406,   519,   193,    52,   537,   181,   416,
-       8,   419,   143,    86,   542,   195,    58,    87,   540,   517,
-     195,   358,   152,   153,   546,   127,    88,   518,   371,    23,
-      66,    67,    60,   181,    61,   230,   553,   441,   195,   514,
-     156,   181,    90,   256,    64,   181,    65,   184,   185,   186,
-      62,    92,   208,   181,   133,    75,    93,   134,   209,    94,
-     195,    89,   181,   235,    13,   115,   211,   459,   215,    95,
-     219,   295,   264,   220,    18,   209,   144,    20,   353,   181,
-     225,   181,    76,    23,   335,   480,   371,   354,    10,   156,
-     193,   234,   264,   288,   181,   162,    13,   441,   163,   289,
-     164,   374,    15,   181,    78,    17,    18,    19,   193,    20,
-     480,   181,  -132,   193,   253,    23,   371,   383,   255,  -132,
-      13,    23,    66,    67,   421,   496,    15,   181,   306,    17,
-      18,   193,   181,    20,   181,   181,   182,    10,   283,    23,
-     118,   173,   174,   183,   285,    13,   371,   119,   371,   120,
-     188,    15,   226,   314,    17,    18,    19,   189,    20,   189,
-     229,   286,   317,    82,    23,    83,   373,   189,   287,   318,
-     305,   371,   441,   287,   366,   371,   431,   495,   509,   371,
-     510,   366,   441,   318,   318,   318,   147,   287,   175,   204,
-     151,   298,    72,   156,   205,     8,   207,    79,   131,   165,
-     130,   183,   166,   211,   177,   325,   178,   326,   176,   327,
-     328,   329,   330,   331,   332,   333,   334,   454,   133,     8,
-     455,   134,   211,   181,   337,   169,   170,   171,   172,   243,
-     244,   245,   246,   241,   242,   348,   349,   398,   190,   399,
-     191,    10,   351,   352,   400,   192,   356,   401,   402,    13,
-     521,   239,   240,   522,   403,    15,   404,   203,    17,    18,
-      19,     9,    20,   217,   454,    10,    11,   532,    23,   454,
-      12,   222,   548,    13,    14,   247,   248,   379,   380,    15,
-     224,    16,    17,    18,    19,   133,    20,   233,   134,   388,
-      21,    22,    23,   261,   270,   454,   271,   272,   551,   273,
-     274,   397,   167,   275,   168,   276,   263,   277,   266,   267,
-     282,   296,   297,   298,   307,   308,   313,   319,   339,   341,
-     345,   278,   361,   279,   355,   280,   363,   281,   369,   387,
-     370,   375,   377,   382,   391,   396,   417,   420,   425,   430,
-     432,   435,   437,   429,   438,   444,   445,   446,   447,   456,
-     448,   457,   460,   464,   474,   467,   484,   485,   451,   483,
-     452,   491,   502,   494,   508,   512,   513,   525,   520,   516,
-     533,   526,   545,   462,   547,   538,   249,   543,   250,   254,
-     128,   473,   251,   350,   469,   252,   541,   336,   472,   535,
-     414,   531,   503,   368,   497,   393,   284,    33,     0,     0,
-     211,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       6,   144,   159,    28,   266,   202,   328,    30,   227,   227,
+      24,   204,    38,   320,    24,    41,    42,   150,    44,    45,
+      24,    47,   351,   400,   442,    24,    51,   160,   161,   162,
+     163,    54,   197,   501,   272,     6,   204,    58,   -69,   158,
+     183,   212,   114,    60,   203,   183,   236,   147,    27,   132,
+      79,   115,    39,    82,    83,   294,    86,    87,    46,   117,
+     123,   183,   296,    50,   445,    53,   497,   126,   396,   445,
+     500,   183,    64,   181,    65,     6,    66,   137,   235,   445,
+     183,    52,   117,   123,   511,   158,   117,     8,   550,   368,
+     231,   148,   556,   361,   563,   428,   156,   240,   241,   242,
+      53,   396,   182,   498,   261,   550,   477,   135,   120,   559,
+     136,   398,   480,   -68,    23,   121,   -69,   122,   517,   565,
+     198,    24,   116,   123,   199,     4,   547,   195,     8,   503,
+     429,   262,    23,   552,   157,   455,     6,   474,   222,    23,
+     220,    23,     3,    24,   446,   212,    23,   544,   123,   546,
+     390,    23,    67,    68,   120,   232,    23,   120,   467,   189,
+      23,   121,   369,   122,   121,   369,   122,   369,   263,    92,
+     308,    65,   562,    66,     8,     5,   564,   319,    94,   456,
+     566,   225,    13,    95,   234,   475,    96,   537,    15,   117,
+     268,    17,    18,   264,   183,    20,    97,   316,     8,    23,
+     273,    23,   204,   549,   183,   543,   183,   227,   504,   227,
+     420,   126,   158,    23,     8,   342,    92,   344,    65,   393,
+      66,   555,   394,    93,   423,    94,   183,   295,   297,   298,
+      95,    49,   350,    96,   272,   538,   204,   388,   539,   389,
+     307,    23,   554,    97,   158,   227,   132,   227,    23,    67,
+      68,   531,    13,   560,   532,    23,   470,   418,   223,   427,
+      10,   224,    18,   123,   380,    20,   382,   313,    13,   183,
+    -151,    23,   318,   385,    15,   319,    13,    17,    18,    19,
+     208,    20,    15,    43,   197,    17,    18,    23,  -149,    20,
+     538,   183,    10,   539,   183,    23,    67,    68,   123,    88,
+      13,   531,   479,    89,   532,   151,    15,   304,   133,    17,
+      18,    19,    90,    20,   123,   362,   305,   492,  -151,    23,
+     366,  -151,   370,   152,   529,   375,    92,   169,    65,   170,
+      66,   218,   260,    93,   183,    94,  -149,   120,   134,  -149,
+      95,     8,   183,    96,   121,   492,   122,    91,   123,   375,
+      92,   306,    65,    97,    66,   459,     8,    93,    55,    94,
+      89,   510,   362,   362,    95,   268,   133,    96,   112,    90,
+     318,   197,   410,   129,   112,   131,   411,    97,   346,   195,
+     -68,   510,    48,   421,   439,   424,   489,   347,   183,   490,
+     167,   236,   197,   168,   499,   362,   145,   197,   154,   155,
+     527,   129,   528,   375,    91,    23,    67,    68,   183,   210,
+      53,   314,   447,    56,   183,   211,   183,   197,   299,   183,
+     315,   440,   348,   186,   187,   188,   357,    13,   183,    23,
+      67,    68,    57,    15,   463,   358,    17,    18,   197,   292,
+      20,   117,   214,   468,   219,   293,    23,   339,   268,   183,
+     378,   387,   426,   206,   209,    59,   229,   183,   207,   185,
+     183,   183,   183,   463,   463,   375,   195,   238,   509,   158,
+     120,   268,   507,  -136,   184,   135,   447,   121,   136,   122,
+    -136,   185,   183,    63,   239,   211,   190,   195,   230,   183,
+     257,   463,   195,   191,   259,   191,    92,   375,    65,   233,
+      66,   321,   377,    93,   437,    94,   191,    77,   322,   291,
+      95,   322,   195,    96,   287,   506,    73,    10,   175,   176,
+     289,    81,   322,    97,   164,    13,   375,   165,   375,   166,
+     519,    15,   520,   318,    17,    18,    19,   322,    20,   291,
+      78,   370,   149,   310,    23,    80,   153,   183,   309,   243,
+     244,   375,   447,   370,   460,   375,   132,   461,   460,   375,
+     146,   525,   447,   171,   172,   173,   174,   531,   133,   302,
+     532,   158,    61,     8,    62,    23,    67,    68,    84,   460,
+      85,   214,   558,   329,   180,   330,   177,   331,   332,   333,
+     334,   335,   336,   337,   338,   524,   158,   178,   460,   179,
+     214,   561,   341,   247,   248,   249,   250,   245,   246,   251,
+     252,   183,   192,   352,   353,   403,   193,   404,   194,    10,
+     355,   356,   405,   205,   360,   406,   407,    13,   221,   226,
+       8,   228,   408,    15,   409,   237,    17,    18,    19,   265,
+      20,   267,   286,   270,    10,   271,    23,   290,   301,   300,
+     291,   302,    13,   312,   317,   383,   384,   311,    15,   343,
+     323,    17,    18,    19,   345,    20,   359,   392,   349,   365,
+     367,    23,     9,   391,   373,   374,    10,    11,   379,   402,
+     381,    12,   386,   395,    13,    14,   399,   401,   430,   422,
+      15,   425,    16,    17,    18,    19,   135,    20,   434,   136,
+     435,    21,    22,    23,   436,   274,   438,   275,   276,   443,
+     277,   278,   441,   444,   279,   450,   280,   451,   281,   462,
+     466,   452,   469,   473,   453,   476,   454,   483,   496,   491,
+     494,   495,   282,   502,   283,   505,   284,   457,   285,   458,
+     512,   513,   518,   522,   523,   526,   530,   535,   536,   542,
+     548,   557,   253,   471,   254,   553,   255,   354,   256,   130,
+     215,   258,   482,   551,   478,   340,   541,   545,   481,   372,
+     419,   397,   493,   508,    34,   288,     0,     0,     0,     0,
+       0,     0,     0,   214,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-     504,   505,   506
+       0,     0,     0,     0,     0,   514,   515,   516
   };
 
   const short
   P5Parser::yycheck_[] =
   {
-       2,    78,    91,   121,   189,   141,   142,     6,     6,   268,
-       6,   123,     8,   400,    10,    11,    12,    83,    14,    15,
-      16,    17,   264,   298,    36,    21,    22,   463,     7,   363,
-      26,     9,   121,    11,    36,     9,   148,    92,    93,    94,
-      95,   130,    38,     9,    18,    20,    16,     3,     5,    45,
-      20,     6,    48,    49,   360,    51,    52,     0,    60,    61,
-      17,     6,    17,    75,     8,    10,    62,     7,     5,     8,
-       7,    16,     9,    75,     7,     8,    21,     7,     7,    36,
-      82,    83,    20,    53,    86,     8,     5,   393,     7,    20,
-       9,    10,     5,    12,    90,    14,    17,    53,     8,     8,
-      19,   488,   538,    22,     5,    84,    84,   162,   163,   164,
-     444,    84,   548,    32,    35,    89,    17,    92,    84,   115,
-     362,   123,   121,   121,   136,   121,    11,    84,    72,    84,
-     464,   518,    72,   520,   136,    79,     6,    81,   134,    39,
-      53,   137,    81,   232,    84,    90,   148,    84,    85,    86,
-      20,    84,    90,   149,    84,    84,   543,   432,    81,    90,
-     547,    36,    72,    11,   551,    84,    85,    86,    20,    79,
-     115,    81,    81,     9,    53,   264,     9,    36,   233,     9,
-      65,    11,    18,    11,    84,     8,    71,   189,   190,    74,
-      75,   187,   137,    78,     9,   261,     8,    66,   194,    84,
-     312,    53,   338,    18,   340,    84,   465,     9,    56,   205,
-      16,    59,     5,   290,     7,   292,     9,    53,    11,    12,
-      53,    14,    18,   219,   220,   221,    19,    57,    56,    22,
-     296,    59,     8,     9,   346,    65,   232,     8,    53,    32,
-     376,    71,   378,    20,    74,    75,    76,    53,    78,    72,
-      20,    53,   437,   371,    84,     8,    79,    53,    81,   261,
-      72,     8,   339,   259,   341,    53,     8,    79,   264,    81,
-       5,    17,     7,   362,     9,     8,    53,    12,    15,    14,
-       8,    57,   371,    53,    19,    56,    20,    22,    59,    65,
-      36,    84,    85,    86,   296,    71,    84,    32,    74,    75,
-      76,    53,    78,    56,     9,    20,    59,    44,    84,    56,
-     312,   313,    59,    18,    56,    53,   318,    59,   320,    53,
-       5,   323,     7,    56,     9,     5,    59,    12,    56,    14,
-      65,    59,    20,    20,    19,    53,    71,    22,    53,    74,
-      75,    20,   479,    78,   346,   347,     6,    32,    53,    84,
-      85,    86,     5,     9,    41,    35,   500,    17,   360,   361,
-     497,   363,    18,    58,     6,    53,   362,   456,    63,    64,
-      65,   524,   371,   371,    53,   371,    36,   521,    20,   375,
-      11,   377,    35,     5,   528,   474,     5,     9,   541,     6,
-     479,   393,    87,    88,   533,    90,    18,     6,   400,    84,
-      85,    86,     5,    20,     7,    10,   545,   403,   497,     8,
-       9,    20,     5,    10,     7,    20,     9,   112,   113,   114,
-       7,    14,    10,    20,     9,     7,    19,    12,    16,    22,
-     519,    53,    20,    18,    65,   437,   131,   433,   133,    32,
-      71,    10,   444,    74,    75,    16,    53,    78,     9,    20,
-     145,    20,     7,    84,    10,   457,   458,    18,    57,     9,
-     456,   156,   464,    10,    20,    25,    65,   463,    28,    16,
-      30,    10,    71,    20,     7,    74,    75,    76,   474,    78,
-     482,    20,     6,   479,   179,    84,   488,    10,   183,    13,
-      65,    84,    85,    86,    10,    10,    71,    20,    16,    74,
-      75,   497,    20,    78,    20,    20,     6,    57,   203,    84,
-      72,    33,    34,    13,   209,    65,   518,    79,   520,    81,
-       6,    71,     6,   519,    74,    75,    76,    13,    78,    13,
-       6,     6,     6,     5,    84,     7,     6,    13,    13,    13,
-     235,   543,   538,    13,   546,   547,     6,     6,     6,   551,
-       6,   553,   548,    13,    13,    13,    82,    13,    39,     8,
-      86,     7,    42,     9,    13,    11,     8,    47,     5,    19,
-      17,    13,    22,   268,    43,   270,    40,   272,    46,   274,
-     275,   276,   277,   278,   279,   280,   281,    13,     9,    11,
-      16,    12,   287,    20,   289,    35,    36,    37,    38,   169,
-     170,   171,   172,   167,   168,   300,   301,    53,     5,    55,
-      18,    57,   307,   308,    60,    18,   311,    63,    64,    65,
-      56,   165,   166,    59,    70,    71,    72,    18,    74,    75,
-      76,    53,    78,     8,    13,    57,    58,    16,    84,    13,
-      62,     8,    16,    65,    66,   173,   174,   342,   343,    71,
-       8,    73,    74,    75,    76,     9,    78,     6,    12,   354,
-      82,    83,    84,     7,    18,    13,    20,    21,    16,    23,
-      24,   366,    48,    27,    50,    29,     6,    31,     7,     7,
-      53,     7,    35,     7,    18,    89,     7,    72,     7,     7,
-      53,    45,     7,    47,    10,    49,     5,    51,     8,    10,
-       8,     8,     8,     8,     8,    18,     8,     8,    91,     8,
-       7,    53,     5,    16,     5,     5,    53,    53,    53,     7,
-      53,     7,    77,     5,     7,     6,    53,     5,   423,     8,
-     425,     6,     8,     7,     7,     7,    53,     7,    61,    16,
-       7,    53,     7,   438,     6,    16,   175,    16,   176,   180,
-      64,   454,   177,   306,   449,   178,   525,   287,   453,   519,
-     371,   512,   482,   321,   474,   361,   205,     6,    -1,    -1,
-     465,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+       2,    80,    93,     6,   191,   123,   272,     6,   143,   144,
+       6,   125,     8,   268,    10,    11,    12,    85,    14,    15,
+      16,    17,   302,   367,   405,    21,    22,    94,    95,    96,
+      97,    27,   123,   472,     5,    37,   150,    37,     6,     9,
+      20,   132,     9,    39,     8,    20,    17,     9,     6,    17,
+      46,    18,    10,    49,    50,     7,    52,    53,    16,    61,
+      62,    20,     7,    21,     7,    36,    16,    63,   364,     7,
+       8,    20,     5,    15,     7,    77,     9,    77,    53,     7,
+      20,    17,    84,    85,   489,     9,    88,    11,   534,     8,
+       8,    53,     8,     8,     8,    18,    92,   164,   165,   166,
+      36,   397,    44,    53,    53,   551,   450,     9,    72,   548,
+      12,   366,    92,    84,    84,    79,    84,    81,   499,   558,
+     123,   117,    89,   125,   123,     3,   531,   123,    11,   473,
+      53,    90,    84,   538,    92,     9,   138,     5,   138,    84,
+     136,    84,     0,   139,    72,   236,    84,   528,   150,   530,
+      90,    84,    85,    86,    72,   151,    84,    72,   438,   117,
+      84,    79,    81,    81,    79,    81,    81,    81,    39,     5,
+     237,     7,   553,     9,    11,    53,   557,   268,    14,    53,
+     561,   139,    65,    19,    10,    53,    22,     8,    71,   191,
+     192,    74,    75,   189,    20,    78,    32,   265,    11,    84,
+     196,    84,   316,     8,    20,   526,    20,   342,   474,   344,
+      53,   207,     9,    84,    11,   294,     5,   296,     7,    56,
+       9,   542,    59,    12,    53,    14,    20,   223,   224,   225,
+      19,    66,   300,    22,     5,    56,   350,    53,    59,    53,
+     236,    84,     8,    32,     9,   380,    17,   382,    84,    85,
+      86,    56,    65,     8,    59,    84,   443,   375,    71,    53,
+      57,    74,    75,   265,   343,    78,   345,   263,    65,    20,
+       8,    84,   268,     8,    71,   366,    65,    74,    75,    76,
+       6,    78,    71,    36,   375,    74,    75,    84,     8,    78,
+      56,    20,    57,    59,    20,    84,    85,    86,   300,     5,
+      65,    56,    53,     9,    59,    17,    71,     9,     5,    74,
+      75,    76,    18,    78,   316,   317,    18,   465,    56,    84,
+     322,    59,   324,    35,    53,   327,     5,    48,     7,    50,
+       9,    10,    10,    12,    20,    14,    56,    72,    35,    59,
+      19,    11,    20,    22,    79,   493,    81,    53,   350,   351,
+       5,    53,     7,    32,     9,    41,    11,    12,    53,    14,
+       9,   488,   364,   365,    19,   367,     5,    22,    59,    18,
+     366,   462,   375,    64,    65,    66,   375,    32,     9,   375,
+       6,   508,    36,   379,    16,   381,    56,    18,    20,    59,
+      19,    17,   483,    22,     6,   397,    35,   488,    89,    90,
+       6,    92,     6,   405,    53,    84,    85,    86,    20,    10,
+      36,     9,   408,    53,    20,    16,    20,   508,    10,    20,
+      18,    53,    53,   114,   115,   116,     9,    65,    20,    84,
+      85,    86,    53,    71,   436,    18,    74,    75,   529,    10,
+      78,   443,   133,   439,   135,    16,    84,    10,   450,    20,
+      10,    10,    10,     8,     8,     5,   147,    20,    13,    13,
+      20,    20,    20,   465,   466,   467,   462,   158,     8,     9,
+      72,   473,    10,     6,     6,     9,   472,    79,    12,    81,
+      13,    13,    20,     7,    18,    16,     6,   483,     6,    20,
+     181,   493,   488,    13,   185,    13,     5,   499,     7,     6,
+       9,     6,     6,    12,     6,    14,    13,     7,    13,    13,
+      19,    13,   508,    22,   205,     6,    43,    57,    33,    34,
+     211,    48,    13,    32,    25,    65,   528,    28,   530,    30,
+       6,    71,     6,   529,    74,    75,    76,    13,    78,    13,
+       7,   543,    84,    16,    84,     7,    88,    20,   239,   167,
+     168,   553,   548,   555,    13,   557,    17,    16,    13,   561,
+      53,    16,   558,    35,    36,    37,    38,    56,     5,     7,
+      59,     9,     5,    11,     7,    84,    85,    86,     5,    13,
+       7,   272,    16,   274,    40,   276,    39,   278,   279,   280,
+     281,   282,   283,   284,   285,     8,     9,    46,    13,    43,
+     291,    16,   293,   171,   172,   173,   174,   169,   170,   175,
+     176,    20,     5,   304,   305,    53,    18,    55,    18,    57,
+     311,   312,    60,    18,   315,    63,    64,    65,     8,     8,
+      11,     8,    70,    71,    72,     6,    74,    75,    76,     7,
+      78,     6,    53,     7,    57,     7,    84,     6,    35,     7,
+      13,     7,    65,    89,     7,   346,   347,    18,    71,     7,
+      72,    74,    75,    76,     7,    78,    10,   358,    53,     7,
+       5,    84,    53,    10,     8,     8,    57,    58,     8,   370,
+       8,    62,     8,     8,    65,    66,     6,    18,    91,     8,
+      71,     8,    73,    74,    75,    76,     9,    78,    16,    12,
+       8,    82,    83,    84,     7,    18,     7,    20,    21,     5,
+      23,    24,    53,     5,    27,     5,    29,    53,    31,     7,
+       7,    53,    77,     5,    53,     6,    53,     7,     5,     8,
+       8,    53,    45,     6,    47,     7,    49,   428,    51,   430,
+      16,     8,     7,     7,    53,     7,    61,     7,    53,     7,
+      16,     6,   177,   444,   178,    16,   179,   310,   180,    65,
+     133,   182,   460,   535,   455,   291,   522,   529,   459,   325,
+     375,   365,   466,   483,     6,   207,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,   474,    -1,    -1,    -1,    -1,    -1,    -1,
       -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
-     485,   486,   487
+      -1,    -1,    -1,    -1,    -1,   496,   497,   498
   };
 
   const unsigned char
   P5Parser::yystos_[] =
   {
-       0,    94,   176,     0,     3,    53,   116,   174,    11,    53,
+       0,    94,   179,     0,     3,    53,   118,   177,    11,    53,
       57,    58,    62,    65,    66,    71,    73,    74,    75,    76,
-      78,    82,    83,    84,    96,   115,   117,   124,   125,   126,
-     165,   166,   169,   170,   171,   172,   173,    96,   117,   170,
-      96,    96,    36,    96,    96,   117,    96,    36,    66,   117,
-      96,    17,    36,    96,    53,    53,    53,   174,     5,    96,
-       5,     7,     7,     5,     7,     9,    85,    86,    95,    96,
-      97,    98,    99,   118,   119,     7,     7,    96,     7,    99,
-      96,    96,     5,     7,    96,    96,     5,     9,    18,    53,
-       5,    12,    14,    19,    22,    32,    99,   100,   101,   102,
+      78,    82,    83,    84,    96,   117,   119,   120,   127,   128,
+     129,   168,   169,   172,   173,   174,   175,   176,    96,   120,
+     173,    96,    96,    36,    96,    96,   120,    96,    36,    66,
+     120,    96,    17,    36,    96,    53,    53,    53,   177,     5,
+      96,     5,     7,     7,     5,     7,     9,    85,    86,    95,
+      96,    97,    98,    99,   100,   121,   122,     7,     7,    96,
+       7,    99,    96,    96,     5,     7,    96,    96,     5,     9,
+      18,    53,     5,    12,    14,    19,    22,    32,    99,   102,
      103,   104,   105,   106,   107,   108,   109,   110,   111,   112,
-     113,   114,     9,    18,    89,   116,   138,   139,    72,    79,
-      81,   116,   163,   164,    96,   167,   168,   113,   114,   113,
-      17,     5,    35,     9,    12,   174,   175,   116,   120,   121,
-     122,   123,   123,    35,    53,     9,    53,   139,   164,    17,
-      35,   139,   113,   113,    96,   117,     9,   119,   101,   101,
-     101,   101,    25,    28,    30,    19,    22,    48,    50,    35,
-      36,    37,    38,    33,    34,    39,    46,    43,    40,    15,
-      44,    20,     6,    13,   113,   113,   113,   117,     6,    13,
-       5,    18,    18,    96,   117,   119,   124,   126,   133,   148,
-     149,     8,   163,    18,     8,    13,     6,     8,    10,    16,
-     119,   113,   140,   141,    10,   113,    96,     8,   174,    71,
-      74,   117,     8,   122,     8,   113,     6,     8,    96,     6,
-      10,    53,    17,     6,   113,    18,   101,   101,   101,   102,
-     102,   103,   103,   104,   104,   104,   104,   105,   105,   106,
-     107,   108,   109,   113,   110,   113,    10,    53,    90,    39,
-      96,     7,   138,     6,   116,   134,     7,     7,     5,    96,
-      18,    20,    21,    23,    24,    27,    29,    31,    45,    47,
-      49,    51,    53,   113,   167,   113,     6,    13,    10,    16,
-       7,    96,     7,    96,    96,    10,     7,    35,     7,   152,
-       9,    18,    53,    96,   101,   113,    16,    18,    89,    96,
-       9,    18,   164,     7,    96,   119,   133,     6,    13,    72,
-     154,   157,   158,   151,   141,   113,   113,   113,   113,   113,
-     113,   113,   113,   113,   113,    10,   140,   113,   123,     7,
-     123,     7,     9,    18,    53,    53,   164,   151,   113,   113,
-     112,   113,   113,     9,    18,    10,   113,     8,   116,   161,
-     162,     7,   116,     5,     8,    81,   116,   153,   158,     8,
-       8,   116,   150,     6,    10,     8,   123,     8,   123,   113,
-     113,     8,     8,    10,    53,    53,    90,    10,   113,    56,
-      59,     8,   161,   162,   133,   134,    18,   113,    53,    55,
-      60,    63,    64,    70,    72,   124,   126,   136,   137,   142,
-     143,   144,   147,   149,   152,    53,    96,     8,    53,    96,
-       8,    10,    53,    18,    53,    91,   113,   129,   130,    16,
-       8,     6,     7,    16,    53,    53,   150,     5,     5,     7,
-      72,    96,   127,   135,     5,    53,    53,    53,    53,     9,
-      53,   113,   113,    41,    13,    16,     7,     7,   151,    96,
-      77,   138,   113,   128,     5,     5,    53,     6,   134,   113,
-      53,    92,   113,   129,     7,   124,   126,   149,   159,   160,
-     116,   155,   156,     8,    53,     5,    16,    53,     6,     8,
-     127,     6,   134,   141,     7,     6,    10,   160,     8,   159,
-      56,    59,     8,   155,   113,   113,   113,   150,     7,     6,
-       6,   146,     7,    53,     8,   130,    16,     6,     6,    53,
-      61,    56,    59,   131,   132,     7,    53,     8,    56,    59,
-     145,   146,    16,     7,   150,   148,   150,   130,    16,     8,
-     131,   132,   130,    16,     8,     7,   154,     6,    16,   127,
-       8,    16,   150,   154,     8,   150,   127,   150,     8
+     113,   114,   115,   116,     9,    18,    89,   118,   141,   142,
+      72,    79,    81,   118,   166,   167,    96,   170,   171,   115,
+     116,   115,    17,     5,    35,     9,    12,   177,   178,   118,
+     123,   124,   125,   126,   126,    35,    53,     9,    53,   142,
+     167,    17,    35,   142,   115,   115,    96,   120,     9,   122,
+     103,   103,   103,   103,    25,    28,    30,    19,    22,    48,
+      50,    35,    36,    37,    38,    33,    34,    39,    46,    43,
+      40,    15,    44,    20,     6,    13,   115,   115,   115,   120,
+       6,    13,     5,    18,    18,    96,   120,   122,   127,   129,
+     136,   151,   152,     8,   166,    18,     8,    13,     6,     8,
+      10,    16,   122,   101,   115,   119,   143,   144,    10,   115,
+      96,     8,   177,    71,    74,   120,     8,   125,     8,   115,
+       6,     8,    96,     6,    10,    53,    17,     6,   115,    18,
+     103,   103,   103,   104,   104,   105,   105,   106,   106,   106,
+     106,   107,   107,   108,   109,   110,   111,   115,   112,   115,
+      10,    53,    90,    39,    96,     7,   141,     6,   118,   137,
+       7,     7,     5,    96,    18,    20,    21,    23,    24,    27,
+      29,    31,    45,    47,    49,    51,    53,   115,   170,   115,
+       6,    13,    10,    16,     7,    96,     7,    96,    96,    10,
+       7,    35,     7,   155,     9,    18,    53,    96,   103,   115,
+      16,    18,    89,    96,     9,    18,   167,     7,    96,   122,
+     136,     6,    13,    72,   157,   160,   161,   154,   144,   115,
+     115,   115,   115,   115,   115,   115,   115,   115,   115,    10,
+     143,   115,   126,     7,   126,     7,     9,    18,    53,    53,
+     167,   154,   115,   115,   114,   115,   115,     9,    18,    10,
+     115,     8,   118,   164,   165,     7,   118,     5,     8,    81,
+     118,   156,   161,     8,     8,   118,   153,     6,    10,     8,
+     126,     8,   126,   115,   115,     8,     8,    10,    53,    53,
+      90,    10,   115,    56,    59,     8,   164,   165,   136,     6,
+     137,    18,   115,    53,    55,    60,    63,    64,    70,    72,
+     127,   129,   139,   140,   145,   146,   147,   150,   152,   155,
+      53,    96,     8,    53,    96,     8,    10,    53,    18,    53,
+      91,   115,   132,   133,    16,     8,     7,     6,     7,    16,
+      53,    53,   153,     5,     5,     7,    72,    96,   130,   138,
+       5,    53,    53,    53,    53,     9,    53,   115,   115,    41,
+      13,    16,     7,   118,   158,   159,     7,   154,    96,    77,
+     141,   115,   131,     5,     5,    53,     6,   137,   115,    53,
+      92,   115,   132,     7,   127,   129,   152,   162,   163,    56,
+      59,     8,   158,   159,     8,    53,     5,    16,    53,     6,
+       8,   130,     6,   137,   144,     7,     6,    10,   163,     8,
+     162,   133,    16,     8,   115,   115,   115,   153,     7,     6,
+       6,   149,     7,    53,     8,    16,     7,     6,     6,    53,
+      61,    56,    59,   134,   135,     7,    53,     8,    56,    59,
+     148,   149,     7,   157,   153,   151,   153,   133,    16,     8,
+     134,   135,   133,    16,     8,   157,     8,     6,    16,   130,
+       8,    16,   153,     8,   153,   130,   153
   };
 
   const unsigned char
   P5Parser::yyr1_[] =
   {
        0,    93,    94,    95,    96,    97,    98,    98,    98,    98,
-      98,    98,    99,    99,   100,   100,   100,   100,   100,   101,
-     101,   102,   102,   102,   102,   103,   103,   103,   104,   104,
-     104,   105,   105,   105,   105,   105,   106,   106,   106,   107,
-     107,   108,   108,   109,   109,   110,   110,   111,   111,   112,
-     112,   113,   113,   113,   114,   114,   115,   115,   116,   116,
-     117,   117,   117,   117,   117,   117,   117,   117,   118,   118,
-     118,   118,   118,   119,   119,   119,   120,   120,   120,   120,
-     121,   121,   121,   121,   121,   121,   122,   122,   123,   123,
-     124,   124,   124,   125,   125,   126,   126,   126,   126,   126,
-     126,   126,   127,   127,   127,   128,   128,   129,   129,   130,
-     130,   131,   131,   131,   131,   132,   132,   133,   133,   134,
-     134,   135,   135,   136,   136,   137,   138,   138,   138,   138,
-     138,   138,   139,   139,   139,   140,   141,   141,   141,   142,
-     143,   143,   144,   144,   145,   145,   145,   145,   146,   146,
-     147,   147,   148,   148,   148,   148,   148,   148,   148,   148,
-     148,   148,   148,   148,   148,   149,   150,   150,   150,   150,
-     150,   150,   150,   150,   150,   150,   150,   151,   151,   152,
-     153,   153,   153,   154,   154,   155,   155,   155,   155,   156,
-     156,   157,   158,   158,   159,   159,   159,   160,   160,   160,
-     161,   161,   161,   161,   162,   162,   163,   163,   163,   163,
-     163,   163,   163,   163,   164,   164,   165,   165,   165,   165,
-     166,   167,   167,   168,   168,   169,   170,   170,   171,   171,
-     171,   172,   173,   174,   174,   174,   174,   174,   174,   174,
-     174,   175,   175,   176,   176,   176
+      98,    98,    99,    99,   100,   101,   101,   102,   102,   102,
+     102,   102,   103,   103,   104,   104,   104,   104,   105,   105,
+     105,   106,   106,   106,   107,   107,   107,   107,   107,   108,
+     108,   108,   109,   109,   110,   110,   111,   111,   112,   112,
+     113,   113,   114,   114,   115,   115,   115,   116,   116,   117,
+     117,   118,   118,   119,   119,   119,   119,   120,   120,   120,
+     120,   120,   121,   121,   121,   121,   121,   122,   122,   122,
+     123,   123,   123,   123,   124,   124,   124,   124,   124,   124,
+     125,   125,   126,   126,   127,   127,   127,   128,   128,   129,
+     129,   129,   129,   129,   129,   129,   130,   130,   130,   131,
+     131,   132,   132,   133,   133,   134,   134,   134,   134,   135,
+     135,   136,   136,   137,   137,   138,   138,   139,   139,   140,
+     141,   141,   141,   141,   141,   141,   142,   142,   142,   143,
+     144,   144,   144,   145,   146,   146,   147,   147,   148,   148,
+     148,   148,   149,   149,   150,   150,   151,   151,   151,   151,
+     151,   151,   151,   151,   151,   151,   151,   151,   151,   152,
+     153,   153,   153,   153,   153,   153,   153,   153,   153,   153,
+     153,   154,   154,   155,   156,   156,   156,   157,   157,   158,
+     158,   158,   158,   159,   159,   160,   160,   161,   161,   162,
+     162,   162,   163,   163,   163,   164,   164,   164,   164,   165,
+     165,   166,   166,   166,   166,   166,   166,   166,   166,   167,
+     167,   168,   168,   168,   168,   169,   170,   170,   171,   171,
+     172,   173,   173,   174,   174,   174,   175,   176,   177,   177,
+     177,   177,   177,   177,   177,   177,   178,   178,   179,   179,
+     179
   };
 
   const signed char
   P5Parser::yyr2_[] =
   {
        0,     2,     2,     1,     1,     1,     1,     1,     1,     3,
-       3,     3,     1,     4,     1,     2,     2,     2,     2,     1,
-       4,     1,     3,     3,     3,     1,     3,     3,     1,     3,
-       3,     1,     3,     3,     3,     3,     1,     3,     3,     1,
-       3,     1,     3,     1,     3,     1,     3,     1,     3,     1,
-       5,     1,     2,     4,     1,     3,     2,     5,     0,     2,
-       4,     4,     1,     1,     3,     4,     6,     1,     1,     3,
-       4,     3,     3,     1,     6,     5,     4,     6,     7,    10,
-       6,     7,     7,     6,     7,     7,     1,     1,     1,     2,
-       6,     9,    12,     4,     7,     3,     5,     6,     8,     9,
-      11,     4,     5,     3,     2,     0,     2,     1,     3,     1,
-       3,     4,     3,     3,     2,     1,     2,     1,     4,     2,
-       4,     7,     6,     2,     2,     2,     3,     5,     4,     6,
-       6,     5,     0,     1,     3,     1,     0,     1,     3,     6,
-       5,     7,     9,     7,     4,     3,     3,     2,     0,     2,
-       7,     6,     1,     3,     3,     3,     3,     3,     3,     3,
-       3,     3,     3,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     0,     2,     3,
-       5,     5,     3,     0,     2,     7,     4,     6,     3,     1,
-       2,     7,     1,     2,     1,     1,     1,     0,     1,     2,
-       7,     4,     6,     3,     1,     2,     5,     5,     5,     7,
-       6,     2,     2,     2,     1,     2,     8,     5,     8,     5,
-       3,     1,     3,     1,     3,     5,     5,     5,     2,     2,
-       2,     6,     5,     2,     2,     2,     2,     2,     3,     2,
-       2,     1,     2,     0,     2,     2
+       3,     3,     1,     1,     4,     1,     1,     1,     2,     2,
+       2,     2,     1,     4,     1,     3,     3,     3,     1,     3,
+       3,     1,     3,     3,     1,     3,     3,     3,     3,     1,
+       3,     3,     1,     3,     1,     3,     1,     3,     1,     3,
+       1,     3,     1,     5,     1,     2,     4,     1,     3,     2,
+       5,     0,     2,     4,     4,     1,     1,     1,     1,     3,
+       4,     6,     1,     3,     4,     3,     3,     1,     6,     5,
+       4,     6,     7,    10,     6,     7,     7,     6,     7,     7,
+       1,     1,     1,     2,     6,     9,    12,     4,     7,     3,
+       5,     6,     8,     9,    11,     4,     5,     3,     2,     0,
+       2,     1,     3,     1,     3,     4,     3,     3,     2,     1,
+       2,     1,     4,     2,     4,     7,     6,     2,     2,     2,
+       3,     5,     4,     6,     6,     5,     0,     1,     3,     1,
+       0,     1,     3,     6,     5,     7,     9,     7,     4,     3,
+       3,     2,     0,     2,     7,     6,     1,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     0,     2,     3,     5,     5,     3,     0,     2,     7,
+       4,     6,     3,     1,     2,     7,     6,     1,     2,     1,
+       1,     1,     0,     1,     2,     7,     4,     6,     3,     1,
+       2,     5,     5,     5,     7,     6,     2,     2,     2,     1,
+       2,     8,     5,     8,     5,     3,     1,     3,     1,     3,
+       5,     5,     5,     2,     2,     2,     6,     5,     2,     2,
+       2,     2,     2,     3,     2,     2,     1,     2,     0,     2,
+       2
   };
 
 
@@ -5890,24 +6010,24 @@ namespace P4 { namespace P5 {
   "TABLE", "IDENTIFIER", "STRING_LITERAL", "INTEGER", "LPAREN_PREC",
   "THEN", "'['", "']'", "'='", "';'", "$accept", "program", "string_lit",
   "ID", "const_value", "primary_expression", "postfix_expression",
-  "unary_expression", "cast_expression", "multiplicative_expression",
-  "additive_expression", "shift_expression", "relational_expression",
-  "equality_expression", "and_expression", "exclusive_or_expression",
-  "inclusive_or_expression", "logical_and_expression",
-  "logical_or_expression", "conditional_expression", "expression",
-  "expression_list", "annotation", "annotations", "type_ref",
-  "field_ref_no_slice", "field_ref", "field_dec",
-  "anonymous_struct_union_dec", "struct_field_dec", "struct_field_list",
-  "constant_declaration", "header_declaration", "variable_declaration",
-  "return_value_type", "return_value_type_list", "value_masked_or_set",
-  "value_list", "case_entry", "case_list", "field_ref_or_func",
-  "select_exp", "return_select_statement", "return_statement",
-  "break_statement", "parameter", "param_list", "arg", "arg_list",
-  "do_while_statement", "conditional_statement", "for_loop_statement",
-  "case", "switch_cases", "switch_statement", "assignment_or_call",
-  "assignment_or_call_statement", "action_statement",
-  "action_statement_list", "action_compound_statement", "key_element",
-  "key_element_list", "key_case_entry", "key_case_list",
+  "method_call", "method_args", "unary_expression", "cast_expression",
+  "multiplicative_expression", "additive_expression", "shift_expression",
+  "relational_expression", "equality_expression", "and_expression",
+  "exclusive_or_expression", "inclusive_or_expression",
+  "logical_and_expression", "logical_or_expression",
+  "conditional_expression", "expression", "expression_list", "annotation",
+  "annotations", "type_ref_explicit", "type_ref", "field_ref_no_slice",
+  "field_ref", "field_dec", "anonymous_struct_union_dec",
+  "struct_field_dec", "struct_field_list", "constant_declaration",
+  "header_declaration", "variable_declaration", "return_value_type",
+  "return_value_type_list", "value_masked_or_set", "value_list",
+  "case_entry", "case_list", "field_ref_or_func", "select_exp",
+  "return_select_statement", "return_statement", "break_statement",
+  "parameter", "param_list", "arg", "arg_list", "do_while_statement",
+  "conditional_statement", "for_loop_statement", "case", "switch_cases",
+  "switch_statement", "assignment_or_call", "assignment_or_call_statement",
+  "action_statement", "action_statement_list", "action_compound_statement",
+  "key_element", "key_element_list", "key_case_entry", "key_case_list",
   "key_switch_entry", "key_switch_list", "program_selection_statement",
   "program_selection_statement_list", "table_case_entry",
   "table_case_list", "table_property", "table_property_list",
@@ -5923,31 +6043,32 @@ namespace P4 { namespace P5 {
   const short
   P5Parser::yyrline_[] =
   {
-       0,   328,   328,   337,   341,   351,   354,   355,   356,   357,
-     358,   359,   363,   364,   368,   369,   370,   371,   372,   376,
-     377,   381,   382,   383,   384,   388,   390,   391,   395,   396,
-     397,   401,   402,   403,   404,   405,   409,   410,   411,   415,
-     416,   420,   421,   425,   426,   430,   431,   435,   436,   440,
-     441,   445,   447,   452,   462,   465,   476,   482,   489,   492,
-     506,   514,   522,   525,   529,   533,   537,   541,   546,   548,
-     549,   550,   551,   556,   557,   558,   561,   568,   576,   584,
-     595,   604,   613,   622,   633,   643,   655,   656,   660,   666,
-     680,   684,   689,   697,   701,   707,   708,   709,   713,   717,
-     722,   727,   736,   742,   743,   749,   752,   758,   759,   762,
-     768,   775,   786,   792,   803,   811,   816,   823,   826,   833,
-     839,   846,   849,   854,   855,   858,   866,   873,   880,   887,
-     894,   904,   916,   917,   922,   930,   933,   934,   940,   948,
-     964,   970,   981,  1001,  1039,  1049,  1055,  1064,  1071,  1072,
-    1078,  1081,  1086,  1093,  1096,  1100,  1104,  1108,  1112,  1116,
-    1120,  1124,  1128,  1132,  1137,  1144,  1147,  1151,  1155,  1159,
-    1160,  1161,  1162,  1163,  1164,  1165,  1166,  1172,  1173,  1179,
-    1188,  1193,  1200,  1208,  1211,  1217,  1226,  1237,  1246,  1258,
-    1263,  1269,  1276,  1281,  1288,  1289,  1290,  1293,  1296,  1301,
-    1307,  1317,  1322,  1332,  1339,  1345,  1353,  1358,  1363,  1368,
-    1371,  1374,  1377,  1380,  1386,  1390,  1398,  1401,  1404,  1407,
-    1419,  1426,  1430,  1436,  1446,  1460,  1467,  1471,  1480,  1481,
-    1482,  1485,  1493,  1503,  1508,  1513,  1518,  1523,  1527,  1528,
-    1533,  1540,  1545,  1553,  1554,  1557
+       0,   335,   335,   344,   348,   358,   361,   362,   363,   364,
+     365,   366,   370,   371,   375,   384,   388,   396,   397,   398,
+     399,   400,   404,   405,   409,   410,   411,   412,   416,   418,
+     419,   423,   424,   425,   429,   430,   431,   432,   433,   437,
+     438,   439,   443,   444,   448,   449,   453,   454,   458,   459,
+     463,   464,   468,   469,   473,   475,   480,   490,   493,   504,
+     510,   517,   520,   535,   543,   551,   554,   560,   561,   565,
+     569,   573,   579,   581,   582,   583,   584,   589,   590,   591,
+     594,   601,   609,   617,   628,   637,   646,   655,   666,   676,
+     688,   689,   693,   699,   713,   717,   722,   730,   734,   740,
+     741,   742,   746,   750,   755,   760,   769,   775,   776,   782,
+     785,   791,   792,   795,   801,   808,   819,   825,   836,   844,
+     849,   856,   859,   866,   872,   879,   882,   887,   888,   891,
+     899,   906,   913,   920,   927,   937,   949,   950,   955,   963,
+     966,   967,   973,   981,   997,  1003,  1014,  1034,  1072,  1082,
+    1088,  1097,  1104,  1105,  1111,  1114,  1119,  1126,  1129,  1133,
+    1137,  1141,  1145,  1149,  1153,  1157,  1161,  1165,  1170,  1177,
+    1180,  1184,  1188,  1192,  1193,  1194,  1195,  1196,  1197,  1198,
+    1199,  1205,  1206,  1212,  1221,  1226,  1233,  1241,  1244,  1250,
+    1259,  1270,  1279,  1291,  1296,  1302,  1307,  1312,  1317,  1324,
+    1325,  1326,  1329,  1332,  1337,  1343,  1353,  1358,  1368,  1375,
+    1381,  1389,  1394,  1399,  1404,  1407,  1410,  1413,  1416,  1422,
+    1426,  1434,  1437,  1440,  1443,  1455,  1462,  1466,  1472,  1482,
+    1496,  1503,  1507,  1516,  1517,  1518,  1521,  1529,  1539,  1544,
+    1549,  1554,  1559,  1563,  1564,  1569,  1576,  1581,  1589,  1590,
+    1593
   };
 
   void
@@ -5980,9 +6101,9 @@ namespace P4 { namespace P5 {
 
 #line 7 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 } } // P4::P5
-#line 5984 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
+#line 6105 "/root/p4c/build/frontends/parsers/p5/p5parser.cpp"
 
-#line 1560 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
+#line 1596 "/root/p4c/frontends/parsers/p5/p5parser.ypp"
 
 
 namespace P4 {

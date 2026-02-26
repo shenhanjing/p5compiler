@@ -9870,12 +9870,11 @@ void IR::P5KeySwitch::validate() const {
 #line 9871 "/root/p4c/build/ir/ir-generated.cpp"
 
         annotations.validate();
-        CHECK_NULL(select);
         cases.validate(); }
 void IR::P5KeySwitch::toJSON(JSONGenerator & json) const {
     Node::toJSON(json);
     json.emit("annotations", annotations);
-    json.emit("select", select);
+    if (select != nullptr) json.emit("select", select);
     json.emit("cases", cases);
 }
 IR::P5KeySwitch::P5KeySwitch(JSONLoader & json) : Node(json) {
@@ -9889,7 +9888,7 @@ bool IR::P5KeySwitch::operator==(IR::Node const & a) const { return a == *this; 
 
 #line 57 "/root/p4c/frontends/p5/ir-p5.def"
 void IR::P5Key::dbprint(std::ostream & out) const { out << "P5Key"; }
-#line 9893 "/root/p4c/build/ir/ir-generated.cpp"
+#line 9892 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::P5Key::operator==(IR::P5Key const & a) const {
         return Statement::operator==(static_cast<const Statement &>(a))
         && elements == a.elements
@@ -9915,7 +9914,7 @@ void IR::P5Key::visit_children(Visitor & v, char const * n) const {
     switches.visit_children(v, "switches");
 }
 void IR::P5Key::validate() const {
-#line 9919 "/root/p4c/build/ir/ir-generated.cpp"
+#line 9918 "/root/p4c/build/ir/ir-generated.cpp"
 
         elements.validate();
         switches.validate(); }
@@ -9936,7 +9935,7 @@ bool IR::P5Key::operator==(IR::Node const & a) const { return a == *this; }
 
 #line 67 "/root/p4c/frontends/p5/ir-p5.def"
 void IR::P5DesignatedInitializer::dbprint(std::ostream & out) const { out << "P5DesignatedInitializer"; }
-#line 9940 "/root/p4c/build/ir/ir-generated.cpp"
+#line 9939 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::P5DesignatedInitializer::operator==(IR::P5DesignatedInitializer const & a) const {
         return Expression::operator==(static_cast<const Expression &>(a))
         && isMember == a.isMember
@@ -9964,7 +9963,7 @@ void IR::P5DesignatedInitializer::visit_children(Visitor & v, char const * n) co
     v.visit(value, "value");
 }
 void IR::P5DesignatedInitializer::validate() const {
-#line 9968 "/root/p4c/build/ir/ir-generated.cpp"
+#line 9967 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(designator);
         CHECK_NULL(value); }
@@ -9988,7 +9987,7 @@ bool IR::P5DesignatedInitializer::operator==(IR::Expression const & a) const { r
 bool IR::P5DesignatedInitializer::operator==(IR::Node const & a) const { return a == *this; }
 #line 74 "/root/p4c/frontends/p5/ir-p5.def"
 void IR::P5PostIncrement::dbprint(std::ostream & out) const { out << "P5PostIncrement"; }
-#line 9992 "/root/p4c/build/ir/ir-generated.cpp"
+#line 9991 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::P5PostIncrement::operator==(IR::P5PostIncrement const & a) const {
         return Expression::operator==(static_cast<const Expression &>(a))
         && expr == a.expr;
@@ -10010,7 +10009,7 @@ void IR::P5PostIncrement::visit_children(Visitor & v, char const * n) const {
     v.visit(expr, "expr");
 }
 void IR::P5PostIncrement::validate() const {
-#line 10014 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10013 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(expr); }
 void IR::P5PostIncrement::toJSON(JSONGenerator & json) const {
@@ -10070,7 +10069,7 @@ void IR::DpdkDeclaration::visit_children(Visitor & v, char const * n) const {
     v.visit(global, "global");
 }
 void IR::DpdkDeclaration::validate() const {
-#line 10074 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10073 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(global); }
 void IR::DpdkDeclaration::toJSON(JSONGenerator & json) const {
@@ -10144,7 +10143,7 @@ void IR::DpdkHeaderInstance::visit_children(Visitor & v, char const * n) const {
     v.visit(headerType, "headerType");
 }
 void IR::DpdkHeaderInstance::validate() const {
-#line 10148 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10147 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(name);
         CHECK_NULL(headerType); }
@@ -10194,10 +10193,10 @@ IR::DpdkAsmStatement::DpdkAsmStatement(JSONLoader & json) : Node(json) {
 bool IR::DpdkAsmStatement::operator==(IR::Node const & a) const { return a == *this; }
 #line 43 "/root/p4c/backends/dpdk/dpdk.def"
 IR::Vector<IR::Annotation> const & IR::DpdkAction::getAnnotations() const { return annotations; }
-#line 10198 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10197 "/root/p4c/build/ir/ir-generated.cpp"
 #line 44 "/root/p4c/backends/dpdk/dpdk.def"
 IR::Vector<IR::Annotation> & IR::DpdkAction::getAnnotations() { return annotations; }
-#line 10201 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10200 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkAction::operator==(IR::DpdkAction const & a) const {
         return this->typeId() == a.typeId()
         && annotations == a.annotations
@@ -10229,7 +10228,7 @@ void IR::DpdkAction::visit_children(Visitor & v, char const * n) const {
     para.visit_children(v, "para");
 }
 void IR::DpdkAction::validate() const {
-#line 10233 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10232 "/root/p4c/build/ir/ir-generated.cpp"
 
         annotations.validate();
         statements.validate();
@@ -10262,7 +10261,7 @@ const IR::Key *IR::DpdkTable::getKey() const {
             ::P4::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
             return nullptr; }
         return kp->value->to<IR::Key>(); }
-#line 10266 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10265 "/root/p4c/build/ir/ir-generated.cpp"
 #line 63 "/root/p4c/backends/dpdk/dpdk.def"
 const IR::EntriesList *IR::DpdkTable::getEntries() const {
         auto ep = properties->getProperty(TableProperties::entriesPropertyName);
@@ -10274,7 +10273,7 @@ const IR::EntriesList *IR::DpdkTable::getEntries() const {
         }
         return ep->value->to<IR::EntriesList>();
     }
-#line 10278 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10277 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkTable::operator==(IR::DpdkTable const & a) const {
         return this->typeId() == a.typeId()
         && name == a.name
@@ -10507,7 +10506,7 @@ void IR::DpdkAsmProgram::visit_children(Visitor & v, char const * n) const {
     globals.visit_children(v, "globals");
 }
 void IR::DpdkAsmProgram::validate() const {
-#line 10511 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10510 "/root/p4c/build/ir/ir-generated.cpp"
 
         headerType.validate();
         structType.validate();
@@ -10567,7 +10566,7 @@ void IR::DpdkListStatement::visit_children(Visitor & v, char const * n) const {
     statements.visit_children(v, "statements");
 }
 void IR::DpdkListStatement::validate() const {
-#line 10571 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10570 "/root/p4c/build/ir/ir-generated.cpp"
 
         statements.validate(); }
 void IR::DpdkListStatement::toJSON(JSONGenerator & json) const {
@@ -10631,7 +10630,7 @@ void IR::DpdkLearnStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(argument, "argument");
 }
 void IR::DpdkLearnStatement::validate() const {
-#line 10635 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10634 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(timeout); }
 void IR::DpdkLearnStatement::dump_fields(std::ostream & out) const {
@@ -10677,7 +10676,7 @@ void IR::DpdkMirrorStatement::visit_children(Visitor & v, char const * n) const 
     v.visit(sessionId, "sessionId");
 }
 void IR::DpdkMirrorStatement::validate() const {
-#line 10681 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10680 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(slotId);
         CHECK_NULL(sessionId); }
@@ -10714,7 +10713,7 @@ void IR::DpdkEmitStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(header, "header");
 }
 void IR::DpdkEmitStatement::validate() const {
-#line 10718 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10717 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkEmitStatement::toJSON(JSONGenerator & json) const {
@@ -10752,7 +10751,7 @@ void IR::DpdkExtractStatement::visit_children(Visitor & v, char const * n) const
     v.visit(length, "length");
 }
 void IR::DpdkExtractStatement::validate() const {
-#line 10756 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10755 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkExtractStatement::toJSON(JSONGenerator & json) const {
@@ -10788,7 +10787,7 @@ void IR::DpdkLookaheadStatement::visit_children(Visitor & v, char const * n) con
     v.visit(header, "header");
 }
 void IR::DpdkLookaheadStatement::validate() const {
-#line 10792 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10791 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkLookaheadStatement::toJSON(JSONGenerator & json) const {
@@ -10804,7 +10803,7 @@ bool IR::DpdkLookaheadStatement::operator==(IR::Node const & a) const { return a
 #line 166 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpStatement::DpdkJmpStatement(cstring instruction, cstring l) :
         instruction(instruction), label(l.toUpper()) { }
-#line 10808 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10807 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpStatement::operator==(IR::DpdkJmpStatement const & a) const {
         return DpdkAsmStatement::operator==(static_cast<const DpdkAsmStatement &>(a))
         && instruction == a.instruction
@@ -10836,7 +10835,7 @@ bool IR::DpdkJmpStatement::operator==(IR::Node const & a) const { return a == *t
 #line 172 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpLabelStatement::DpdkJmpLabelStatement(cstring label) :
         DpdkJmpStatement("jmp"_cs, label) { }
-#line 10840 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10839 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpLabelStatement::operator==(IR::DpdkJmpLabelStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a));
     }
@@ -10857,7 +10856,7 @@ bool IR::DpdkJmpLabelStatement::operator==(IR::Node const & a) const { return a 
 #line 179 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpHitStatement::DpdkJmpHitStatement(cstring label) :
         DpdkJmpStatement("jmph"_cs, label) { }
-#line 10861 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10860 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpHitStatement::operator==(IR::DpdkJmpHitStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a));
     }
@@ -10878,7 +10877,7 @@ bool IR::DpdkJmpHitStatement::operator==(IR::Node const & a) const { return a ==
 #line 186 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpMissStatement::DpdkJmpMissStatement(cstring label) :
         DpdkJmpStatement("jmpnh"_cs, label) { }
-#line 10882 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10881 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpMissStatement::operator==(IR::DpdkJmpMissStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a));
     }
@@ -10899,7 +10898,7 @@ bool IR::DpdkJmpMissStatement::operator==(IR::Node const & a) const { return a =
 #line 195 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpActionStatement::DpdkJmpActionStatement(cstring instruction, cstring label, IR::ID action) :
         DpdkJmpStatement(instruction, label), action(action) { }
-#line 10903 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10902 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpActionStatement::operator==(IR::DpdkJmpActionStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a))
         && action == a.action;
@@ -10927,7 +10926,7 @@ bool IR::DpdkJmpActionStatement::operator==(IR::Node const & a) const { return a
 #line 202 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpIfActionRunStatement::DpdkJmpIfActionRunStatement(cstring label, cstring act) :
         DpdkJmpActionStatement("jmpa"_cs, label, act) { }
-#line 10931 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10930 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpIfActionRunStatement::operator==(IR::DpdkJmpIfActionRunStatement const & a) const {
         return DpdkJmpActionStatement::operator==(static_cast<const DpdkJmpActionStatement &>(a));
     }
@@ -10949,7 +10948,7 @@ bool IR::DpdkJmpIfActionRunStatement::operator==(IR::Node const & a) const { ret
 #line 209 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpIfActionNotRunStatement::DpdkJmpIfActionNotRunStatement(cstring label, cstring act) :
         DpdkJmpActionStatement("jmpna"_cs, label, act) { }
-#line 10953 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10952 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpIfActionNotRunStatement::operator==(IR::DpdkJmpIfActionNotRunStatement const & a) const {
         return DpdkJmpActionStatement::operator==(static_cast<const DpdkJmpActionStatement &>(a));
     }
@@ -10971,7 +10970,7 @@ bool IR::DpdkJmpIfActionNotRunStatement::operator==(IR::Node const & a) const { 
 #line 217 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpHeaderStatement::DpdkJmpHeaderStatement(cstring instruction, cstring label, const IR::Expression* hdr) :
         DpdkJmpStatement(instruction, label), header(hdr) { }
-#line 10975 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10974 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpHeaderStatement::operator==(IR::DpdkJmpHeaderStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a))
         && header == a.header;
@@ -10993,7 +10992,7 @@ void IR::DpdkJmpHeaderStatement::visit_children(Visitor & v, char const * n) con
     v.visit(header, "header");
 }
 void IR::DpdkJmpHeaderStatement::validate() const {
-#line 10997 "/root/p4c/build/ir/ir-generated.cpp"
+#line 10996 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkJmpHeaderStatement::toJSON(JSONGenerator & json) const {
@@ -11009,7 +11008,7 @@ bool IR::DpdkJmpHeaderStatement::operator==(IR::Node const & a) const { return a
 #line 223 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpIfInvalidStatement::DpdkJmpIfInvalidStatement(cstring label, const IR::Expression* hdr) :
         DpdkJmpHeaderStatement("jmpnv"_cs, label, hdr) { }
-#line 11013 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11012 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpIfInvalidStatement::operator==(IR::DpdkJmpIfInvalidStatement const & a) const {
         return DpdkJmpHeaderStatement::operator==(static_cast<const DpdkJmpHeaderStatement &>(a));
     }
@@ -11031,7 +11030,7 @@ bool IR::DpdkJmpIfInvalidStatement::operator==(IR::Node const & a) const { retur
 #line 230 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpIfValidStatement::DpdkJmpIfValidStatement(cstring label, const IR::Expression* hdr) :
         DpdkJmpHeaderStatement("jmpv"_cs, label, hdr) { }
-#line 11035 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11034 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpIfValidStatement::operator==(IR::DpdkJmpIfValidStatement const & a) const {
         return DpdkJmpHeaderStatement::operator==(static_cast<const DpdkJmpHeaderStatement &>(a));
     }
@@ -11053,7 +11052,7 @@ bool IR::DpdkJmpIfValidStatement::operator==(IR::Node const & a) const { return 
 #line 239 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpCondStatement::DpdkJmpCondStatement(cstring instruction, cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpStatement(instruction, label), src1(src1), src2(src2) { }
-#line 11057 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11056 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpCondStatement::operator==(IR::DpdkJmpCondStatement const & a) const {
         return DpdkJmpStatement::operator==(static_cast<const DpdkJmpStatement &>(a))
         && src1 == a.src1
@@ -11079,7 +11078,7 @@ void IR::DpdkJmpCondStatement::visit_children(Visitor & v, char const * n) const
     v.visit(src2, "src2");
 }
 void IR::DpdkJmpCondStatement::validate() const {
-#line 11083 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11082 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(src1);
         CHECK_NULL(src2); }
@@ -11098,7 +11097,7 @@ bool IR::DpdkJmpCondStatement::operator==(IR::Node const & a) const { return a =
 #line 244 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpEqualStatement::DpdkJmpEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmpeq"_cs, label, src1, src2) { }
-#line 11102 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11101 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpEqualStatement::operator==(IR::DpdkJmpEqualStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11120,7 +11119,7 @@ bool IR::DpdkJmpEqualStatement::operator==(IR::Node const & a) const { return a 
 #line 251 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpNotEqualStatement::DpdkJmpNotEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmpneq"_cs, label, src1, src2) { }
-#line 11124 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11123 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpNotEqualStatement::operator==(IR::DpdkJmpNotEqualStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11142,7 +11141,7 @@ bool IR::DpdkJmpNotEqualStatement::operator==(IR::Node const & a) const { return
 #line 258 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpGreaterEqualStatement::DpdkJmpGreaterEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmpge"_cs, label, src1, src2) { }
-#line 11146 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11145 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpGreaterEqualStatement::operator==(IR::DpdkJmpGreaterEqualStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11164,7 +11163,7 @@ bool IR::DpdkJmpGreaterEqualStatement::operator==(IR::Node const & a) const { re
 #line 265 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpGreaterStatement::DpdkJmpGreaterStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmpgt"_cs, label, src1, src2) { }
-#line 11168 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11167 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpGreaterStatement::operator==(IR::DpdkJmpGreaterStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11186,7 +11185,7 @@ bool IR::DpdkJmpGreaterStatement::operator==(IR::Node const & a) const { return 
 #line 272 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpLessOrEqualStatement::DpdkJmpLessOrEqualStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmple"_cs, label, src1, src2) { }
-#line 11190 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11189 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpLessOrEqualStatement::operator==(IR::DpdkJmpLessOrEqualStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11208,7 +11207,7 @@ bool IR::DpdkJmpLessOrEqualStatement::operator==(IR::Node const & a) const { ret
 #line 279 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkJmpLessStatement::DpdkJmpLessStatement(cstring label, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkJmpCondStatement("jmplt"_cs, label, src1, src2) { }
-#line 11212 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11211 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkJmpLessStatement::operator==(IR::DpdkJmpLessStatement const & a) const {
         return DpdkJmpCondStatement::operator==(static_cast<const DpdkJmpCondStatement &>(a));
     }
@@ -11248,7 +11247,7 @@ void IR::DpdkRxStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(port, "port");
 }
 void IR::DpdkRxStatement::validate() const {
-#line 11252 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11251 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(port); }
 void IR::DpdkRxStatement::toJSON(JSONGenerator & json) const {
@@ -11282,7 +11281,7 @@ void IR::DpdkTxStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(port, "port");
 }
 void IR::DpdkTxStatement::validate() const {
-#line 11286 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11285 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(port); }
 void IR::DpdkTxStatement::toJSON(JSONGenerator & json) const {
@@ -11298,7 +11297,7 @@ bool IR::DpdkTxStatement::operator==(IR::Node const & a) const { return a == *th
 #line 299 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkAssignmentStatement::DpdkAssignmentStatement(cstring instruction, const IR::Expression* dst) :
         instruction(instruction), dst(dst) { }
-#line 11302 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11301 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkAssignmentStatement::operator==(IR::DpdkAssignmentStatement const & a) const {
         return DpdkAsmStatement::operator==(static_cast<const DpdkAsmStatement &>(a))
         && instruction == a.instruction
@@ -11322,7 +11321,7 @@ void IR::DpdkAssignmentStatement::visit_children(Visitor & v, char const * n) co
     v.visit(dst, "dst");
 }
 void IR::DpdkAssignmentStatement::validate() const {
-#line 11326 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11325 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(dst); }
 void IR::DpdkAssignmentStatement::dump_fields(std::ostream & out) const {
@@ -11343,7 +11342,7 @@ bool IR::DpdkAssignmentStatement::operator==(IR::Node const & a) const { return 
 #line 307 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkUnaryStatement::DpdkUnaryStatement(cstring instruction, const IR::Expression* dst, const IR::Expression* src) :
         DpdkAssignmentStatement(instruction, dst), src(src) { }
-#line 11347 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11346 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkUnaryStatement::operator==(IR::DpdkUnaryStatement const & a) const {
         return DpdkAssignmentStatement::operator==(static_cast<const DpdkAssignmentStatement &>(a))
         && src == a.src;
@@ -11365,7 +11364,7 @@ void IR::DpdkUnaryStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(src, "src");
 }
 void IR::DpdkUnaryStatement::validate() const {
-#line 11369 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11368 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(src); }
 void IR::DpdkUnaryStatement::toJSON(JSONGenerator & json) const {
@@ -11381,7 +11380,7 @@ bool IR::DpdkUnaryStatement::operator==(IR::Node const & a) const { return a == 
 #line 312 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkMovStatement::DpdkMovStatement(const IR::Expression* dst, const IR::Expression* src) :
         DpdkUnaryStatement("mov"_cs, dst, src) { }
-#line 11385 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11384 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkMovStatement::operator==(IR::DpdkMovStatement const & a) const {
         return DpdkUnaryStatement::operator==(static_cast<const DpdkUnaryStatement &>(a));
     }
@@ -11403,7 +11402,7 @@ bool IR::DpdkMovStatement::operator==(IR::Node const & a) const { return a == *t
 #line 318 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkMovhStatement::DpdkMovhStatement(const IR::Expression* dst, const IR::Expression* src) :
         DpdkUnaryStatement("movh"_cs, dst, src) { }
-#line 11407 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11406 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkMovhStatement::operator==(IR::DpdkMovhStatement const & a) const {
         return DpdkUnaryStatement::operator==(static_cast<const DpdkUnaryStatement &>(a));
     }
@@ -11425,7 +11424,7 @@ bool IR::DpdkMovhStatement::operator==(IR::Node const & a) const { return a == *
 #line 328 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkBinaryStatement::DpdkBinaryStatement(cstring instruction, const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkAssignmentStatement(instruction, dst), src1(src1), src2(src2) { }
-#line 11429 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11428 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkBinaryStatement::operator==(IR::DpdkBinaryStatement const & a) const {
         return DpdkAssignmentStatement::operator==(static_cast<const DpdkAssignmentStatement &>(a))
         && src1 == a.src1
@@ -11451,7 +11450,7 @@ void IR::DpdkBinaryStatement::visit_children(Visitor & v, char const * n) const 
     v.visit(src2, "src2");
 }
 void IR::DpdkBinaryStatement::validate() const {
-#line 11455 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11454 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(src1);
         CHECK_NULL(src2); }
@@ -11470,7 +11469,7 @@ bool IR::DpdkBinaryStatement::operator==(IR::Node const & a) const { return a ==
 #line 335 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkAddStatement::DpdkAddStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("add"_cs, dst, src1, src2) { }
-#line 11474 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11473 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkAddStatement::operator==(IR::DpdkAddStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11492,7 +11491,7 @@ bool IR::DpdkAddStatement::operator==(IR::Node const & a) const { return a == *t
 #line 342 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkAndStatement::DpdkAndStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("and"_cs, dst, src1, src2) { }
-#line 11496 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11495 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkAndStatement::operator==(IR::DpdkAndStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11514,7 +11513,7 @@ bool IR::DpdkAndStatement::operator==(IR::Node const & a) const { return a == *t
 #line 349 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkShlStatement::DpdkShlStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("shl"_cs, dst, src1, src2) { }
-#line 11518 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11517 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkShlStatement::operator==(IR::DpdkShlStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11536,7 +11535,7 @@ bool IR::DpdkShlStatement::operator==(IR::Node const & a) const { return a == *t
 #line 356 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkShrStatement::DpdkShrStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("shr"_cs, dst, src1, src2) { }
-#line 11540 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11539 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkShrStatement::operator==(IR::DpdkShrStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11558,7 +11557,7 @@ bool IR::DpdkShrStatement::operator==(IR::Node const & a) const { return a == *t
 #line 363 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkSubStatement::DpdkSubStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("sub"_cs, dst, src1, src2) { }
-#line 11562 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11561 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkSubStatement::operator==(IR::DpdkSubStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11580,7 +11579,7 @@ bool IR::DpdkSubStatement::operator==(IR::Node const & a) const { return a == *t
 #line 370 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkOrStatement::DpdkOrStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("or"_cs, dst, src1, src2) { }
-#line 11584 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11583 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkOrStatement::operator==(IR::DpdkOrStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11602,7 +11601,7 @@ bool IR::DpdkOrStatement::operator==(IR::Node const & a) const { return a == *th
 #line 377 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkXorStatement::DpdkXorStatement(const IR::Expression* dst, const IR::Expression* src1, const IR::Expression* src2) :
         DpdkBinaryStatement("xor"_cs, dst, src1, src2) { }
-#line 11606 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11605 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkXorStatement::operator==(IR::DpdkXorStatement const & a) const {
         return DpdkBinaryStatement::operator==(static_cast<const DpdkBinaryStatement &>(a));
     }
@@ -11642,7 +11641,7 @@ void IR::DpdkRecircidStatement::visit_children(Visitor & v, char const * n) cons
     v.visit(pass, "pass");
 }
 void IR::DpdkRecircidStatement::validate() const {
-#line 11646 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11645 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(pass); }
 void IR::DpdkRecircidStatement::toJSON(JSONGenerator & json) const {
@@ -11719,7 +11718,7 @@ bool IR::DpdkRecirculateStatement::operator==(IR::DpdkAsmStatement const & a) co
 bool IR::DpdkRecirculateStatement::operator==(IR::Node const & a) const { return a == *this; }
 #line 407 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkLabelStatement::DpdkLabelStatement(cstring l) : label(l.toUpper()) { }
-#line 11723 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11722 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkLabelStatement::operator==(IR::DpdkLabelStatement const & a) const {
         return DpdkAsmStatement::operator==(static_cast<const DpdkAsmStatement &>(a))
         && label == a.label;
@@ -11769,7 +11768,7 @@ void IR::DpdkChecksumAddStatement::visit_children(Visitor & v, char const * n) c
     v.visit(field, "field");
 }
 void IR::DpdkChecksumAddStatement::validate() const {
-#line 11773 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11772 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(field); }
 void IR::DpdkChecksumAddStatement::dump_fields(std::ostream & out) const {
@@ -11816,7 +11815,7 @@ void IR::DpdkChecksumSubStatement::visit_children(Visitor & v, char const * n) c
     v.visit(field, "field");
 }
 void IR::DpdkChecksumSubStatement::validate() const {
-#line 11820 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11819 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(field); }
 void IR::DpdkChecksumSubStatement::dump_fields(std::ostream & out) const {
@@ -11920,7 +11919,7 @@ void IR::DpdkGetHashStatement::visit_children(Visitor & v, char const * n) const
     v.visit(dst, "dst");
 }
 void IR::DpdkGetHashStatement::validate() const {
-#line 11924 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11923 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(fields);
         CHECK_NULL(dst); }
@@ -11970,7 +11969,7 @@ void IR::DpdkGetChecksumStatement::visit_children(Visitor & v, char const * n) c
     v.visit(dst, "dst");
 }
 void IR::DpdkGetChecksumStatement::validate() const {
-#line 11974 "/root/p4c/build/ir/ir-generated.cpp"
+#line 11973 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(dst); }
 void IR::DpdkGetChecksumStatement::dump_fields(std::ostream & out) const {
@@ -12021,7 +12020,7 @@ void IR::DpdkCastStatement::visit_children(Visitor & v, char const * n) const {
     v.visit(type, "type");
 }
 void IR::DpdkCastStatement::validate() const {
-#line 12025 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12024 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(dst);
         CHECK_NULL(src);
@@ -12065,7 +12064,7 @@ void IR::DpdkVerifyStatement::visit_children(Visitor & v, char const * n) const 
     v.visit(error, "error");
 }
 void IR::DpdkVerifyStatement::validate() const {
-#line 12069 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12068 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(condition);
         CHECK_NULL(error); }
@@ -12104,7 +12103,7 @@ void IR::DpdkMeterDeclStatement::visit_children(Visitor & v, char const * n) con
     v.visit(size, "size");
 }
 void IR::DpdkMeterDeclStatement::validate() const {
-#line 12108 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12107 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(size); }
 void IR::DpdkMeterDeclStatement::dump_fields(std::ostream & out) const {
@@ -12158,7 +12157,7 @@ void IR::DpdkMeterExecuteStatement::visit_children(Visitor & v, char const * n) 
     v.visit(color_out, "color_out");
 }
 void IR::DpdkMeterExecuteStatement::validate() const {
-#line 12162 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12161 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(index);
         CHECK_NULL(color_in);
@@ -12206,7 +12205,7 @@ void IR::DpdkGetTableEntryIndex::visit_children(Visitor & v, char const * n) con
     v.visit(index, "index");
 }
 void IR::DpdkGetTableEntryIndex::validate() const {
-#line 12210 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12209 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(index); }
 void IR::DpdkGetTableEntryIndex::toJSON(JSONGenerator & json) const {
@@ -12246,7 +12245,7 @@ void IR::DpdkCounterCountStatement::visit_children(Visitor & v, char const * n) 
     v.visit(incr, "incr");
 }
 void IR::DpdkCounterCountStatement::validate() const {
-#line 12250 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12249 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(index); }
 void IR::DpdkCounterCountStatement::dump_fields(std::ostream & out) const {
@@ -12294,7 +12293,7 @@ void IR::DpdkRegisterDeclStatement::visit_children(Visitor & v, char const * n) 
     v.visit(init_val, "init_val");
 }
 void IR::DpdkRegisterDeclStatement::validate() const {
-#line 12298 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12297 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(size); }
 void IR::DpdkRegisterDeclStatement::dump_fields(std::ostream & out) const {
@@ -12318,7 +12317,7 @@ bool IR::DpdkRegisterDeclStatement::operator==(IR::Node const & a) const { retur
 #line 517 "/root/p4c/backends/dpdk/dpdk.def"
 IR::DpdkRegisterReadStatement::DpdkRegisterReadStatement(const IR::Expression* dst, cstring reg, const IR::Expression* index) :
         DpdkAssignmentStatement("read"_cs, dst), reg(reg), index(index) { }
-#line 12322 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12321 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::DpdkRegisterReadStatement::operator==(IR::DpdkRegisterReadStatement const & a) const {
         return DpdkAssignmentStatement::operator==(static_cast<const DpdkAssignmentStatement &>(a))
         && reg == a.reg
@@ -12342,7 +12341,7 @@ void IR::DpdkRegisterReadStatement::visit_children(Visitor & v, char const * n) 
     v.visit(index, "index");
 }
 void IR::DpdkRegisterReadStatement::validate() const {
-#line 12346 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12345 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(index); }
 void IR::DpdkRegisterReadStatement::dump_fields(std::ostream & out) const {
@@ -12389,7 +12388,7 @@ void IR::DpdkRegisterWriteStatement::visit_children(Visitor & v, char const * n)
     v.visit(src, "src");
 }
 void IR::DpdkRegisterWriteStatement::validate() const {
-#line 12393 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12392 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(index);
         CHECK_NULL(src); }
@@ -12432,7 +12431,7 @@ void IR::DpdkValidateStatement::visit_children(Visitor & v, char const * n) cons
     v.visit(header, "header");
 }
 void IR::DpdkValidateStatement::validate() const {
-#line 12436 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12435 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkValidateStatement::toJSON(JSONGenerator & json) const {
@@ -12466,7 +12465,7 @@ void IR::DpdkInvalidateStatement::visit_children(Visitor & v, char const * n) co
     v.visit(header, "header");
 }
 void IR::DpdkInvalidateStatement::validate() const {
-#line 12470 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12469 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(header); }
 void IR::DpdkInvalidateStatement::toJSON(JSONGenerator & json) const {
@@ -12519,10 +12518,10 @@ cstring IR::TCKernelMetadata::toString() const {
         }
         return metaName;
     }
-#line 12523 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12522 "/root/p4c/build/ir/ir-generated.cpp"
 #line 47 "/root/p4c/backends/tc/tc.def"
 void IR::TCKernelMetadata::dbprint(std::ostream & out) const { out << toString(); }
-#line 12526 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12525 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCKernelMetadata::operator==(IR::TCKernelMetadata const & a) const {
         return this->typeId() == a.typeId()
         && metaField == a.metaField;
@@ -12550,43 +12549,43 @@ bool IR::TCKernelMetadata::operator==(IR::Node const & a) const { return a == *t
 void IR::TCActionParam::setParamName(cstring pN) {
         paramName = pN;
     }
-#line 12554 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12553 "/root/p4c/build/ir/ir-generated.cpp"
 #line 58 "/root/p4c/backends/tc/tc.def"
 void IR::TCActionParam::setBitSize(unsigned bS) {
         bitSize = bS;
     }
-#line 12559 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12558 "/root/p4c/build/ir/ir-generated.cpp"
 #line 61 "/root/p4c/backends/tc/tc.def"
 void IR::TCActionParam::setDataType(unsigned d) {
         dataType = d;
     }
-#line 12564 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12563 "/root/p4c/build/ir/ir-generated.cpp"
 #line 64 "/root/p4c/backends/tc/tc.def"
 void IR::TCActionParam::setDirection(unsigned d) {
         direction = d;
     }
-#line 12569 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12568 "/root/p4c/build/ir/ir-generated.cpp"
 #line 67 "/root/p4c/backends/tc/tc.def"
 IR::TCActionParam::TCActionParam() {
         paramName = nullptr;
         bitSize = 0;
     }
-#line 12575 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12574 "/root/p4c/build/ir/ir-generated.cpp"
 #line 71 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCActionParam::getParamName() const {
         return paramName;
     }
-#line 12580 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12579 "/root/p4c/build/ir/ir-generated.cpp"
 #line 74 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCActionParam::getName() const {
         return "param." + paramName;
     }
-#line 12585 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12584 "/root/p4c/build/ir/ir-generated.cpp"
 #line 77 "/root/p4c/backends/tc/tc.def"
 unsigned IR::TCActionParam::getDirection() const {
         return direction;
     }
-#line 12590 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12589 "/root/p4c/build/ir/ir-generated.cpp"
 #line 80 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCActionParam::getParamDecl(cstring placeholderName) const {
         std::string paramDecl = "";
@@ -12624,7 +12623,7 @@ cstring IR::TCActionParam::getParamDecl(cstring placeholderName) const {
         }
         return paramDecl;
     }
-#line 12628 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12627 "/root/p4c/build/ir/ir-generated.cpp"
 #line 116 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCActionParam::toString() const {
         std::string tcActionParam = absl::StrCat("\n\tparam ", paramName, " type ");
@@ -12656,10 +12655,10 @@ cstring IR::TCActionParam::toString() const {
         }
         return tcActionParam;
     }
-#line 12660 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12659 "/root/p4c/build/ir/ir-generated.cpp"
 #line 146 "/root/p4c/backends/tc/tc.def"
 void IR::TCActionParam::dbprint(std::ostream & out) const { out << toString(); }
-#line 12663 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12662 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCActionParam::operator==(IR::TCActionParam const & a) const {
         return this->typeId() == a.typeId()
         && paramName == a.paramName
@@ -12702,18 +12701,18 @@ bool IR::TCActionParam::operator==(IR::Node const & a) const { return a == *this
 void IR::TCDefaultActionParam::setParamDetail(const IR::TCActionParam* pN) {
         paramDetail = pN;
     }
-#line 12706 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12705 "/root/p4c/build/ir/ir-generated.cpp"
 #line 155 "/root/p4c/backends/tc/tc.def"
 void IR::TCDefaultActionParam::setDefaultValue(cstring dV) {
         defaultValue = dV;
     }
-#line 12711 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12710 "/root/p4c/build/ir/ir-generated.cpp"
 #line 158 "/root/p4c/backends/tc/tc.def"
 IR::TCDefaultActionParam::TCDefaultActionParam() {
         paramDetail = nullptr;
         defaultValue = nullptr;
     }
-#line 12717 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12716 "/root/p4c/build/ir/ir-generated.cpp"
 #line 162 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCDefaultActionParam::toString() const {
         std::string tcActionParam = absl::StrCat(" ", paramDetail->paramName);
@@ -12721,10 +12720,10 @@ cstring IR::TCDefaultActionParam::toString() const {
             absl::StrAppend(&tcActionParam, " ", defaultValue);
         return tcActionParam;
     }
-#line 12725 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12724 "/root/p4c/build/ir/ir-generated.cpp"
 #line 168 "/root/p4c/backends/tc/tc.def"
 void IR::TCDefaultActionParam::dbprint(std::ostream & out) const { out << toString(); }
-#line 12728 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12727 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCDefaultActionParam::operator==(IR::TCDefaultActionParam const & a) const {
         return this->typeId() == a.typeId()
         && paramDetail == a.paramDetail
@@ -12748,7 +12747,7 @@ void IR::TCDefaultActionParam::visit_children(Visitor & v, char const * n) const
     v.visit(paramDetail, "paramDetail");
 }
 void IR::TCDefaultActionParam::validate() const {
-#line 12752 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12751 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(paramDetail); }
 void IR::TCDefaultActionParam::dump_fields(std::ostream & out) const {
@@ -12773,34 +12772,34 @@ cstring IR::TCAction::getName() const {
         }
         return absl::StrCat(pipelineName, "/", actionName);
     }
-#line 12777 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12776 "/root/p4c/build/ir/ir-generated.cpp"
 #line 182 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCAction::getActionName() const {
         return actionName;
     }
-#line 12782 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12781 "/root/p4c/build/ir/ir-generated.cpp"
 #line 185 "/root/p4c/backends/tc/tc.def"
 void IR::TCAction::setPipelineName(cstring pN) {
         pipelineName = pN;
     }
-#line 12787 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12786 "/root/p4c/build/ir/ir-generated.cpp"
 #line 188 "/root/p4c/backends/tc/tc.def"
 void IR::TCAction::addActionParams(const IR::TCActionParam* tca) {
         actionParams.push_back(tca);
     }
-#line 12792 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12791 "/root/p4c/build/ir/ir-generated.cpp"
 #line 191 "/root/p4c/backends/tc/tc.def"
 void IR::TCAction::setActionId(unsigned id) {
         actId = id;
     }
-#line 12797 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12796 "/root/p4c/build/ir/ir-generated.cpp"
 #line 194 "/root/p4c/backends/tc/tc.def"
 IR::TCAction::TCAction(cstring aN) {
         actionName = aN;
         pipelineName = nullptr;
         actId = 0;
     }
-#line 12804 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12803 "/root/p4c/build/ir/ir-generated.cpp"
 #line 199 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCAction::toString() const {
         std::string tcAction = absl::StrCat("\n$TC p4template create action/", pipelineName, "/", actionName);
@@ -12816,10 +12815,10 @@ cstring IR::TCAction::toString() const {
 
         return tcAction;
     }
-#line 12820 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12819 "/root/p4c/build/ir/ir-generated.cpp"
 #line 213 "/root/p4c/backends/tc/tc.def"
 void IR::TCAction::dbprint(std::ostream & out) const { out << toString(); }
-#line 12823 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12822 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCAction::operator==(IR::TCAction const & a) const {
         return this->typeId() == a.typeId()
         && actionName == a.actionName
@@ -12861,7 +12860,7 @@ bool IR::TCAction::operator==(IR::Node const & a) const { return a == *this; }
 cstring IR::TCEntry::getActionName() const {
         return action;
     }
-#line 12865 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12864 "/root/p4c/build/ir/ir-generated.cpp"
 #line 222 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCEntry::toString() const {
         std::string tcEntry = "";
@@ -12870,10 +12869,10 @@ cstring IR::TCEntry::toString() const {
         }
         return tcEntry;
     }
-#line 12874 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12873 "/root/p4c/build/ir/ir-generated.cpp"
 #line 229 "/root/p4c/backends/tc/tc.def"
 void IR::TCEntry::dbprint(std::ostream & out) const { out << toString(); }
-#line 12877 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12876 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCEntry::operator==(IR::TCEntry const & a) const {
         return this->typeId() == a.typeId()
         && action == a.action
@@ -12905,94 +12904,94 @@ bool IR::TCEntry::operator==(IR::Node const & a) const { return a == *this; }
 void IR::TCTable::setTablePermission(cstring p) {
         permissions = p;
     }
-#line 12909 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12908 "/root/p4c/build/ir/ir-generated.cpp"
 #line 264 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDirectCounter(cstring counter) {
         isDirectCounter = true;
         directCounterInstance = counter;
     }
-#line 12915 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12914 "/root/p4c/build/ir/ir-generated.cpp"
 #line 268 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDirectMeter(cstring meter) {
         isDirectMeter = true;
         directMeterInstance = meter;
     }
-#line 12921 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12920 "/root/p4c/build/ir/ir-generated.cpp"
 #line 272 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setKeySize(unsigned k) {
         keySize = k;
     }
-#line 12926 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12925 "/root/p4c/build/ir/ir-generated.cpp"
 #line 275 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setTableEntriesCount(unsigned t) {
         tableEntriesCount = t;
     }
-#line 12931 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12930 "/root/p4c/build/ir/ir-generated.cpp"
 #line 278 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setNumMask(unsigned n) {
         numMask = n;
     }
-#line 12936 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12935 "/root/p4c/build/ir/ir-generated.cpp"
 #line 281 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setMatchType(unsigned m) {
         matchType = m;
     }
-#line 12941 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12940 "/root/p4c/build/ir/ir-generated.cpp"
 #line 284 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDefaultHitAction(const IR::TCAction* d) {
         defaultHitAction = d;
     }
-#line 12946 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12945 "/root/p4c/build/ir/ir-generated.cpp"
 #line 287 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDefaultMissAction(const IR::TCAction* d) {
         defaultMissAction = d;
     }
-#line 12951 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12950 "/root/p4c/build/ir/ir-generated.cpp"
 #line 290 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDefaultHitConst(bool i) {
         isDefaultHitConst = i;
     }
-#line 12956 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12955 "/root/p4c/build/ir/ir-generated.cpp"
 #line 293 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setDefaultMissConst(bool i) {
         isDefaultMissConst = i;
     }
-#line 12961 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12960 "/root/p4c/build/ir/ir-generated.cpp"
 #line 296 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setTcMayOverrideHit() {
         isTcMayOverrideHit = true;
     }
-#line 12966 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12965 "/root/p4c/build/ir/ir-generated.cpp"
 #line 299 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setTcMayOverrideMiss() {
         isTcMayOverrideMiss = true;
     }
-#line 12971 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12970 "/root/p4c/build/ir/ir-generated.cpp"
 #line 302 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::setTableAddOnMiss() {
         isTableAddOnMiss = true;
     }
-#line 12976 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12975 "/root/p4c/build/ir/ir-generated.cpp"
 #line 305 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::addAction(const IR::TCAction* action, unsigned flag) {
         actionList.emplace(action, flag);
     }
-#line 12981 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12980 "/root/p4c/build/ir/ir-generated.cpp"
 #line 308 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::addConstEntries(const IR::TCEntry* entry) {
         const_entries.push_back(entry);
     }
-#line 12986 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12985 "/root/p4c/build/ir/ir-generated.cpp"
 #line 311 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::addTimerProfiles(unsigned tp) {
         timerProfiles = tp;
     }
-#line 12991 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12990 "/root/p4c/build/ir/ir-generated.cpp"
 #line 314 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCTable::getTableName() const {
         return tableName;
     }
-#line 12996 "/root/p4c/build/ir/ir-generated.cpp"
+#line 12995 "/root/p4c/build/ir/ir-generated.cpp"
 #line 317 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCTable::printMatchType(unsigned matchType) const {
         cstring matchTypeString = cstring::empty;
@@ -13009,7 +13008,7 @@ cstring IR::TCTable::printMatchType(unsigned matchType) const {
         }
         return matchTypeString;
     }
-#line 13013 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13012 "/root/p4c/build/ir/ir-generated.cpp"
 #line 332 "/root/p4c/backends/tc/tc.def"
 IR::TCTable::TCTable(unsigned tId, cstring tN, cstring cN, cstring pN) {
         tableID = tId;
@@ -13032,7 +13031,7 @@ IR::TCTable::TCTable(unsigned tId, cstring tN, cstring cN, cstring pN) {
         isDirectCounter = false;
         isDirectMeter = false;
     }
-#line 13036 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13035 "/root/p4c/build/ir/ir-generated.cpp"
 #line 353 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCTable::toString() const {
         std::string tcTable = absl::StrCat("\n$TC p4template create table/",
@@ -13114,10 +13113,10 @@ cstring IR::TCTable::toString() const {
         }
         return tcTable;
     }
-#line 13118 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13117 "/root/p4c/build/ir/ir-generated.cpp"
 #line 433 "/root/p4c/backends/tc/tc.def"
 void IR::TCTable::dbprint(std::ostream & out) const { out << toString(); }
-#line 13121 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13120 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCTable::operator==(IR::TCTable const & a) const {
         return this->typeId() == a.typeId()
         && tableID == a.tableID
@@ -13193,7 +13192,7 @@ void IR::TCTable::visit_children(Visitor & v, char const * n) const {
     v.visit(defaultMissAction, "defaultMissAction");
 }
 void IR::TCTable::validate() const {
-#line 13197 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13196 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(defaultHitAction);
         CHECK_NULL(defaultMissAction); }
@@ -13292,13 +13291,13 @@ IR::TCKey::TCKey(unsigned id, unsigned width, cstring ptype, cstring name, cstri
         emitID = isID;
         emitValue = false;
     }
-#line 13296 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13295 "/root/p4c/build/ir/ir-generated.cpp"
 #line 454 "/root/p4c/backends/tc/tc.def"
 void IR::TCKey::setValue(unsigned v) {
         value = v;
         emitValue = true;
     }
-#line 13302 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13301 "/root/p4c/build/ir/ir-generated.cpp"
 #line 458 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCKey::toString() const {
         std::string tckeyInstance = absl::StrCat(" ", keyAttribute, " ", keyName, " ptype ", type);
@@ -13310,10 +13309,10 @@ cstring IR::TCKey::toString() const {
         }
         return tckeyInstance;
     }
-#line 13314 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13313 "/root/p4c/build/ir/ir-generated.cpp"
 #line 468 "/root/p4c/backends/tc/tc.def"
 void IR::TCKey::dbprint(std::ostream & out) const { out << toString(); }
-#line 13317 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13316 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCKey::operator==(IR::TCKey const & a) const {
         return this->typeId() == a.typeId()
         && keyID == a.keyID
@@ -13383,7 +13382,7 @@ IR::TCExternInstance::TCExternInstance(unsigned id, cstring name, bool isNe, uns
         isInstanceType = false;
         isConstructorKeys = false;
     }
-#line 13387 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13386 "/root/p4c/build/ir/ir-generated.cpp"
 #line 494 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::addControlPathKeys(safe_vector<const IR::TCKey *> k) {
         if (k.size() > 0) {
@@ -13391,7 +13390,7 @@ void IR::TCExternInstance::addControlPathKeys(safe_vector<const IR::TCKey *> k) 
             controlKeys = k;
         }
     }
-#line 13395 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13394 "/root/p4c/build/ir/ir-generated.cpp"
 #line 500 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::addConstructorKeys(safe_vector<const IR::TCKey *> k) {
         if (k.size() > 0) {
@@ -13399,24 +13398,24 @@ void IR::TCExternInstance::addConstructorKeys(safe_vector<const IR::TCKey *> k) 
             constructorKeys = k;
         }
     }
-#line 13403 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13402 "/root/p4c/build/ir/ir-generated.cpp"
 #line 506 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::setExternTypeInstance(cstring type) {
         isInstanceType = true;
         instanceType = type;
     }
-#line 13409 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13408 "/root/p4c/build/ir/ir-generated.cpp"
 #line 510 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::setExternTableBindable(bool flag) {
         isTablBindable = flag;
     }
-#line 13414 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13413 "/root/p4c/build/ir/ir-generated.cpp"
 #line 513 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::setNumElements(unsigned ne) {
         isNumelemns = true;
         numelemns = ne;
     }
-#line 13420 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13419 "/root/p4c/build/ir/ir-generated.cpp"
 #line 517 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCExternInstance::toString() const {
         std::string tcExternInstance = absl::StrCat(instanceName, " instid ", instanceID, " \\");
@@ -13441,10 +13440,10 @@ cstring IR::TCExternInstance::toString() const {
         }
         return tcExternInstance;
     }
-#line 13445 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13444 "/root/p4c/build/ir/ir-generated.cpp"
 #line 540 "/root/p4c/backends/tc/tc.def"
 void IR::TCExternInstance::dbprint(std::ostream & out) const { out << toString(); }
-#line 13448 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13447 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCExternInstance::operator==(IR::TCExternInstance const & a) const {
         return this->typeId() == a.typeId()
         && instanceID == a.instanceID
@@ -13525,12 +13524,12 @@ IR::TCExtern::TCExtern(cstring eId, cstring eN, cstring pN, unsigned inst, cstri
         acl_permisson = p;
         has_exec_method = exec_method;
     }
-#line 13529 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13528 "/root/p4c/build/ir/ir-generated.cpp"
 #line 559 "/root/p4c/backends/tc/tc.def"
 void IR::TCExtern::addExternInstance(const IR::TCExternInstance* tei) {
         externInstances.push_back(tei);
     }
-#line 13534 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13533 "/root/p4c/build/ir/ir-generated.cpp"
 #line 562 "/root/p4c/backends/tc/tc.def"
 const IR::TCExternInstance *IR::TCExtern::getExternInstance(cstring inst_name) const {
         for (auto extnInstDef : externInstances) {
@@ -13540,7 +13539,7 @@ const IR::TCExternInstance *IR::TCExtern::getExternInstance(cstring inst_name) c
         }
         return nullptr;
     }
-#line 13544 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13543 "/root/p4c/build/ir/ir-generated.cpp"
 #line 570 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCExtern::toString() const {
         std::string tcExtern = absl::StrCat("\n$TC p4template create extern/", "root/", externName,
@@ -13556,10 +13555,10 @@ cstring IR::TCExtern::toString() const {
         }
         return tcExtern;
     }
-#line 13560 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13559 "/root/p4c/build/ir/ir-generated.cpp"
 #line 584 "/root/p4c/backends/tc/tc.def"
 void IR::TCExtern::dbprint(std::ostream & out) const { out << toString(); }
-#line 13563 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13562 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCExtern::operator==(IR::TCExtern const & a) const {
         return this->typeId() == a.typeId()
         && externName == a.externName
@@ -13616,42 +13615,42 @@ bool IR::TCExtern::operator==(IR::Node const & a) const { return a == *this; }
 void IR::TCPipeline::setPipelineName(cstring pName) {
         pipelineName = pName;
     }
-#line 13620 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13619 "/root/p4c/build/ir/ir-generated.cpp"
 #line 599 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::setNumTables(unsigned n) {
         numTables = n;
     }
-#line 13625 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13624 "/root/p4c/build/ir/ir-generated.cpp"
 #line 602 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::addNoActionDefinition(const IR::TCAction* actionDef) {
         NoAction = actionDef;
     }
-#line 13630 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13629 "/root/p4c/build/ir/ir-generated.cpp"
 #line 605 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::addActionDefinition(const IR::TCAction* actionDef) {
         actionDefs.push_back(actionDef);
     }
-#line 13635 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13634 "/root/p4c/build/ir/ir-generated.cpp"
 #line 608 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::addTableDefinition(const IR::TCTable* tableDef) {
         tableDefs.push_back(tableDef);
     }
-#line 13640 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13639 "/root/p4c/build/ir/ir-generated.cpp"
 #line 611 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::setPipelinePreAction(const IR::TCAction* action) {
         preaction = action;
     }
-#line 13645 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13644 "/root/p4c/build/ir/ir-generated.cpp"
 #line 614 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::setPipelinePostAction(const IR::TCAction* action) {
         postaction = action;
     }
-#line 13650 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13649 "/root/p4c/build/ir/ir-generated.cpp"
 #line 617 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::addExternDefinition(const IR::TCExtern* externDef) {
         externDefs.push_back(externDef);
     }
-#line 13655 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13654 "/root/p4c/build/ir/ir-generated.cpp"
 #line 620 "/root/p4c/backends/tc/tc.def"
 const IR::TCExtern *IR::TCPipeline::getExternDefinition(cstring eName) const {
         for (auto externDef : externDefs) {
@@ -13661,14 +13660,14 @@ const IR::TCExtern *IR::TCPipeline::getExternDefinition(cstring eName) const {
         }
         return nullptr;
     }
-#line 13665 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13664 "/root/p4c/build/ir/ir-generated.cpp"
 #line 628 "/root/p4c/backends/tc/tc.def"
 IR::TCPipeline::TCPipeline() {
         Util::SourceInfo* srcinfo = new Util::SourceInfo();
         Node::srcInfo = *srcinfo;
         pipelineName = nullptr;
     }
-#line 13672 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13671 "/root/p4c/build/ir/ir-generated.cpp"
 #line 633 "/root/p4c/backends/tc/tc.def"
 cstring IR::TCPipeline::toString() const {
         std::string tcCode = absl::StrCat("#!/bin/bash -x\n",
@@ -13703,10 +13702,10 @@ cstring IR::TCPipeline::toString() const {
         absl::StrAppend(&tcCode, "\n$TC p4template update pipeline/", pipelineName, " state ready");
         return tcCode;
     }
-#line 13707 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13706 "/root/p4c/build/ir/ir-generated.cpp"
 #line 666 "/root/p4c/backends/tc/tc.def"
 void IR::TCPipeline::dbprint(std::ostream & out) const { out << toString(); }
-#line 13710 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13709 "/root/p4c/build/ir/ir-generated.cpp"
 bool IR::TCPipeline::operator==(IR::TCPipeline const & a) const {
         return this->typeId() == a.typeId()
         && pipelineName == a.pipelineName
@@ -13746,7 +13745,7 @@ void IR::TCPipeline::visit_children(Visitor & v, char const * n) const {
     v.visit(postaction, "postaction");
 }
 void IR::TCPipeline::validate() const {
-#line 13750 "/root/p4c/build/ir/ir-generated.cpp"
+#line 13749 "/root/p4c/build/ir/ir-generated.cpp"
 
         CHECK_NULL(NoAction);
         CHECK_NULL(preaction);

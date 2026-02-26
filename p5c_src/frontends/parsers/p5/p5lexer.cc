@@ -922,187 +922,188 @@ case 16:
 YY_RULE_SETUP
 #line 64 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
-                        auto string = cstring(driver.stringLiteral);
+                        std::string val(yytext);
+                        cstring string(val.substr(1, val.length() - 2));
                         return Parser::make_STRING_LITERAL(string, driver.yylloc);
                       }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 69 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 70 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_BREAK(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 71 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 72 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_CASE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 73 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 74 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_CLASS(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 75 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 76 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_CONST(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 77 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 78 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_DEFAULT(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 79 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 80 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_DO(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 81 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 82 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_ELSE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 83 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 84 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_ENUM(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 85 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 86 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_FOR(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 87 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 88 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_IF(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 89 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 90 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_INT(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 91 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 92 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_NAMESPACE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 93 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 94 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_PRIVATE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 95 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 96 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_PROTECTED(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 97 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 98 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_PUBLIC(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 99 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 100 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_RETURN(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 101 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 102 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_STRUCT(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 103 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 104 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_SWITCH(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 105 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 106 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_TYPEDEF(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 107 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 108 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_UNION(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 109 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 110 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_UINT(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 111 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 112 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_USING(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 113 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 114 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_WHILE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 115 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 116 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_VOID(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 118 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 119 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_KEY(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 120 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 121 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                         return Parser::make_CONTROL_PARAMETERS(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 122 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 123 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_SIZE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 125 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 126 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_HEADER(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 127 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 128 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   return Parser::make_TABLE(cstring(yytext), driver.yylloc); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 130 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 131 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 {
                   BEGIN(driver.saveState);
                   cstring name = cstring(yytext);
@@ -1112,305 +1113,305 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 138 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 139 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                      UnparsedConstant constant{cstring(yytext), 2, 16, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 141 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 142 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   UnparsedConstant constant{cstring(yytext), 2, 10, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 144 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 145 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   UnparsedConstant constant{cstring(yytext), 2, 8, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 147 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 148 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   UnparsedConstant constant{cstring(yytext), 2, 2, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 150 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 151 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState);
                   UnparsedConstant constant{cstring(yytext), 0, 10, false};
                   return Parser::make_INTEGER(constant, driver.yylloc); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 154 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 155 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_L_PAREN(driver.yylloc); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 155 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 156 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_R_PAREN(driver.yylloc); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 156 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 157 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_L_BRACE(driver.yylloc); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 157 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 158 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_R_BRACE(driver.yylloc); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 158 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 159 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_L_BRACKET(driver.yylloc); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 159 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 160 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_R_BRACKET(driver.yylloc); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 160 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 161 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_AT(driver.yylloc); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 161 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 162 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_DOT(driver.yylloc); }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 162 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 163 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_COMMA(driver.yylloc); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 163 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 164 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_COMPLEMENT(driver.yylloc); }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 164 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 165 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_QUESTION(driver.yylloc); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 165 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 166 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_COLON(driver.yylloc); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 166 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 167 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_SCOPE(driver.yylloc); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 167 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 168 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN(driver.yylloc); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 168 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 169 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_PLUS(driver.yylloc); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 169 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 170 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_PP(driver.yylloc); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 170 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 171 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_PLUS(driver.yylloc); }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 171 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 172 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_MINUS(driver.yylloc); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 172 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 173 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_MM(driver.yylloc); }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 173 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 174 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_MINUS(driver.yylloc); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 174 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 175 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_MUL(driver.yylloc); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 175 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 176 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_POW(driver.yylloc); }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 176 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 177 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_MUL(driver.yylloc); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 177 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 178 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_DIV(driver.yylloc); }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 178 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 179 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_DIV(driver.yylloc); }
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 179 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 180 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_MOD(driver.yylloc); }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 180 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 181 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_MOD(driver.yylloc); }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 181 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 182 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_NOT(driver.yylloc); }
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 182 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 183 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_EQ_OP(driver.yylloc); }
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 183 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 184 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_NE_OP(driver.yylloc); }
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 184 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 185 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_R_ANGLE(driver.yylloc); }
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 185 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 186 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_L_ANGLE(driver.yylloc); }
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 186 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 187 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_GE(driver.yylloc); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 187 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 188 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_LE(driver.yylloc); }
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 188 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 189 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_BIT_AND(driver.yylloc); }
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 189 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 190 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_AND_OP(driver.yylloc); }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 190 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 191 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_MASK(driver.yylloc); }
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 191 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 192 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_BIT_AND(driver.yylloc); }
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 192 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 193 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_BIT_OR(driver.yylloc); }
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 193 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 194 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_OR_OP(driver.yylloc); }
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 194 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 195 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_BIT_OR(driver.yylloc); }
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 195 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 196 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_BIT_XOR(driver.yylloc); }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 196 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 197 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_BIT_XOR(driver.yylloc); }
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 197 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 198 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_RIGHT_OP(driver.yylloc); }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 198 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 199 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_SHR(driver.yylloc); }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 199 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 200 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_LEFT_OP(driver.yylloc); }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 200 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 201 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_ASSIGN_SHL(driver.yylloc); }
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 201 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 202 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_SHARP(driver.yylloc); }
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 202 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 203 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_SEMICOLON(driver.yylloc); }
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 204 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 205 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 205 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 206 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { BEGIN(driver.saveState); return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 208 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 209 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 211 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 212 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1414 "lex.yy.c"
+#line 1415 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2373,6 +2374,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 211 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
+#line 212 "/root/p4c/frontends/parsers/p5/p5lexer.ll"
 
 

@@ -62,7 +62,8 @@ using Parser = P5::P5Parser;
 <LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { BEGIN(INITIAL); }
 
 \"[^"]*\"             { BEGIN(driver.saveState);
-                        auto string = cstring(driver.stringLiteral);
+                        std::string val(yytext);
+                        cstring string(val.substr(1, val.length() - 2));
                         return Parser::make_STRING_LITERAL(string, driver.yylloc);
                       }
 

@@ -42,7 +42,7 @@ class P5KeyCase : IAnnotated {
 
 class P5KeySwitch : IAnnotated {
     optional inline Vector<Annotation> annotations;
-    Expression select;
+    NullOK Expression select;
     optional inline Vector<P5KeyCase> cases;
     dbprint { out << "P5KeySwitch"; }
 

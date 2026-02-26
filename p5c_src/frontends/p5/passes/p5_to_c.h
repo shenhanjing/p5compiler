@@ -76,6 +76,7 @@ class P5ToC {
     using LocalsMap = std::unordered_map<cstring, const IR::Type *>;
     std::unordered_map<cstring, const IR::Type *> globalVariables;
     std::unordered_map<cstring, const IR::Type_Struct *> structMap;
+    std::unordered_set<cstring> declaredTypes;
 
     std::ostream *getStream(const std::string &filename);
     void flushCFile();
