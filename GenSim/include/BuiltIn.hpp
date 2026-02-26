@@ -100,23 +100,33 @@ inline void clear_fields_one(T &&value) {
 
 template <typename T>
 inline void append_bits_msb_first(const T &value, std::vector<bool> &out) {
-    using D = std::decay_t<T>;
-    if constexpr (is_p5_uint<D>::value) {
-        constexpr std::size_t N = D::width();
-        for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
-    } else if constexpr (is_p5_member<D>::value) {
-        constexpr std::size_t N = D::width();
-        for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
-    } else if constexpr (is_p5_union<D>::value) {
-        // Convert union to its raw uint view and append.
-        auto raw = value.to_uint();
-        constexpr std::size_t N = decltype(raw)::width();
-        for (std::size_t i = 0; i < N; ++i) out.push_back(raw[N - 1 - i]);
-    } else if constexpr (std::is_aggregate_v<D>) {
-        boost::pfr::for_each_field(value, [&](const auto &sub) { append_bits_msb_first(sub, out); });
+    using U = remove_cvref_t<T>;
+    if constexpr (std::is_array_v<U>) {
+        for (const auto &elem : value) append_bits_msb_first(elem, out);
+    } else if constexpr (is_std_array<U>::value) {
+        for (const auto &elem : value) append_bits_msb_first(elem, out);
+    } else if constexpr (is_std_vector<U>::value) {
+        for (const auto &elem : value) append_bits_msb_first(elem, out);
     } else {
-        static_assert(always_false<T>::value,
-                      "Key pack supports p5::uint/p5::member/p5::Union or aggregates composed of them.");
+        using D = std::decay_t<T>;
+        if constexpr (is_p5_uint<D>::value) {
+            constexpr std::size_t N = D::width();
+            for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
+        } else if constexpr (is_p5_member<D>::value) {
+            constexpr std::size_t N = D::width();
+            for (std::size_t i = 0; i < N; ++i) out.push_back(value[N - 1 - i]);
+        } else if constexpr (is_p5_union<D>::value) {
+            // Convert union to its raw uint view and append.
+            auto raw = value.to_uint();
+            constexpr std::size_t N = decltype(raw)::width();
+            for (std::size_t i = 0; i < N; ++i) out.push_back(raw[N - 1 - i]);
+        } else if constexpr (std::is_aggregate_v<D>) {
+            boost::pfr::for_each_field(value, [&](const auto &sub) { append_bits_msb_first(sub, out); });
+        } else {
+            static_assert(always_false<T>::value,
+                          "Key pack supports p5::uint/p5::member/p5::Union, arrays/vectors of them, "
+                          "or aggregates composed of them.");
+        }
     }
 }
 
@@ -125,7 +135,7 @@ inline auto pack_key_to_uint(const Key &key) {
     using D = std::decay_t<Key>;
     constexpr std::size_t Bits = p5::bit_width_v<D>;
     static_assert(Bits > 0, "Key bit width must be > 0");
-    static_assert(Bits <= 256, "Packed key width exceeds p5::uint<N> supported range (<=256)");
+    static_assert(Bits <= P5_UINT_MAX_BITS, "Packed key width exceeds p5::uint<N> supported range (<=256)");
     std::vector<bool> bits;
     bits.reserve(Bits);
     append_bits_msb_first(key, bits);
@@ -226,25 +236,25 @@ inline std::size_t find_field_index(const char* field_name) {
     constexpr auto& names = struct_field_names<StructType>::names;
     constexpr std::size_t name_count = struct_field_names<StructType>::count;
     constexpr std::size_t field_count = boost::pfr::tuple_size_v<StructType>;
-    
+
     // Check if field names are defined
     if (name_count == 0) {
         throw std::runtime_error("Field names not defined for this struct type. "
                                 "Please specialize struct_field_names template.");
     }
-    
+
     // Verify field count matches
     if (name_count != field_count) {
         throw std::runtime_error("Field name count does not match struct field count.");
     }
-    
+
     // Find matching field name (case-sensitive)
     for (std::size_t i = 0; i < name_count; ++i) {
         if (std::strcmp(names[i], field_name) == 0) {
             return i;
         }
     }
-    
+
     return SIZE_MAX; // Not found
 }
 
@@ -299,6 +309,14 @@ constexpr std::size_t bit_width_of_type() {
 // Global _sizeof function: returns bit width (in bits) based on argument type.
 template <typename T>
 constexpr std::size_t _sizeof(const T&) {
+    using Decayed = std::decay_t<T>;
+    return p5::bit_width_v<Decayed>;
+}
+
+// Global _sizeof function overload: allows calling with type template argument directly.
+// Usage: _sizeof<MyType>()
+template <typename T>
+constexpr std::size_t _sizeof() {
     using Decayed = std::decay_t<T>;
     return p5::bit_width_v<Decayed>;
 }
@@ -752,20 +770,20 @@ public:
     template <typename T>
     inline auto _map(const std::vector<T>& struct_list, const char* field_name) const {
         using StructType = std::decay_t<T>;
-        
+
         // 查找字段索引
         std::size_t field_index = detail_builtin::find_field_index<StructType>(field_name);
-        
+
         if (field_index == SIZE_MAX) {
-            throw std::invalid_argument(std::string("Field '") + field_name + 
+            throw std::invalid_argument(std::string("Field '") + field_name +
                                        "' not found in struct");
         }
-        
+
         constexpr std::size_t field_count = boost::pfr::tuple_size_v<StructType>;
         if (field_index >= field_count) {
             throw std::invalid_argument("Field index out of range");
         }
-        
+
         // Dispatch based on field_index using explicit template instantiation
         // Each branch calls a different template function with its own return type
         // We use separate if statements (not else-if) so compiler can optimize
@@ -851,7 +869,7 @@ public:
                 return detail_builtin::map_field_dispatch_wrapper<StructType>::template dispatch_impl<15>(struct_list);
             }
         }
-        
+
         // If we reach here, field_index is out of range
         throw std::invalid_argument("Field index out of range (max 16 fields supported)");
     }
@@ -948,7 +966,7 @@ public:
 
         // 根据操作符进行归约
         T result = list[0];
-        
+
         if (std::strcmp(op, "+") == 0) {
             // 加法: list[0] + list[1] + ... + list[n-1]
             for (size_t i = 1; i < list.size(); ++i) {
@@ -976,7 +994,7 @@ public:
             }
         } else {
             // 不支持的操作符，抛出异常
-            throw std::invalid_argument(std::string("Unsupported operator: ") + op + 
+            throw std::invalid_argument(std::string("Unsupported operator: ") + op +
                                         ". Supported operators: +, -, |, &, ^");
         }
 
