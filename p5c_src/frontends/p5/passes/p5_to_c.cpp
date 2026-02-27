@@ -517,7 +517,46 @@ void P5ToC::emitTypedef(const IR::Type_Typedef *td) {
         std::ostringstream oss;
         auto *oldStream = outputStream;
         outputStream = &oss;
-        emitFieldType(td->type, EmitMode::Memberized);
+
+        bool handled = false;
+
+        // Special case: handle templates (like _inflate<T> or Vector<T>) manually
+        // because emitFieldType might not handle template specialization name mangling for _inU_ correctly
+        if (auto *st = td->type->to<IR::Type_Specialized>()) {
+             *outputStream << st->baseType->path->name << "<";
+             for (size_t i = 0; i < st->arguments->size(); ++i) {
+                 if (i > 0) *outputStream << ", ";
+                 emitFieldType(st->arguments->at(i), EmitMode::Memberized);
+             }
+             *outputStream << ">";
+             handled = true;
+        } else if (auto *tn = td->type->to<IR::Type_Name>()) {
+             // Handle case where parser treats Template<T> as a single Type_Name
+             std::string name = tn->path->name.toString().c_str();
+             auto start = name.find('<');
+             auto end = name.rfind('>');
+             if (start != std::string::npos && end != std::string::npos && end > start) {
+                 std::string base = name.substr(0, start);
+                 std::string args = name.substr(start + 1, end - start - 1);
+
+                 // Simple heuristic: if it's a single argument and not a basic type, add _inU_
+                 if (args.find(',') == std::string::npos) {
+                     // Check for basic types to avoid _inU_uint<...>
+                     bool isBasic = (args.find("uint") == 0 || args.find("int") == 0 ||
+                                     args == "bool" || args == "bit" || args == "void");
+
+                     if (!isBasic) {
+                         *outputStream << base << "<_inU_" << args << ">";
+                         handled = true;
+                     }
+                 }
+             }
+        }
+
+        if (!handled) {
+            emitFieldType(td->type, EmitMode::Memberized);
+        }
+
         outputStream = oldStream;
         std::string mappedType = oss.str();
 
@@ -1983,6 +2022,7 @@ void P5ToC::emitStructOrUnionImpl(const IR::Type_Struct *st, bool isNested, Emit
 
     if (isUnionType) {
         *outputStream << "using " << st->name << " = p5::Union<_Layout_" << st->name << ">;\n";
+        *outputStream << "using _inU_" << st->name << " = " << st->name << ";\n";
     }
 
     if (!isNested) {
