@@ -1253,8 +1253,14 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
                       }
                  }
             }
-            // Case 3: Standard sizeof(expr) -> _sizeof(expr)
-            // Fallthrough to normal emission, but map "sizeof" to "_sizeof"
+            // Case 3: Standard sizeof(expr) -> _sizeof<decltype(expr)>()
+            if (mc->arguments && mc->arguments->size() == 1) {
+                *outputStream << "_sizeof<decltype(";
+                emitExpressionWithCtx(mc->arguments->at(0)->expression, locals);
+                *outputStream << ")>()";
+                return;
+            }
+            // Fallback (e.g. multi-arg, though unlikely for sizeof) -> _sizeof(...)
             *outputStream << "_sizeof";
         } else {
             emitExpressionWithCtx(mc->method, locals);
