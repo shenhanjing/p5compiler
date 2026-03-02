@@ -1517,9 +1517,13 @@ void P5ToC::emitExpressionWithCtx(const IR::Expression *expr, const LocalsMap &l
 
     if (auto *cast = expr->to<IR::Cast>()) {
         emitFieldType(cast->destType);
-        *outputStream << "(";
+        if (!cast->expr->is<IR::ListExpression>()) {
+            *outputStream << "{";
+        }
         emitExpressionWithCtx(cast->expr, locals);
-        *outputStream << ")";
+        if (!cast->expr->is<IR::ListExpression>()) {
+            *outputStream << "}";
+        }
         return;
     }
 

@@ -1166,7 +1166,15 @@ struct _arr_UN {
 };
 
 void _test_inflate_arg(_compressed_FIBRSP_S CompressedFibRsp){
+}
 
+struct _test_ST_init{
+  uint<4> A;
+  ETHER_TYPE_S B;
+};
+void _test_ST_init_fun(){
+  _test_ST_init temp;
+  temp = (_test_ST_init) { 0, (ETHER_TYPE_S){ 0 }};
 }
 
 //void typeref(){
