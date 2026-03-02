@@ -1165,6 +1165,10 @@ struct _arr_UN {
   };
 };
 
+void _test_inflate_arg(_compressed_FIBRSP_S CompressedFibRsp){
+
+}
+
 //void typeref(){
 //  uint<4> a = 5;
 //  uint<4> c = 5;

@@ -596,6 +596,22 @@ void P5ToC::emitSerEnum(const IR::Type_SerEnum *serEnum) {
 void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &class_name) {
     if (func == nullptr) return;
 
+    // Map _compressed_X -> _inflate<X>, otherwise reuse emitFieldType.
+    auto writeMappedType = [this](const IR::Type *type, std::ostream &os) {
+        if (auto *tn = type->to<IR::Type_Name>()) {
+            auto name = tn->path->name.toString();
+            if (name.startsWith("_compressed_")) {
+                auto inner = name.substr(strlen("_compressed_"));
+                os << "_inflate<" << inner << ">";
+                return;
+            }
+        }
+        auto *old = outputStream;
+        outputStream = &os;
+        emitFieldType(type);
+        outputStream = old;
+    };
+
     // Pre-scan parameters to collect generic template typenames for uint<0>.
     // Rules:
     // - uint<0> var        -> Tn var
@@ -707,7 +723,7 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                 // Unsized array parameters (T a[]) are represented via annotation.
                 // Keep the original "[]" form in the generated signature.
                 if (!handled && isUnsizedArrayParam(param)) {
-                    emitFieldType(param->type);
+                    writeMappedType(param->type, *outputStream);
                     if (param->direction == IR::Direction::InOut) {
                         // C++: reference to array of unknown bound: T (&name)[]
                         *outputStream << " (&" << param->name << ")[]";
@@ -730,7 +746,7 @@ void P5ToC::emitFunctionSignature(const IR::Function *func, const std::string &c
                 }
 
                 if (!handled) {
-                    emitFieldType(param->type);
+                    writeMappedType(param->type, *outputStream);
                     if (param->direction == IR::Direction::InOut) {
                         *outputStream << " &" << param->name;
                     } else {
