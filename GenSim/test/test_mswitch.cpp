@@ -278,6 +278,154 @@ bool test_mswitch_with_slices() {
     return ok;
 }
 
+struct MaskUnionLayout {
+    p5::member<p5::uint<8>> whole;
+    struct {
+        p5::member<p5::uint<4>> hi;
+        p5::member<p5::uint<4>> lo;
+    } nybble;
+};
+
+struct MaskNestedAgg {
+    p5::uint<4> x;
+    p5::uint<4> y;
+};
+
+struct MaskAgg {
+    p5::uint<8> a;
+    p5::Union<MaskUnionLayout> u;
+    p5::uint<4> arr[2];
+    MaskNestedAgg nested;
+};
+
+bool test_masked_match_aggregate_recursive() {
+    bool ok = true;
+
+    MaskAgg in{};
+    in.a = 0x5A;
+    in.u = p5::uint<8>(0xBC);
+    in.arr[0] = 0x3;
+    in.arr[1] = 0x7;
+    in.nested.x = 0xE;
+    in.nested.y = 0x1;
+
+    auto sw = p5::mswitch::tie(in);
+
+    MaskAgg val{};
+    val.a = 0x5A;
+    val.u = p5::uint<8>(0xB0); // only high nibble is checked by mask
+    val.arr[0] = 0x3;
+    val.arr[1] = 0x0;          // wildcarded by mask
+    val.nested.x = 0xE;
+    val.nested.y = 0x0;        // wildcarded by mask
+
+    MaskAgg m{};
+    m.a = 0xFF;
+    m.u = p5::uint<8>(0xF0);
+    m.arr[0] = 0xF;
+    m.arr[1] = 0x0;
+    m.nested.x = 0xF;
+    m.nested.y = 0x0;
+
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(val, m)),
+                      "aggregate recursive masked match succeeds");
+
+    MaskAgg bad = val;
+    bad.nested.x = 0xD; // this field is masked-in, must fail
+    ok &= expect_true(!p5::mswitch::match(sw, p5::mswitch::mask(bad, m)),
+                      "aggregate recursive masked match fails on masked field mismatch");
+
+    MaskAgg zero{};
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(zero, zero)),
+                      "aggregate mask(0,0) acts as wildcard");
+
+    return ok;
+}
+
+bool test_masked_match_union_direct() {
+    bool ok = true;
+
+    p5::Union<MaskUnionLayout> in{};
+    in = p5::uint<8>(0xBC);
+    auto sw = p5::mswitch::tie(in);
+
+    // Check high nibble only.
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(0xB0, 0xF0)),
+                      "union direct masked match with integral pattern succeeds");
+    ok &= expect_true(!p5::mswitch::match(sw, p5::mswitch::mask(0xA0, 0xF0)),
+                      "union direct masked match fails on high nibble mismatch");
+
+    // Pattern as Union object.
+    p5::Union<MaskUnionLayout> val{};
+    p5::Union<MaskUnionLayout> m{};
+    val = p5::uint<8>(0xB0);
+    m = p5::uint<8>(0xF0);
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(val, m)),
+                      "union direct masked match with union value/mask succeeds");
+
+    return ok;
+}
+
+bool test_masked_match_aggregate_with_raw_uint_pattern() {
+    bool ok = true;
+
+    MaskAgg in{};
+    in.a = 0x5A;
+    in.u = p5::uint<8>(0xBC);
+    in.arr[0] = 0x3;
+    in.arr[1] = 0x7;
+    in.nested.x = 0xE;
+    in.nested.y = 0x1;
+    auto sw = p5::mswitch::tie(in);
+
+    constexpr std::size_t W = p5::bit_width_v<MaskAgg>;
+    using U = p5::uint<W>;
+    U in_bits = p5::mswitch::detail::to_bits(in);
+
+    // Build raw uint patterns from runtime-flattened bits, then toggle masked/unmasked bits.
+    U v = in_bits;
+    U m = U::max();
+    m[0] = false;      // ignore one bit
+    v[0] = !in_bits[0];
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(v, m)),
+                      "aggregate masked match with raw uint pattern succeeds");
+
+    U bad_v = v;
+    bad_v[1] = !in_bits[1];   // this bit is still masked-in
+    ok &= expect_true(!p5::mswitch::match(sw, p5::mswitch::mask(bad_v, m)),
+                      "aggregate masked match with raw uint pattern fails on masked-in mismatch");
+
+    return ok;
+}
+
+bool test_masked_match_aggregate_array_only() {
+    bool ok = true;
+
+    MaskAgg in{};
+    in.a = 0x12;
+    in.u = p5::uint<8>(0x34);
+    in.arr[0] = 0xA;
+    in.arr[1] = 0x5;
+    in.nested.x = 0x6;
+    in.nested.y = 0x7;
+    auto sw = p5::mswitch::tie(in);
+
+    // Only check arr[0], everything else wildcard.
+    MaskAgg val{};
+    MaskAgg m{};
+    val.arr[0] = 0xA;
+    m.arr[0] = 0xF;
+    ok &= expect_true(p5::mswitch::match(sw, p5::mswitch::mask(val, m)),
+                      "aggregate masked match on array-only field succeeds");
+
+    MaskAgg bad = val;
+    bad.arr[0] = 0x9;
+    ok &= expect_true(!p5::mswitch::match(sw, p5::mswitch::mask(bad, m)),
+                      "aggregate masked match on array-only field fails when mismatched");
+
+    return ok;
+}
+
 } // namespace
 
 int main() {
@@ -290,6 +438,10 @@ int main() {
     all_ok &= test_mask_patterns_more();
     all_ok &= test_single_param_switch_style();
     all_ok &= test_mswitch_with_slices();
+    all_ok &= test_masked_match_aggregate_recursive();
+    all_ok &= test_masked_match_union_direct();
+    all_ok &= test_masked_match_aggregate_with_raw_uint_pattern();
+    all_ok &= test_masked_match_aggregate_array_only();
 
     if (all_ok) {
         std::cout << "[PASS] mswitch tests\n";
