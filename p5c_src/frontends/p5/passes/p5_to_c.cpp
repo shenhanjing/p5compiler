@@ -74,6 +74,7 @@ void P5ToC::emitP5Program(const IR::P4Program *program) {
     bool oldBypass = bypassCtxPrefix;
     bypassCtxPrefix = true;
     emitEnumsHpp(program);
+    emitConstantsHpp(program);
     emitStructHpp(program);
     emitGtvHpp(program);
     bypassCtxPrefix = oldBypass;
@@ -2097,6 +2098,33 @@ void P5ToC::emitEnumsHpp(const IR::P4Program *program) {
     outputStream = defaultStream;
 }
 
+void P5ToC::emitConstantsHpp(const IR::P4Program *program) {
+    outputStream = getStream("include/generated_constants.hpp");
+
+    *outputStream << "#ifndef GENERATED_CONSTANTS_HPP\n"
+                  << "#define GENERATED_CONSTANTS_HPP\n"
+                  << "\n"
+                  << "#include \"table.hpp\"\n"
+                  << "#include \"SE.hpp\"\n"
+                  << "#include \"key.hpp\"\n"
+                  << "#include \"BuiltIn.hpp\"\n"
+                  << "#include \"p5_types.hpp\"\n"
+                  << "#include \"model_intf_1027.h\"\n"
+                  << "\n";
+
+    for (const auto *obj : program->objects) {
+        if (auto *decl = obj->to<IR::Declaration_Constant>()) {
+            *outputStream << "static constexpr auto " << decl->name << " = ";
+            emitExpressionWithCtx(decl->initializer, {});
+            *outputStream << ";\n";
+        }
+    }
+
+    *outputStream << "\n#endif // GENERATED_CONSTANTS_HPP\n";
+
+    outputStream = defaultStream;
+}
+
 void P5ToC::emitStructHpp(const IR::P4Program *program) {
     outputStream = getStream("include/generated_struct.hpp");
 
@@ -2111,6 +2139,7 @@ void P5ToC::emitStructHpp(const IR::P4Program *program) {
                   << "#include \"model_intf_1027.h\"\n"
                   << "\n"
                   << "#include \"generated_enum.hpp\"\n"
+                  << "#include \"generated_constants.hpp\"\n"
                   << "\n";
 
     for (const auto *obj : program->objects) {
@@ -3361,36 +3390,6 @@ int P5ToC::evaluateExprToInt(const IR::Expression* expr) {
     ::P4::error("Cannot evaluate expression to integer: %s", expr);
     return 0;
 }
-
-// int P5ToC::getTypeSize(const IR::Type* type) {
-//     if (auto tb = type->to<IR::Type_Bits>()) {
-//         if (tb->expression) {
-//             return evaluateExprToInt(tb->expression);
-//         }
-//         return tb->width_bits();
-//     }
-//     if (auto tn = type->to<IR::Type_Name>()) {
-//         if (structMap.count(tn->path->name)) {
-//             return getTypeSize(structMap.at(tn->path->name));
-//         }
-//         return 0;
-//     }
-//     if (auto ts = type->to<IR::Type_Struct>()) {
-//         int size = 0;
-//         for (auto field : ts->fields) {
-//             size += getTypeSize(field->type);
-//         }
-//         return size;
-//     }
-//     if (auto stack = type->to<IR::Type_Stack>()) {
-//          int elemSize = getTypeSize(stack->elementType);
-//          if (auto c = stack->size->to<IR::Constant>()) {
-//              return elemSize * c->asInt();
-//          }
-//          return elemSize * evaluateExprToInt(stack->size);
-//     }
-//     return 0;
-// }
 
 const IR::P4Program *runP5ToC(const IR::P4Program *program, const std::string &out_dir) {
     CHECK_NULL(program);

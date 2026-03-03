@@ -107,6 +107,7 @@ class P5ToC {
     bool emitMethodCall(const IR::MethodCallExpression *mc, std::ostream &os, const LocalsMap &locals = {});
     void emitGtvHpp(const IR::P4Program *program);
     void emitEnumsHpp(const IR::P4Program *program);
+    void emitConstantsHpp(const IR::P4Program *program);
     void emitStructHpp(const IR::P4Program *program);
     void emitSwitch(const IR::P4Program *program);
     void emitStructsAndUnions(const IR::P4Program *program);
