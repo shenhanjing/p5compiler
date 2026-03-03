@@ -118,7 +118,7 @@ private:
         }
 
         // 赋值自整数（按低位写入，超出 64 位的部分清零）
-        template <typename Integral, typename = std::enable_if_t<std::is_integral_v<Integral>>>
+        template <typename Integral, typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>)>>
         slice_proxy &operator=(Integral rhs) {
             uint64_t v = static_cast<uint64_t>(rhs);
             for (size_t i = 0; i < width; ++i) {
@@ -139,6 +139,18 @@ private:
 
         bool operator[](size_t pos) const {
             return bits[Low + pos];
+        }
+
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bit_reference operator[](Enum pos) {
+            return (*this)[static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+        }
+
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bool operator[](Enum pos) const {
+            return (*this)[static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
         }
 
         // ---- nested compile-time slice access (relative to this slice) ----
@@ -198,41 +210,41 @@ private:
         bool operator>=(const slice_proxy<H2, L2> &rhs) const { return *this >= static_cast<uint<H2 - L2 + 1>>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator==(Integral rhs) const { return read() == static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator!=(Integral rhs) const { return read() != static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<(Integral rhs) const { return read() < static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<=(Integral rhs) const { return read() <= static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>(Integral rhs) const { return read() > static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>=(Integral rhs) const { return read() >= static_cast<uint64_t>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator==(Integral lhs, const slice_proxy &rhs) { return rhs == lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator!=(Integral lhs, const slice_proxy &rhs) { return rhs != lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) < rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) <= rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) > rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) >= rhs.read(); }
 
         // ---- binary arithmetic/bitwise ops (return value_type) ----
@@ -247,6 +259,16 @@ private:
         value_type operator~() const { return ~read(); }
         value_type operator<<(size_t shift) const { return read() << shift; }
         value_type operator>>(size_t shift) const { return read() >> shift; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator<<(Enum shift) const {
+            return (*this) << static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator>>(Enum shift) const {
+            return (*this) >> static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template <size_t M> value_type operator+(const uint<M> &rhs) const { return read() + value_type(rhs); }
         template <size_t M> value_type operator-(const uint<M> &rhs) const { return read() - value_type(rhs); }
@@ -258,44 +280,53 @@ private:
         template <size_t M> value_type operator^(const uint<M> &rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator+(Integral rhs) const { return read() + value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator-(Integral rhs) const { return read() - value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator*(Integral rhs) const { return read() * value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator/(Integral rhs) const { return read() / value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator%(Integral rhs) const { return read() % value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator&(Integral rhs) const { return read() & value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator|(Integral rhs) const { return read() | value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator^(Integral rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator+(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) + rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator-(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) - rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator*(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) * rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator/(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) / rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator%(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) % rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator&(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) & rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator|(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) | rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator^(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) ^ rhs.read(); }
 
         // ---- compound assignments (read-modify-write) ----
@@ -309,6 +340,16 @@ private:
         slice_proxy &operator^=(const uint<width> &rhs) { auto tmp = read(); tmp ^= rhs; *this = tmp; return *this; }
         slice_proxy &operator<<=(size_t shift) { auto tmp = read(); tmp <<= shift; *this = tmp; return *this; }
         slice_proxy &operator>>=(size_t shift) { auto tmp = read(); tmp >>= shift; *this = tmp; return *this; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator<<=(Enum shift) {
+            return (*this) <<= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator>>=(Enum shift) {
+            return (*this) >>= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template<size_t M> slice_proxy &operator+=(const uint<M> &rhs) { return (*this += uint<width>(rhs)); }
         template<size_t M> slice_proxy &operator-=(const uint<M> &rhs) { return (*this -= uint<width>(rhs)); }
@@ -320,28 +361,28 @@ private:
         template<size_t M> slice_proxy &operator^=(const uint<M> &rhs) { return (*this ^= uint<width>(rhs)); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator+=(Integral rhs) { return (*this += uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator-=(Integral rhs) { return (*this -= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator*=(Integral rhs) { return (*this *= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator/=(Integral rhs) { return (*this /= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator%=(Integral rhs) { return (*this %= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator&=(Integral rhs) { return (*this &= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator|=(Integral rhs) { return (*this |= uint<width>(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator^=(Integral rhs) { return (*this ^= uint<width>(rhs)); }
 
         // ---- ++/-- ----
@@ -359,7 +400,7 @@ public:
     
     // 从整数构造（允许隐式从任意非 bool 整型转换）
     explicit uint(uint64_t val) : value(val) {}
-    template <typename Integral, typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+    template <typename Integral, typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>) && !std::is_same_v<Integral, bool>>>
     /*implicit*/ uint(Integral val) : value(static_cast<uint64_t>(val)) {}
     
     // 从其他 uint<N> 构造
@@ -377,7 +418,7 @@ public:
         value = val;
         return *this;
     }
-    template <typename Integral, typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+    template <typename Integral, typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>) && !std::is_same_v<Integral, bool>>>
     uint& operator=(Integral val) {
         value = static_cast<uint64_t>(val);
         return *this;
@@ -527,11 +568,23 @@ public:
         out.value = (value << shift);
         return out;
     }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint operator<<(Enum shift) const {
+        return (*this) << static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
     
     uint operator>>(size_t shift) const {
         uint out{};
         out.value = (value >> shift);
         return out;
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint operator>>(Enum shift) const {
+        return (*this) >> static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
     }
     
     // 复合赋值运算符
@@ -579,10 +632,22 @@ public:
         value <<= shift;
         return *this;
     }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint& operator<<=(Enum shift) {
+        return (*this) <<= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
     
     uint& operator>>=(size_t shift) {
         value >>= shift;
         return *this;
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint& operator>>=(Enum shift) {
+        return (*this) >>= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
     }
     
     // 比较运算符
@@ -690,6 +755,18 @@ public:
 
     bool operator[](size_t pos) const {
         return value[pos];
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bit_reference operator[](Enum pos) {
+        return (*this)[static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bool operator[](Enum pos) const {
+        return (*this)[static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
     }
 
     // 编译期切片访问（可写）
@@ -875,6 +952,18 @@ public:
         return access_.get(access_.ctx, offset_ + pos);
     }
 
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bit_reference operator[](Enum pos) {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bool operator[](Enum pos) const {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+
     // slice proxy (writable), similar to p5::uint::slice_proxy
     template <std::size_t High, std::size_t Low>
     class slice_proxy {
@@ -923,7 +1012,7 @@ public:
         }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>) && !std::is_same_v<Integral, bool>>>
         slice_proxy &operator=(Integral rhs) {
             if (!access_.set) return *this;
             uint64_t v = static_cast<uint64_t>(rhs);
@@ -938,6 +1027,17 @@ public:
         bool operator[](std::size_t pos) const {
             if (!access_.get) return false;
             return access_.get(access_.ctx, base_ + Low + pos);
+        }
+
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bit_reference operator[](Enum pos) {
+            return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bool operator[](Enum pos) const {
+            return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
         }
 
         // ---- nested compile-time slice access (relative to this slice) ----
@@ -998,41 +1098,41 @@ public:
         bool operator>=(const slice_proxy<H2, L2> &rhs) const { return *this >= static_cast<p5::uint<H2 - L2 + 1>>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator==(Integral rhs) const { return read() == static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator!=(Integral rhs) const { return read() != static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<(Integral rhs) const { return read() < static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<=(Integral rhs) const { return read() <= static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>(Integral rhs) const { return read() > static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>=(Integral rhs) const { return read() >= static_cast<uint64_t>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator==(Integral lhs, const slice_proxy &rhs) { return rhs == lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator!=(Integral lhs, const slice_proxy &rhs) { return rhs != lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) < rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) <= rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) > rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) >= rhs.read(); }
 
         // ---- binary arithmetic/bitwise ops (return value_type) ----
@@ -1047,6 +1147,16 @@ public:
         value_type operator~() const { return ~read(); }
         value_type operator<<(size_t shift) const { return read() << shift; }
         value_type operator>>(size_t shift) const { return read() >> shift; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator<<(Enum shift) const {
+            return (*this) << static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator>>(Enum shift) const {
+            return (*this) >> static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template <std::size_t M> value_type operator+(const p5::uint<M> &rhs) const { return read() + value_type(rhs); }
         template <std::size_t M> value_type operator-(const p5::uint<M> &rhs) const { return read() - value_type(rhs); }
@@ -1058,44 +1168,53 @@ public:
         template <std::size_t M> value_type operator^(const p5::uint<M> &rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator+(Integral rhs) const { return read() + value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator-(Integral rhs) const { return read() - value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator*(Integral rhs) const { return read() * value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator/(Integral rhs) const { return read() / value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator%(Integral rhs) const { return read() % value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator&(Integral rhs) const { return read() & value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator|(Integral rhs) const { return read() | value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator^(Integral rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator+(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) + rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator-(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) - rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator*(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) * rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator/(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) / rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator%(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) % rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator&(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) & rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator|(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) | rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator^(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) ^ rhs.read(); }
 
         // ---- compound assignments (read-modify-write) ----
@@ -1109,6 +1228,16 @@ public:
         slice_proxy &operator^=(const value_type &rhs) { auto tmp = read(); tmp ^= rhs; *this = tmp; return *this; }
         slice_proxy &operator<<=(size_t shift) { auto tmp = read(); tmp <<= shift; *this = tmp; return *this; }
         slice_proxy &operator>>=(size_t shift) { auto tmp = read(); tmp >>= shift; *this = tmp; return *this; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator<<=(Enum shift) {
+            return (*this) <<= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator>>=(Enum shift) {
+            return (*this) >>= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template<std::size_t M> slice_proxy &operator+=(const p5::uint<M> &rhs) { return (*this += value_type(rhs)); }
         template<std::size_t M> slice_proxy &operator-=(const p5::uint<M> &rhs) { return (*this -= value_type(rhs)); }
@@ -1120,28 +1249,28 @@ public:
         template<std::size_t M> slice_proxy &operator^=(const p5::uint<M> &rhs) { return (*this ^= value_type(rhs)); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator+=(Integral rhs) { return (*this += value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator-=(Integral rhs) { return (*this -= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator*=(Integral rhs) { return (*this *= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator/=(Integral rhs) { return (*this /= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator%=(Integral rhs) { return (*this %= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator&=(Integral rhs) { return (*this &= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator|=(Integral rhs) { return (*this |= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator^=(Integral rhs) { return (*this ^= value_type(rhs)); }
 
         // ---- ++/-- ----
@@ -1197,7 +1326,7 @@ public:
 
     // Assign from integer: write low bits.
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>) && !std::is_same_v<Integral, bool>>>
     member &operator=(Integral rhs) {
         write_from(rhs);
         return *this;
@@ -1228,32 +1357,32 @@ public:
 
     // comparisons: member vs integral
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator==(Integral rhs) const {
         return read() == static_cast<uint64_t>(rhs);
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator!=(Integral rhs) const {
         return read() != static_cast<uint64_t>(rhs);
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator<(Integral rhs) const {
         return read() < static_cast<uint64_t>(rhs);
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator<=(Integral rhs) const {
         return read() <= static_cast<uint64_t>(rhs);
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator>(Integral rhs) const {
         return read() > static_cast<uint64_t>(rhs);
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator>=(Integral rhs) const {
         return read() >= static_cast<uint64_t>(rhs);
     }
@@ -1262,7 +1391,7 @@ public:
     value_type operator+(const member &rhs) const { return read() + rhs.read(); }
     value_type operator+(const value_type &rhs) const { return read() + rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator+(Integral rhs) const {
         return read() + value_type(rhs);
     }
@@ -1271,7 +1400,7 @@ public:
     value_type operator-(const member &rhs) const { return read() - rhs.read(); }
     value_type operator-(const value_type &rhs) const { return read() - rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator-(Integral rhs) const {
         return read() - value_type(rhs);
     }
@@ -1279,7 +1408,7 @@ public:
     value_type operator*(const member &rhs) const { return read() * rhs.read(); }
     value_type operator*(const value_type &rhs) const { return read() * rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator*(Integral rhs) const {
         return read() * value_type(rhs);
     }
@@ -1287,7 +1416,7 @@ public:
     value_type operator/(const member &rhs) const { return read() / rhs.read(); }
     value_type operator/(const value_type &rhs) const { return read() / rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator/(Integral rhs) const {
         return read() / value_type(rhs);
     }
@@ -1295,7 +1424,7 @@ public:
     value_type operator%(const member &rhs) const { return read() % rhs.read(); }
     value_type operator%(const value_type &rhs) const { return read() % rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator%(Integral rhs) const {
         return read() % value_type(rhs);
     }
@@ -1304,7 +1433,7 @@ public:
     value_type operator&(const member &rhs) const { return read() & rhs.read(); }
     value_type operator&(const value_type &rhs) const { return read() & rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator&(Integral rhs) const {
         return read() & value_type(rhs);
     }
@@ -1312,7 +1441,7 @@ public:
     value_type operator|(const member &rhs) const { return read() | rhs.read(); }
     value_type operator|(const value_type &rhs) const { return read() | rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator|(Integral rhs) const {
         return read() | value_type(rhs);
     }
@@ -1320,7 +1449,7 @@ public:
     value_type operator^(const member &rhs) const { return read() ^ rhs.read(); }
     value_type operator^(const value_type &rhs) const { return read() ^ rhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator^(Integral rhs) const {
         return read() ^ value_type(rhs);
     }
@@ -1330,6 +1459,16 @@ public:
     // shifts (match p5::uint signature: shift is size_t)
     value_type operator<<(std::size_t shift) const { return read() << shift; }
     value_type operator>>(std::size_t shift) const { return read() >> shift; }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    value_type operator<<(Enum shift) const {
+        return (*this) << static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    value_type operator>>(Enum shift) const {
+        return (*this) >> static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
 
     // compound assignments (read-modify-write)
     member &operator+=(const member &rhs) { return (*this += rhs.read()); }
@@ -1340,7 +1479,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator+=(Integral rhs) { return (*this += value_type(rhs)); }
 
     member &operator-=(const member &rhs) { return (*this -= rhs.read()); }
@@ -1351,7 +1490,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator-=(Integral rhs) { return (*this -= value_type(rhs)); }
 
     member &operator*=(const member &rhs) { return (*this *= rhs.read()); }
@@ -1362,7 +1501,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator*=(Integral rhs) { return (*this *= value_type(rhs)); }
 
     member &operator/=(const member &rhs) { return (*this /= rhs.read()); }
@@ -1373,7 +1512,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator/=(Integral rhs) { return (*this /= value_type(rhs)); }
 
     member &operator%=(const member &rhs) { return (*this %= rhs.read()); }
@@ -1384,7 +1523,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator%=(Integral rhs) { return (*this %= value_type(rhs)); }
 
     member &operator&=(const member &rhs) { return (*this &= rhs.read()); }
@@ -1395,7 +1534,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator&=(Integral rhs) { return (*this &= value_type(rhs)); }
 
     member &operator|=(const member &rhs) { return (*this |= rhs.read()); }
@@ -1406,7 +1545,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator|=(Integral rhs) { return (*this |= value_type(rhs)); }
 
     member &operator^=(const member &rhs) { return (*this ^= rhs.read()); }
@@ -1417,7 +1556,7 @@ public:
         return *this;
     }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     member &operator^=(Integral rhs) { return (*this ^= value_type(rhs)); }
 
     member &operator<<=(std::size_t shift) {
@@ -1427,11 +1566,23 @@ public:
         return *this;
     }
 
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    member &operator<<=(Enum shift) {
+        return (*this) <<= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+
     member &operator>>=(std::size_t shift) {
         auto tmp = read();
         tmp >>= shift;
         *this = tmp;
         return *this;
+    }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    member &operator>>=(Enum shift) {
+        return (*this) >>= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
     }
 
     // ++/--
@@ -1460,38 +1611,47 @@ public:
 
     // integral-lhs convenience (ADL via friend)
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator==(Integral lhs, const member &rhs) { return rhs == lhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator!=(Integral lhs, const member &rhs) { return rhs != lhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator<(Integral lhs, const member &rhs) { return value_type(lhs) < rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator<=(Integral lhs, const member &rhs) { return value_type(lhs) <= rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator>(Integral lhs, const member &rhs) { return value_type(lhs) > rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator>=(Integral lhs, const member &rhs) { return value_type(lhs) >= rhs.read(); }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator+(Integral lhs, const member &rhs) { return value_type(lhs) + rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator-(Integral lhs, const member &rhs) { return value_type(lhs) - rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator*(Integral lhs, const member &rhs) { return value_type(lhs) * rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator/(Integral lhs, const member &rhs) { return value_type(lhs) / rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator%(Integral lhs, const member &rhs) { return value_type(lhs) % rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator&(Integral lhs, const member &rhs) { return value_type(lhs) & rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator|(Integral lhs, const member &rhs) { return value_type(lhs) | rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator^(Integral lhs, const member &rhs) { return value_type(lhs) ^ rhs.read(); }
 
 private:
@@ -1620,7 +1780,7 @@ public:
     }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator=(Integral rhs) {
         return (*this = value_type(rhs));
     }
@@ -1649,6 +1809,17 @@ public:
 
     bit_reference operator[](std::size_t pos) { return bit_reference(ctx_, get_bit_, set_bit_, pos); }
     bool operator[](std::size_t pos) const { return get_bit_ ? get_bit_(ctx_, pos) : false; }
+
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bit_reference operator[](Enum pos) {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bool operator[](Enum pos) const {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
 
     template <std::size_t High, std::size_t Low>
     class slice_proxy {
@@ -1695,7 +1866,7 @@ public:
         }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator=(Integral rhs) {
             if (!set_) return *this;
             uint64_t v = static_cast<uint64_t>(rhs);
@@ -1708,6 +1879,16 @@ public:
         // bit access within slice
         bit_reference operator[](std::size_t pos) { return bit_reference(ctx_, get_, set_, Low + pos); }
         bool operator[](std::size_t pos) const { return get_ ? get_(ctx_, Low + pos) : false; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bit_reference operator[](Enum pos) {
+            return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        bool operator[](Enum pos) const {
+            return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+        }
 
         // nested compile-time slice access (relative to this slice)
         template <std::size_t SubHigh, std::size_t SubLow>
@@ -1766,41 +1947,41 @@ public:
         bool operator>=(const slice_proxy<H2, L2> &rhs) const { return *this >= static_cast<p5::uint<H2 - L2 + 1>>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator==(Integral rhs) const { return read() == static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator!=(Integral rhs) const { return read() != static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<(Integral rhs) const { return read() < static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator<=(Integral rhs) const { return read() <= static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>(Integral rhs) const { return read() > static_cast<uint64_t>(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         bool operator>=(Integral rhs) const { return read() >= static_cast<uint64_t>(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator==(Integral lhs, const slice_proxy &rhs) { return rhs == lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator!=(Integral lhs, const slice_proxy &rhs) { return rhs != lhs; }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) < rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator<=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) <= rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) > rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend bool operator>=(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) >= rhs.read(); }
 
         // binary ops (return value_type)
@@ -1815,6 +1996,16 @@ public:
         value_type operator~() const { return ~read(); }
         value_type operator<<(size_t shift) const { return read() << shift; }
         value_type operator>>(size_t shift) const { return read() >> shift; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator<<(Enum shift) const {
+            return (*this) << static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        value_type operator>>(Enum shift) const {
+            return (*this) >> static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template <std::size_t M> value_type operator+(const p5::uint<M> &rhs) const { return read() + value_type(rhs); }
         template <std::size_t M> value_type operator-(const p5::uint<M> &rhs) const { return read() - value_type(rhs); }
@@ -1826,44 +2017,53 @@ public:
         template <std::size_t M> value_type operator^(const p5::uint<M> &rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator+(Integral rhs) const { return read() + value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator-(Integral rhs) const { return read() - value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator*(Integral rhs) const { return read() * value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator/(Integral rhs) const { return read() / value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator%(Integral rhs) const { return read() % value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator&(Integral rhs) const { return read() & value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator|(Integral rhs) const { return read() | value_type(rhs); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         value_type operator^(Integral rhs) const { return read() ^ value_type(rhs); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator+(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) + rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator-(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) - rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator*(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) * rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator/(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) / rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+        friend value_type operator%(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) % rhs.read(); }
+        template <typename Integral,
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator&(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) & rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator|(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) | rhs.read(); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         friend value_type operator^(Integral lhs, const slice_proxy &rhs) { return value_type(lhs) ^ rhs.read(); }
 
         // compound assignments (read-modify-write)
@@ -1877,6 +2077,16 @@ public:
         slice_proxy &operator^=(const value_type &rhs) { auto tmp = read(); tmp ^= rhs; *this = tmp; return *this; }
         slice_proxy &operator<<=(size_t shift) { auto tmp = read(); tmp <<= shift; *this = tmp; return *this; }
         slice_proxy &operator>>=(size_t shift) { auto tmp = read(); tmp >>= shift; *this = tmp; return *this; }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator<<=(Enum shift) {
+            return (*this) <<= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
+        template <typename Enum,
+                  typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+        slice_proxy &operator>>=(Enum shift) {
+            return (*this) >>= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+        }
 
         template<std::size_t M> slice_proxy &operator+=(const p5::uint<M> &rhs) { return (*this += value_type(rhs)); }
         template<std::size_t M> slice_proxy &operator-=(const p5::uint<M> &rhs) { return (*this -= value_type(rhs)); }
@@ -1888,28 +2098,28 @@ public:
         template<std::size_t M> slice_proxy &operator^=(const p5::uint<M> &rhs) { return (*this ^= value_type(rhs)); }
 
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator+=(Integral rhs) { return (*this += value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator-=(Integral rhs) { return (*this -= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator*=(Integral rhs) { return (*this *= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator/=(Integral rhs) { return (*this /= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator%=(Integral rhs) { return (*this %= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator&=(Integral rhs) { return (*this &= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator|=(Integral rhs) { return (*this |= value_type(rhs)); }
         template <typename Integral,
-                  typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+                  typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
         slice_proxy &operator^=(Integral rhs) { return (*this ^= value_type(rhs)); }
 
         // ++/--
@@ -1977,41 +2187,41 @@ public:
     bool operator>=(const p5::uint<M> &rhs) const { return read() >= value_type(rhs); }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator==(Integral rhs) const { return read() == static_cast<uint64_t>(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator!=(Integral rhs) const { return read() != static_cast<uint64_t>(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator<(Integral rhs) const { return read() < static_cast<uint64_t>(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator<=(Integral rhs) const { return read() <= static_cast<uint64_t>(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator>(Integral rhs) const { return read() > static_cast<uint64_t>(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     bool operator>=(Integral rhs) const { return read() >= static_cast<uint64_t>(rhs); }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator==(Integral lhs, const uint_ref &rhs) { return rhs == lhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator!=(Integral lhs, const uint_ref &rhs) { return rhs != lhs; }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator<(Integral lhs, const uint_ref &rhs) { return value_type(lhs) < rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator<=(Integral lhs, const uint_ref &rhs) { return value_type(lhs) <= rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator>(Integral lhs, const uint_ref &rhs) { return value_type(lhs) > rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend bool operator>=(Integral lhs, const uint_ref &rhs) { return value_type(lhs) >= rhs.read(); }
 
     // -------- arithmetic/bitwise (return value_type) --------
@@ -2036,46 +2246,65 @@ public:
 
     value_type operator<<(size_t shift) const { return read() << shift; }
     value_type operator>>(size_t shift) const { return read() >> shift; }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    value_type operator<<(Enum shift) const {
+        return (*this) << static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    value_type operator>>(Enum shift) const {
+        return (*this) >> static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator+(Integral rhs) const { return read() + value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator-(Integral rhs) const { return read() - value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator*(Integral rhs) const { return read() * value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator/(Integral rhs) const { return read() / value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator%(Integral rhs) const { return read() % value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator&(Integral rhs) const { return read() & value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator|(Integral rhs) const { return read() | value_type(rhs); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     value_type operator^(Integral rhs) const { return read() ^ value_type(rhs); }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator+(Integral lhs, const uint_ref &rhs) { return value_type(lhs) + rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator-(Integral lhs, const uint_ref &rhs) { return value_type(lhs) - rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator*(Integral lhs, const uint_ref &rhs) { return value_type(lhs) * rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator/(Integral lhs, const uint_ref &rhs) { return value_type(lhs) / rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend value_type operator%(Integral lhs, const uint_ref &rhs) { return value_type(lhs) % rhs.read(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator&(Integral lhs, const uint_ref &rhs) { return value_type(lhs) & rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator|(Integral lhs, const uint_ref &rhs) { return value_type(lhs) | rhs.read(); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     friend value_type operator^(Integral lhs, const uint_ref &rhs) { return value_type(lhs) ^ rhs.read(); }
 
     // -------- compound assignments (read-modify-write) --------
@@ -2089,6 +2318,16 @@ public:
     uint_ref &operator^=(const value_type &rhs) { auto tmp = read(); tmp ^= rhs; return (*this = tmp); }
     uint_ref &operator<<=(size_t shift) { auto tmp = read(); tmp <<= shift; return (*this = tmp); }
     uint_ref &operator>>=(size_t shift) { auto tmp = read(); tmp >>= shift; return (*this = tmp); }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint_ref &operator<<=(Enum shift) {
+        return (*this) <<= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    uint_ref &operator>>=(Enum shift) {
+        return (*this) >>= static_cast<size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
 
     uint_ref &operator+=(const uint_ref &rhs) { return (*this += rhs.read()); }
     uint_ref &operator-=(const uint_ref &rhs) { return (*this -= rhs.read()); }
@@ -2100,28 +2339,28 @@ public:
     uint_ref &operator^=(const uint_ref &rhs) { return (*this ^= rhs.read()); }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator+=(Integral rhs) { return (*this += value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator-=(Integral rhs) { return (*this -= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator*=(Integral rhs) { return (*this *= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator/=(Integral rhs) { return (*this /= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator%=(Integral rhs) { return (*this %= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator&=(Integral rhs) { return (*this &= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator|=(Integral rhs) { return (*this |= value_type(rhs)); }
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<std::decay_t<Integral>> && !std::is_same_v<std::decay_t<Integral>, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
     uint_ref &operator^=(Integral rhs) { return (*this ^= value_type(rhs)); }
 
     // ++/--
@@ -2354,7 +2593,7 @@ public:
     }
 
     template <typename Integral,
-              typename = std::enable_if_t<std::is_integral_v<Integral> && !std::is_same_v<Integral, bool>>>
+              typename = std::enable_if_t<(std::is_integral_v<Integral> || std::is_enum_v<Integral>) && !std::is_same_v<Integral, bool>>>
     Union &operator=(Integral rhs) {
         storage_ = static_cast<uint64_t>(rhs);
         return *this;
@@ -2369,6 +2608,258 @@ public:
     }
 
     uint64_t to_ullong() const { return to_uint().to_ullong(); }
+
+    class bit_reference {
+    public:
+        bit_reference(detail_p5_union::bit_access access, std::size_t abs_pos) : access_(access), abs_pos_(abs_pos) {}
+        operator bool() const { return access_.get ? access_.get(access_.ctx, abs_pos_) : false; }
+        bit_reference &operator=(bool v) {
+            if (access_.set) access_.set(access_.ctx, abs_pos_, v);
+            return *this;
+        }
+        bit_reference &operator=(const bit_reference &rhs) { return (*this = static_cast<bool>(rhs)); }
+    private:
+        detail_p5_union::bit_access access_{};
+        std::size_t abs_pos_{0};
+    };
+
+    bit_reference operator[](std::size_t pos) { return bit_reference(access_, base_offset_ + pos); }
+    bool operator[](std::size_t pos) const { return access_.get ? access_.get(access_.ctx, base_offset_ + pos) : false; }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bit_reference operator[](Enum pos) {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    bool operator[](Enum pos) const {
+        return (*this)[static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(pos))];
+    }
+
+    template <std::size_t High, std::size_t Low>
+    p5::uint<High - Low + 1> slice() const {
+        static_assert(High >= Low, "High must be >= Low");
+        static_assert(High < width(), "High must be < Union width");
+        p5::uint<High - Low + 1> out{};
+        for (std::size_t i = 0; i <= High - Low; ++i) {
+            out[i] = (*this)[Low + i];
+        }
+        return out;
+    }
+    template <std::size_t High, std::size_t Low>
+    using writable_slice_proxy = typename p5::member<p5::uint<width()>>::template slice_proxy<High, Low>;
+    template <std::size_t High, std::size_t Low>
+    writable_slice_proxy<High, Low> slice() {
+        static_assert(High >= Low, "High must be >= Low");
+        static_assert(High < width(), "High must be < Union width");
+        return writable_slice_proxy<High, Low>(access_, base_offset_);
+    }
+    template <std::size_t High, std::size_t Low>
+    writable_slice_proxy<High, Low> operator[](bit_range_t<High, Low>) { return slice<High, Low>(); }
+    template <std::size_t High, std::size_t Low>
+    p5::uint<High - Low + 1> operator[](bit_range_t<High, Low>) const { return slice<High, Low>(); }
+
+    bool operator==(const Union &rhs) const { return to_uint() == rhs.to_uint(); }
+    bool operator!=(const Union &rhs) const { return to_uint() != rhs.to_uint(); }
+    bool operator<(const Union &rhs) const { return to_uint() < rhs.to_uint(); }
+    bool operator<=(const Union &rhs) const { return to_uint() <= rhs.to_uint(); }
+    bool operator>(const Union &rhs) const { return to_uint() > rhs.to_uint(); }
+    bool operator>=(const Union &rhs) const { return to_uint() >= rhs.to_uint(); }
+
+    bool operator==(const storage_type &rhs) const { return to_uint() == rhs; }
+    bool operator!=(const storage_type &rhs) const { return to_uint() != rhs; }
+    bool operator<(const storage_type &rhs) const { return to_uint() < rhs; }
+    bool operator<=(const storage_type &rhs) const { return to_uint() <= rhs; }
+    bool operator>(const storage_type &rhs) const { return to_uint() > rhs; }
+    bool operator>=(const storage_type &rhs) const { return to_uint() >= rhs; }
+
+    template <std::size_t M>
+    bool operator==(const p5::uint<M> &rhs) const { return to_uint() == storage_type(rhs); }
+    template <std::size_t M>
+    bool operator!=(const p5::uint<M> &rhs) const { return to_uint() != storage_type(rhs); }
+    template <std::size_t M>
+    bool operator<(const p5::uint<M> &rhs) const { return to_uint() < storage_type(rhs); }
+    template <std::size_t M>
+    bool operator<=(const p5::uint<M> &rhs) const { return to_uint() <= storage_type(rhs); }
+    template <std::size_t M>
+    bool operator>(const p5::uint<M> &rhs) const { return to_uint() > storage_type(rhs); }
+    template <std::size_t M>
+    bool operator>=(const p5::uint<M> &rhs) const { return to_uint() >= storage_type(rhs); }
+
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator==(Integral rhs) const { return to_uint() == static_cast<uint64_t>(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator!=(Integral rhs) const { return to_uint() != static_cast<uint64_t>(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator<(Integral rhs) const { return to_uint() < static_cast<uint64_t>(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator<=(Integral rhs) const { return to_uint() <= static_cast<uint64_t>(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator>(Integral rhs) const { return to_uint() > static_cast<uint64_t>(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    bool operator>=(Integral rhs) const { return to_uint() >= static_cast<uint64_t>(rhs); }
+
+    storage_type operator+(const Union &rhs) const { return to_uint() + rhs.to_uint(); }
+    storage_type operator-(const Union &rhs) const { return to_uint() - rhs.to_uint(); }
+    storage_type operator*(const Union &rhs) const { return to_uint() * rhs.to_uint(); }
+    storage_type operator/(const Union &rhs) const { return to_uint() / rhs.to_uint(); }
+    storage_type operator%(const Union &rhs) const { return to_uint() % rhs.to_uint(); }
+    storage_type operator&(const Union &rhs) const { return to_uint() & rhs.to_uint(); }
+    storage_type operator|(const Union &rhs) const { return to_uint() | rhs.to_uint(); }
+    storage_type operator^(const Union &rhs) const { return to_uint() ^ rhs.to_uint(); }
+
+    storage_type operator+(const storage_type &rhs) const { return to_uint() + rhs; }
+    storage_type operator-(const storage_type &rhs) const { return to_uint() - rhs; }
+    storage_type operator*(const storage_type &rhs) const { return to_uint() * rhs; }
+    storage_type operator/(const storage_type &rhs) const { return to_uint() / rhs; }
+    storage_type operator%(const storage_type &rhs) const { return to_uint() % rhs; }
+    storage_type operator&(const storage_type &rhs) const { return to_uint() & rhs; }
+    storage_type operator|(const storage_type &rhs) const { return to_uint() | rhs; }
+    storage_type operator^(const storage_type &rhs) const { return to_uint() ^ rhs; }
+    storage_type operator~() const { return ~to_uint(); }
+
+    storage_type operator<<(std::size_t shift) const { return to_uint() << shift; }
+    storage_type operator>>(std::size_t shift) const { return to_uint() >> shift; }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    storage_type operator<<(Enum shift) const {
+        return (*this) << static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    storage_type operator>>(Enum shift) const {
+        return (*this) >> static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator+(Integral rhs) const { return to_uint() + storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator-(Integral rhs) const { return to_uint() - storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator*(Integral rhs) const { return to_uint() * storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator/(Integral rhs) const { return to_uint() / storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator%(Integral rhs) const { return to_uint() % storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator&(Integral rhs) const { return to_uint() & storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator|(Integral rhs) const { return to_uint() | storage_type(rhs); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    storage_type operator^(Integral rhs) const { return to_uint() ^ storage_type(rhs); }
+
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator==(Integral lhs, const Union &rhs) { return rhs == lhs; }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator!=(Integral lhs, const Union &rhs) { return rhs != lhs; }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator<(Integral lhs, const Union &rhs) { return storage_type(lhs) < rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator<=(Integral lhs, const Union &rhs) { return storage_type(lhs) <= rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator>(Integral lhs, const Union &rhs) { return storage_type(lhs) > rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend bool operator>=(Integral lhs, const Union &rhs) { return storage_type(lhs) >= rhs.to_uint(); }
+
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator+(Integral lhs, const Union &rhs) { return storage_type(lhs) + rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator-(Integral lhs, const Union &rhs) { return storage_type(lhs) - rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator*(Integral lhs, const Union &rhs) { return storage_type(lhs) * rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator/(Integral lhs, const Union &rhs) { return storage_type(lhs) / rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator%(Integral lhs, const Union &rhs) { return storage_type(lhs) % rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator&(Integral lhs, const Union &rhs) { return storage_type(lhs) & rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator|(Integral lhs, const Union &rhs) { return storage_type(lhs) | rhs.to_uint(); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    friend storage_type operator^(Integral lhs, const Union &rhs) { return storage_type(lhs) ^ rhs.to_uint(); }
+
+    Union &operator+=(const Union &rhs) { return (*this += rhs.to_uint()); }
+    Union &operator-=(const Union &rhs) { return (*this -= rhs.to_uint()); }
+    Union &operator*=(const Union &rhs) { return (*this *= rhs.to_uint()); }
+    Union &operator/=(const Union &rhs) { return (*this /= rhs.to_uint()); }
+    Union &operator%=(const Union &rhs) { return (*this %= rhs.to_uint()); }
+    Union &operator&=(const Union &rhs) { return (*this &= rhs.to_uint()); }
+    Union &operator|=(const Union &rhs) { return (*this |= rhs.to_uint()); }
+    Union &operator^=(const Union &rhs) { return (*this ^= rhs.to_uint()); }
+
+    Union &operator+=(const storage_type &rhs) { set_from_uint(to_uint() + rhs); return *this; }
+    Union &operator-=(const storage_type &rhs) { set_from_uint(to_uint() - rhs); return *this; }
+    Union &operator*=(const storage_type &rhs) { set_from_uint(to_uint() * rhs); return *this; }
+    Union &operator/=(const storage_type &rhs) { set_from_uint(to_uint() / rhs); return *this; }
+    Union &operator%=(const storage_type &rhs) { set_from_uint(to_uint() % rhs); return *this; }
+    Union &operator&=(const storage_type &rhs) { set_from_uint(to_uint() & rhs); return *this; }
+    Union &operator|=(const storage_type &rhs) { set_from_uint(to_uint() | rhs); return *this; }
+    Union &operator^=(const storage_type &rhs) { set_from_uint(to_uint() ^ rhs); return *this; }
+    Union &operator<<=(std::size_t shift) { set_from_uint(to_uint() << shift); return *this; }
+    Union &operator>>=(std::size_t shift) { set_from_uint(to_uint() >> shift); return *this; }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    Union &operator<<=(Enum shift) {
+        return (*this) <<= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+    template <typename Enum,
+              typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+    Union &operator>>=(Enum shift) {
+        return (*this) >>= static_cast<std::size_t>(static_cast<std::underlying_type_t<std::decay_t<Enum>>>(shift));
+    }
+
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator+=(Integral rhs) { return (*this += storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator-=(Integral rhs) { return (*this -= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator*=(Integral rhs) { return (*this *= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator/=(Integral rhs) { return (*this /= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator%=(Integral rhs) { return (*this %= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator&=(Integral rhs) { return (*this &= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator|=(Integral rhs) { return (*this |= storage_type(rhs)); }
+    template <typename Integral,
+              typename = std::enable_if_t<(std::is_integral_v<std::decay_t<Integral>> || std::is_enum_v<std::decay_t<Integral>>) && !std::is_same_v<std::decay_t<Integral>, bool>>>
+    Union &operator^=(Integral rhs) { return (*this ^= storage_type(rhs)); }
 
 private:
     storage_type storage_{};
@@ -2513,6 +3004,59 @@ uint<N> operator/(uint64_t lhs, const uint<N>& rhs) {
 }
 
 template<size_t N>
+uint<N> operator%(uint64_t lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) % rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator+(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) + rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator-(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) - rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator*(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) * rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator/(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) / rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator%(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) % rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator&(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) & rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator|(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) | rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+uint<N> operator^(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) ^ rhs;
+}
+
+template<size_t N>
 bool operator==(uint64_t lhs, const uint<N>& rhs) {
     return uint<N>(lhs) == rhs;
 }
@@ -2539,6 +3083,42 @@ bool operator>(uint64_t lhs, const uint<N>& rhs) {
 
 template<size_t N>
 bool operator>=(uint64_t lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) >= rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator==(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) == rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator!=(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) != rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator<(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) < rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator<=(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) <= rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator>(Enum lhs, const uint<N>& rhs) {
+    return uint<N>(lhs) > rhs;
+}
+
+template <typename Enum, size_t N,
+          typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+bool operator>=(Enum lhs, const uint<N>& rhs) {
     return uint<N>(lhs) >= rhs;
 }
 
