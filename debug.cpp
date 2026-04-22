@@ -697,3 +697,103 @@ In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/te
 /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_pipeline.hpp:289:176: note:   candidate expects 1 argument, 2 provided
   289 |                             mswitch::CaseClause(mswitch::masked(Part2or4_S{L3_TYPE_IPv4, IpInfo_S{0, L4_PROTOCOL_NONE}}, Part2or4_S{L3_TYPE_MASK, IpInfo_S{0, L4_PROTOCOL_NONE}}), mswitch::masked(0, 0), mswitch::masked(Part6_S{TelemetryInfo_S{TELEMETRY_TYPE_IFIT_DT, IfitInfo_S{0, 0}}}, Part6_S{TelemetryInfo_S{(TELEMETRY_TYPE_MASK - 1), IfitInfo_S{0, 4}}})),  // tag=2
       |                                                                                                                                                                                ^
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:20035:5: note: candidate: ‘p5Sim::Part2or4_S::Part2or4_S(p5Sim::Part2or4_S&&)’
+20035 |     Part2or4_S(Part2or4_S&&) noexcept = default;
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:20035:5: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:20034:5: note: candidate: ‘p5Sim::Part2or4_S::Part2or4_S(const p5Sim::Part2or4_S&)’
+20034 |     Part2or4_S(const Part2or4_S&) = default;
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:20034:5: note:   candidate expects 1 argument, 2 provided
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:4:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_pipeline.hpp:289:282: error: no matching function for call to ‘p5Sim::IfitInfo_S::IfitInfo_S(<brace-enclosed initializer list>)’
+  289 |                             mswitch::CaseClause(mswitch::masked(Part2or4_S{L3_TYPE_IPv4, IpInfo_S{0, L4_PROTOCOL_NONE}}, Part2or4_S{L3_TYPE_MASK, IpInfo_S{0, L4_PROTOCOL_NONE}}), mswitch::masked(0, 0), mswitch::masked(Part6_S{TelemetryInfo_S{TELEMETRY_TYPE_IFIT_DT, IfitInfo_S{0, 0}}}, Part6_S{TelemetryInfo_S{(TELEMETRY_TYPE_MASK - 1), IfitInfo_S{0, 4}}})),  // tag=2
+      |                                                                                                                                                                                                                                                                                          ^
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19545:5: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(uint64_t, uint64_t, std::shared_ptr<std::vector<unsigned char> >, std::shared_ptr<p5Sim::Uint>, bool)’
+19545 |     IfitInfo_S(
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19545:5: note:   candidate expects 5 arguments, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19540:5: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(uint64_t, p5Sim::ConstEnumTag)’
+19540 |     IfitInfo_S(uint64_t value, ConstEnumTag is_const_enum)
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19540:45: note:   no known conversion for argument 2 from ‘int’ to ‘p5Sim::ConstEnumTag’
+19540 |     IfitInfo_S(uint64_t value, ConstEnumTag is_const_enum)
+      |                                ~~~~~~~~~~~~~^~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19535:14: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(uint64_t)’
+19535 |     explicit IfitInfo_S(uint64_t value)
+      |              ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19535:14: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19530:14: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(p5Sim::NullTag)’
+19530 |     explicit IfitInfo_S(NullTag)
+      |              ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19530:14: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19525:5: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S()’
+19525 |     IfitInfo_S()
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19525:5: note:   candidate expects 0 arguments, 2 provided
+In file included from /usr1/p4c/GenSimv2/include/uint.hpp:14,
+                 from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:4,
+                 from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19512:42: note: candidate: ‘template<class U, typename std::enable_if<(std::is_base_of<p5Sim::Uint, typename std::decay<_Tp>::type>::value && (! std::is_same<typename std::decay<_Tp>::type, p5Sim::IfitInfo_S>::value)), int>::type <anonymous> > p5Sim::IfitInfo_S::IfitInfo_S(const U&)’
+19512 |     DECLARE_UINT_SHALLOW_CONVERTING_CTOR(IfitInfo_S)
+      |                                          ^~~~~~~~~~
+/usr1/p4c/GenSimv2/include/project_macros.hpp:164:14: note: in definition of macro ‘DECLARE_UINT_SHALLOW_CONVERTING_CTOR’
+  164 |     explicit CLASS_NAME(const U& rhs)                                                               \
+      |              ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19512:42: note:   template argument deduction/substitution failed:
+19512 |     DECLARE_UINT_SHALLOW_CONVERTING_CTOR(IfitInfo_S)
+      |                                          ^~~~~~~~~~
+/usr1/p4c/GenSimv2/include/project_macros.hpp:164:14: note: in definition of macro ‘DECLARE_UINT_SHALLOW_CONVERTING_CTOR’
+  164 |     explicit CLASS_NAME(const U& rhs)                                                               \
+      |              ^~~~~~~~~~
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:4:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_pipeline.hpp:289:282: note:   candidate expects 1 argument, 2 provided
+  289 |                             mswitch::CaseClause(mswitch::masked(Part2or4_S{L3_TYPE_IPv4, IpInfo_S{0, L4_PROTOCOL_NONE}}, Part2or4_S{L3_TYPE_MASK, IpInfo_S{0, L4_PROTOCOL_NONE}}), mswitch::masked(0, 0), mswitch::masked(Part6_S{TelemetryInfo_S{TELEMETRY_TYPE_IFIT_DT, IfitInfo_S{0, 0}}}, Part6_S{TelemetryInfo_S{(TELEMETRY_TYPE_MASK - 1), IfitInfo_S{0, 4}}})),  // tag=2
+      |                                                                                                                                                                                                                                                                                          ^
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19511:5: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(p5Sim::IfitInfo_S&&)’
+19511 |     IfitInfo_S(IfitInfo_S&&) noexcept = default;
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19511:5: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19510:5: note: candidate: ‘p5Sim::IfitInfo_S::IfitInfo_S(const p5Sim::IfitInfo_S&)’
+19510 |     IfitInfo_S(const IfitInfo_S&) = default;
+      |     ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19510:5: note:   candidate expects 1 argument, 2 provided
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:4:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_pipeline.hpp:289:283: error: no matching function for call to ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S(<brace-enclosed initializer list>)’
+  289 |                             mswitch::CaseClause(mswitch::masked(Part2or4_S{L3_TYPE_IPv4, IpInfo_S{0, L4_PROTOCOL_NONE}}, Part2or4_S{L3_TYPE_MASK, IpInfo_S{0, L4_PROTOCOL_NONE}}), mswitch::masked(0, 0), mswitch::masked(Part6_S{TelemetryInfo_S{TELEMETRY_TYPE_IFIT_DT, IfitInfo_S{0, 0}}}, Part6_S{TelemetryInfo_S{(TELEMETRY_TYPE_MASK - 1), IfitInfo_S{0, 4}}})),  // tag=2
+      |                                                                                                                                                                                                                                                                                           ^
+In file included from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19710:5: note: candidate: ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S(uint64_t, uint64_t, std::shared_ptr<std::vector<unsigned char> >, std::shared_ptr<p5Sim::Uint>, bool)’
+19710 |     TelemetryInfo_S(
+      |     ^~~~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19710:5: note:   candidate expects 5 arguments, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19705:5: note: candidate: ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S(uint64_t, p5Sim::ConstEnumTag)’
+19705 |     TelemetryInfo_S(uint64_t value, ConstEnumTag is_const_enum)
+      |     ^~~~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19705:5: note:   conversion of argument 2 would be ill-formed:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19700:14: note: candidate: ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S(uint64_t)’
+19700 |     explicit TelemetryInfo_S(uint64_t value)
+      |              ^~~~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19700:14: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19692:14: note: candidate: ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S(p5Sim::NullTag)’
+19692 |     explicit TelemetryInfo_S(NullTag)
+      |              ^~~~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19692:14: note:   candidate expects 1 argument, 2 provided
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19684:5: note: candidate: ‘p5Sim::TelemetryInfo_S::TelemetryInfo_S()’
+19684 |     TelemetryInfo_S()
+      |     ^~~~~~~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19684:5: note:   candidate expects 0 arguments, 2 provided
+In file included from /usr1/p4c/GenSimv2/include/uint.hpp:14,
+                 from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:4,
+                 from /usr1/iMA0/output/SD5993/generated_output/SD5993_merged/test_wrapper.cpp:1:
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19668:42: note: candidate: ‘template<class U, typename std::enable_if<(std::is_base_of<p5Sim::Uint, typename std::decay<_Tp>::type>::value && (! std::is_same<typename std::decay<_Tp>::type, p5Sim::TelemetryInfo_S>::value)), int>::type <anonymous> > p5Sim::TelemetryInfo_S::TelemetryInfo_S(const U&)’
+19668 |     DECLARE_UINT_SHALLOW_CONVERTING_CTOR(TelemetryInfo_S)
+      |                                          ^~~~~~~~~~~~~~~
+/usr1/p4c/GenSimv2/include/project_macros.hpp:164:14: note: in definition of macro ‘DECLARE_UINT_SHALLOW_CONVERTING_CTOR’
+  164 |     explicit CLASS_NAME(const U& rhs)                                                               \
+      |              ^~~~~~~~~~
+/usr1/iMA0/output/SD5993/generated_output/SD5993_merged/generated_struct.hpp:19668:42: note:   template argument deduction/substitution failed:
+19668 |     DECLARE_UINT_SHALLOW_CONVERTING_CTOR(TelemetryInfo_S)
