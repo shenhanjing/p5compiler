@@ -1,4 +1,6 @@
-#define HASH_NUM       4
-
-const uint<32> DeviceHashSize = 16 * HASH_NUM;
-typedef uint<DeviceHashSize> DeviceHashSize_t;
+union SID_ARRAY_U
+{
+    SRID_S  SRID[7];
+    uint<32> CSID32[7][4];
+    uint<16> CSID16[7][8];
+};
