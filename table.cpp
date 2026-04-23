@@ -1,3 +1,33 @@
+struct IpInfo_S
+{
+  uint<7> VerSpecific;
+  uint<7> Protocol;
+};
+
+struct Part1or3_S
+{
+  uint<16> value;
+}
+
+struct Part2or4_S
+{
+  uint<2> L3Type;
+  union
+  {
+    IpInfo_S IpInfo;
+  };
+};
+
+struct Part5_S
+{
+  uint<8> value;
+}
+
+struct Part6_S
+{
+  uint<8> value;
+}
+
 struct PHI_S
 {
   union
